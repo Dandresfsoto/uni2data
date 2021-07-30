@@ -1,0 +1,211 @@
+extends base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") call_to_action
+                | Acciones
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light",id="delete-notificaciones")
+                        a Borrar todas las notificaciones
+                            i(class="material-icons icon-sican") delete
+
+                    div(class="divider divider-perfil")
+
+block container_principal
+
+    div(class="center hide",style="margin-top:100px;",id="container-initial-message")
+        i(class="large material-icons") notifications_off
+        p(class="title-container-notifications") No tienes notificaciones para mostrar.
+
+    div(class="container-notificaciones",id="container-notificaciones")
+
+        |{% for notification in notifications %}
+
+        div(class="infinite-item z-depth-1",id="notification_{{ notification.id }}")
+
+            div(class="icon-notification center")
+                i(class="medium material-icons {{ notification.color }}") {{ notification.icon }}
+
+            div(class="body-notification")
+
+                a(href="#",class="close-notification-link",id="{{ notification.id }}")
+                    i(class="tiny material-icons right close-notification") close
+
+                p(class="title-notification") {{ notification.title|capfirst }}
+                p(class="body-notification") {{ notification.body|safe }}
+
+                p(class="right-align time-ago-notification") {{ notification.date|naturaltime|capfirst }}
+
+        |{% endfor %}
+
+
+    div(class="infinite-loading center hide")
+        div(class="preloader-wrapper small active")
+            div(class="spinner-layer spinner-blue-only")
+                div(class="circle-clipper left")
+                    div(class="circle")
+                div(class="gap-patch")
+                    div(class="circle")
+                div(class="circle-clipper right")
+                    div(class="circle")
+
+
+    |{% if page_obj.has_next %}
+    a(class="infinite-more-link hide",href="?page={{ page_obj.next_page_number }}") More
+    |{% endif %}
+
+    div(id="modal1",class="modal")
+        div(class="modal-content")
+            div(class="container")
+                div(class="row")
+                    div(class="s12")
+                        P(class="center title-modal-notifications") ELIMINAR NOTIFICACIONES
+                div(class="row")
+                    div(class="s12")
+                        p(class="title-body-notifications").
+                            Estas seguro de querer eliminar todas las notificaciones?, esta acción no puede revertirse.
+
+                div(class="row hide",id="progress-delete-notifications")
+                    p(id="progress-delete-notifications-message") Eliminando notificaciones:
+                    div(class="progress")
+                        div(id="progress-delete-notifications-loader",class="indeterminate")
+
+                div(class="row")
+                    div(class="col s12 m6",id="modal1-close-container")
+                        a(class="waves-effect waves-light btn-large brown darken-4",id="modal1-close") No
+
+                    div(class="col s12 m6",id="modal1-accept-container")
+                        a(class="waves-effect waves-light btn-large red darken-4",id="modal1-accept") Si, eliminar
+
+                    div(class="col s12 hide",id="modal1-exit-container")
+                        a(class="waves-effect waves-light btn-large green darken-4",id="modal1-exit") cerrar
+
+
+block body_script_auth
+    script.
+
+        var notification_length = "{{notifications.count}}";
+
+        if(notification_length == "0"){
+            $("#container-initial-message").removeClass("hide");
+        }
+
+        $('.modal').modal({
+            opacity: .9,
+            complete: function () {
+                $('#modal1-close-container').removeClass('hide');
+                $('#modal1-accept-container').removeClass('hide');
+                $('#modal1-exit-container').addClass('hide');
+
+                $('#progress-delete-notifications-message').text("Eliminando notificaciones:");
+                $('#progress-delete-notifications-loader').addClass('indeterminate');
+                $('#progress-delete-notifications-loader').removeClass('determinate');
+                $('#progress-delete-notifications').addClass('hide');
+            }
+        });
+
+        $('#delete-notificaciones').click(function () {
+            $('#modal1').modal('open');
+        });
+
+        $('#modal1-close').click(function () {
+            $('#modal1').modal('close');
+        });
+
+        $('#modal1-exit').click(function () {
+            $('#modal1').modal('close');
+        });
+
+        $('#modal1-accept').click(function () {
+            $('#progress-delete-notifications').removeClass('hide');
+
+            $.ajax({
+                url: "{{ url_rest_notification }}",
+                type: "DELETE",
+                data: {pk: 'all'},
+                success: function (data) {
+
+                    Waypoint.refreshAll();
+
+                    $("#container-notificaciones").empty();
+                    $('#progress-delete-notifications-message').text("Se han borrado todas las notificaciones");
+                    $('#progress-delete-notifications-loader').removeClass('indeterminate');
+                    $('#progress-delete-notifications-loader').addClass('determinate');
+                    $('#progress-delete-notifications-loader').css('width','100%');
+                    $('#modal1-close-container').addClass('hide');
+                    $('#modal1-accept-container').addClass('hide');
+                    $('#modal1-exit-container').removeClass('hide');
+                    $("#container-initial-message").removeClass("hide");
+                }
+            });
+
+        });
+
+        notification_listener();
+
+        var infinite = new Waypoint.Infinite({
+            element: $('.container-notificaciones')[0],
+            onBeforePageLoad: function () {
+                $(".infinite-loading").removeClass('hide');
+            },
+            onAfterPageLoad: function ($items) {
+                $(".infinite-loading").addClass('hide');
+                notification_listener();
+            }
+        });
+        
+        
+        function notification_listener() {
+            $(".close-notification-link").click(function (event) {
+                var id_notification = event.target.parentElement.id;
+                var selector = "#" + "notification_" + id_notification.toString();
+
+                $.ajax({
+                    url: "{{ url_rest_notification }}",
+                    type: "DELETE",
+                    data: {pk:id_notification},
+                    success: function (data) {
+
+                        $(selector).remove();
+                        if (data.length == 0) {
+                            $("#container-initial-message").removeClass("hide");
+                        }
+                        else {
+                            $("#container-initial-message").addClass("hide");
+                        }
+                    },
+                    error: function (data) {
+                    }
+                });
+                Waypoint.refreshAll();
+            });
+        }

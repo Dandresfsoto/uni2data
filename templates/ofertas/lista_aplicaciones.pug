@@ -1,0 +1,262 @@
+extends ../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/ofertas/") Ofertas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") {{ breadcrum_active | truncatechars:22 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+    | {% if permiso_crear %}
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") call_to_action
+                | Acciones
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="reportes/listado/") Reporte de la aplicación
+                            i(class="material-icons icon-sican") map
+
+                    div(class="divider divider-perfil")
+
+    | {% endif %}
+
+
+block container_principal
+    div(class="container-datatable")
+        table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
+            thead
+                tr
+                    th Cualificación
+                    th Nombre
+                    th Cedula
+                    th Fecha
+                    th Municipios
+                    th Perfil
+                    th Experiencia
+                    th Seleccion
+                    th Hv y Resumen
+            tbody
+                tr
+                    td Cualificación
+                    td Nombre
+                    td Cedula
+                    td Fecha
+                    td Municipios
+                    td Perfil
+                    td Experiencia
+                    td Seleccion
+                    td Hv y Resumen
+
+
+    div(id="modal_resumen",class="modal modal-fixed-footer")
+        div(class="modal-content")
+            div(id="modal_resumen_content")
+        div(class="modal-footer")
+            a(href="#!",class="modal-action modal-close waves-effect waves-green btn-flat") cerrar
+
+block body_script_auth
+    script.
+
+        $(document).ready(function () {
+
+            $('#modal_resumen').modal({
+                dismissible: false,
+                opacity: .9,
+                complete: function () {
+                    $("#modal_resumen_content").empty();
+                    var resumen = $('#formulario_resumen').serialize();
+                    console.log(resumen);
+                }
+            });
+
+            var table = $('#table').DataTable({
+                responsive: true,
+                stateSave: true,
+                searching: true,
+                processing: true,
+                serverSide: true,
+                ajax: "{{ url_datatable }}",
+                "order": [[ 3, "desc" ]],
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
+                },
+                drawCallback: function (settings) {
+                    $('.tooltipped').tooltip({delay: 50});
+                }
+            });
+
+            table.on('responsive-display', function (e, datatable, row, showHide, update) {
+                $('.tooltipped').tooltip({delay: 50});
+            });
+
+        });
+
+        function resumen(id) {
+
+            $.ajax({
+                type: "GET",
+                url: "{{ url_resumen_aplicacion }}",
+                data: {
+                    id: id
+                },
+                success: function (data, textStatus, xhr) {
+
+
+                    var photo = "";
+                    var titulos = "";
+                    var experiencias = "";
+
+                    if (data.usuario.photo != null) {
+                        photo = "<img class = 'responsive-img materialboxed' src = '" + data.usuario.photo + "' > "
+                    }
+                    else{
+                        photo = "<img class = 'responsive-img materialboxed' src = '/static/img/icon-192.png' > "
+                    }
+
+                    for(i = 0;i< data.titulos.length;i++){
+
+                        var numero_tarjeta = ""
+                        var fecha_expedicion = ""
+
+                        if (data.titulos[i].numero_tarjeta != null) {
+                            numero_tarjeta = "<p><b>Número de tarjeta profesional: </b>" + data.titulos[i].numero_tarjeta + "</p>"
+                        }
+
+                        if (data.titulos[i].fecha_expedicion != null) {
+                            fecha_expedicion = "<p><b>Fecha de expedición: </b>" + data.titulos[i].fecha_expedicion + "</p>"
+                        }
+
+                        titulos +=  "<div class='col s12'>" +
+                                        "<div class='card teal darken-4'>" +
+                                            "<div class='card-content white-text'>" +
+                                                "<span style='font-size: 1.4rem;' class='card-title'><b>" + data.titulos[i].nombre + "</b></span>" +
+                                                "<p><b>Modalidad: </b>" + data.titulos[i].modalidad + "</p>" +
+                                                "<p><b>Semestres aprobados: </b>" + data.titulos[i].semestres + "</p>" +
+                                                "<p><b>Graduado: </b>" + data.titulos[i].graduado + "</p>" +
+                                                "<p><b>Fecha de terminación: </b>" + data.titulos[i].fecha_terminacion + "</p>" +
+                                                numero_tarjeta +
+                                                fecha_expedicion +
+
+                                            "</div>" +
+                                        "</div>" +
+                                    "</div>"
+                    }
+
+                    for (i = 0; i < data.experiencias.length; i++) {
+
+                        var email_empresa = ""
+                        var telefono_empresa = ""
+                        var direccion = ""
+
+                        if (data.experiencias[i].email_empresa != '') {
+                            email_empresa = "<p><b>Email: </b>" + data.experiencias[i].email_empresa + "</p>"
+                        }
+
+                        if (data.experiencias[i].telefono_empresa != '') {
+                            telefono_empresa = "<p><b>Telefono: </b>" + data.experiencias[i].telefono_empresa + "</p>"
+                        }
+
+                        if (data.experiencias[i].direccion != '') {
+                            direccion = "<p><b>Dirección: </b>" + data.experiencias[i].direccion + "</p>"
+                        }
+
+                        experiencias += "<div class='col s12'>" +
+                                            "<div class='card orange darken-4'>" +
+                                                "<div class='card-content white-text'>" +
+                                                    "<span style='font-size: 1.4rem;' class='card-title' class='card-title'><b>" + data.experiencias[i].cargo + "</b></span>" +
+                                                    "<p><b>Empresa: </b>" + data.experiencias[i].nombre_empresa + "</p>" +
+                                                    "<p><b>Tipo de empresa: </b>" + data.experiencias[i].tipo_empresa + "</p>" +
+                                                    "<p><b>Dependencia: </b>" + data.experiencias[i].dependencia + "</p>" +
+                                                    "<p><b>Duración: </b>" + data.experiencias[i].meses + " mes(es)</p>" +
+                                                    "<p><b>Fecha de ingreso: </b>" + data.experiencias[i].fecha_ingreso + "</p>" +
+                                                    "<p><b>Fecha de retiro: </b>" + data.experiencias[i].fecha_retiro + "</p>" +
+                                                    "<p><b>Municipio: </b>" + data.experiencias[i].municipio + "</p>" +
+                                                    email_empresa +
+                                                    telefono_empresa +
+                                                    direccion +
+                                                "</div>" +
+                                            "</div>" +
+                                        "</div>"
+                    }
+
+                    $("#modal_resumen_content").append(
+                        "<div class='row'>" +
+                            "<div class='col s12 m5 l4 center-align'>" +
+                                photo +
+                            "</div>"+
+                            "<div class='col s12 m7 l8'>" +
+                                "<p style='margin-top: 0px;margin-bottom: 0px;font-size: 1.7rem;'><b>" + data.usuario.fullname + "</b></p>"+
+                                "<p style='margin-top: 0px;margin-bottom: 0px;font-size: 1rem;'><b>Aspitante "+ data.usuario.sexo + " de " + data.usuario.edad +" años, reside en "+ data.usuario.lugar_residencia +"</b></p>"+
+                                "<p style='margin-top: 10px;margin-bottom: 0px;font-size: 1rem;'><b>Cedula: </b>" + data.usuario.cedula + " de "+ data.usuario.lugar_expedicion +"</p>"+
+
+                                "<p style='margin-top: 5px;margin-bottom: 0px;font-size: 0.8rem;'><b>Lugar de nacimiento: </b>" + data.usuario.lugar_nacimiento +"</p>"+
+                                "<p style='margin-top: 5px;margin-bottom: 0px;font-size: 0.8rem;'><b>Dirección de residencia: </b>" + data.usuario.direccion + "</p>" +
+                                "<p style='margin-top: 5px;margin-bottom: 0px;font-size: 0.8rem;'><b>Email: </b>" + data.usuario.email + "</p>" +
+                                "<p style='margin-top: 5px;margin-bottom: 0px;font-size: 0.8rem;'><b>Celular: </b>" + data.usuario.celular + "</p>" +
+                                "<p style='margin-top: 5px;margin-bottom: 0px;font-size: 0.8rem;'><b>Grupo sanguineo: </b>" + data.usuario.tipo_sangre + "</p>" +
+                            "</div>" +
+                        "</div>" +
+                        "<div class='row'>" +
+                            "<div class='col s12'>" +
+                                "<h5><b>APLICACIÓN:</b></h5>" +
+                                "<p style='margin-top: 10px;margin-bottom: 0px;font-size: 1rem;'><b>Fecha: </b>" + data.aplicacion.creation +"</p>"+
+                                "<p style='margin-top: 10px;margin-bottom: 0px;font-size: 1rem;'><b>Municipios: </b>" + data.aplicacion.municipios +"</p>"+
+                                "<p style='text-align: justify;margin-top: 10px;margin-bottom: 0px;font-size: 1rem;'><b>Observación: </b>" + data.aplicacion.observacion +"</p>"+
+                            "</div>" +
+                        "</div>" +
+                        "<div class='row'>" +
+                            "<div class='col s12'>" +
+                                "<h5><b>TITULOS ACADÉMICOS:</b></h5>"+
+                                titulos +
+                            "</div>" +
+                            "<div class='col s12'>" +
+                                "<h5><b>EXPERIENCIA LABORAL:</b></h5>" +
+                                experiencias +
+                            "</div>" +
+                        "</div>"
+
+                    )
+                    $('#modal_resumen').modal('open');
+                    $('.materialboxed').materialbox();
+                },
+                error: function (data, textStatus, xhr) {
+                }
+            });
+        }

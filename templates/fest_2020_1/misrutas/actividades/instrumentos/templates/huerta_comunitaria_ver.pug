@@ -1,0 +1,189 @@
+extends ../../../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca_2021/") IRACA
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="{{ url_ruta_breadcrum }}") {{ ruta_breadcrum }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../") Actividades: {{ breadcrum_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_2 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Ver: {{ breadcrum_active | truncatechars:20 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container container-form",style="margin-top:20px;")
+
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend {{objeto.nombre}}:
+
+        div(class="row")
+            div(class="col s12")
+                table(class="striped bordered",width="100%")
+                    tbody
+                        tr
+                            td(style="font-weight:bold") Municipio:
+                            td {{ objeto.municipio }}
+                            td(style="font-weight:bold") Fecha:
+                            td {{ objeto.fecha }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad }}
+
+
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto1 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad1 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto2 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad2 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto3 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad3 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto4 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad4 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto5 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad5 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto6 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad6 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto7 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad7 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto8 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad8 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto9 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad9 }}
+
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto10 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad10 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto11 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad11 }}
+
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto12 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad12 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto13 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad13 }}
+
+                        tr
+                            td(style="font-weight:bold") Producto:
+                            td {{ objeto.producto14 }}
+                            td(style="font-weight:bold") Cantidad:
+                            td {{ objeto.cantidad14 }}
+
+
+        div(class="row")
+
+            div(class="col s12")
+                embed(src="{{objeto.url_file}}",type="application/pdf",width="100%",height="700px")
+
+
+block body_script_auth
+    script.
+
+        $(document).ready(function () {
+
+        });

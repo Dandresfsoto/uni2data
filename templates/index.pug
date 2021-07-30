@@ -1,0 +1,108 @@
+extends base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light",id="color-button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons",id="icon-menu-sican") filter_list
+                | Filtros
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    div(class="filter-items-container")
+                        |{% for filtro in filtros %}
+                        div
+                            input(name="group1",
+                                    "{{filtro.checked}}",
+                                    type="radio",
+                                    id="{{filtro.id}}",
+                                    data-filter="{{filtro.data_filter}}",
+                                    class="radio-white")
+                            label(for="{{filtro.id}}",class="filter-color") {{filtro.name}}
+                        |{% endfor %}
+
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+
+    div(id="mix-container")
+        | {% for item in items%}
+        div(class="mix {{ item.sican_categoria }} card {{ item.sican_color }}",data-order="{{ item.sican_order }}")
+            a(href="{{ item.sican_url }}",class="link-card")
+                div(class="card-content white-text")
+                    span(class="card-title activator") {{ item.sican_name }}
+                        i(class="material-icons left") {{ item.sican_icon }}
+                        i(class="material-icons right") more_vert
+                    p {{ item.sican_description }}
+        | {% endfor %}
+
+
+        div(class="gap")
+        div(class="gap")
+        div(class="gap")
+
+    |{% if not activar_cuenta %}
+
+
+    |{% else %}
+
+
+    div(class="fixed-action-btn")
+        a(class="btn-floating btn-large orange darken-4",href="/activar/",id="activar_cuenta")
+            i(class="large material-icons") account_box
+
+
+
+
+    div(class="tap-target",data-activates="activar_cuenta")
+        div(class="tap-target-content")
+            h5 ACTIVAR CUENTA
+            p.
+                Si tienes un código de activación usa este vinculo, no es necesario si vas a aplicar a ofertas de empleo.
+
+
+
+    |{% endif %}
+
+block body_script_auth
+    
+
+
+    script.
+        var config = {
+            selectors: {
+                target: '.mix'
+            },
+            animation: {
+                duration: 800
+            }
+        }
+
+        var containerEl = document.querySelector('#mix-container');
+        var mixer = mixitup(containerEl, config);
+
+        containerEl.classList.add("mixitup-ready");
+
+    |{% if not activar_cuenta %}
+
+    |{% else %}
+
+    script.
+        $(document).ready(function(){
+            $('.tap-target').tapTarget('open');
+            $('.collapsible').collapsible();
+        });
+
+
+    |{% endif %}

@@ -1,0 +1,137 @@
+extends ../../../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca_2021/") IRACA
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="{{ url_ruta_breadcrum }}") {{ ruta_breadcrum }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../") Actividades: {{ breadcrum_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_2 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Ver: {{ breadcrum_active | truncatechars:20 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container container-form",style="margin-top:20px;margin-left:150px;")
+        | {% if objeto.url_file != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Acta RIP Ventas, presentación y costo de productos
+                     div(class="row")
+
+                    div(class="col s12")
+                        embed(src="{{objeto.url_file}}",type="application/pdf",width="80%",height="700px")
+        |{% endif %}
+
+
+
+        | {% if objeto.url_file2 != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Acta RIP Ventajas y procesos de formalización de empresas
+            div(class="col s12")
+                embed(src="{{objeto.url_file2}}",type="application/pdf",width="80%",height="700px")
+        | {% endif %}
+
+
+        | {% if objeto.url_file3 != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Acta RIP resolución de conflictos
+            div(class="col s12")
+                embed(src="{{objeto.url_file3}}",type="application/pdf",width="80%",height="700px")
+        | {% endif %}
+
+
+        | {% if objeto.url_file4 != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Acta RIP Aspectos estratégicos en la rueda de inclusión productiva
+            div(class="col s12")
+                embed(src="{{objeto.url_file4}}",type="application/pdf",width="80%",height="700px")
+        | {% endif %}
+
+
+        | {% if objeto.url_file5 != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend 100% de Acuerdos comerciales firmados por las partes y  cargadas al SICAN
+            div(class="col s12")
+                embed(src="{{objeto.url_file5}}",type="application/pdf",width="80%",height="700px")
+        | {% endif %}
+
+
+
+
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend HOGARES:
+
+        | {% for hogar in objeto.hogares.all %}
+        table(class="striped",width="100%")
+            td(style="font-weight:bold") {{ hogar }}
+        | {% endfor %}
+
+block body_script_auth
+    script.
+
+        $(document).ready(function () {
+
+        });

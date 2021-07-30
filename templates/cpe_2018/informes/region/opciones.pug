@@ -1,0 +1,79 @@
+extends ../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/informes/") Informes
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") {{ breadcrum_active }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+block container_principal
+
+    div(id="mix-container")
+        | {% for item in items%}
+        div(class="mix {{ item.sican_categoria }} card {{ item.sican_color }}",data-order="{{ item.sican_order }}")
+            a(href="{{ item.sican_url }}",class="link-card")
+                div(class="card-content white-text")
+                    span(class="card-title activator") {{ item.sican_name }}
+                        i(class="material-icons left") {{ item.sican_icon }}
+                        i(class="material-icons right") more_vert
+                    p {{ item.sican_description }}
+        | {% endfor %}
+
+
+        div(class="gap")
+        div(class="gap")
+        div(class="gap")
+
+
+block body_script_auth
+    script.
+
+        var config = {
+            selectors: {
+            target: '.mix'
+        },
+        animation: {
+        duration: 800
+        }
+        }
+
+        var containerEl = document.querySelector('#mix-container');
+        var mixer = mixitup(containerEl, config);
+
+        containerEl.classList.add("mixitup-ready");

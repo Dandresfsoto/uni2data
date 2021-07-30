@@ -1,0 +1,183 @@
+extends ../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/recursos_humanos/") Recursos humanos
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/recursos_humanos/contratistas/") Contratistas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../") Contratos: {{breadcrum_1 | truncatechars:15}}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Crear contrato
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container",style="margin-top:40px;")
+        |{% crispy form %}
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+            new AutoNumeric('#id_valor_char', { currencySymbol : '$ ' });
+
+            $('textarea#id_objeto_contrato').characterCounter();
+
+
+            $('#id_otro_si_1').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el otrosi #1',
+                    'replace': 'Arrastra y suelta el otrosi #1 para reemplazar',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+            $('#id_otro_si_2').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el otrosi #2',
+                    'replace': 'Arrastra y suelta el otrosi #2 para reemplazar',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+            $('#id_otro_si_3').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el otrosi #3',
+                    'replace': 'Arrastra y suelta el otrosi #3 para reemplazar',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+
+            $('#id_file').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta la minuta del contrato',
+                    'replace': 'Arrastra y suelta la minuta para reemplazar',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+            $('#id_soporte_liquidacion').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el soporte de la liquidación',
+                    'replace': 'Arrastra y suelta el soporte de la liquidación',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+            $('#id_soporte_renuncia').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el soporte de renuncia',
+                    'replace': 'Arrastra y suelta el soporte de renuncia',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+
+            $('#id_inicio').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 150,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false
+            });
+
+            $('#id_fin').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 150,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false
+            });
+
+            $('#id_fecha_liquidacion').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 10,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false
+            });
+
+            $('#id_fecha_renuncia').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 10,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false
+            });
+
+            $('#id_grupo_soportes').material_select();
+            $('#id_tipo_contrato').material_select();
+            $('#id_proyecto').material_select();
+            $('#id_cargo').select2();
+
+            $("label[for='id_grupo_soportes']").addClass('active');
+            $("label[for='id_tipo_contrato']").addClass('active');
+            $("label[for='id_proyecto']").addClass('active');
+            $("label[for='id_cargo']").addClass('active');
+        });

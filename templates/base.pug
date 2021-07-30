@@ -1,0 +1,83 @@
+|{% load staticfiles %}
+|{% load crispy_forms_tags %}
+|{% load humanize %}
+|{% load mathfilters %}
+|{% load ofertas_tags %}
+doctype html
+html(lang="es")
+   head
+      title
+         block title
+
+      meta(http-equiv="Content-Type",content="text/html; charset=UTF-8")
+      meta(name="viewport",content="width=device-width, initial-scale=1.0")
+      link(rel="shortcut icon",type='image/x-icon',href="{% static 'img/favicon.png'%}")
+      link(rel="stylesheet",href="https://fonts.googleapis.com/icon?family=Material+Icons")
+
+      link(rel="stylesheet",href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css")
+      link(rel="stylesheet",href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/alertify.min.css")
+      link(rel="stylesheet",href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/themes/default.min.css")
+      link(rel="stylesheet",href="//cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css")
+      link(rel="stylesheet",href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css")
+      link(rel="stylesheet",href="//cdn.datatables.net/responsive/2.2.1/css/responsive.dataTables.min.css")
+      link(rel="stylesheet",href="//unpkg.com/materialize-stepper@3.0.0/dist/css/mstepper.min.css")
+      link(rel="stylesheet",href="//cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/css/dropify.min.css")
+      link(rel="stylesheet",href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css")
+      link(rel="stylesheet",href="//use.fontawesome.com/releases/v5.0.12/css/all.css",integrity="sha384-G0fIWCsCzJIMAVNQPfjH08cyYaUtMwjJwqiRKxxE/rx96Uroj1BtIQ6MLJuheaO9",crossorigin="anonymous")
+      link(rel="stylesheet",href="//cdn.jsdelivr.net/npm/materialize-social@1.0.3/materialize-social.min.css")
+      link(rel="stylesheet",href="//cdn.jsdelivr.net/npm/jquery-background-video@1.0.0/jquery.background-video.min.css")
+      link(rel="stylesheet",href="{% static 'css/base.css'%}")
+      link(rel="stylesheet",href="{% static 'css/quilljs.css'%}")
+
+      block head_content
+
+
+   body
+      block body_content
+
+      script(src="//code.jquery.com/jquery-3.3.1.min.js",
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/mixitup/3.3.0/mixitup.min.js")
+      script(src="{% static 'js/materialize.js'%}")
+      script(src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/alertify.min.js")
+      script(src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js")
+      script(src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js")
+      script(src="//unpkg.com/materialize-stepper@3.0.0/dist/js/mstepper.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/js/dropify.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/i18n/es.js")
+      script(src="//cdn.jsdelivr.net/npm/jquery-background-video@1.0.0/jquery.background-video.min.js")
+
+      script(src="//cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.5/push.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.5/serviceWorker.min.js")
+
+
+      script(src="//cdnjs.cloudflare.com/ajax/libs/SoundJS/1.0.1/soundjs.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/shortcuts/infinite.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment-with-locales.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/localization/messages_es.min.js")
+
+
+      script(src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.3/chosen.jquery.min.js")
+      script(src="//cdnjs.cloudflare.com/ajax/libs/autonumeric/4.1.0/autoNumeric.min.js")
+      script(src="{% static 'js/quill.js'%}")
+      script(src="//www.google.com/recaptcha/api.js")
+
+      script.
+        var error = '{{ error }}'
+        if(error != ""){
+            alertify.error(error);
+        }
+
+      script.
+          var success = '{{ success }}'
+          if (success != "") {
+              alertify.success(success);
+          }
+
+      block body_script

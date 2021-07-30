@@ -1,0 +1,99 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres
+    container_name: postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    env_file:
+      - ./.envs/.production/.django
+    ports:
+      - 5432:5432
+
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/production/django/Dockerfile
+    image: opmas_production_django
+    container_name: django_app
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - static_volume:/app/staticfiles
+      - ./media:/app/media
+    env_file:
+      - ./.envs/.production/.django
+    command: /start
+
+  nginx:
+    restart: always
+    container_name: nginx_server
+    depends_on:
+      - django
+    volumes:
+      - static_volume:/app/staticfiles
+      - ./media:/app/media
+    build:
+      context: ./compose/production/nginx
+    ports:
+      - "80:80"
+
+  celeryworker:
+    image: opmas_production_django
+    restart: always
+    volumes:
+      - static_volume:/app/staticfiles
+      - ./media:/app/media
+    env_file:
+      - ./.envs/.production/.django
+    command: /start-celeryworker
+    depends_on:
+      - django
+
+  flower:
+    image: opmas_production_django
+    restart: always
+    volumes:
+      - static_volume:/app/staticfiles
+      - ./media:/app/media
+    depends_on:
+      - django
+      - redis
+      - daphne
+      - nginx
+    container_name: flower_container
+    env_file:
+      - ./.envs/.production/.django
+    ports:
+      - "5555:5555"
+    command: /start-flower
+
+  daphne:
+    image: opmas_production_django
+    restart: always
+    volumes:
+      - static_volume:/app/staticfiles
+      - ./media:/app/media
+    depends_on:
+      - django
+    env_file:
+      - ./.envs/.production/.django
+    command: /start-daphne
+
+
+  redis:
+    image: redis
+    restart: always
+    volumes:
+      - static_volume:/app/staticfiles
+      - ./media:/app/media
+    container_name: cache
+    expose:
+      - 6379
+
+volumes:
+  static_volume:
+  db-data:

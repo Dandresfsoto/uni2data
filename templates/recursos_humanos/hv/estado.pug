@@ -1,0 +1,151 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/recursos_humanos/") Recursos humanos
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/recursos_humanos/hv/") Hojas de vida
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") {{ breadcrum_active | truncatechars:25 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container",style="margin-top:40px;")
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="padding-left:0px;")
+                    legend Hoja de vida: {{ hv.cargo }}
+
+            div(class="col s12 m6")
+                p
+                    b(style="margin-right:5px;") Contratista:
+                    | {{ hv.contratista.get_full_name }}
+                p
+                    b(style="margin-right:5px;") Cédula:
+                    | {{ hv.contratista.cedula }}
+                p
+                    b(style="margin-right:5px;") Hoja de vida:
+                    a(href="{{ file_url }}",target="_blank") Link
+
+            div(class="col s12 m6")
+                p
+                    b(style="margin-right:5px;") Región:
+                    | {{ hv.region }}
+                p
+                    b(style="margin-right:5px;") Envio:
+                    | Envio {{ hv.envio }}
+                p
+                    b(style="margin-right:5px;") Formato de experiencia:
+                    a(href="{{ hv.url_excel }}",target="_blank") Link
+
+            div(class="col s12")
+
+
+
+                div(class="center-align",style="padding:50px;",id="preloader_hv")
+                    div(class="preloader-wrapper big active")
+                        div(class="spinner-layer spinner-blue-only")
+                            div(class="circle-clipper left")
+                                div(class="circle")
+                            div(class="gap-patch")
+                                div(class="circle")
+                            div(class="circle-clipper right")
+                                div(class="circle")
+
+                embed(src="{{file_url}}",type="application/pdf",width="100%",height="800px",class="hide",id="embed_pdf")
+
+                div(style="margin-top:20px;")
+                    |{% crispy form %}
+
+    div(class="fixed-action-btn")
+        a(class="btn-floating btn-large red tooltipped",id="trazabilidad_button",data-position="top",data-delay="50",data-tooltip="Ver trazabilidad de la hoja de vida")
+            i(class="large material-icons") remove_red_eye
+
+
+    div(id="modaltrazabilidad" class="modal bottom-sheet")
+        div(class="modal-content")
+            h5
+                b(id="title-ruta") Trazabilidad de la hoja de vida
+
+            div(style="margin-top:20px;")
+                ul(class="collection",id="trazabilidad-ul")
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+            $("#embed_pdf").ready(function () {
+                $("#preloader_hv").addClass("hide");
+                $("#embed_pdf").removeClass("hide");
+            })
+
+            $('select').material_select();
+            $('.modal').modal();
+
+            //$('select').material_select();
+            $("label[for='id_estado']").addClass('active');
+
+
+            $("#trazabilidad_button").click(function () {
+                $.ajax({
+                    url: "{{ url_hv_trazabilidad }}",
+                    success: function (data) {
+
+                        $("#trazabilidad-ul").empty();
+
+                        for (i = 0; i < data.data.length; i++) {
+                            $("#trazabilidad-ul").append(
+                                '<li class="collection-item avatar">' +
+                                '<i class="material-icons circle" style="font-weight: bold;">check</i>' +
+                                '<span class="title"><b>' + data.data[i].observacion + '</b></span>' +
+                                '<p><b>Usuario: </b>' + data.data[i].usuario + '<b style="margin-left: 10px;">Fecha: </b>' + data.data[i].creacion + '</p>' +
+                                '</li>'
+                            );
+                        }
+
+                        $('#modaltrazabilidad').modal('open');
+
+                    },
+                    error: function () {
+                    }
+                });
+            })
+
+
+        });

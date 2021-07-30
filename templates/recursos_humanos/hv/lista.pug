@@ -1,0 +1,133 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/recursos_humanos/") Recursos humanos
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Hojas de vida
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+    | {% if permiso_crear %}
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") call_to_action
+                | Acciones
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="crear/") Añadir hoja de vida
+                            i(class="material-icons icon-sican") insert_drive_file
+
+                    div(class="divider divider-perfil")
+
+    | {% endif %}
+
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") assessment
+                | Reportes
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="reporte/") Reporte de HV
+                            i(class="material-icons icon-sican") view_list
+
+                    div(class="divider divider-perfil")
+
+
+block container_principal
+    div(class="container-datatable")
+        table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
+            thead
+                tr
+                    th Editar
+                    th Región
+                    th Contratista
+                    th N° Envio
+                    th Consecutivo Cargo
+                    th Cargo
+                    th Fecha de carga
+                    th Hv
+                    th Excel
+                    th Estado
+
+            tbody
+                tr
+                    td Editar
+                    td Región
+                    td Contratista
+                    td N° Envio
+                    td Consecutivo Cargo
+                    td Cargo
+                    td Fecha de carga
+                    td Hv
+                    td Excel
+                    td Estado
+
+
+block body_script_auth
+    script.
+
+        $(document).ready(function () {
+
+            var table = $('#table').DataTable({
+                responsive: true,
+                stateSave: true,
+                searching: true,
+                processing: true,
+                serverSide: true,
+                ajax: "{{ url_datatable }}",
+                "order": [[ 6, "desc" ]],
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
+                },
+                drawCallback: function (settings) {
+                    $('.tooltipped').tooltip({delay: 50});
+                }
+            });
+
+            table.on('responsive-display', function (e, datatable, row, showHide, update) {
+                $('.tooltipped').tooltip({delay: 50});
+            });
+
+        });

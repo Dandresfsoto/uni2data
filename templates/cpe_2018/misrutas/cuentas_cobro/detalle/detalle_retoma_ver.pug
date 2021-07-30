@@ -1,0 +1,115 @@
+extends ../../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/misrutas/") Mis Rutas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../../../") Cuentas de cobro: {{ breadcrum_1| truncatechars:8 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../") Detalle: {{ cuenta_cobro.id | truncatechars:10}}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../") {{ breadcrum_2 | truncatechars:10}}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") Retoma
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Radicado: {{ breadcrum_active | truncatechars:16}}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+
+    div(class="fixed-action-btn")
+        a(href="trazabilidad/",class="btn-floating btn-large red tooltipped",data-position="top",data-delay="50",data-tooltip="Ver trazabilidad")
+            i(class="large material-icons") remove_red_eye
+
+
+
+    div(class="container container-form",style="margin-top:40px;")
+        div
+            div(class="row")
+                div(class="col s12 m6 l8")
+                    embed(src="{{retoma.url_file}}",type="application/pdf",width="100%",height="500px")
+                div(class="col s12 m6 l4")
+                    div(class="col s12")
+                        p(style="margin-top:0;")
+                            b Municipio:
+                            span(style="margin-left:5px;") {{ retoma.municipio }}
+
+                        p(style="margin-top:0;")
+                            b Fecha:
+                            span(style="margin-left:5px;") {{ retoma.fecha }}
+
+                        p(style="margin-top:0;")
+                            b Radicado:
+                            span(style="margin-left:5px;") {{ retoma.radicado }}
+
+                        p(style="margin-top:0;")
+                            b Bolsas:
+                            span(style="margin-left:5px;") {{ retoma.bolsas }}
+            div(class="row")
+                div(class="col s12 m6 l8")
+                    embed(src="{{retoma.url_file2}}",type="application/pdf",width="100%",height="500px")
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+        });

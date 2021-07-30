@@ -1,0 +1,135 @@
+extends base
+
+
+block body_content
+    header
+        nav
+            div(class="nav-wrapper nav-wrapper-principal")
+
+                a(href="#",class="brand-logo")
+                    object(class="responsive-img brand-logo-object-navbar",height="40",type="image/svg+xml",data="{% static 'img/op.svg'%}")
+
+
+                a(href="#",class="brand-logo center hide-on-med-and-down title-logo") {{title | upper}}
+
+
+                a(href="#",data-activates="nav-mobile",class="button-collapse full hide-on-large-only")
+                    i(class="material-icons") menu
+
+                ul(class="right hide-on-large-only")
+                    li
+                        a(class="waves-effect waves-light",href="#")
+                            span(id="notifications_navbar",class="new badge",data-badge-caption="") {{user.notifications|add:user.messages}}
+
+
+            ul(id="nav-mobile",class="side-nav fixed side-nav-principal")
+
+                li(class="center-align")
+                    object(class="responsive-img brand-logo-object",height="70",type="image/svg+xml",data="{% static 'img/op.svg'%}")
+
+
+                ul(id = "menu-sican",class="collapsible",data-collapsible="accordion")
+                    li(class="bold waves-effect waves-light",id="color-button-menu")
+
+                        div(class="collapsible-header")
+                            i(class="material-icons",id="icon-menu-sican") arrow_drop_down
+                            |{{user.email | truncatechars:22}}&nbsp;&nbsp;&nbsp;
+                            span(id="notifications_header",class="new badge hide",data-badge-caption="") {{user.notifications|add:user.messages}}
+
+                        div(class="collapsible-body collapsible-body-blue")
+                            ul
+                                div(class="divider divider-perfil")
+                                li(class="bold waves-effect waves-light")
+                                    a(href="/perfil/") Perfil
+                                        i(class="material-icons icon-sican") person
+                                div(class="divider divider-perfil")
+                                li(class="bold waves-effect waves-light")
+                                    a(href="/notificaciones/") Notificaciones&nbsp;&nbsp;&nbsp;
+                                        i(class="material-icons icon-sican") notifications
+                                        span(id="notifications_body",class="new badge hide",data-badge-caption="") {{user.notifications}}
+                                div(class="divider divider-perfil")
+
+                                li(class="bold waves-effect waves-light")
+                                    a(href="/chat/") Chat&nbsp;&nbsp;&nbsp;
+                                        i(class="material-icons icon-sican") message
+                                        span(id="message_body",class="new badge hide",data-badge-caption="") {{user.messages}}
+                                div(class="divider divider-perfil")
+
+                                li(class="bold waves-effect waves-light")
+                                    a(href="/password/") Cambiar contraseña
+                                        i(class="material-icons icon-sican") security
+                                div(class="divider divider-perfil")
+                                li(class="bold waves-effect waves-light")
+                                    a(href="/logout/") Cerrar sesión
+                                        i(class="material-icons icon-sican") exit_to_app
+                                div(class="divider divider-perfil")
+
+                div(class="space-navbar-items")
+                block side_nav_container
+                div(class="space-navbar-footer")
+
+
+    main
+        block container_principal
+
+
+
+block body_script
+    | {% if debug %}
+    script.
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host);
+    | {% else %}
+    script.
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/realtime");
+    | {% endif %}
+
+    script(src="{% static 'js/jquery.animatecss.min.js'%}")
+    script(src="{% static 'js/Csrftoken.js'%}")
+    script(src="{% static 'js/Socket.js'%}")
+
+    script.
+
+        $(document).ready(function(){
+
+
+
+            var user_notifications= {{user.notifications}};
+
+            var user_messages= {{user.notifications}};
+
+            if(user_notifications+user_messages > 0){
+                $("#notifications_header").removeClass('hide');
+                $("#notifications_navbar").removeClass('hide');
+            }
+
+            if(user_notifications > 0){
+                $("#notifications_body").removeClass('hide');
+            }
+
+            if (user_messages > 0) {
+                $("#message_body").removeClass('hide');
+            }
+
+
+
+
+            $(".button-collapse").sideNav({
+                menuWidth: 300,
+                closeOnClick: true
+            });
+
+            $("#menu-sican").click(function () {
+                var state = $("#icon-menu-sican").text();
+                if( state == 'arrow_drop_down' ){
+                    $("#icon-menu-sican").text("arrow_drop_up");
+                }
+                else{
+                    $("#icon-menu-sican").text("arrow_drop_down");
+                }
+            });
+
+
+        });
+    block body_script_auth

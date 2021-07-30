@@ -1,0 +1,3 @@
+<ul class = "stepper {{ stepper.css_class }}" {% if stepper.css_id != None %}id = "{{ stepper.css_id }} {% endif %}>
+    {{ fields|safe }}
+</ul>

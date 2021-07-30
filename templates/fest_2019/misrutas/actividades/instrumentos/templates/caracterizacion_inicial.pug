@@ -1,0 +1,1450 @@
+extends ../../../../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca/") IRACA
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="{{ url_ruta_breadcrum }}") {{ ruta_breadcrum }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../../") Actividades: {{ breadcrum_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../") {{ breadcrum_2 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") Hogar: {{ breadcrum_3 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") {{ breadcrum_active | truncatechars:25 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container",style="margin-top:20px;width:90%;height:900px;")
+        form(method="post")
+            |{% csrf_token %}
+
+            ul(class="stepper")
+                li(class="step active")
+                    div(class="step-title waves-effect waves-dark") Hogar
+                    div(class="step-content",id = "step_1")
+
+                        div(class="row")
+                            div(class="col s12")
+                                b Lugar de atención:
+
+                        div(class="row")
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.departamento_atencion.id_for_label }}",class="active") {{ form.departamento_atencion.label }}
+                                    |{{ form.departamento_atencion }}
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.municipio_atencion.id_for_label }}",class="active") {{ form.municipio_atencion.label }}
+                                    | {{ form.municipio_atencion }}
+
+
+                        div(class="row",style="margin-top:30px;")
+                            div(class="col s12")
+                                b Lugar de residencia:
+
+                        div(class="row")
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.departamento_residencia.id_for_label }}",class="active") {{ form.departamento_residencia.label }}
+                                    | {{ form.departamento_residencia }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.municipio_residencia.id_for_label }}",class="active") {{ form.municipio_residencia.label }}
+                                    | {{ form.municipio_residencia }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.zona_residencia.id_for_label }}",class="active") {{ form.zona_residencia.label }}
+                                    | {{ form.zona_residencia }}
+
+
+                        div(id="row_cabecera_municipal",class="hide")
+                            div(class="row",style="margin-top:30px;")
+                                div(class="col s12")
+                                    b Información cabecera municipal:
+
+                            div(class="row")
+                                div(class="col s12 m6 l4")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.localidad.id_for_label }}") {{ form.localidad.label }}
+                                        | {{ form.localidad }}
+                                div(class="col s12 m6 l4")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.barrio.id_for_label }}") {{ form.barrio.label }}
+                                        | {{ form.barrio }}
+                                div(class="col s12 m6 l4")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.direccion_predio.id_for_label }}") {{ form.direccion_predio.label }}
+                                        | {{ form.direccion_predio }}
+
+                        div(id="row_otra_zona_residencia",class="hide")
+                            div(class="row",style="margin-top:30px;")
+                                div(class="col s12")
+                                    b Información centro poblado o rural disperso:
+
+                            div(class="row")
+                                div(class="col s12 m6 l6",style="margin-top:15px;")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.corregimiento.id_for_label }}",class="active") {{ form.corregimiento.label }}
+                                        | {{ form.corregimiento }}
+                                div(class="col s12 m6 l6",style="margin-top:15px;")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.vereda.id_for_label }}",class="active") {{ form.vereda.label }}
+                                        | {{ form.vereda }}
+                                div(class="col s12 m6 l4",style="margin-top:15px;")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.ubicacion_predio.id_for_label }}") {{ form.ubicacion_predio.label }}
+                                        | {{ form.ubicacion_predio }}
+
+                        div(class="row",style="margin-top:30px;")
+                            div(class="col s12")
+                                b Contacto:
+
+                        div(class="row")
+                            div(class="col s12 m6 l4")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.telefono_fijo.id_for_label }}",class="active") {{ form.telefono_fijo.label }}
+                                    | {{ form.telefono_fijo }}
+
+
+                        div(class="row",style="margin-top:30px;")
+                            div(class="col s12")
+                                b Vivienda:
+
+
+
+                        div(class="row")
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.tipo_vivienda.id_for_label }}",class="active") {{ form.tipo_vivienda.label }}
+                                    | {{ form.tipo_vivienda }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.propiedad_vivienda.id_for_label }}",class="active") {{ form.propiedad_vivienda.label }}
+                                    | {{ form.propiedad_vivienda }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.estrato_vivienda.id_for_label }}",class="active") {{ form.estrato_vivienda.label }}
+                                    | {{ form.estrato_vivienda }}
+
+                        div(id="row_otro_tipo_vivienda",class="hide")
+                            div(class="row",style="margin-top:30px;")
+                                div(class="col s12")
+                                    b Otro tipo de vivienda:
+
+
+                            div(class="row")
+                                div(class="col s12 m6 l6")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.otro_tipo_vivienda.id_for_label }}",class="active") {{ form.otro_tipo_vivienda.label }}
+                                        | {{ form.otro_tipo_vivienda }}
+
+                        div(id="warning_step_1",class="red lighten-5 hide",style="margin-top:20px;padding:10px;border-radius:5px;")
+                            div(class="row")
+                                div(class="col s12")
+                                    p
+                                        b Por favor realice las siguientes correcciones:
+                                    ul(class="collection")
+                                        div(id="warning_step_1_div")
+
+
+
+
+
+                        div(class="step-actions")
+                            button(class="waves-effect waves-dark btn green darken-3 next-step") Siguiente
+
+                li(class="step")
+                    div(class="step-title waves-effect") Geo-referenciación
+                    div(class="step-content",id = "step_2")
+
+                        div(class="row")
+                            div(class="col s12")
+                                b Datos de Geo-referenciación:
+
+                        div(class="row")
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.longitud.id_for_label }}",class="active") {{ form.longitud.label }}
+                                    | {{ form.longitud }}
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.latitud.id_for_label }}",class="active") {{ form.latitud.label }}
+                                    | {{ form.latitud }}
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.precision.id_for_label }}",class="active") {{ form.precision.label }}
+                                    | {{ form.precision }}
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.altitud.id_for_label }}",class="active") {{ form.altitud.label }}
+                                    | {{ form.altitud }}
+
+
+                        div(id="warning_step_2",class="red lighten-5 hide",style="margin-top:20px;padding:10px;border-radius:5px;")
+                            div(class="row")
+                                div(class="col s12")
+                                    p
+                                        b Por favor realice las siguientes correcciones:
+                                    ul(class="collection")
+                                        div(id="warning_step_2_div")
+
+                        div(class="step-actions")
+                            button(class="waves-effect waves-dark btn green darken-3 next-step") Siguiente
+                            button(class="waves-effect waves-dark btn-flat previous-step") Anterior
+
+                li(class="step")
+                    div(class="step-title waves-effect") Familia
+                    div(class="step-content",id = "step_3")
+
+                        div(class="row")
+                            div(class="col s12")
+                                b Información sobre la familia:
+
+                        div(class="row")
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.otro_telefono.id_for_label }}",class="active") {{ form.otro_telefono.label }}
+                                    | {{ form.otro_telefono }}
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.descripcion_direccion.id_for_label }}",class="active") {{ form.descripcion_direccion.label }}
+                                    | {{ form.descripcion_direccion }}
+
+
+
+                        div(class="row")
+                            div(class="col s12")
+                                b Caracterización nucleo familiar:
+
+
+                        div(class="row")
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.numero_personas_familia.id_for_label }}",class="active") {{ form.numero_personas_familia.label }}
+                                    | {{ form.numero_personas_familia }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.menores_5_anios.id_for_label }}",class="active") {{ form.menores_5_anios.label }}
+                                    | {{ form.menores_5_anios }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.mayores_60_anios.id_for_label }}",class="active") {{ form.mayores_60_anios.label }}
+                                    | {{ form.mayores_60_anios }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.mujeres_gestantes_lactantes.id_for_label }}",class="active") {{ form.mujeres_gestantes_lactantes.label }}
+                                    | {{ form.mujeres_gestantes_lactantes }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.discapacitados_familia.id_for_label }}",class="active") {{ form.discapacitados_familia.label }}
+                                    | {{ form.discapacitados_familia }}
+
+                        div(id="warning_step_3",class="red lighten-5 hide",style="margin-top:20px;padding:10px;border-radius:5px;")
+                            div(class="row")
+                                div(class="col s12")
+                                    p
+                                        b Por favor realice las siguientes correcciones:
+                                    ul(class="collection")
+                                        div(id="warning_step_3_div")
+
+                        div(class="step-actions")
+                            button(class="waves-effect waves-dark btn green darken-3 next-step") Siguiente
+                            button(class="waves-effect waves-dark btn-flat previous-step") Anterior
+
+                li(class="step")
+                    div(class="step-title waves-effect") Datos Personales
+                    div(class="step-content",id = "step_4")
+
+
+                        div(class="row")
+                            div(class="col s12")
+                                b Identificación contacto:
+
+                        div(class="row")
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.tipo_documento.id_for_label }}",class="active") {{ form.tipo_documento.label }}
+                                    | {{ form.tipo_documento }}
+                        div(class="row")
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.numero_documento.id_for_label }}",class="active") {{ form.numero_documento.label }}
+                                    | {{ form.numero_documento }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.primer_apellido.id_for_label }}",class="active") {{ form.primer_apellido.label }}
+                                    | {{ form.primer_apellido }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.segundo_apellido.id_for_label }}",class="active") {{ form.segundo_apellido.label }}
+                                    | {{ form.segundo_apellido }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.primer_nombre.id_for_label }}",class="active") {{ form.primer_nombre.label }}
+                                    | {{ form.primer_nombre }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.segundo_nombre.id_for_label }}",class="active") {{ form.segundo_nombre.label }}
+                                    | {{ form.segundo_nombre }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.celular_1.id_for_label }}",class="active") {{ form.celular_1.label }}
+                                    | {{ form.celular_1 }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.celular_2.id_for_label }}",class="active") {{ form.celular_2.label }}
+                                    | {{ form.celular_2 }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.correo_electronico.id_for_label }}",class="active") {{ form.correo_electronico.label }}
+                                    | {{ form.correo_electronico }}
+
+
+                        div(class="row")
+                            div(class="col s12")
+                                b Lugar y fecha de nacimiento:
+
+                        div(class="row")
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.departamento_nacimiento.id_for_label }}",class="active") {{ form.departamento_nacimiento.label }}
+                                    | {{ form.departamento_nacimiento }}
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.municipio_nacimiento.id_for_label }}",class="active") {{ form.municipio_nacimiento.label }}
+                                    | {{ form.municipio_nacimiento }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.fecha_nacimiento.id_for_label }}",class="active") {{ form.fecha_nacimiento.label }}
+                                    | {{ form.fecha_nacimiento }}
+
+
+                        div(class="row")
+                            div(class="col s12")
+                                b Lugar y fecha de expedición del documento:
+
+                        div(class="row")
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.departamento_expedicion.id_for_label }}",class="active") {{ form.departamento_expedicion.label }}
+                                    | {{ form.departamento_expedicion }}
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.municipio_expedicion.id_for_label }}",class="active") {{ form.municipio_expedicion.label }}
+                                    | {{ form.municipio_expedicion }}
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.fecha_expedicion.id_for_label }}",class="active") {{ form.fecha_expedicion.label }}
+                                    | {{ form.fecha_expedicion }}
+
+                        div(id="warning_step_4",class="red lighten-5 hide",style="margin-top:20px;padding:10px;border-radius:5px;")
+                            div(class="row")
+                                div(class="col s12")
+                                    p
+                                        b Por favor realice las siguientes correcciones:
+                                    ul(class="collection")
+                                        div(id="warning_step_4_div")
+
+                        div(class="step-actions")
+                            button(class="waves-effect waves-dark btn green darken-3 next-step") Siguiente
+                            button(class="waves-effect waves-dark btn-flat previous-step") Anterior
+
+                li(class="step")
+                    div(class="step-title waves-effect") Caracteristicas Generales
+                    div(class="step-content",id = "step_5")
+
+                        div(class="row")
+                            div(class="col s12")
+                                b Sexo, identidad de género y condición sexual:
+
+                        div(class="row")
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.sexo.id_for_label }}",class="active") {{ form.sexo.label }}
+                                    | {{ form.sexo }}
+
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.sexo.identidad_genero }}",class="active") {{ form.identidad_genero.label }}
+                                    | {{ form.identidad_genero }}
+
+                            div(class="col s12 m6 l4",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.condicion_sexual.id_for_label }}",class="active") {{ form.condicion_sexual.label }}
+                                    | {{ form.condicion_sexual }}
+
+                        div(class="row",style="margin-top:15px;")
+                            div(class="col s12")
+                                b Información militar:
+
+                            div(class="col s12 m6")
+                                div(class="input-field fieldWrapper")
+                                    | {{ form.tiene_libreta }}
+                                    label(for="{{ form.tiene_libreta.id_for_label }}",style="margin-bottom:15px;") {{ form.tiene_libreta.label }}
+
+                        div(id="row_numero_libreta",class="hide")
+                            div(class="row")
+                                div(class="col s12 m6")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.numero_libreta.id_for_label }}",class="active") {{ form.numero_libreta.label }}
+                                        | {{ form.numero_libreta }}
+
+
+                        div(class="row",style="margin-top:15px;")
+                            div(class="col s12")
+                                b Estado civil y Étnia:
+
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.estado_civil.id_for_label }}",class="active") {{ form.estado_civil.label }}
+                                    | {{ form.estado_civil }}
+
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.etnia.id_for_label }}",class="active") {{ form.etnia.label }}
+                                    | {{ form.etnia }}
+
+                        div(id="row_etnia_indigena",class="hide")
+                            div(class="row",style="margin-top:15px;")
+                                div(class="col s12")
+                                    b Etnia indigena:
+
+                            div(class="row")
+                                div(class="col s12 m6 l4")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.pueblo_indigena.id_for_label }}",class="active") {{ form.pueblo_indigena.label }}
+                                        | {{ form.pueblo_indigena }}
+                                div(class="col s12 m6 l4")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.resguardo_indigena.id_for_label }}",class="active") {{ form.resguardo_indigena.label }}
+                                        | {{ form.resguardo_indigena }}
+                                div(class="col s12 m6 l4")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.comunidad_indigena.id_for_label }}",class="active") {{ form.comunidad_indigena.label }}
+                                        | {{ form.comunidad_indigena }}
+                                div(class="col s12")
+                                    div(class="input-field fieldWrapper")
+                                        | {{ form.lengua_nativa_indigena }}
+                                        label(for="{{ form.lengua_nativa_indigena.id_for_label }}",style="margin-bottom:15px;") {{ form.lengua_nativa_indigena.label }}
+
+                                div(id="row_lengua_indigena",class="hide")
+                                    div(class="col s12 m6",style="margin-top:15px;")
+                                        div(class="input-field fieldWrapper")
+                                            label(for="{{ form.cual_lengua_indigena.id_for_label }}",class="active") {{ form.cual_lengua_indigena.label }}
+                                            | {{ form.cual_lengua_indigena }}
+
+                        div(id="row_etnia_afro",class="hide")
+                            div(class="row",style="margin-top:15px;")
+                                div(class="col s12")
+                                    b Etnia Afrocolombiano:
+
+                            div(class="row")
+                                div(class="col s12 m6")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.consejo_afro.id_for_label }}",class="active") {{ form.consejo_afro.label }}
+                                        | {{ form.consejo_afro }}
+                                div(class="col s12 m6")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.comunidad_afro.id_for_label }}",class="active") {{ form.comunidad_afro.label }}
+                                        | {{ form.comunidad_afro }}
+
+                                div(class="col s12")
+                                    div(class="input-field fieldWrapper")
+                                        | {{ form.lengua_nativa_afro }}
+                                        label(for="{{ form.lengua_nativa_afro.id_for_label }}",style="margin-bottom:15px;") {{ form.lengua_nativa_afro.label }}
+
+                                div(id="row_lengua_afro",class="hide")
+                                    div(class="col s12 m6",style="margin-top:15px;")
+                                        div(class="input-field fieldWrapper")
+                                            label(for="{{ form.cual_lengua_afro.id_for_label }}",class="active") {{ form.cual_lengua_afro.label }}
+                                            | {{ form.cual_lengua_afro }}
+
+                        div(class="row",style="margin-top:15px;")
+                            div(class="col s12")
+                                b Datos acerca de la discapacidad:
+
+                            div(class="col s12 m6")
+                                div(class="input-field fieldWrapper")
+                                    | {{ form.discapacidad }}
+                                    label(for="{{ form.discapacidad.id_for_label }}",style="margin-bottom:15px;") {{ form.discapacidad.label }}
+
+                        div(id="row_discapacidad",class="hide")
+                            div(class="row")
+                                div(class="col s12 m6")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.registro_discapacidad.id_for_label }}",class="active") {{ form.registro_discapacidad.label }}
+                                        | {{ form.registro_discapacidad }}
+
+                            div(class="row",style="margin-top:15px;")
+                                div(class="col s12")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.categoria_discapacidad.id_for_label }}",class="active") {{ form.categoria_discapacidad.label }}
+                                        | {{ form.categoria_discapacidad }}
+
+                            div(class="row",style="margin-top:15px;")
+                                div(class="col s12")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.dificultades_permanentes.id_for_label }}",class="active") {{ form.dificultades_permanentes.label }}
+                                        | {{ form.dificultades_permanentes }}
+
+                            div(class="row",style="margin-top:15px;")
+                                div(class="col s12")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.utiliza_actualmente.id_for_label }}",class="active") {{ form.utiliza_actualmente.label }}
+                                        | {{ form.utiliza_actualmente }}
+
+                            div(class="row",style="margin-top:15px;")
+                                div(class="col s12")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.rehabilitacion.id_for_label }}",class="active") {{ form.rehabilitacion.label }}
+                                        | {{ form.rehabilitacion }}
+
+                            div(class="row",style="margin-top:15px;")
+                                div(class="col s12")
+                                    div(class="input-field fieldWrapper")
+                                        | {{ form.tiene_cuidador }}
+                                        label(for="{{ form.tiene_cuidador.id_for_label }}",style="margin-bottom:15px;") {{ form.tiene_cuidador.label }}
+
+                            div(id="row_cuidador",class="hide",style="margin-top:15px;")
+                                div(class="row")
+                                    div(class="col s12 m6")
+                                        div(class="input-field fieldWrapper")
+                                            label(for="{{ form.cuidador.id_for_label }}",class="active") {{ form.cuidador.label }}
+                                            | {{ form.cuidador }}
+
+
+                        div(class="row",style="margin-top:15px;margin-bottom:15px;")
+                            div(class="col s12")
+                                b Parentesco y relación con el hogar:
+
+                            div(class="col s12 m6")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.parentezco.id_for_label }}",class="active") {{ form.parentezco.label }}
+                                    | {{ form.parentezco }}
+
+                        div(class="row")
+                            div(class="col s12")
+                                div(class="input-field fieldWrapper")
+                                    | {{ form.es_jefe }}
+                                    label(for="{{ form.es_jefe.id_for_label }}",style="margin-bottom:15px;") {{ form.es_jefe.label }}
+
+                            div(class="col s12")
+                                div(class="input-field fieldWrapper")
+                                    | {{ form.es_representante_hogar }}
+                                    label(for="{{ form.es_representante_hogar.id_for_label }}",style="margin-bottom:15px;") {{ form.es_representante_hogar.label }}
+
+
+                        div(class="row",style="margin-top:15px;margin-bottom:15px;")
+                            div(class="col s12")
+                                b Información bancaria:
+
+                            div(class="col s12")
+                                div(class="input-field fieldWrapper")
+                                    | {{ form.bancarizacion }}
+                                    label(for="{{ form.bancarizacion.id_for_label }}",style="margin-bottom:15px;") {{ form.bancarizacion.label }}
+
+
+                        div(id="row_bancarizacion",class="hide")
+                            div(class="row")
+                                div(class="col s12 m6")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.banco.id_for_label }}",class="active") {{ form.banco.label }}
+                                        | {{ form.banco }}
+                                div(class="col s12 m6")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.banco.tipo_cuenta }}",class="active") {{ form.tipo_cuenta.label }}
+                                        | {{ form.tipo_cuenta }}
+                            div(class="row")
+                                div(class="col s12 m6")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.numero_cuenta.tipo_cuenta }}",class="active") {{ form.numero_cuenta.label }}
+                                        | {{ form.numero_cuenta }}
+
+
+                        div(id="warning_step_5",class="red lighten-5 hide",style="margin-top:20px;padding:10px;border-radius:5px;")
+                            div(class="row")
+                                div(class="col s12")
+                                    p
+                                        b Por favor realice las siguientes correcciones:
+                                    ul(class="collection")
+                                        div(id="warning_step_5_div")
+
+
+                        div(class="step-actions")
+                            button(class="waves-effect waves-dark btn green darken-3 next-step") Siguiente
+                            button(class="waves-effect waves-dark btn-flat previous-step") Anterior
+
+                li(class="step")
+                    div(class="step-title waves-effect") Educación y salud
+                    div(class="step-content",id = "step_6")
+
+                        div(class="row")
+                            div(class="col s12")
+                                b Educación:
+
+                        div(class="row")
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.nivel_escolaridad.id_for_label }}",class="active") {{ form.nivel_escolaridad.label }}
+                                    | {{ form.nivel_escolaridad }}
+                        div(class="row")
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.grado_titulo.id_for_label }}",class="active") {{ form.grado_titulo.label }}
+                                    | {{ form.grado_titulo }}
+
+                        div(class="row")
+                            div(class="col s12")
+                                div(class="input-field fieldWrapper")
+                                    | {{ form.sabe_leer }}
+                                    label(for="{{ form.sabe_leer.id_for_label }}",style="margin-bottom:15px;") {{ form.sabe_leer.label }}
+                            div(class="col s12")
+                                div(class="input-field fieldWrapper")
+                                    | {{ form.sabe_sumar_restar }}
+                                    label(for="{{ form.sabe_sumar_restar.id_for_label }}",style="margin-bottom:15px;") {{ form.sabe_sumar_restar.label }}
+                            div(class="col s12")
+                                div(class="input-field fieldWrapper")
+                                    | {{ form.actualmente_estudia }}
+                                    label(for="{{ form.actualmente_estudia.id_for_label }}",style="margin-bottom:15px;") {{ form.actualmente_estudia.label }}
+
+                        div(id="row_si_estudia",class="hide")
+                            div(class="row")
+                                div(class="col s12")
+                                    div(class="input-field fieldWrapper")
+                                        | {{ form.recibe_alimentos }}
+                                        label(for="{{ form.recibe_alimentos.id_for_label }}",style="margin-bottom:15px;") {{ form.recibe_alimentos.label }}
+
+
+                        div(id="row_no_estudia",style="margin-top:15px;")
+                            div(class="row")
+                                div(class="col s12 m6")
+                                    div(class="input-field fieldWrapper")
+                                        label(for="{{ form.razon_no_estudia.id_for_label }}",class="active") {{ form.razon_no_estudia.label }}
+                                        | {{ form.razon_no_estudia }}
+
+                            div(id="row_no_estudia_otra",class="hide")
+                                div(class="row")
+                                    div(class="col s12 m6")
+                                        div(class="input-field fieldWrapper")
+                                            label(for="{{ form.razon_no_estudia_otra.id_for_label }}",class="active") {{ form.razon_no_estudia_otra.label }}
+                                            | {{ form.razon_no_estudia_otra }}
+
+                        div(class="row",style="margin-top:15px;")
+                            div(class="col s12")
+                                b Salud y Seguridad Social:
+
+                            div(class="col s12 m6",style="margin-top:15px;")
+                                div(class="input-field fieldWrapper")
+                                    label(for="{{ form.regimen_seguridad_social.id_for_label }}",class="active") {{ form.regimen_seguridad_social.label }}
+                                    | {{ form.regimen_seguridad_social }}
+
+
+                        div(id="warning_step_6",class="red lighten-5 hide",style="margin-top:20px;padding:10px;border-radius:5px;")
+                            div(class="row")
+                                div(class="col s12")
+                                    p
+                                        b Por favor realice las siguientes correcciones:
+                                    ul(class="collection")
+                                        div(id="warning_step_6_div")
+
+
+                        div(class="step-actions")
+                            button(class="waves-effect waves-dark btn green darken-3 next-step") Siguiente
+                            button(class="waves-effect waves-dark btn-flat previous-step") Anterior
+
+                li(class="step")
+                    div(class="step-title waves-effect") Enviar
+                    div(class="step-content",id = "step_7")
+                        div(class="row")
+                            div(class="col s12")
+                                b Si la información es correcta por favor envia el formulario.
+                        div(class="step-actions")
+                            button(class="waves-effect waves-dark btn-flat previous-step") Anterior
+                            button(class="waves-effect waves-dark btn green darken-3",type="submit") Enviar
+
+
+
+block body_script_auth
+    script(src="//cdnjs.cloudflare.com/ajax/libs/validate.js/0.12.0/validate.min.js")
+    script.
+
+        $(document).ready(function () {
+
+            $(document).ready(function () {
+
+                var stepper = document.querySelector('.stepper');
+                var stepperInstace = new MStepper(stepper, {
+                    // options
+                    firstActive: 0,
+                    stepTitleNavigation: false,
+                    validationFunction: ValidationFunctionStep,
+                })
+
+
+                function ValidationFunctionStep(stepperForm, activeStepContent){
+                    var id = activeStepContent.id;
+                    var correcciones = []
+                    var status = true
+
+                    if(id === 'step_1') {
+
+                        var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                        var dict = {}
+
+                        for(let i = 0;i < inputs.length; i++){
+                            label = $("label[for='" + inputs[i].id + "']").text()
+                            dict[inputs[i].id] = {'valor':inputs[i].value,'label':label}
+                        }
+
+                        /* Aca va la validacion */
+
+                        /* Campos requeridos */
+                        var requeridos = [
+                            'id_departamento_atencion',
+                            'id_municipio_atencion',
+                            'id_departamento_residencia',
+                            'id_municipio_residencia',
+                            'id_zona_residencia',
+                            'id_tipo_vivienda',
+                            'id_propiedad_vivienda'
+                        ]
+
+                        for (let i = 0; i < requeridos.length; i++) {
+                            if (dict[requeridos[i]]['valor'] === "") {
+                                correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                                status = false
+                            }
+                        }
+
+
+                        if(dict['id_zona_residencia']['valor'] === 'Cabecera municipal'){
+                            var requeridos_cabecera = [
+                                'id_barrio',
+                                'id_direccion_predio'
+                            ]
+
+                            for (let i = 0; i < requeridos_cabecera.length; i++) {
+                                if (dict[requeridos_cabecera[i]]['valor'] === "") {
+                                    correcciones.push('Completa el campo: ' + dict[requeridos_cabecera[i]]['label'])
+                                    status = false
+                                }
+                            }
+                        }
+
+                        if (dict['id_zona_residencia']['valor'] === 'Centro poblado' || dict['id_zona_residencia']['valor'] === 'Rural disperso') {
+                            var requeridos_centro_poblado = [
+                                'id_ubicacion_predio'
+                            ]
+
+                            for (let i = 0; i < requeridos_centro_poblado.length; i++) {
+                                if (dict[requeridos_centro_poblado[i]]['valor'] === "") {
+                                    correcciones.push('Completa el campo: ' + dict[requeridos_centro_poblado[i]]['label'])
+                                    status = false
+                                }
+                            }
+                        }
+
+                        if (dict['id_tipo_vivienda']['valor'] === 'Otro tipo de Vivienda (Carpa, Tienda, Vagon, Embarcacion, Cueva, Refugio Natural, Puente, etc,) Cual?') {
+                            var requeridos_tipo_vivienda = [
+                                'id_otro_tipo_vivienda'
+                            ]
+
+                            for (let i = 0; i < requeridos_tipo_vivienda.length; i++) {
+                                if (dict[requeridos_tipo_vivienda[i]]['valor'] === "") {
+                                    correcciones.push('Completa el campo: ' + dict[requeridos_tipo_vivienda[i]]['label'])
+                                    status = false
+                                }
+                            }
+                        }
+
+
+
+                        if(status === false){
+                            $("#warning_step_1").removeClass('hide')
+                            $("#warning_step_1_div").empty()
+                            $("#warning_step_1_div").append(CorreccionesHtml(correcciones))
+                        }
+                        else{
+                            $("#warning_step_1").addClass('hide')
+                            $("#warning_step_1_div").empty()
+                        }
+                    }
+                    else if(id === 'step_2') {
+
+                        var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                        var dict = {}
+
+                        var constraints = {
+                            coordenadas: {
+                                format: {
+                                    pattern: "((?:[-]+)?(\\d+)(\\.\\d{5,10}))$"
+                                }
+                            },
+                            presicion: {
+                                format: {
+                                    pattern: "((\\d+)(\\.\\d{1,2}))$"
+                                }
+                            },
+                            altitud: {
+                                format: {
+                                    pattern: "((\\d+)(\\.\\d{1,3}))$"
+                                }
+                            }
+                        };
+
+                        for (let i = 0; i < inputs.length; i++) {
+                            label = $("label[for='" + inputs[i].id + "']").text()
+                            dict[inputs[i].id] = {'valor': inputs[i].value, 'label': label}
+                        }
+
+                        /* Aca va la validacion */
+
+                        /* Campos requeridos */
+                        var requeridos = [
+                            'id_longitud',
+                            'id_latitud',
+                            'id_precision',
+                            'id_altitud'
+                        ]
+
+                        for (let i = 0; i < requeridos.length; i++) {
+                            if (dict[requeridos[i]]['valor'] === "") {
+                                correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                                status = false
+                            }
+                            else{
+                                if(requeridos[i] === "id_longitud" ){
+                                    var dict_validate = validate({coordenadas: dict['id_longitud']['valor']}, constraints)
+                                    if(dict_validate !== undefined){
+                                        correcciones.push('La longitud debe contener un numero entero y 5 a 7 decimales separados por un punto, ejemplo: 7.1149319')
+                                        status = false
+                                    }
+                                }
+                                else if (requeridos[i] === "id_latitud") {
+                                    var dict_validate = validate({coordenadas: dict['id_latitud']['valor']}, constraints)
+                                    if (dict_validate !== undefined) {
+                                        correcciones.push('La latitud debe contener un numero entero y 5 a 7 decimales separados por un punto, ejemplo: -73.1121367')
+                                        status = false
+                                    }
+                                }
+                                else if (requeridos[i] === "id_precision") {
+                                    var dict_validate = validate({presicion: dict['id_precision']['valor']}, constraints)
+                                    if (dict_validate !== undefined) {
+                                        correcciones.push('La presición debe contener un numero entero y 1 o 2 decimales separados por un punto, ejemplo: 28.99')
+                                        status = false
+                                    }
+                                }
+                                else if (requeridos[i] === "id_altitud") {
+                                    var dict_validate = validate({presicion: dict['id_altitud']['valor']}, constraints)
+                                    if (dict_validate !== undefined) {
+                                        correcciones.push('La presición debe contener un numero entero y 1,2 o 3 decimales separados por un punto, ejemplo: 978.97')
+                                        status = false
+                                    }
+                                }
+                            }
+                        }
+
+                        if (status === false) {
+                            $("#warning_step_2").removeClass('hide')
+                            $("#warning_step_2_div").empty()
+                            $("#warning_step_2_div").append(CorreccionesHtml(correcciones))
+                        }
+                        else {
+                            $("#warning_step_2").addClass('hide')
+                            $("#warning_step_2_div").empty()
+                        }
+
+                    }
+                    else if(id === 'step_3') {
+                        var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                        var dict = {}
+
+                        for (let i = 0; i < inputs.length; i++) {
+                            label = $("label[for='" + inputs[i].id + "']").text()
+                            dict[inputs[i].id] = {'valor': inputs[i].value, 'label': label}
+                        }
+
+                        /* Aca va la validacion */
+
+                        /* Campos requeridos */
+                        var requeridos = [
+                            'id_numero_personas_familia',
+                            'id_menores_5_anios',
+                            'id_mayores_60_anios',
+                            'id_mujeres_gestantes_lactantes',
+                            'id_discapacitados_familia'
+                        ]
+
+                        for (let i = 0; i < requeridos.length; i++) {
+                            if (dict[requeridos[i]]['valor'] === "") {
+                                correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                                status = false
+                            }
+                        }
+
+
+                        if (status === false) {
+                            $("#warning_step_3").removeClass('hide')
+                            $("#warning_step_3_div").empty()
+                            $("#warning_step_3_div").append(CorreccionesHtml(correcciones))
+                        }
+                        else {
+                            $("#warning_step_3").addClass('hide')
+                            $("#warning_step_3_div").empty()
+                        }
+
+                    }
+                    else if (id === 'step_4') {
+                        var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                        var dict = {}
+
+                        for (let i = 0; i < inputs.length; i++) {
+                            label = $("label[for='" + inputs[i].id + "']").text()
+                            dict[inputs[i].id] = {'valor': inputs[i].value, 'label': label}
+                        }
+
+                        /* Aca va la validacion */
+
+                        /* Campos requeridos */
+                        var requeridos = [
+                            'id_tipo_documento',
+                            'id_numero_documento',
+                            'id_primer_apellido',
+                            'id_primer_nombre',
+                            'id_celular_1',
+                            'id_departamento_nacimiento',
+                            'id_municipio_nacimiento',
+                            'id_fecha_nacimiento',
+                            'id_departamento_expedicion',
+                            'id_municipio_expedicion',
+                            'id_fecha_expedicion'
+                        ]
+
+                        for (let i = 0; i < requeridos.length; i++) {
+                            if (dict[requeridos[i]]['valor'] === "") {
+                                correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                                status = false
+                            }
+                        }
+
+
+                        if (status === false) {
+                            $("#warning_step_4").removeClass('hide')
+                            $("#warning_step_4_div").empty()
+                            $("#warning_step_4_div").append(CorreccionesHtml(correcciones))
+                        }
+                        else {
+                            $("#warning_step_4").addClass('hide')
+                            $("#warning_step_4_div").empty()
+                        }
+
+                    }
+                    else if (id === 'step_5') {
+                        var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                        var dict = {}
+
+                        for (let i = 0; i < inputs.length; i++) {
+                            label = $("label[for='" + inputs[i].id + "']").text()
+
+                            if(inputs[i].type === "checkbox"){
+                                dict[inputs[i].id] = {'valor': inputs[i].checked, 'label': label}
+                            }
+                            else{
+                                dict[inputs[i].id] = {'valor': inputs[i].value, 'label': label}
+                            }
+                        }
+
+                        /* Aca va la validacion */
+
+                        /* Campos requeridos */
+                        var requeridos = [
+                            'id_sexo',
+                            'id_estado_civil',
+                            'id_etnia',
+                            'id_parentezco'
+                        ]
+
+                        for (let i = 0; i < requeridos.length; i++) {
+                            if (dict[requeridos[i]]['valor'] === "") {
+                                correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                                status = false
+                            }
+                        }
+
+
+                        if (dict['id_tiene_libreta']['valor'] === true) {
+                            var requeridos_libreta = [
+                                'id_numero_libreta',
+                            ]
+
+                            for (let i = 0; i < requeridos_libreta.length; i++) {
+                                if (dict[requeridos_libreta[i]]['valor'] === "") {
+                                    correcciones.push('Completa el campo: ' + dict[requeridos_libreta[i]]['label'])
+                                    status = false
+                                }
+                            }
+                        }
+
+
+
+                        if (status === false) {
+                            $("#warning_step_5").removeClass('hide')
+                            $("#warning_step_5_div").empty()
+                            $("#warning_step_5_div").append(CorreccionesHtml(correcciones))
+                        }
+                        else {
+                            $("#warning_step_5").addClass('hide')
+                            $("#warning_step_5_div").empty()
+                        }
+
+                    }
+
+                    else if (id === 'step_6') {
+                        var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                        var dict = {}
+
+                        for (let i = 0; i < inputs.length; i++) {
+                            label = $("label[for='" + inputs[i].id + "']").text()
+
+                            if (inputs[i].type === "checkbox") {
+                                dict[inputs[i].id] = {'valor': inputs[i].checked, 'label': label}
+                            }
+                            else {
+                                dict[inputs[i].id] = {'valor': inputs[i].value, 'label': label}
+                            }
+                        }
+
+                        /* Aca va la validacion */
+
+                        /* Campos requeridos */
+                        var requeridos = [
+                            'id_nivel_escolaridad',
+                            'id_regimen_seguridad_social'
+                        ]
+
+                        for (let i = 0; i < requeridos.length; i++) {
+                            if (dict[requeridos[i]]['valor'] === "") {
+                                correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                                status = false
+                            }
+                        }
+
+
+                        if (dict['id_actualmente_estudia']['valor'] === false) {
+                            var requeridos_estudia = [
+                                'id_razon_no_estudia',
+                            ]
+
+                            for (let i = 0; i < requeridos_estudia.length; i++) {
+                                if (dict[requeridos_estudia[i]]['valor'] === "") {
+                                    correcciones.push('Completa el campo: ' + dict[requeridos_estudia[i]]['label'])
+                                    status = false
+                                }
+                            }
+                        }
+
+
+                        if (dict['id_razon_no_estudia']['valor'] === "Otro - Cual?") {
+                            var requeridos_estudia = [
+                                'id_razon_no_estudia_otra',
+                            ]
+
+                            for (let i = 0; i < requeridos_estudia.length; i++) {
+                                if (dict[requeridos_estudia[i]]['valor'] === "") {
+                                    correcciones.push('Completa el campo: ' + dict[requeridos_estudia[i]]['label'])
+                                    status = false
+                                }
+                            }
+                        }
+
+
+                        if (status === false) {
+                            $("#warning_step_6").removeClass('hide')
+                            $("#warning_step_6_div").empty()
+                            $("#warning_step_6_div").append(CorreccionesHtml(correcciones))
+                        }
+                        else {
+                            $("#warning_step_6").addClass('hide')
+                            $("#warning_step_6_div").empty()
+                        }
+
+                    }
+
+                    return status;
+                }
+
+                function CorreccionesHtml(correcciones_list){
+                    var data = ''
+                    for(let i = 0;i < correcciones_list.length; i++){
+                        data += '<li class="collection-item">'+ correcciones_list[i] +'<a class="secondary-content"><i class="material-icons red-text">warning</i></a></li>'
+
+                    }
+                    return data
+                }
+
+                $('#id_departamento_atencion').select2();
+                $('#id_municipio_atencion').select2();
+
+                $('#id_departamento_nacimiento').select2();
+                $('#id_municipio_nacimiento').select2();
+
+                $('#id_departamento_expedicion').select2();
+                $('#id_municipio_expedicion').select2();
+
+                $('#id_departamento_residencia').select2();
+                $('#id_municipio_residencia').select2();
+
+                $('#id_zona_residencia').select2();
+
+                $('#id_corregimiento').select2();
+                $('#id_vereda').select2();
+
+                $('#id_tipo_vivienda').select2();
+                $('#id_propiedad_vivienda').select2();
+                $('#id_estrato_vivienda').select2();
+                $('#id_tipo_documento').select2();
+
+                $('#id_sexo').select2();
+                $('#id_identidad_genero').select2();
+                $('#id_condicion_sexual').select2();
+
+                $('#id_estado_civil').select2();
+                $('#id_etnia').select2();
+
+                $('#id_pueblo_indigena').select2();
+                $('#id_comunidad_afro').select2();
+                $('#id_comunidad_indigena').select2();
+                $('#id_cual_lengua_indigena').select2();
+
+                $('#id_consejo_afro').select2();
+                $('#id_resguardo_indigena').select2();
+                $('#id_cual_lengua_afro').select2();
+
+                $('#id_registro_discapacidad').select2();
+                $('#id_categoria_discapacidad').select2();
+                $('#id_dificultades_permanentes').select2();
+
+                $('#id_utiliza_actualmente').select2();
+                $('#id_rehabilitacion').select2();
+
+                $('#id_cuidador').select2();
+                $('#id_parentezco').select2();
+
+                $('#id_banco').select2();
+                $('#id_tipo_cuenta').select2();
+
+                $('#id_nivel_escolaridad').select2();
+                $('#id_razon_no_estudia').select2();
+
+                $('#id_regimen_seguridad_social').select2();
+
+                $('.datepicker').pickadate({
+                    format: 'dd/mm/yyyy',
+                    selectMonths: true,
+                    selectYears: 120,
+                    monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                        'Octubre', 'Noviembre', 'Diciembre'],
+                    weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                    today: 'Hoy',
+                    clear: 'Borrar',
+                    close: 'Ok',
+                    closeOnSelect: false,
+                    max: new Date()
+                });
+
+
+                $("#id_departamento_nacimiento").change(function () {
+                    var url = '/rest/v1.0/fest_2019/misrutas/cargar-municipios/'
+                    var departamento_id = $(this).val();
+
+                    $.ajax({
+                        url: url,
+                        data: {
+                            'departamento': departamento_id
+                        },
+                        success: function (data) {
+                            $("#id_municipio_nacimiento").html(data);
+                            $('#id_municipio_nacimiento').select2();
+                        }
+                    });
+
+                });
+
+
+                $("#id_departamento_expedicion").change(function () {
+                    var url = '/rest/v1.0/fest_2019/misrutas/cargar-municipios/'
+                    var departamento_id = $(this).val();
+
+                    $.ajax({
+                        url: url,
+                        data: {
+                            'departamento': departamento_id
+                        },
+                        success: function (data) {
+                            $("#id_municipio_expedicion").html(data);
+                            $('#id_municipio_expedicion').select2();
+                        }
+                    });
+
+                });
+
+
+                $("#id_departamento_atencion").change(function () {
+                    var url = '/rest/v1.0/fest_2019/misrutas/cargar-municipios/'
+                    var departamento_id = $(this).val();
+
+                    $.ajax({
+                        url: url,
+                        data: {
+                            'departamento': departamento_id
+                        },
+                        success: function (data) {
+                            $("#id_municipio_atencion").html(data);
+                            $('#id_municipio_atencion').select2();
+                        }
+                    });
+
+                });
+
+
+                $("#id_tiene_libreta").change(function () {
+                    var estado = $(this).is(':checked');
+                    if (estado === true) {
+                        $("#row_numero_libreta").removeClass('hide')
+                    }
+                    else{
+                        $("#row_numero_libreta").addClass('hide')
+                    }
+                });
+
+
+                $("#id_actualmente_estudia").change(function () {
+                    var estado = $(this).is(':checked');
+                    if (estado === true) {
+                        $("#row_si_estudia").removeClass('hide')
+                        $("#row_no_estudia").addClass('hide')
+                    }
+                    else {
+                        $("#row_si_estudia").addClass('hide')
+                        $("#row_no_estudia").removeClass('hide')
+                    }
+                });
+
+
+
+
+                $("#id_tiene_cuidador").change(function () {
+                    var estado = $(this).is(':checked');
+                    if (estado === true) {
+                        $("#row_cuidador").removeClass('hide')
+                    }
+                    else {
+                        $("#row_cuidador").addClass('hide')
+                    }
+                });
+
+
+                $("#id_bancarizacion").change(function () {
+                    var estado = $(this).is(':checked');
+                    if (estado === true) {
+                        $("#row_bancarizacion").removeClass('hide')
+                    }
+                    else {
+                        $("#row_bancarizacion").addClass('hide')
+                    }
+                });
+
+
+                $("#id_discapacidad").change(function () {
+                    var estado = $(this).is(':checked');
+                    if (estado === true) {
+                        $("#row_discapacidad").removeClass('hide')
+                    }
+                    else {
+                        $("#row_discapacidad").addClass('hide')
+                    }
+                });
+
+
+                $("#id_departamento_residencia").change(function () {
+                    var url = '/rest/v1.0/fest_2019/misrutas/cargar-municipios/'
+                    var departamento_id = $(this).val();
+
+                    $.ajax({
+                        url: url,
+                        data: {
+                            'departamento': departamento_id
+                        },
+                        success: function (data) {
+                            $("#id_municipio_residencia").html(data);
+                            $('#id_municipio_residencia').select2();
+                        }
+                    });
+
+                });
+
+                $("#id_municipio_residencia").change(function () {
+                    var url = '/rest/v1.0/fest_2019/misrutas/cargar-corregimientos/'
+                    var url_2 = '/rest/v1.0/fest_2019/misrutas/cargar-veredas/'
+                    var municipio_id = $(this).val();
+
+                    $.ajax({
+                        url: url,
+                        data: {
+                            'municipio': municipio_id
+                        },
+                        success: function (data) {
+                            $("#id_corregimiento").html(data);
+                            $('#id_corregimiento').select2();
+                        }
+                    });
+
+                    $.ajax({
+                        url: url_2,
+                        data: {
+                            'municipio': municipio_id
+                        },
+                        success: function (data) {
+                            $("#id_vereda").html(data);
+                            $('#id_vereda').select2();
+                        }
+                    });
+
+                });
+
+
+                $("#id_zona_residencia").change(function () {
+                    if($(this).val() === "Cabecera municipal"){
+                        $("#row_cabecera_municipal").removeClass('hide')
+                        $("#row_otra_zona_residencia").addClass('hide')
+                    }
+                    else if ($(this).val() === "") {
+                        $("#row_cabecera_municipal").addClass('hide')
+                        $("#row_otra_zona_residencia").addClass('hide')
+                    }
+                    else{
+                        $("#row_cabecera_municipal").addClass('hide')
+                        $("#row_otra_zona_residencia").removeClass('hide')
+                    }
+                });
+
+
+                $("#id_razon_no_estudia").change(function () {
+                    if ($(this).val() === "Otro - Cual?") {
+                        $("#row_no_estudia_otra").removeClass('hide')
+                    }
+                    else {
+                        $("#row_no_estudia_otra").addClass('hide')
+                    }
+                });
+
+
+
+
+
+                $("#id_etnia").change(function () {
+                    if ($(this).val() === "Indigena") {
+                        $("#row_etnia_indigena").removeClass('hide')
+                        $("#row_etnia_afro").addClass('hide')
+                    }
+                    else if ($(this).val() === "Afrocolombiano / Negro") {
+                        $("#row_etnia_afro").removeClass('hide')
+                        $("#row_etnia_indigena").addClass('hide')
+                    }
+                    else {
+                        $("#row_etnia_afro").addClass('hide')
+                        $("#row_etnia_indigena").addClass('hide')
+                    }
+                });
+
+
+                $("#id_lengua_nativa_indigena").change(function () {
+                    var estado = $(this).is(':checked');
+                    if (estado === true) {
+                        $("#row_lengua_indigena").removeClass('hide')
+                    }
+                    else {
+                        $("#row_lengua_indigena").addClass('hide')
+                    }
+                });
+
+
+                $("#id_lengua_nativa_afro").change(function () {
+                    var estado = $(this).is(':checked');
+                    if (estado === true) {
+                        $("#row_lengua_afro").removeClass('hide')
+                    }
+                    else {
+                        $("#row_lengua_afro").addClass('hide')
+                    }
+                });
+
+
+
+
+                $("#id_tipo_vivienda").change(function () {
+                    if ($(this).val() === "Otro tipo de Vivienda (Carpa, Tienda, Vagon, Embarcacion, Cueva, Refugio Natural, Puente, etc,) Cual?") {
+                        $("#row_otro_tipo_vivienda").removeClass('hide')
+                    }
+                    else {
+                        $("#row_otro_tipo_vivienda").addClass('hide')
+                    }
+                });
+
+
+            });
+
+        });

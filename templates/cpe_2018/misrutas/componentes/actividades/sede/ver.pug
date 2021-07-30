@@ -1,0 +1,111 @@
+extends ../../../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/misrutas/") Mis Rutas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../../../../") {{ breadcrum_1 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../../") Acceso
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../") Radicado: {{ breadcrum_2 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_active | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Ver
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+
+    div(class="fixed-action-btn")
+        a(class="btn-floating btn-large red")
+            i(class="large material-icons") dehaze
+
+        ul
+            li
+                a(href="trazabilidad/",class="btn-floating green tooltipped",data-position="top",data-delay="50",data-tooltip="Ver trazabilidad")
+                    i(class="large material-icons") remove_red_eye
+
+
+    div(class="container container-form",style="margin-top:40px;")
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend {{ objeto_ruta.entregable.nombre }}:
+            div(class="col s12")
+                p(style="display:inline;margin-right:5px;")
+                    b Actualmente:
+                | {{ soporte.pretty_print_url_file | safe }}
+
+            div(class="col s12")
+                | {% if soporte.get_extension == 'png' or soporte.get_extension == 'jpg' or soporte.get_extension == 'jpeg' %}
+                img(src="{{soporte.url_file}}",class="materialboxed",style="width:100%;")
+                | {% elif soporte.get_extension == 'pdf' %}
+                embed(src="{{soporte.url_file}}",type="application/pdf",width="100%",height="500px")
+                | {% else %}
+                iframe(style="width: 100%;height: 500px;",src="https://docs.google.com/gview?url={{ request.scheme }}://{{ request.get_host }}{{soporte.url_file}}&embedded=true")
+                | {% endif %}
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+        });

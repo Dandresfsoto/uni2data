@@ -1,0 +1,185 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/acceso/") Acceso
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/acceso/rutas/") Rutas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_active | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Ruta: {{ breadcrum_active_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+block container_principal
+    div(class="container",style="margin-top:40px;margin-bottom:100px;")
+
+        |{% crispy form %}
+
+
+        //ul(class="collapsible",data-collapsible="accordion",style="margin-top:50px;")
+            |{% for radicado in radicados.radicados %}
+            li
+                div(class="collapsible-header")
+                    i(class="material-icons green-text text-darken-3") add_circle
+                    |{{ radicado.radicado.numero }} - {{ radicado.radicado.municipio }}, {{ radicado.radicado.departamento }}
+                div(class="collapsible-body")
+                    h5(class="blue-text text-darken-4")
+                        b Información de la sede:
+                    p
+                        b(style="margin-right:5px;") Nombre IE:
+                        |{{ radicado.radicado.nombre_ie }}
+                    p
+                        b(style="margin-right:5px;") Nombre sede:
+                        | {{ radicado.radicado.nombre_sede }}
+                    p
+                        b(style="margin-right:5px;") Dane sede:
+                        | {{ radicado.radicado.dane_sede }}
+                    p
+                        b(style="margin-right:5px;") Tipologia sede:
+                        | {{ radicado.radicado.tipologia_sede }}
+                    p
+                        b(style="margin-right:5px;") Ubicación de la sede:
+                        | {{ radicado.radicado.ubicacion }}
+                    p
+                        b(style="margin-right:5px;") Estado del radicado:
+                        | {{ radicado.radicado.estado }}
+
+                    h5(class="blue-text text-darken-4",style="margin-top:50px;")
+                        b Actividades del radicado:
+
+                    div(class="row",style="margin-bottom:0px;")
+                        div(class="col s12")
+
+                            p(style="margin-bottom:0px;")
+                                b(style="margin-right:5px;") Actividades pendientes:
+                                | {{ radicado.total_actividades_pendientes }}
+
+
+                    div(class="row")
+                        div(class="col s6")
+
+                            p(style="margin-bottom:0px;")
+                                b(style="margin-right:5px;") Actividades pagadas:
+                                | {{ radicado.pagadas.cantidad }}
+
+
+                        div(class="col s6")
+
+                            p(style="margin-bottom:0px;")
+                                b(style="margin-left:10px;margin-right:5px;") Valor:
+                                | $ {{ radicado.pagadas.valor |floatformat:2|intcomma }}
+
+
+
+                        div(class="col s6")
+
+                            p(style="margin-bottom:0px;")
+                                b(style="margin-right:5px;") Actividades asignadas:
+                                | {{ radicado.asignadas.cantidad }}
+
+
+                        div(class="col s6")
+
+                            p(style="margin-bottom:0px;")
+                                b(style="margin-left:10px;margin-right:5px;") Valor:
+                                | $ {{ radicado.asignadas.valor |floatformat:2|intcomma }}
+
+
+                        div(class="col s6")
+
+                            p(style="margin-bottom:0px;")
+                                b(style="margin-right:5px;") Actividades disponibles:
+                                | {{ radicado.disponibles.cantidad }}
+
+
+                        div(class="col s6")
+
+                            p(style="margin-bottom:0px;")
+                                b(style="margin-left:10px;margin-right:5px;") Valor:
+                                | $ {{ radicado.disponibles.valor |floatformat:2|intcomma }}
+
+
+                        div(class="col s6")
+
+                            p(style="margin-bottom:0px;")
+                                b(style="margin-right:5px;") Actividades ANDES:
+                                | {{ radicado.andes.cantidad }}
+
+
+                        div(class="col s6")
+
+                            p(style="margin-bottom:0px;")
+                                b(style="margin-left:10px;margin-right:5px;") Valor:
+                                | $ {{ radicado.andes.valor |floatformat:2|intcomma }}
+
+            |{% endfor %}
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+            new AutoNumeric('#id_valor', { currencySymbol : '$ ' });
+            $('.collapsible').collapsible();
+
+            $('#id_valor').on('keyup',function () {
+
+                var valor_ruta = parseFloat($('#id_valor').val().replace('$ ','').replace(/,/g, ""));
+                var actividades = parseInt($('#total_actividades_form').text());
+                var valor_actividad = (valor_ruta/actividades);
+                $('#valor_actividad').text(formatter.format(valor_actividad).replace('COP','$'));
+
+            });
+
+
+            var formatter = new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 2,
+                // the default value for minimumFractionDigits depends on the currency
+                // and is usually already 2
+            });
+
+        });

@@ -1,0 +1,16 @@
+extends ../base_no_auth
+
+block title
+    |Registro
+
+block body_content_no_auth
+    div(class="section white")
+        div(class="container")
+            div(class="row")
+                div(class="col s12")
+                    div(class="")
+                        form(action="",method="POST",enctype="multipart/form-data")
+                            | {% crispy form %}
+                            
+
+block body_script

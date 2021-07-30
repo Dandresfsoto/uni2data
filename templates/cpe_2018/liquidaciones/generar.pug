@@ -1,0 +1,134 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/liquidaciones/") Liquidaciones
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_1 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") {{ breadcrum_active | truncatechars:22 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+
+block container_principal
+    div(class="container",style="margin-top:40px;")
+        | {% crispy form %}
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+            $('select').material_select();
+            $("label[for='id_mes']").addClass('active');
+            $("label[for='id_year']").addClass('active');
+
+            var valores_inicial = JSON.parse($('#id_valores_inicial').val());
+            console.log(valores_inicial);
+
+            $('#container_meses').empty();
+
+            if (valores_inicial.length > 1) {
+                for (i = 0; i < valores_inicial.length; i++) {
+                    $('#container_meses').append(
+                        '<div class="row">' +
+                        '<div class="input-field col s12">' +
+                        '<input id="' + valores_inicial[i].mes + '" type="text">' +
+                        '<label for="' + valores_inicial[i].mes + '">Valor honorarios ' + valores_inicial[i].mes + '</label>' +
+                        '</div>' +
+                        '</div>'
+                    );
+                    new AutoNumeric(document.getElementById(valores_inicial[i].mes), {currencySymbol: '$ '});
+                    document.getElementById(valores_inicial[i].mes).value = valores_inicial[i].valor
+                }
+            }
+
+
+            $('form').submit(function () {
+
+                var meses = $('#id_mes').val();
+                var meses_json = []
+
+                if (meses.length > 1) {
+                    for (i = 0; i < meses.length; i++) {
+                        meses_json.push({
+                            'mes': meses[i],
+                            'valor': document.getElementById(meses[i]).value,
+                            'year': document.getElementById('id_year').value
+                        });
+                    }
+                }
+
+                var meses_json_form = JSON.stringify(meses_json);
+                $("#id_valores").val(meses_json_form);
+
+
+            });
+
+            $('#id_mes').change(function () {
+
+                var meses = $('#id_mes').val();
+                var meses_json = []
+
+                $('#container_meses').empty();
+
+                if (meses.length > 1) {
+                    for (i = 0; i < meses.length; i++) {
+                        $('#container_meses').append(
+                            '<div class="row">' +
+                            '<div class="input-field col s12">' +
+                            '<input id="' + meses[i] + '" type="text">' +
+                            '<label for="' + meses[i] + '">Valor honorarios ' + meses[i] + '</label>' +
+                            '</div>' +
+                            '</div>'
+                        );
+                        new AutoNumeric(document.getElementById(meses[i]), {currencySymbol: '$ '});
+                    }
+                }
+
+            });
+        });

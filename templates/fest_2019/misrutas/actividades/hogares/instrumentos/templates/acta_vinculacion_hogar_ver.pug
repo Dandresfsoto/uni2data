@@ -1,0 +1,121 @@
+extends ../../../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca/") IRACA
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="{{ url_ruta_breadcrum }}") {{ ruta_breadcrum }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../") Actividades: {{ breadcrum_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_2 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Ver: {{ breadcrum_active | truncatechars:20 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container container-form",style="margin-top:20px;")
+
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend {{objeto.nombre}}:
+
+        div(class="row")
+            div(class="col s12")
+                table(class="striped bordered",width="100%")
+                    tbody
+
+                        tr
+                            td(style="font-weight:bold") Fecha de diligenciamiento:
+                            td(colspan=3) {{ objeto.fecha_diligenciamiento }}
+
+                        tr
+                            td(style="font-weight:bold") Nombre de la comunidad:
+                            td {{ objeto.nombre_comunidad }}
+                            td(style="font-weight:bold") Resguardo indigena o consejo comunitario:
+                            td {{ objeto.resguado_indigena_consejo_comunitario }}
+
+                        tr
+                            td(style="font-weight:bold") Municipio:
+                            td {{ objeto.municipio }}
+                            td(style="font-weight:bold") Departamento:
+                            td {{ objeto.municipio.departamento }}
+
+                        tr
+                            td(style="font-weight:bold") Nombre representante:
+                            td {{ objeto.nombre_representante }}
+                            td(style="font-weight:bold") Documento representante:
+                            td {{ objeto.documento_representante }}
+
+
+                        tr
+                            td(style="font-weight:bold") Tipo de identificación:
+                            td {{ objeto.tipo_identificacion }}
+                            td(style="font-weight:bold") Telefono celular:
+                            td {{ objeto.telefono_celular }}
+
+
+
+
+        div(class="row")
+
+            div(class="col s12")
+                embed(src="{{objeto.url_file}}",type="application/pdf",width="100%",height="700px")
+
+
+block body_script_auth
+    script.
+
+        $(document).ready(function () {
+
+        });

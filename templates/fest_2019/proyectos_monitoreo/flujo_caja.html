@@ -1,0 +1,142 @@
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+{% load mathfilters %}
+{% load ofertas_tags %}<!DOCTYPE html><html lang="es"><head><title>{{title | upper}}</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png'%}"><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/alertify.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/themes/default.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css"><link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css"><link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.dataTables.min.css"><link rel="stylesheet" href="//unpkg.com/materialize-stepper@3.0.0/dist/css/mstepper.min.css"><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/css/dropify.min.css"><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css"><link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.12/css/all.css" integrity="sha384-G0fIWCsCzJIMAVNQPfjH08cyYaUtMwjJwqiRKxxE/rx96Uroj1BtIQ6MLJuheaO9" crossorigin="anonymous"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/materialize-social@1.0.3/materialize-social.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/jquery-background-video@1.0.0/jquery.background-video.min.css"><link rel="stylesheet" href="{% static 'css/base.css'%}"><link rel="stylesheet" href="{% static 'css/quilljs.css'%}"></head><body><header><nav><div class="nav-wrapper nav-wrapper-principal"><a class="brand-logo" href="#"><object class="responsive-img brand-logo-object-navbar" height="40" type="image/svg+xml" data="{% static 'img/op.svg'%}"></object></a><a class="brand-logo center hide-on-med-and-down title-logo" href="#">{{title | upper}}</a><a class="button-collapse full hide-on-large-only" href="#" data-activates="nav-mobile"><i class="material-icons">menu</i></a><ul class="right hide-on-large-only"><li><a class="waves-effect waves-light" href="#"><span class="new badge" id="notifications_navbar" data-badge-caption="">{{user.notifications|add:user.messages}}</span></a></li></ul></div><ul class="side-nav fixed side-nav-principal" id="nav-mobile"><li class="center-align"><object class="responsive-img brand-logo-object" height="70" type="image/svg+xml" data="{% static 'img/op.svg'%}"></object></li><ul class="collapsible" id="menu-sican" data-collapsible="accordion"><li class="bold waves-effect waves-light" id="color-button-menu"><div class="collapsible-header"><i class="material-icons" id="icon-menu-sican">arrow_drop_down</i>{{user.email | truncatechars:22}}&nbsp;&nbsp;&nbsp;<span class="new badge hide" id="notifications_header" data-badge-caption="">{{user.notifications|add:user.messages}}</span></div><div class="collapsible-body collapsible-body-blue"><ul><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/perfil/">Perfil<i class="material-icons icon-sican">person</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/notificaciones/">Notificaciones&nbsp;&nbsp;&nbsp;<i class="material-icons icon-sican">notifications</i><span class="new badge hide" id="notifications_body" data-badge-caption="">{{user.notifications}}</span></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/chat/">Chat&nbsp;&nbsp;&nbsp;<i class="material-icons icon-sican">message</i><span class="new badge hide" id="message_body" data-badge-caption="">{{user.messages}}</span></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/password/">Cambiar contraseña<i class="material-icons icon-sican">security</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/logout/">Cerrar sesión<i class="material-icons icon-sican">exit_to_app</i></a></li><div class="divider divider-perfil"></div></ul></div></li></ul><div class="space-navbar-items"></div><ul class="collapsible" data-collapsible="accordion"><li class="bold waves-effect waves-light button-menu"><div class="collapsible-header active"><i class="material-icons">local_activity</i>Breadcrums</div><div class="collapsible-body collapsible-body-blue"><ul><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/">Inicio<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/iraca/">IRACA<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/iraca/proyectos_monitoreo/">{{ nombre_modulo | truncatechars:22 }}<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light breadcrum-active"><a href="#">Flujo de caja: {{ breadcrumb_active| truncatechars:10 }}<i class="material-icons icon-sican">check_circle</i></a></li><div class="divider divider-perfil"></div></ul></div></li></ul><div class="space-navbar-footer"></div></ul></nav></header><main><div class="row" style="margin-top:40px;padding: 0px 20px;"><form method="post" enctype="multipart/form-data" id="form_flujo_caja">{% csrf_token %}<div class="row hide" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label for="{{ form.flujo_caja.id_for_label }}">{{ form.flujo_caja.label }}</label>{{ form.flujo_caja }}</div></div></div>{% verbatim %}<div id="app"><div v-for="(item, index) in lineas" :key="index" style="margin-bottom:100px;"><fieldset style="margin: 0px; padding: 0px;"><legend>Linea: {{ item.name }}</legend></fieldset><div class="row" style="margin-top:10px;"><div class="col s12"><fieldset><legend>Ingresos en efectivo</legend></fieldset></div></div><div class="col s12" v-if="flujo_caja[index].ingresos.length === 0"><div class="col s12"><p>No hay ingresos creados en el flujo de caja, para agregar uno haga click en el siguiente boton.</p></div></div><div class="col s12"><div class="card" v-for="(item2, index2) in flujo_caja[index].ingresos" :key="index2"><div class="card-content"><div class="row"><p style="color:gray;margin-left:10px;">Ingreso # {{ index2 + 1 }}</p><div class="input-field col s12"><input type="text" v-model="item2.description" id="`description_${index}_${index2}`"><label for="`description_${index}_${index2}`">Descripción del ingreso</label></div><div class="input-field col s12 m6 l3" v-for="(mes, index_mes) in item2.meses" :key="index_mes"><money v-model="mes.value" v-bind="money" id="`mes_${index}_${index2}_${index_mes}`"></money><label class="active" for="`mes_${index}_${index2}_${index_mes}`">Mes {{ mes.id }}</label></div></div></div><div class="card-action"><a href="#" @click="removeIngreso(index, index2)">Borrar ingreso # {{ index2 + 1 }}</a></div></div></div><div class="col s12" style="padding-left:20px;margin-top:10px;margin-bottom:50px;"><a class="btn-floating btn-small waves-effect waves-light red tooltipped" @click="addIngreso(index)" data-position="top" data-delay="50" data-tooltip="Nuevo ingreso"><i class="material-icons">add</i></a></div><div class="col s12"><fieldset><legend>Egresos en efectivo</legend></fieldset></div><div class="col s12" v-if="flujo_caja[index].egresos.length === 0"><div class="col s12"><p>No hay egresos creados en el flujo de caja, para agregar uno haga click en el siguiente boton.</p></div></div><div class="col s12"><div class="card" v-for="(item2, index2) in flujo_caja[index].egresos" :key="index"><div class="card-content"><div class="row"><p style="color:gray;margin-left:10px;">Egreso # {{ index2 + 1 }}</p><div class="input-field col s12"><input type="text" v-model="item2.description" id="`description_egreso_${index}_${index2}`"><label for="`description_egreso_${index}_${index2}`">Descripción del egreso</label></div><div class="input-field col s12 m6 l3" v-for="(mes, index_mes) in item2.meses" :key="index_mes"><money v-model="mes.value" v-bind="money" id="`mes_egreso_${index}_${index2}_${index_mes}`"></money><label class="active" for="`mes_egreso_${index}_${index2}_${index_mes}`">Mes {{ mes.id }}</label></div></div></div><div class="card-action"><a href="#" @click="removeEgreso(index, index2)">Borrar egreso # {{ index2 + 1 }}</a></div></div></div><div class="col s12" style="padding-left:20px;margin-top:10px;margin-bottom:200px;"><a class="btn-floating btn-small waves-effect waves-light red tooltipped" @click="addEgreso(index)" data-position="top" data-delay="50" data-tooltip="Nuevo egreso"><i class="material-icons">add</i></a></div></div></div>{% endverbatim %}<div class="row"><div class="col s12 right-align"><input class="btn btn-primary button-submit" type="submit" name="submit" value="Guardar"></div></div></form></div></main><script src="//code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><script src="//cdnjs.cloudflare.com/ajax/libs/mixitup/3.3.0/mixitup.min.js"></script><script src="{% static 'js/materialize.js'%}"></script><script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/alertify.min.js"></script><script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script><script src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script><script src="//unpkg.com/materialize-stepper@3.0.0/dist/js/mstepper.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/js/dropify.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/i18n/es.js"></script><script src="//cdn.jsdelivr.net/npm/jquery-background-video@1.0.0/jquery.background-video.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.5/push.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.5/serviceWorker.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/SoundJS/1.0.1/soundjs.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/shortcuts/infinite.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment-with-locales.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/localization/messages_es.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.3/chosen.jquery.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/autonumeric/4.1.0/autoNumeric.min.js"></script><script src="{% static 'js/quill.js'%}"></script><script src="//www.google.com/recaptcha/api.js"></script><script>var error = '{{ error }}'
+if(error != ""){
+    alertify.error(error);
+}
+</script><script>var success = '{{ success }}'
+if (success != "") {
+    alertify.success(success);
+}
+</script>{% if debug %}<script>var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host);</script>{% else %}<script>var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/realtime");</script>{% endif %}<script src="{% static 'js/jquery.animatecss.min.js'%}"></script><script src="{% static 'js/Csrftoken.js'%}"></script><script src="{% static 'js/Socket.js'%}"></script><script>$(document).ready(function(){
+
+
+
+    var user_notifications= {{user.notifications}};
+
+    var user_messages= {{user.notifications}};
+
+    if(user_notifications+user_messages > 0){
+        $("#notifications_header").removeClass('hide');
+        $("#notifications_navbar").removeClass('hide');
+    }
+
+    if(user_notifications > 0){
+        $("#notifications_body").removeClass('hide');
+    }
+
+    if (user_messages > 0) {
+        $("#message_body").removeClass('hide');
+    }
+
+
+
+
+    $(".button-collapse").sideNav({
+        menuWidth: 300,
+        closeOnClick: true
+    });
+
+    $("#menu-sican").click(function () {
+        var state = $("#icon-menu-sican").text();
+        if( state == 'arrow_drop_down' ){
+            $("#icon-menu-sican").text("arrow_drop_up");
+        }
+        else{
+            $("#icon-menu-sican").text("arrow_drop_down");
+        }
+    });
+
+
+});</script><script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script><script src="https://cdn.jsdelivr.net/npm/v-money@0.8.1/dist/v-money.min.js"></script><script>var app = new Vue({
+    el: '#app',
+    data: {
+        flujo_caja: [],
+        meses: "{{ meses }}",
+        lineas: {},
+        money: {
+            decimal: '.',
+            thousands: ',',
+            prefix: '$ ',
+            precision: 2,
+            masked: false
+        }
+    },
+    created() {
+        this.lineas = JSON.parse("{{ lineas|escapejs }}")
+
+        flujo_caja = JSON.parse("{{ flujo_caja|escapejs }}")
+
+        if(flujo_caja.length === undefined){
+            for (const x of Array(this.lineas.length).keys()) {
+                this.flujo_caja.push({
+                    "ingresos": [],
+                    "egresos": [],
+                })
+            }
+        }
+        else{
+            this.flujo_caja = flujo_caja
+        }
+
+
+
+    },
+    methods: {
+
+        addIngreso(index) {
+
+            var meses = []
+
+            for (const x of Array(parseInt(this.meses)).keys()) {
+                meses.push({
+                    id: x+1,
+                    value: 0
+                })
+            }
+
+            this.flujo_caja[index].ingresos.push({
+                description: '',
+                meses: meses
+            })
+        },
+        addEgreso(index) {
+
+            var meses = []
+
+            for (const x of Array(parseInt(this.meses)).keys()) {
+                meses.push({
+                    id: x + 1,
+                    value: 0
+                })
+            }
+
+            this.flujo_caja[index].egresos.push({
+                description: '',
+                meses: meses
+            })
+        },
+        removeIngreso(index, index2) {
+            this.flujo_caja[index].ingresos.splice(index2, 1)
+        },
+        removeEgreso(index, index2) {
+            this.flujo_caja[index].egresos.splice(index2, 1)
+        },
+    }
+})
+</script><script>$(document).ready(function () {
+
+
+    $("#form_flujo_caja").submit(function (event) {
+
+        var data = JSON.stringify(app.flujo_caja)
+
+        $("#id_flujo_caja").val(data);
+
+    });
+
+});</script></body></html>

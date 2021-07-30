@@ -1,0 +1,719 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Perfil
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container container-form")
+        |{% crispy form %}
+
+
+    div(id="modal_ofertas",class="modal modal-fixed-footer")
+        div(class="modal-content")
+            h5
+                b Trabaja con nosotros!!
+            img(class="responsive-img",src="{% static 'img/empleo.jpg'%}")
+
+            p(style = "text-align: justify;").
+                Estamos en la búsqueda de los mejores profesionales, queremos que hagan parte de nuestra familia,
+                te invitamos a diligenciar completamente tu perfil y a postularte en las ofertas que tenemos disponibles.
+
+            p(style = "text-align: justify;display:inline;").
+                Recuerda que la información que suministras en este formulario es totalmente privada y en todo caso respetan
+                nuestra
+            a(href="/privacidad",style = "text-align: justify;display:inline;margin-left:5px;") politica de privacidad.
+
+            p.
+                Puedes mantener actualizado tu perfil haciendo click sobre tu correo electrónico en el panel izquierdo.
+
+
+        div(class="modal-footer")
+            a(href="#!",class="modal-action modal-close waves-effect waves-green btn-flat") Cerrar
+
+
+
+    div(id="modal_educacion_superior",class="modal modal-fixed-footer",style="height: 80% !important ; max-height: 80% !important ;")
+        div(class="modal-content")
+
+            h5
+                b EDUCACIÓN SUPERIOR (PREGRADO Y POSTGRADO)
+
+            div(class="row")
+                div(class="col s12",id = "info_educacion_superior")
+
+            <div id="preloader_educacion_superior" class="center-align hide" style="margin-top:100px;">
+                <div class="preloader-wrapper big active">
+                    <div class="spinner-layer spinner-blue-only">
+                        <div class="circle-clipper left">
+                            <div class="circle">
+                            </div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle">
+                            </div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            form(method="post",enctype="multipart/form-data",id="formulario_educacion_superior")
+                div(class="row",style="margin-top:20px;")
+                    div(class="col s12 m6 l4")
+                        div(class="input-field")
+                            select(name = "modalidad_academica",id="modalidad_academica")
+
+                                option(value="null",disabled,selected) ----------
+                                option(value="Técnica") Técnica
+                                option(value="Técnologica") Técnologica
+                                option(value="Técnologica especializada") Técnologica especializada
+                                option(value="Universitaria") Universitaria
+                                option(value="Especialización") Especialización
+                                option(value="Maestria o magíster") Maestria o magíster
+                                option(value="Doctorado o PHD") Doctorado o PHD
+
+                            label Modalidad académica *
+
+                    div(class="col s12 m6 l4")
+                        div(class="input-field")
+                            select(name = "semestres_aprobados",id="semestres_aprobados")
+
+                                option(value="null",disabled,selected) ----------
+                                option(value="1") 1
+                                option(value="2") 2
+                                option(value="3") 3
+                                option(value="4") 4
+                                option(value="5") 5
+                                option(value="6") 6
+                                option(value="7") 7
+                                option(value="8") 8
+                                option(value="9") 9
+                                option(value="10") 10
+                                option(value="11") 11
+                                option(value="12") 12
+
+                            label Número de semestres aprobados *
+
+                    div(class="col s12 m6 l4")
+                        div(class="input-field")
+                            select(name = "graduado",id="graduado")
+
+                                option(value="null",disabled,selected) ----------
+                                option(value="Si") Si
+                                option(value="No") No
+
+                            label Graduado *
+
+
+
+                    div(class="col s12 m6")
+                        div(class="input-field")
+                            input(name="nombre_estudio",type="text",id="nombre_estudio",maxlength="100")
+                            label Nombre del estudio o titulo obtenido *
+
+
+
+                    div(class="col s12 m6")
+                        div(class="input-field")
+                            input(name="fecha_terminacion",type="text",id="fecha_terminacion")
+                            label Fecha de terminación *
+
+                    div(class="col s12 m6")
+                        div(class="input-field")
+                            input(name="numero_tarjeta_profesional",type="text",id="numero_tarjeta_profesional",maxlength="100")
+                            label Número de la tarjeta profesional
+
+                    div(class="col s12 m6")
+                        div(class="input-field")
+                            input(name="fecha_tarjeta_profesional",type="text",id="fecha_tarjeta_profesional")
+                            label Fecha de expedición
+
+                    div(class="row")
+                        div(class="col s12")
+                            p(style="color:#9e9e9e;font-size:0.7rem;") - Los campos marcados con * son obligatorios.
+                            p(style="color:#9e9e9e;font-size:0.7rem;").
+                                - El número de la tarjeta profesional y la fecha de expedición solo aplica a las profesiones y
+                                titulos académicos que la requieren por ley.
+
+        div(class="modal-footer")
+            a(id="guardar_educacion_superior",href="#!",class="modal-action waves-effect waves-green btn btn-primary button-submit") Guardar
+            a(href="#!",class="modal-action modal-close waves-effect waves-green btn-flat") Cerrar
+
+
+    div(id="modal_experiencia_laboral",class="modal modal-fixed-footer",style="height: 80% !important ; max-height: 80% !important ;")
+        div(class="modal-content")
+            h5
+                b EXPERIENCIA LABORAL
+
+            div(class="row")
+                div(class="col s12",id = "info_experiencia_laboral")
+
+            <div id="preloader_experiencia_laboral" class="center-align hide" style="margin-top:100px;">
+                <div class="preloader-wrapper big active">
+                    <div class="spinner-layer spinner-blue-only">
+                        <div class="circle-clipper left">
+                            <div class="circle">
+                            </div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle">
+                            </div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            form(method="post",enctype="multipart/form-data",id="formulario_experiencia_laboral")
+                div(class="row",style="margin-top:20px;")
+                    div(class="row")
+                        div(class="col s12 m6")
+                            div(class="input-field")
+                                select(name = "municipio",id="municipio")
+
+                                    option(value="",disabled,selected) Municipio *
+                    div(class="row")
+                        div(class="col s12 m6 l5")
+                            div(class="input-field")
+                                input(name="nombre_empresa",type="text",id="nombre_empresa",maxlength="100")
+                                label Nombre de la empresa *
+
+                        div(class="col s12 m6 l3")
+                            div(class="input-field")
+                                select(name = "tipo_empresa",id="tipo_empresa")
+
+                                    option(value="null",disabled,selected) ----------
+                                    option(value="Publica") Publica
+                                    option(value="Privada") Privada
+
+                                label Tipo de empresa *
+
+                        div(class="col s12 m6 l4")
+                            div(class="input-field")
+                                input(name="email_empresa",type="email",id="email_empresa",maxlength="100")
+                                label Email de la empresa
+
+                        div(class="col s12 m6 l4")
+                            div(class="input-field")
+                                input(name="telefono_empresa",type="text",id="telefono_empresa",maxlength="100")
+                                label Telefono
+
+                        div(class="col s12 m6 l4")
+                            div(class="input-field")
+                                input(name="cargo_empresa",type="text",id="cargo_empresa",maxlength="100")
+                                label Cargo *
+
+                        div(class="col s12 m6 l4")
+                            div(class="input-field")
+                                input(name="dependencia_empresa",type="text",id="dependencia_empresa",maxlength="100")
+                                label Dependencia *
+
+                        div(class="col s12 m6 l4")
+                            div(class="input-field")
+                                input(name="direccion_empresa",type="text",id="direccion_empresa",maxlength="100")
+                                label Dirección
+
+                        div(class="col s12 m6 l4")
+                            div(class="input-field")
+                                input(name="fecha_ingreso",type="text",id="fecha_ingreso")
+                                label Fecha de ingreso *
+
+                        div(class="col s12 m6 l4")
+                            div(class="input-field")
+                                input(name="fecha_retiro",type="text",id="fecha_retiro")
+                                label Fecha de retiro *
+
+
+
+
+
+
+
+
+        div(class="modal-footer")
+            a(id="guardar_experiencia_laboral",href="#!",class="modal-action waves-effect waves-green btn btn-primary button-submit") Guardar
+            a(href="#!",class="modal-action modal-close waves-effect waves-green btn-flat") Cerrar
+
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+
+            $(".eliminar_titulo").click(function () {
+
+                var id = $(this).attr('id');
+                var id_container = '#container_'+ id;
+
+                $.ajax({
+                    type: "DELETE",
+                    url: "{{ url_guardar_educacion_superior }}",
+                    data: {
+                        id: id,
+                    },
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status == 200) {
+                            $(id_container).remove();
+                        }
+                    },
+                    error: function (data, textStatus, xhr) {
+                        alert("Ocurrio un error");
+                    }
+                });
+            });
+
+            $(".eliminar_experiencia").click(function () {
+
+                var id = $(this).attr('id');
+                var id_container = '#container_experiencia_' + id;
+
+                $.ajax({
+                    type: "DELETE",
+                    url: "{{ url_guardar_experiencia }}",
+                    data: {
+                        id: id,
+                    },
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status == 200) {
+                            $(id_container).remove();
+                        }
+                    },
+                    error: function (data, textStatus, xhr) {
+                        alert("Ocurrio un error");
+                    }
+                });
+            });
+
+            $("#guardar_educacion_superior").click(function () {
+
+                $("#info_educacion_superior").empty();
+
+                $("#preloader_educacion_superior").removeClass("hide");
+                $("#formulario_educacion_superior").addClass("hide");
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_guardar_educacion_superior }}",
+                    data: $('#formulario_educacion_superior').serialize(), // serializes the form's elements.
+                    success: function (data,textStatus, xhr) {
+                        if(xhr.status == 206){
+
+                            $("#preloader_educacion_superior").addClass("hide");
+                            $("#formulario_educacion_superior").removeClass("hide");
+
+                            $("#info_educacion_superior").append(
+                                "<p><b>" + data.response + "</b></p>"
+                            );
+                        }
+                        if(xhr.status == 201){
+
+                            $("#preloader_educacion_superior").addClass("hide");
+                            $("#formulario_educacion_superior").removeClass("hide");
+
+                            var titulo = JSON.parse(data.data);
+                            var numero_tarjeta = ""
+                            var fecha_expedicion = ""
+
+                            if(titulo[0].fields.numero_tarjeta != null){
+                                numero_tarjeta = "<p><b>Número de tarjeta profesional: </b>" + titulo[0].fields.numero_tarjeta + "</p>"
+                            }
+
+                            if (titulo[0].fields.fecha_expedicion != null) {
+                                fecha_expedicion = "<p><b>Fecha de expedición: </b>" + titulo[0].fields.fecha_expedicion + "</p>"
+                            }
+
+                            $("#container_titulos").prepend(
+                                "<div id='container_" + titulo[0].pk + "' class='col s12 m6'>" +
+                                    "<div class='card grey lighten-4'>" +
+                                        "<div class='card-content'>" +
+                                            "<span class='card-title'><b>" + titulo[0].fields.nombre + "</b></span>" +
+                                            "<p><b>Modalidad: </b>" + titulo[0].fields.modalidad + "</p>" +
+                                            "<p><b>Semestres aprobados: </b>" + titulo[0].fields.semestres + "</p>" +
+                                            "<p><b>Graduado: </b>" + titulo[0].fields.graduado + "</p>" +
+                                            "<p><b>Fecha de terminación: </b>" + titulo[0].fields.fecha_terminacion + "</p>" +
+                                            numero_tarjeta +
+                                            fecha_expedicion +
+
+                                        "</div>" +
+                                        "<div class='card-action'>" +
+                                            "<a id='' class='eliminar_titulo' style='cursor: pointer;'>Eliminar</a>" +
+                                        "</div>" +
+                                    "</div>" +
+                                "</div>"
+                            )
+                        $('#modal_educacion_superior').modal('close');
+                        }
+                    },
+                    error: function (data,textStatus, xhr) {
+                        alert("Ocurrio un error");
+                        $("#preloader_educacion_superior").addClass("hide");
+                        $("#formulario_educacion_superior").removeClass("hide");
+                    }
+                });
+
+
+            });
+
+
+            $("#guardar_experiencia_laboral").click(function () {
+
+                $("#info_experiencia_laboral").empty();
+
+                $("#preloader_experiencia_laboral").removeClass("hide");
+                $("#formulario_experiencia_laboral").addClass("hide");
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_guardar_experiencia }}",
+                    data: $('#formulario_experiencia_laboral').serialize(), // serializes the form's elements.
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status == 206) {
+
+                            $("#preloader_experiencia_laboral").addClass("hide");
+                            $("#formulario_experiencia_laboral").removeClass("hide");
+
+                            $("#info_experiencia_laboral").append(
+                                "<p><b>" + data.response + "</b></p>"
+                            );
+                        }
+                        if (xhr.status == 201) {
+
+                            $("#preloader_experiencia_laboral").addClass("hide");
+                            $("#formulario_experiencia_laboral").removeClass("hide");
+
+                            var experiencia = JSON.parse(data.data);
+                            var email_empresa = ""
+                            var telefono_empresa = ""
+                            var direccion = ""
+                            var municipio = $("#municipio").text().replace('Municipio *','');
+
+                            if (experiencia[0].fields.email_empresa != '') {
+                                email_empresa = "<p><b>Email: </b>" + experiencia[0].fields.email_empresa + "</p>"
+                            }
+
+                            if (experiencia[0].fields.telefono_empresa != '') {
+                                telefono_empresa = "<p><b>Telefono: </b>" + experiencia[0].fields.telefono_empresa + "</p>"
+                            }
+
+                            if (experiencia[0].fields.direccion != '') {
+                                direccion = "<p><b>Dirección: </b>" + experiencia[0].fields.direccion + "</p>"
+                            }
+
+                            $("#container_experiencia").prepend(
+                                "<div id='container__experiencia_" + experiencia[0].pk + "' class='col s12 m6'>" +
+                                    "<div class='card grey lighten-4'>" +
+                                        "<div class='card-content'>" +
+                                            "<span class='card-title'><b>" + experiencia[0].fields.cargo + "</b></span>" +
+                                            "<p><b>Empresa: </b>" + experiencia[0].fields.nombre_empresa + "</p>" +
+                                            "<p><b>Tipo de empresa: </b>" + experiencia[0].fields.tipo_empresa + "</p>" +
+                                            "<p><b>Dependencia: </b>" + experiencia[0].fields.dependencia + "</p>" +
+                                            "<p><b>Fecha de ingreso: </b>" + experiencia[0].fields.fecha_ingreso + "</p>" +
+                                            "<p><b>Fecha de retiro: </b>" + experiencia[0].fields.fecha_retiro + "</p>" +
+                                            "<p><b>Municipio: </b>" + municipio + "</p>" +
+                                            email_empresa +
+                                            telefono_empresa +
+                                            direccion +
+                                            "</div>" +
+                                            "<div class='card-action'>" +
+                                            "<a id='' class='eliminar_experiencia' style='cursor: pointer;'>Eliminar</a>" +
+                                        "</div>" +
+                                    "</div>" +
+                                "</div>"
+                            )
+                            $('#modal_experiencia_laboral').modal('close');
+                        }
+                    },
+                    error: function (data, textStatus, xhr) {
+                        alert("Ocurrio un error");
+                        $("#preloader_experiencia_laboral").addClass("hide");
+                        $("#formulario_experiencia_laboral").removeClass("hide");
+                    }
+                });
+
+
+            });
+
+            $('#modal_ofertas').modal({
+                dismissible: false,
+                opacity: .9,
+            });
+
+
+            $('#modal_educacion_superior').modal({
+                dismissible: false,
+                opacity: .9,
+                complete: function () {
+                    $('#formulario_educacion_superior').trigger("reset");
+                    $("#info_educacion_superior").empty();
+                    $("#preloader_educacion_superior").addClass("hide");
+                    $("#formulario_educacion_superior").removeClass("hide");
+                }
+            });
+
+
+            $('#modal_experiencia_laboral').modal({
+                dismissible: false,
+                opacity: .9,
+                complete: function () {
+                    $('#formulario_experiencia_laboral').trigger("reset");
+                    $("#preloader_experiencia_laboral").addClass("hide");
+                    $("#formulario_experiencia_laboral").removeClass("hide");
+                    $('#municipio').val(null).trigger('change');
+                }
+            });
+
+
+            var modal_open = "{{ modal }}"
+
+            if(modal_open == "True"){
+                $('#modal_ofertas').modal('open');
+            }
+
+
+            var drphotoEvent = $('#id_photo').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta tu foto',
+                    'replace': 'Arrastra y suelta una imagen para reemplazar',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                },
+                error: {
+                    'fileSize': 'El tamaño del archivo es demasiado grande (1MB maximo).',
+                    'minWidth': 'El ancho de la imagen es demasiado pequeño ({{ value }}}px minimo).',
+                    'maxWidth': 'El ancho de la imagen es demasiado grande ({{ value }}}px maximo).',
+                    'minHeight': 'La altura de la imagen es demasiado pequeña ({{ value }}}px minimo).',
+                    'maxHeight': 'La altura de la imagen es demasiado grande ({{ value }}px maximo).',
+                    'imageFormat': 'El formato de imagen no está permitido ({{ value }} solamente).'
+                }
+            });
+
+            drphotoEvent.on('dropify.afterClear', function (event, element) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "{{ url_avatar }}",
+                    success: function (data, textStatus, xhr) {
+                    },
+                    error: function (data, textStatus, xhr) {
+                        alert("Ocurrio un error");
+                    }
+                });
+            })
+
+            var drhvEvent =$('#id_hv').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta tu hoja de vida',
+                    'replace': 'Arrastra y suelta tu hoja de vida',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                },
+                error: {
+                    'fileSize': 'El tamaño del archivo es demasiado grande (20MB maximo).'
+                }
+            });
+
+            drhvEvent.on('dropify.afterClear', function (event, element) {
+                $.ajax({
+                    type: "DELETE",
+                    url: "{{ url_hv }}",
+                    success: function (data, textStatus, xhr) {
+                    },
+                    error: function (data, textStatus, xhr) {
+                        alert("Ocurrio un error");
+                    }
+                });
+            })
+
+            $('#id_birthday').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false,
+                max: new Date()
+            });
+
+            $('#fecha_ingreso').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false,
+                max: new Date()
+            });
+
+            $('#fecha_retiro').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false,
+                max: new Date()
+            });
+
+            $('#fecha_terminacion').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false,
+                max: new Date()
+            });
+
+            $('#fecha_tarjeta_profesional').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false,
+                max: new Date()
+            });
+
+
+            $('#id_tipo_sangre').material_select();
+            $('#id_nivel_educacion_basica').material_select();
+            $('#modalidad_academica').material_select();
+            $('#semestres_aprobados').material_select();
+            $('#graduado').material_select();
+            $('#id_sexo').material_select();
+            $('#tipo_empresa').material_select();
+
+            $("label[for='id_tipo_sangre']").addClass('active');
+            $("label[for='id_sexo']").addClass('active');
+            $("label[for='id_lugar_nacimiento']").addClass('active');
+            $("label[for='id_lugar_expedicion']").addClass('active');
+            $("label[for='id_lugar_residencia']").addClass('active');
+            $("label[for='id_nivel_educacion_basica']").addClass('active');
+
+            $('#id_lugar_nacimiento').select2({
+                ajax: {
+                    url: '/rest/v1.0/usuarios/municipios/autocomplete/',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+            });
+
+            $('#municipio').select2({
+                ajax: {
+                    url: '/rest/v1.0/usuarios/municipios/autocomplete/',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+            });
+
+            $('#id_lugar_expedicion').select2({
+                ajax: {
+                    url: '/rest/v1.0/usuarios/municipios/autocomplete/',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+            });
+
+            $('#id_lugar_residencia').select2({
+                ajax: {
+                    url: '/rest/v1.0/usuarios/municipios/autocomplete/',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+            });
+
+            $('#id_grado_educacion_basica').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false,
+                max: new Date()
+            });
+
+        });

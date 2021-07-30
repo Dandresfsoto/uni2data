@@ -1,0 +1,61 @@
+extends base
+
+
+block body_content
+    div(class="navbar-fixed")
+        nav
+            div(class="nav-wrapper container")
+                a(href="#",class="brand-logo")
+                    object(class="responsive-img brand-logo-object-navbar-principal",height="40",type="image/svg+xml",data="{% static 'img/op.svg'%}")
+
+
+    block body_content_no_auth
+
+
+    footer(class="page-footer")
+        div(class="container")
+            div(class="row")
+                div(class="col l4 m6 s12 center-svg-on-movil")
+                    object(class="responsive-img",type="image/svg+xml",data="{% static 'img/op.svg'%}",style="width:150px;")
+
+                div(class="col l8 m6 s12")
+                    div(class="row")
+                        div(class="col l4 m6 s12")
+                            div(class="items-footer")
+                                p(class="right-align center-svg-on-movil") SION
+
+                                div(style="margin-top:10px;",class="right-align center-svg-on-movil")
+                                    a(href="/registro/") Registro
+                                        i(class="fa fa-user-plus fa-lg")
+                                    a(href="/recovery/") Recuperar contraseña
+                                        i(class="fa fa-unlock fa-lg")
+                                    a(href="/certificaciones/") Certificaciones
+                                        i(class="fa fa-search fa-lg")
+
+                        div(class="col l4 m6 s12")
+                            div(class="items-footer")
+                                p(class="right-align center-svg-on-movil") EMPRESA
+
+                                div(style="margin-top:10px;",class="right-align center-svg-on-movil")
+                                    a(href="http://iracaz1.com/") Pagina web
+                                        i(class="fa fa-laptop fa-lg")
+                                    a(href="http://iracaz1.com/") Facebook
+                                        i(class="fab fa-facebook-square fa-lg")
+                                    a(href="http://iracaz1.com/") Twitter
+                                        i(class="fab fa-twitter-square fa-lg")
+                                    a(href="http://iracaz1.com/") YouTube
+                                        i(class="fab fa-youtube-square fa-lg")
+
+
+                        div(class="col l4 m6 s12")
+                            div(class="items-footer")
+                                p(class="right-align center-svg-on-movil") LEGAL
+
+                                div(style="margin-top:10px;",class="right-align center-svg-on-movil")
+                                    a(href="/privacidad/") Privacidad
+                                        i(class="fa fa-book fa-lg")
+
+
+
+        div(class="footer-copyright")
+            div(class="container") © 2019

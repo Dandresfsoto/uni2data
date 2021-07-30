@@ -1,0 +1,147 @@
+extends ../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Mi hoja de vida
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container container-form")
+        |{% crispy form %}
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+            $("label[for='id_permissions']").addClass('active');
+
+            $('#id_permissions').select2({
+                placeholder: 'Permisos del paquete'
+            });
+
+            $('#id_photo').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta tu foto de perfil',
+                    'replace': 'Arrastra y suelta una imagen para reemplazar',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                },
+                error: {
+                    'fileSize': 'El tamaño del archivo es demasiado grande (1MB maximo).',
+                    'minWidth': 'El ancho de la imagen es demasiado pequeño ({{ value }}}px minimo).',
+                    'maxWidth': 'El ancho de la imagen es demasiado grande ({{ value }}}px maximo).',
+                    'minHeight': 'La altura de la imagen es demasiado pequeña ({{ value }}}px minimo).',
+                    'maxHeight': 'La altura de la imagen es demasiado grande ({{ value }}px maximo).',
+                    'imageFormat': 'El formato de imagen no está permitido ({{ value }} solamente).'
+                }
+            });
+
+            $('#id_birthday').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false,
+                max: new Date()
+            });
+
+            $('#id_grado_educacion_basica').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false,
+                max: new Date()
+            });
+
+            $('#id_tipo_sangre').material_select();
+            $('#id_nivel_educacion_basica').material_select();
+
+            $("label[for='id_tipo_sangre']").addClass('active');
+
+            $("label[for='id_lugar_nacimiento']").addClass('active');
+            $("label[for='id_lugar_expedicion']").addClass('active');
+            $("label[for='id_lugar_residencia']").addClass('active');
+
+            $("label[for='id_nivel_educacion_basica']").addClass('active');
+
+            $('#id_lugar_nacimiento').select2({
+                ajax: {
+                    url: '/rest/v1.0/usuarios/municipios/autocomplete/',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+            });
+
+            $('#id_lugar_expedicion').select2({
+                ajax: {
+                    url: '/rest/v1.0/usuarios/municipios/autocomplete/',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+            });
+
+            $('#id_lugar_residencia').select2({
+                ajax: {
+                    url: '/rest/v1.0/usuarios/municipios/autocomplete/',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+            });
+
+        });

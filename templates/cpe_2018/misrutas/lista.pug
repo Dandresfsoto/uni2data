@@ -1,0 +1,141 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Mis Rutas
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+
+block container_principal
+    div(class="container-datatable")
+        table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
+            thead
+                tr
+                    th Actividades
+                    th Código
+                    th Contrato
+                    th Valor
+                    th Novedades
+                    th Progreso
+                    th Mapa
+                    th Cuentas de cobro
+            tbody
+                tr
+                    td Actividades
+                    td Código
+                    td Contrato
+                    td Valor
+                    td Novedades
+                    td Progreso
+                    td Mapa
+                    td Cuentas de cobro
+
+    div(id="modalmap" class="modal")
+        div(class="modal-content")
+            div(id="map",style="height:60vh;")
+
+
+
+block body_script_auth
+    script(async,defer,src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDVkWc8DZW5fqa5rbKvJiH2JfBEarTuvM")
+    script.
+
+        $(document).ready(function () {
+
+            $('.modal').modal();
+
+            var table = $('#table').DataTable({
+                responsive: true,
+                stateSave: true,
+                searching: true,
+                processing: true,
+                serverSide: true,
+                order: [[ 1, "asc" ]],
+                ajax: "{{ url_datatable }}",
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
+                },
+                drawCallback: function (settings) {
+                    $('.tooltipped').tooltip({delay: 50});
+                }
+            });
+
+            table.on('responsive-display', function (e, datatable, row, showHide, update) {
+                $('.tooltipped').tooltip({delay: 50});
+            });
+
+
+        });
+
+        function mapa_ruta(data) {
+            $.ajax({
+                url: '/rest/v1.0/cpe_2018/rutas/mapa/'+ data,
+                success: function (data) {
+
+                    var infowindow = new google.maps.InfoWindow();
+                    var bounds = new google.maps.LatLngBounds();
+
+                    var map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 8,
+                        center: {lat: data[0].latitud, lng: data[0].longitud}
+                    });
+
+
+
+                    for(i=0;i<data.length;i++){
+
+                        var marker = new google.maps.Marker({
+                            position: {lat: data[i].latitud, lng: data[i].longitud},
+                            map: map,
+                        });
+
+                        bounds.extend(marker.position);
+
+                        google.maps.event.addListener(marker, 'click', (function (marker, i) {
+                            return function () {
+                                infowindow.setContent(data[i].cantidad + ' radicado(s) en ' + data[i].nombre + ', ' + data[i].departamento);
+                                infowindow.open(map, marker);
+                            }
+                        })(marker, i));
+                    }
+
+                    map.setCenter(bounds.getCenter());
+
+                    $('#modalmap').modal('open');
+                },
+                error: function () {
+                }
+            });
+        }

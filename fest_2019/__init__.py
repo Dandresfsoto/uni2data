@@ -1,0 +1,1 @@
+default_app_config = 'fest_2019.apps.Fest2019Config'

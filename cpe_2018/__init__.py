@@ -1,0 +1,1 @@
+default_app_config = 'cpe_2018.apps.Cpe2018Config'

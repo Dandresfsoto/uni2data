@@ -1,0 +1,149 @@
+extends ../../../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/acceso/") Acceso
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/acceso/rutas/") Rutas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../") {{ breadcrum_active | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") Radicados: {{ breadcrum_active_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") {{ breadcrum_active_2 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+block container_principal
+    div(class="container-datatable")
+        table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
+            thead
+                tr
+                    th Evidencias
+                    th Actividad
+                    th Valor
+                    th Estado
+                    th Trazabilidad
+            tbody
+                tr
+                    td Evidencias
+                    td Actividad
+                    td Valor
+                    td Estado
+                    td Trazabilidad
+
+
+    div(id="modaltrazabilidad" class="modal bottom-sheet")
+        div(class="modal-content")
+            h5
+                b(id="title-ruta") Trazabilidad actividad
+
+            div(style="margin-top:20px;")
+                ul(class="collection",id="trazabilidad-ul")
+
+block body_script_auth
+    script(async,defer,src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDVkWc8DZW5fqa5rbKvJiH2JfBEarTuvM")
+    script.
+
+        $(document).ready(function () {
+
+            $('.modal').modal();
+
+            var table = $('#table').DataTable({
+                responsive: true,
+                stateSave: true,
+                searching: true,
+                processing: true,
+                serverSide: true,
+                order: [[ 1, "asc" ]],
+                ajax: "{{ url_datatable }}",
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
+                },
+                drawCallback: function (settings) {
+                    $('.tooltipped').tooltip({delay: 50});
+                }
+            });
+
+            table.on('responsive-display', function (e, datatable, row, showHide, update) {
+                $('.tooltipped').tooltip({delay: 50});
+            });
+
+
+        });
+
+        function trazabilidad(data) {
+            $.ajax({
+                url: '{{ url_actividades_trazabilidad }}' + data,
+                success: function (data) {
+
+                    $("#title-ruta").text('Trazabilidad de la actividad: ' + data.actividad.nombre);
+
+                    $("#trazabilidad-ul").empty();
+
+                    for(i=0;i<data.data.length;i++){
+                        $("#trazabilidad-ul").append(
+                            '<li class="collection-item avatar">' +
+                                '<i class="material-icons circle" style="font-weight: bold;">check</i>' +
+                                    '<span class="title"><b>' + data.data[i].observacion + '</b></span>' +
+                                    '<p><b>Usuario: </b>' + data.data[i].usuario + '<b style="margin-left: 10px;">Fecha: </b>' + data.data[i].creacion +'</p>' +
+                            '</li>'
+                        );
+                    }
+
+                    $('#modaltrazabilidad').modal('open');
+
+                },
+                error: function () {
+                }
+            });
+        }

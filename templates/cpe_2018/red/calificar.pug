@@ -1,0 +1,247 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/red/") REDs
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../../") {{ breadcrum_1 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../") RED {{ breadcrum_2 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_3 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Calificar: {{ breadcrum_active | truncatechars:10 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+
+    div(class="fixed-action-btn")
+        a(href="observaciones/",class="btn-floating btn-large red tooltipped",data-position="top",data-delay="50",data-tooltip="Ver observaciones")
+            i(class="large material-icons") message
+
+
+
+    div(class="container container-form",style="margin-top:40px;")
+        |{% if modelo == 'retoma' %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend {{ entregable.nombre }}:
+            div(class="col s12",style="margin-top:10px;")
+                p(style="display:inline;margin-right:5px;")
+                    b Acta:
+                | {{ soporte.pretty_print_url_file | safe }}
+
+            div(class="col s12",style="margin-top:10px;margin-bottom:20px;")
+                p(style="display:inline;margin-right:5px;")
+                    b Registro fotografico:
+                | {{ soporte.pretty_print_url_file2 | safe }}
+
+            div(class="col s12 m6 l8")
+                embed(src="{{soporte.url_file}}",type="application/pdf",width="100%",height="500px")
+
+            div(class="col s12 m6 l4")
+                div(class="col s12")
+                    p(style="margin-top:0;")
+                        b Municipio:
+                        span(style="margin-left:5px;") {{ soporte.municipio }}
+
+                    p(style="margin-top:0;")
+                        b Fecha:
+                        span(style="margin-left:5px;") {{ soporte.fecha }}
+
+                    p(style="margin-top:0;")
+                        b Radicado:
+                        span(style="margin-left:5px;") {{ soporte.radicado }}
+
+                    p(style="margin-top:0;")
+                        b Dane:
+                        span(style="margin-left:5px;") {{ soporte.dane }}
+
+                    p(style="margin-top:0;")
+                        b Sede educativa:
+                        span(style="margin-left:5px;") {{ soporte.sede_educativa }}
+
+                    p(style="margin-top:0;")
+                        b Rector:
+                        span(style="margin-left:5px;") {{ soporte.rector }}
+
+                    p(style="margin-top:0;")
+                        b Celular:
+                        span(style="margin-left:5px;") {{ soporte.celular }}
+
+                    p(style="margin-top:0;")
+                        b Cedula:
+                        span(style="margin-left:5px;") {{ soporte.cedula }}
+                    p(style="margin-top:0;")
+                        b Bolsas:
+                        span(style="margin-left:5px;") {{ soporte.bolsas_empacadas }}
+                    p(style="margin-top:0;")
+                        b Equipos:
+                        span(style="margin-left:5px;") {{ soporte.get_equipos_calculadora_cpe }}
+
+        div(class="row")
+            div(class="col s12 m6 l8")
+                embed(src="{{soporte.url_file2}}",type="application/pdf",width="100%",height="500px")
+
+        |{% else %}
+
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend {{ entregable.nombre }}:
+            div(class="col s12")
+                p(style="display:inline;margin-right:5px;")
+                    b Soporte:
+                | {{ soporte.pretty_print_url_file | safe }}
+
+            div(class="col s12")
+                | {% if soporte.get_extension == 'png' or soporte.get_extension == 'jpg' or soporte.get_extension == 'jpeg' %}
+                img(src="{{soporte.url_file}}",class="materialboxed",style="width:100%;")
+                | {% elif soporte.get_extension == 'pdf' %}
+                embed(src="{{soporte.url_file}}",type="application/pdf",width="100%",height="500px")
+                | {% else %}
+                iframe(style="width: 100%;height: 500px;",src="https://docs.google.com/gview?url={{ request.scheme }}://{{ request.get_host }}{{soporte.url_file}}&embedded=true")
+                | {% endif %}
+
+        |{% endif %}
+
+
+    div(class="container container-form",style="margin-top:40px;")
+        fieldset(style="margin:0;padding-left:0;")
+            legend Observaciones:
+
+        div(class="registro-history")
+            ul
+                | {% for registro in registros %}
+                | {% if not registro.propio %}
+                div(class="row")
+                    li(class="clearfix")
+                        div(class="message-data right-align")
+                            span(class="message-data-time",style="margin-right: 5px;") {{ registro.fecha }}
+                            span(class="message-data-name",style="margin-right: 5px;") {{ registro.usuario }}
+                        div(class="message other-message float-right")
+                            div(class="container-html-delta")
+                                | {{ registro.html | safe }}
+
+                | {% else %}
+                div(class="row")
+                    li
+                        div(class="message-data")
+                            span(class="message-data-name",style="margin-right: 5px;") {{ registro.fecha }}
+                            span(class="message-data-time",style="margin-right: 5px;") {{ registro.usuario }}
+                        div(class="message my-message")
+                            div(class="container-html-delta")
+                                | {{ registro.html | safe }}
+                                | {% if registro.hito != None %}
+                                ul(class="collection")
+                                    li(class="collection-item avatar",style="color: black;")
+                                        a(href="{{ registro.hito.url_file }}")
+                                            i(class="material-icons circle green") insert_drive_file
+                                        span(class="title") Hito:
+                                            b {{ registro.hito.tipo }}
+                                        p(style="font-size:0.8rem;color: #9b9da6;") {{ registro.fecha }}
+                                | {% endif %}
+                | {% endif %}
+                | {% endfor %}
+
+
+    |{% if soporte.estado == 'Nuevo' or soporte.estado == 'Actualizado' %}
+    div(class="container container-form",style="margin-top:40px;")
+        div(class="container container-form",style="margin-top:40px;")
+            |{% crispy form %}
+
+    |{% endif %}
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+            $('select').material_select();
+            $("label[for='id_estado']").addClass('active');
+
+            var toolbarOptions = [
+                [{'header': []}],
+                ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+                ['blockquote'],
+
+                [{'list': 'ordered'}, {'list': 'bullet'}],
+                [{'script': 'sub'}, {'script': 'super'}],      // superscript/subscript
+                [{'indent': '-1'}, {'indent': '+1'}],          // outdent/indent
+                [{'direction': 'rtl'}],                         // text direction
+
+                [{'color': []}, {'background': []}],          // dropdown with defaults from theme
+                [{'align': []}],
+
+                ['clean']                                         // remove formatting button
+            ];
+
+            var quill = new Quill('#contenido', {
+                modules: {
+                    toolbar: toolbarOptions,
+                },
+                theme: 'snow'
+            });
+
+
+            $('form').submit(function () {
+                var delta_json = JSON.stringify(quill.getContents());
+                $("#id_delta").val(delta_json);
+            });
+
+        });

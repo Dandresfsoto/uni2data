@@ -1,0 +1,142 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/red/") REDs
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_active | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Crear RED
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container",style="margin-top:40px;")
+
+        div(class="row")
+
+            div(class="col s12 m6")
+                p(style="font-size: 18px;")
+                    b Acceso:
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b Taller Administratic:
+                    p(style="display:inline;") {{ data.taller_administratic }}
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b Taller de Contenidos:
+                    p(style="display:inline;") {{ data.taller_contenidos }}
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b Taller RAEE:
+                    p(style="display:inline;") {{ data.taller_raee }}
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b Taller de Apertura:
+                    p(style="display:inline;") {{ data.taller_apertura }}
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b Legalización Terminales:
+                    p(style="display:inline;") {{ data.documento_legalizacion_terminales }}
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b Legalización Terminales 1:
+                    p(style="display:inline;") {{ data.documento_legalizacion_terminales_v1 }}
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b Legalización Terminales 2:
+                    p(style="display:inline;") {{ data.documento_legalizacion_terminales_v2 }}
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b Encuesta de monitoreo:
+                    p(style="display:inline;") {{ data.encuesta_monitoreo }}
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b Legalización Retoma:
+                    p(style="display:inline;") {{ data.retoma }}
+
+            div(class="col s12 m6")
+                p(style="font-size: 18px;")
+                    b Formación:
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b InnovaTIC, Listados de asistencia:
+                    p(style="display:inline;") {{ data.asistencias_innovatic }}
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b InnovaTIC, Productos finales (PLE):
+                    p(style="display:inline;") {{ data.ple_innovatic }}
+
+
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b RuralTIC, Listados de asistencia:
+                    p(style="display:inline;") {{ data.asistencias_ruraltic }}
+
+
+                div
+                    p(style="display:inline;margin-right: 5px;")
+                        b RuralTIC, Repositorio de actividades:
+                    p(style="display:inline;") {{ data.repositorio_ruraltic }}
+
+        |{% crispy form %}
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+            $('select').material_select();
+            $("label[for='id_tipo']").addClass('active');
+        });

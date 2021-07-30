@@ -1,0 +1,94 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/recursos_humanos/") Recursos humanos
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/recursos_humanos/contratistas/") Contratistas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../") {{ breadcrum_active | truncatechars:20 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Crear certificación
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+block container_principal
+    div(class="container",style="margin-top:40px;")
+        |{% crispy form %}
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+            $('select').material_select();
+            $("label[for='id_firma']").addClass('active');
+
+            var toolbarOptions = [
+                [{'header': []}],
+                ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+                ['blockquote'],
+
+                [{'list': 'ordered'}, {'list': 'bullet'}],
+                [{'script': 'sub'}, {'script': 'super'}],      // superscript/subscript
+                [{'indent': '-1'}, {'indent': '+1'}],          // outdent/indent
+                [{'direction': 'rtl'}],                         // text direction
+
+                [{'color': []}, {'background': []}],          // dropdown with defaults from theme
+                [{'align': []}],
+
+                ['clean']                                         // remove formatting button
+            ];
+
+            var quill = new Quill('#contenido', {
+                modules: {
+                    toolbar: toolbarOptions,
+                },
+                theme: 'snow'
+            });
+
+            var initial = JSON.parse($("#id_inicial").val());
+            quill.setContents(initial);
+
+
+            $('form').submit(function () {
+                var delta_json = JSON.stringify(quill.getContents());
+                $("#id_contenido").val(delta_json);
+            });
+        });

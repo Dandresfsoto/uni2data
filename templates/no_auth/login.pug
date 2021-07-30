@@ -1,0 +1,376 @@
+extends ../base_no_auth
+
+block title
+    |Iniciar sesión
+
+block body_content_no_auth
+
+    div(id="recovery",class="modal modal-fixed-footer")
+        div(class="modal-content",id="recovery-content")
+            h4 Recuperar contraseña
+            p Ingrese su dirección de correo electrónico, alli enviaremos un codigo numerico de 6 digitos para el cambio de contraseña.
+
+            div(class="center hide",id="recovery-progress")
+                p Estamos procesando la solicitud
+                div(class="preloader-wrapper small active")
+                    div(class="spinner-layer spinner-green-only")
+                        div(class="circle-clipper left")
+                            div(class="circle")
+                        div(class="gap-patch")
+                            div(class="circle")
+                        div(class="circle-clipper right")
+                            div(class="circle")
+
+            div(class="row")
+
+                div(class="input-field col s12 m6 l12")
+                    label(for="email_recovery") Email
+                    input(type="email",name="email",id="email_recovery")
+
+            div(class="row")
+
+                div(class="input-field col s12 m6 l4 hide",id="codigo-container")
+                    label(for="codigo_recovery") Código de recuperación
+                    input(type="number",name="codigo_recovery",id="codigo_recovery")
+
+                div(class="input-field col s12 m6 l4 hide",id="password1_recovery-container")
+                    label(for="password1_recovery") Nueva contraseña
+                    input(type="password",name="password1_recovery",id="password1_recovery")
+
+                div(class="input-field col s12 m6 l4 hide",id="password2_recovery-container")
+                    label(for="password2_recovery") Repetir nueva contraseña
+                    input(type="password",name="password2_recovery",id="password2_recovery")
+
+
+            div(class="center",id="recovery-img")
+                img(src="{% static 'img/recovery.png'%}",height="100")
+
+            div(id="recovery-container")
+
+
+
+        div(class="modal-footer")
+            a(href="#",class="waves-effect btn-flat modal-close") cerrar
+            a(href="#",class="waves-effect btn",id="solicitar_codigo") solicitar código
+            a(href="#",class="waves-effect btn hide",id="cambiar_password") Cambiar contraseña
+
+    div(class="parallax-container parallax-container-login")
+        div(class="parallax")
+            //img(src="{% static 'img/education1.jpg'%}")
+
+            div(class="element-with-video-bg jquery-background-video-wrapper",style="height:100%;")
+                video(class="my-background-video jquery-background-video",loop,autoplay,muted)
+                    source(src="{% static 'video/login.mp4'%}",type="video/mp4",style="opacity:0.3;")
+
+        div(class="parallax-login")
+            div(class="container")
+                div(class="row")
+                    div(class="col s12 m5 l5 center-align")
+                        div(class="description-login hide",id="description-login",style="padding-top:80px;")
+                            object(class="responsive-img",type="image/svg+xml",data="{% static 'img/op.svg'%}")
+                            div(class="row center white-text")
+                                div(class="col s12")
+                                    p
+                                        b Soporte:
+                                    div
+                                        i(class="fab fa-whatsapp fa-lg",style="margin-right:10px;")
+                                        span WhatsApp: (+57)3225975723
+
+
+                            div(class="row center")
+                                div(class="col s12")
+                                    a(href="/registro/" class="btn-large waves-effect waves-light green darken-3") Regístrate
+                    div(class="col s12 m6 offset-m1 l4 offset-l1")
+                        div(class="center-align")
+                            div(class="login-container hide",id="login-container")
+                                form(action="",method="POST",enctype="multipart/form-data")
+                                    | {% crispy form %}
+
+
+    div(class="section white")
+        div(class="container")
+            div(class="row")
+                h4(class="center") Trabaja con nosotros
+            div(class="row")
+                p(class="light",style="text-align: justify;").
+                    Estamos reclutando nuevo talento, si quieres postularte registrate en esta plataforma y completa
+                    tu perfil profesional con tu hoja de vida en formato PDF, luego ingresa a la sección "Ofertas laborales"
+                    y aplica al cargo de tu interés.
+            div(class="row")
+                | {% for oferta in ofertas %}
+                div(class="col s12")
+
+                    div(class="card grey lighten-4")
+                        div(class="card-content")
+                            span(class="card-title",style="margin-bottom:30px;")
+                                b {{ oferta.cargo }}
+
+                            p(style="margin-bottom:10px;")
+                                b Perfil:
+                                span(style="margin-left:10px;")
+                                    | {{ oferta.perfil }}
+
+                            p(style="margin-bottom:10px;")
+                                b Experiencia:
+                                span(style="margin-left:10px;")
+                                    | {{ oferta.experiencia }}
+
+
+                            p(style="margin-bottom:10px;")
+                                b Vacantes:
+                                span(style="margin-left:10px;")
+                                    | {{ oferta.vacantes }}
+
+                            p(style="margin-bottom:10px;")
+                                b Municipios:
+                                span(style="margin-left:10px;")
+                                    | {{ oferta.get_municipios_string }}
+
+
+                            div(class="right-align",style="margin-top:30px;")
+                                span(style="font-size:0.8rem;")
+                                    b Publicación:
+                                    | {{ oferta.creation }}
+
+                            | {% if user|oferta_aplicacion:oferta != '' %}
+                            div(class="right-align",style="")
+                                p(style="margin-bottom:10px;font-size:0.8rem;")
+                                    span(style="margin-left:10px;")
+                                        | {{ user|oferta_aplicacion:oferta }}
+                            | {% endif %}
+
+                | {% endfor %}
+
+
+    div(class="divider")
+
+
+    div(class="section white")
+        div(class="container")
+            div(class="row",id="andes1")
+                div(class="col s12 m5",id="infraestructura")
+                    div(class="icon-block")
+                        h2(class="center")
+                            i(class="medium material-icons") domain
+                        h5(class="center") Infraestructura y Tecnología
+                        p(class="light",style="text-align: justify;").
+                            Desarrollamos programas y proyectos que involucren el suministro de bienes y servicios
+                            generales propios del sector educativo, ambiental, de la industria, del sector agropecuario
+                            y todo lo concerniente a la atención de las comunidades en general en el territorio nacional.
+                            Dichos proyectos involucran la dotación de herramientas y equipos que contribuyan el
+                            aprovechamiento del suelo en cultivos productivos lícitos, equipamiento para la adecuación de
+                            instalaciones físicas, la dotación de herramientas que disminuyen la brecha digital,
+                            la sistematización de procesos que le permitan a las empresas ejecutar sus acciones y planes
+                            de forma eficiente y eficaz, diseño, puesta en marcha y mantenimientos de software y hardware,
+                            como también la dotación de equipos de computó y sus periféricos.
+
+                div(class="col s12 offset-m2 m5",id="prevencion")
+                    div(class="icon-block")
+                        h2(class="center")
+                            i(class="medium material-icons") local_hospital
+                        h5(class="center") Prevención y atención de desastres
+                        p(class="light",style="text-align: justify;").
+                            Realizamos acciones y procesos que involucren una rápida respuesta a situaciones emergentes
+                            que se puedan presentar. Dichas acciones están enfocadas al suministro inmediato de bienes y
+                            servicios que contribuyen a que las personas vulnerables puedan contar con mecanismos alternos
+                            para dicho caso, tales como: procesos de seguridad alimentaria, dotación de equipos de
+                            infraestructura vial, tecnológica, educativa, agropecuario, campamentos, industrial y de
+                            servicios, como también todo lo concerniente al manejo de las víctimas.
+
+            div(class="row",id="andes2")
+                div(class="col s12 m5",id="productivo")
+                    div(class="icon-block")
+                        h2(class="center")
+                            i(class="medium material-icons") face
+                        h5(class="center") Productivo, educativo y social
+                        p(class="light",style="text-align: justify;").
+                            Generamos programas sociales, económicos, culturales, agroindustriales, agropecuarios,
+                            jurídicos y administrativos que cuentan con la dotación de herramientas para el cuidado del
+                            medio ambiente, la reconstrucción social, económica e institucional de un territorio,
+                            el suministro de materias primas para los distintos sectores de la economía, como también
+                            la puesta en marcha de procesos alternativos dirigidos a la sustitución de cultivos ilícitos
+                            en el marco al nuevo enfoque de los programas de la UACT (Unidad Administrativa para la
+                            Consolidación Territorial).
+
+                div(class="col s12 offset-m2 m5",id="desarrollo")
+                    div(class="icon-block")
+                        h2(class="center")
+                            i(class="medium material-icons") people
+                        h5(class="center") Desarrollo de programas de formación y capacitación cultural en el sector social
+                        p(class="light",style="text-align: justify;").
+                            Implementamos proyectos mediante procesos educativos en competencias transversales,
+                            tecnológicos y de formación en derechos humanos, de cooperación nacional e internacional
+                            entre las diferentes entidades tanto públicas como privadas,  a través del suministro de
+                            herramientas que permiten la participación ciudadana en los diferentes procesos, y métodos
+                            asociativos. (Empresas asociativas, cooperativas, fondos colectivos, fondos de inversión, etc.).
+
+
+
+block body_script
+    script.
+        $(document).ready(function () {
+
+
+
+            $('#solicitar_codigo').on("click",function () {
+
+                $("#recovery-img").addClass('hide');
+                $("#recovery-progress").removeClass("hide");
+
+                $.ajax({
+                    url: "/rest/v1.0/usuarios/recovery/",
+                    type: "POST",
+                    data: {
+                        email: $("#email_recovery").val(),
+                    },
+                    success: function (data) {
+                        $("#recovery-progress").addClass("hide");
+
+                        if(data.response == 'no_existe'){
+                            $("#recovery-container").empty();
+                            $("#recovery-container").append(
+
+                                "<i class='tiny material-icons'>block</i><p>No hay usuarios registrados con este email</p>"
+                            );
+                        }
+                        if (data.response == 'enviado') {
+                            $("#recovery-container").empty();
+                            $("#codigo-container").removeClass('hide');
+                            $("#password1_recovery-container").removeClass('hide');
+                            $("#password2_recovery-container").removeClass('hide');
+                            $("#email_recovery").attr('disabled','disabled');
+
+                            $("#solicitar_codigo").addClass('hide');
+                            $("#cambiar_password").removeClass('hide');
+
+                            $("#password1_recovery-container").val(null);
+                            $("#password2_recovery-container").val(null);
+                            $("#codigo-container").val(null);
+                            $("#recovery-img").addClass('hide');
+                        }
+                    }
+                });
+
+            });
+
+
+
+
+
+
+            $('#cambiar_password').on("click", function () {
+
+                $("#recovery-progress").removeClass("hide");
+
+                $.ajax({
+                    url: "/rest/v1.0/usuarios/recovery/",
+                    type: "POST",
+                    data: {
+                        email: $("#email_recovery").val(),
+                        codigo: $("#codigo_recovery").val(),
+                        password1: $("#password1_recovery").val(),
+                        password2: $("#password2_recovery").val(),
+                    },
+                    success: function (data) {
+
+                        $("#recovery-progress").addClass("hide");
+
+                        if (data.response == 'no_existe') {
+                            $("#recovery-container").empty();
+                            $("#recovery-container").append(
+                                "<i class='tiny material-icons'>block</i><p>No hay usuarios registrados con este email</p>"
+                            );
+                        }
+                        if (data.response == 'codigo_invalido') {
+                            $("#recovery-container").empty();
+                            $("#recovery-container").append(
+                                "<i class='tiny material-icons'>block</i><p>El de código de recuperación no es correcto, verificalo en tu buzón</p>"
+                            );
+                        }
+                        if (data.response == 'pasword_error') {
+                            $("#recovery-container").empty();
+                            $("#recovery-container").append(
+                                "<i class='tiny material-icons'>block</i><p>Las contraseñas no coinciden, ingresalas nuevamente</p>"
+                            );
+                            $("#password1_recovery").val(null);
+                            $("#password2_recovery").val(null);
+                        }
+                        if (data.response == 'password_len') {
+                            $("#recovery-container").empty();
+                            $("#recovery-container").append(
+                                "<i class='tiny material-icons'>block</i><p>La contraseña debe tener como minimo 5 caracteres</p>"
+                            );
+                            $("#password1_recovery").val(null);
+                            $("#password2_recovery").val(null);
+                        }
+                        if (data.response == 'ok') {
+                            location.reload();
+                            $("#recovery-container").empty();
+                        }
+                    }
+                });
+
+            });
+
+
+
+
+
+
+
+
+            $('.modal').modal({
+                dismissible: true, // Modal can be dismissed by clicking outside of the modal
+                opacity: .7, // Opacity of modal background
+                inDuration: 300, // Transition in duration
+                outDuration: 200, // Transition out duration
+                ready: function (modal, trigger) { // Callback for Modal open. Modal and trigger parameters available.
+
+                },
+                complete: function () {
+                    $("#recovery-container").empty();
+                    $("#codigo-container").addClass('hide');
+                    $("#password1_recovery-container").addClass('hide');
+                    $("#password2_recovery-container").addClass('hide');
+                    $("#email_recovery").removeAttr("disabled");
+                    $("#recovery-img").removeClass('hide');
+
+                    $("#password1_recovery-container").val(null);
+                    $("#password2_recovery-container").val(null);
+                    $("#codigo-container").val(null);
+                    $("#email_recovery").val(null);
+
+                    $("#solicitar_codigo").removeClass('hide');
+                    $("#cambiar_password").addClass('hide');
+                }
+            });
+
+            $('.parallax').parallax();
+            $('.tooltipped').tooltip({delay: 50});
+
+            $('#login-container').removeClass('hide');
+            $('#description-login').removeClass('hide');
+
+            $('#login-container').addClass('animated zoomIn');
+            $('#description-login').addClass('animated fadeInLeft');
+
+            $('.my-background-video').bgVideo();
+
+            var options = [
+                {
+                    selector: '#andes1', offset: 250, callback: function () {
+                        $('#infraestructura').addClass('animated rubberBand');
+                        $('#prevencion').addClass('animated rubberBand');
+                    }
+                },
+                {
+                    selector: '#andes2', offset: 250, callback: function () {
+                        $('#productivo').addClass('animated rubberBand');
+                        $('#desarrollo').addClass('animated rubberBand');
+                    }
+                },
+            ];
+
+            Materialize.scrollFire(options);
+
+        });

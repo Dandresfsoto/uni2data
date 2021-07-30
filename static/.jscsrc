@@ -1,0 +1,6 @@
+
+    "preset": "airbnb",
+    "requireCurlyBraces": null,
+    "validateIndentation": false,
+    "validateLineBreaks": null
+}

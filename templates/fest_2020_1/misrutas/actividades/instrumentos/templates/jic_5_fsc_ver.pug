@@ -1,0 +1,245 @@
+extends ../../../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca_2021/") IRACA
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="{{ url_ruta_breadcrum }}") {{ ruta_breadcrum }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../") Actividades: {{ breadcrum_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_2 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Ver: {{ breadcrum_active | truncatechars:20 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container container-form",style="margin-top:20px;margin-left:100px;")
+
+        | {% if objeto.url_file != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend F-GI-IP-13 Formato de acta de reunión:
+        div(class="row")
+
+                    div(class="col s12")
+                        embed(src="{{objeto.url_file}}",type="application/pdf",width="80%",height="700px")
+        |{% endif %}
+
+        | {% if objeto.url_file2 != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend F-GI-IP-19 Lista Asistencia Encuentro FEST - Firman hogares FEST:
+            div(class="col s12")
+                embed(src="{{objeto.url_file2}}",type="application/pdf",width="80%",height="700px")
+        |{% endif %}
+
+        | {% if objeto.url_file3 != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend F-GI-IP-19 Lista Asistencia Encuentro FEST - Firman hogares NO FEST:
+            div(class="col s12")
+                embed(src="{{objeto.url_file3}}",type="application/pdf",width="80%",height="700px")
+        |{% endif %}
+
+        | {% if objeto.url_file4 != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Formato acta de reunión ANDES Actividad Complementaria
+            div(class="col s12")
+                embed(src="{{objeto.url_file4}}",type="application/pdf",width="80%",height="700px")
+        |{% endif %}
+
+        | {% if objeto.url_file5 != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Listado de asistencia ANDES actividad complementaria - Firman hogares FEST
+            div(class="col s12")
+                embed(src="{{objeto.url_file5}}",type="application/pdf",width="80%",height="700px")
+        |{% endif %}
+
+        | {% if objeto.url_file6 != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Listado de asistencia ANDES actividad complementaria - Firman hogares NO FEST
+            div(class="col s12")
+                embed(src="{{objeto.url_file6}}",type="application/pdf",width="80%",height="700px")
+        |{% endif %}
+
+        | {% if objeto.url_file7 != None %}
+        div(class="row")
+            div(class="col s10")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend FLA-01 Lista excel participantes encuentro (aplica para metodología virtual) - HOGARES FEST
+            | {% if objeto.get_extension_1 == 'pdf' %}
+            div(class="col s12")
+                embed(src="{{objeto.url_file7}}",type="application/pdf",width="80%",height="700px")
+            | {% else %}
+            div(class="col s12")
+                iframe(style="width: 80%;height: 500px;",src="https://docs.google.com/gview?url={{ request.scheme }}://{{ request.get_host }}{{objeto.url_file7}}&embedded=true")
+            | {% endif %}
+        | {% endif %}
+
+        | {% if objeto.url_file8 != None %}
+        div(class="row")
+            div(class="col s10")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend FLA-01 Lista excel participantes encuentro (aplica para metodología virtual) - HOGARES NO FEST
+            | {% if objeto.get_extension_2 == 'pdf' %}
+            div(class="col s12")
+                embed(src="{{objeto.url_file8}}",type="application/pdf",width="80%",height="700px")
+            | {% else %}
+            div(class="col s12")
+                iframe(style="width: 80%;height: 500px;",src="https://docs.google.com/gview?url={{ request.scheme }}://{{ request.get_host }}{{objeto.url_file8}}&embedded=true")
+            | {% endif %}
+        | {% endif %}
+
+        | {% if objeto.url_foto1 != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Soporte de diligenciamiento del Formulario Gdrive Videos
+            div(class="col s6")
+                img(src="{{objeto.url_foto1}}",class="materialboxed",style="width:80%;")
+        |{% endif %}
+
+
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Fotografías de la Actividad Complementaria
+            | {% if objeto.url_foto2 != None %}
+            div(class="col s6")
+                img(src="{{objeto.url_foto2}}",class="materialboxed",style="width:80%;")
+            |{% endif %}
+            | {% if objeto.url_foto3 != None %}
+            div(class="col s6")
+                img(src="{{objeto.url_foto3}}",class="materialboxed",style="width:80%;")
+            |{% endif %}
+
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+            | {% if objeto.url_foto4 != None %}
+            div(class="col s6")
+                img(src="{{objeto.url_foto4}}",class="materialboxed",style="width:80%;")
+            |{% endif %}
+            | {% if objeto.url_foto5 != None %}
+            div(class="col s6")
+                img(src="{{objeto.url_foto5}}",class="materialboxed",style="width:80%;")
+            |{% endif %}
+
+
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Fotografías de la JIC
+            | {% if objeto.url_foto6 != None %}
+            div(class="col s6")
+                img(src="{{objeto.url_foto6}}",class="materialboxed",style="width:80%;")
+            |{% endif %}
+            | {% if objeto.url_foto7 != None %}
+            div(class="col s6")
+                img(src="{{objeto.url_foto7}}",class="materialboxed",style="width:80%;")
+            |{% endif %}
+
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+            | {% if objeto.url_foto8 != None %}
+            div(class="col s6")
+                img(src="{{objeto.url_foto8}}",class="materialboxed",style="width:80%;")
+            |{% endif %}
+            | {% if objeto.url_foto8 != None %}
+            div(class="col s6")
+                img(src="{{objeto.url_foto9}}",class="materialboxed",style="width:80%;")
+            |{% endif %}
+
+
+        | {% if objeto.url_audio != None %}
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend Grabación de llamada Taller:
+            div(class="col s3")
+                audio(src="{{objeto.url_audio}}",type="audio/wav", controls="controls")
+            div(class="col s3")
+        |{% endif %}
+
+
+        div(class="row")
+            div(class="col s12")
+                fieldset(style="margin:0;padding-left:0;")
+                    legend HOGARES:
+
+        |{% for hogar in objeto.hogares.all %}
+        table(class="striped",width="100%")
+            td(style="font-weight:bold") {{ hogar }}
+        |{% endfor %}
+
+
+
+
+
+
+block body_script_auth
+    script.
+
+        $(document).ready(function () {
+
+        });

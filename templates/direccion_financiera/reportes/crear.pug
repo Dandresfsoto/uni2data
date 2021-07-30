@@ -1,0 +1,120 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/direccion_financiera/") Dirección financiera
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/direccion_financiera/reportes/") Reportes de pago
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Crear reporte
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container",style="margin-top:40px;")
+        |{% crispy form %}
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+            $('#id_servicio').select2();
+            $('#id_proyecto').select2();
+            $('#id_tipo_soporte').select2();
+            $('#id_efectivo').select2();
+            $('#id_rubro').select2();
+
+
+            $("label[for='id_servicio']").addClass('active');
+            $("label[for='id_proyecto']").addClass('active');
+            $("label[for='id_tipo_soporte']").addClass('active');
+            $("label[for='id_efectivo']").addClass('active');
+            $("label[for='id_rubro']").addClass('active');
+
+            $('#id_inicio').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false
+            });
+
+            $('#id_fin').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false
+            });
+
+            $('#id_respaldo').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el archivo de respaldo del reporte',
+                    'replace': 'Arrastra y suelta el archivo de respaldo del reporte',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+            $('#id_firma').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el formato interno firmado',
+                    'replace': 'Arrastra y suelta el formato interno firmado',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+            $('#id_file_banco').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el documento de pago',
+                    'replace': 'Arrastra y suelta el documento de pago',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+        });

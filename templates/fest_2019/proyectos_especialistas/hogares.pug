@@ -1,0 +1,77 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca/") IRACA
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca/proyectos_especialistas/") {{ nombre_modulo | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Hogares: {{ proyecto.nombre_proyecto| truncatechars:18 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container-datatable")
+        table(id="table",width="100%")
+            thead
+                tr
+                    th Cedula
+                    th Nombre
+                    th Verificado
+                    th Nombre verificado
+
+            tbody
+                |{% for hogar in proyecto.get_hogares %}
+                tr
+                    td {{ hogar.document }}
+                    td {{ hogar.name }}
+                    td
+                        |{% if hogar.verificado %}
+                        i(class="material-icons",style="color:#00a833") check_circle
+                        |{% else %}
+                        i(class="material-icons",style="color:#f00") cancel
+                        |{% endif %}
+                    td {{hogar.nombre_verificado}}
+                |{% endfor %}
+
+
+block body_script_auth
+    script.
+
+        $(document).ready(function () {
+
+        });

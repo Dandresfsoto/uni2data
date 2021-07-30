@@ -1,0 +1,240 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca/") IRACA
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca/proyectos_local/") {{ nombre_modulo | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Flujo de caja: {{ breadcrumb_active| truncatechars:10 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="row",style="margin-top:40px;padding: 0px 20px;")
+        form(method="post",enctype="multipart/form-data",id="form_flujo_caja")
+            | {% csrf_token %}
+
+            div(class="row hide",style="border: solid 1px #eaeaea;padding:5px;")
+                div(class="col s12 m6 l4")
+                    div(class="input-field fieldWrapper")
+                        label(for="{{ form.flujo_caja.id_for_label }}") {{ form.flujo_caja.label }}
+                        | {{ form.flujo_caja }}
+
+
+            |{% verbatim %}
+
+            div(id="app")
+
+
+                div(v-for="(item, index) in lineas",:key="index",style="margin-bottom:100px;")
+                    fieldset(style="margin: 0px; padding: 0px;")
+                        legend Linea: {{ item.name }}
+
+
+                    div(class="row",style="margin-top:10px;")
+                        div(class="col s12")
+                            fieldset
+                                legend Ingresos en efectivo
+
+
+                    div(class="col s12",v-if="flujo_caja[index].ingresos.length === 0")
+                        div(class="col s12")
+                            p No hay ingresos creados en el flujo de caja, para agregar uno haga click en el siguiente boton.
+
+
+                    div(class="col s12")
+                        div(v-for="(item2, index2) in flujo_caja[index].ingresos",:key="index2",class="card")
+                            div(class="card-content")
+                                div(class="row")
+                                    p(style="color:gray;margin-left:10px;") Ingreso # {{ index2 + 1 }}
+                                    div(class="input-field col s12")
+                                        input(type="text",v-model="item2.description",id="`description_${index}_${index2}`")
+                                        label(for="`description_${index}_${index2}`") Descripción del ingreso
+
+                                    div(v-for="(mes, index_mes) in item2.meses",:key="index_mes",class="input-field col s12 m6 l3")
+                                        money(v-model="mes.value",v-bind="money",id="`mes_${index}_${index2}_${index_mes}`")
+                                        label(for="`mes_${index}_${index2}_${index_mes}`",class="active") Mes {{ mes.id }}
+
+
+                            div(class="card-action")
+                                a(href="#",@click="removeIngreso(index, index2)") Borrar ingreso # {{ index2 + 1 }}
+
+
+                    div(class="col s12",style="padding-left:20px;margin-top:10px;margin-bottom:50px;")
+                        a(@click="addIngreso(index)",class="btn-floating btn-small waves-effect waves-light red tooltipped",data-position="top",data-delay="50",data-tooltip="Nuevo ingreso")
+                            i(class="material-icons") add
+
+
+
+                    div(class="col s12")
+                        fieldset
+                            legend Egresos en efectivo
+
+                    div(class="col s12",v-if="flujo_caja[index].egresos.length === 0")
+                        div(class="col s12")
+                            p No hay egresos creados en el flujo de caja, para agregar uno haga click en el siguiente boton.
+
+                    div(class="col s12")
+                        div(v-for="(item2, index2) in flujo_caja[index].egresos",:key="index",class="card")
+                            div(class="card-content")
+                                div(class="row")
+                                    p(style="color:gray;margin-left:10px;") Egreso # {{ index2 + 1 }}
+                                    div(class="input-field col s12")
+                                        input(type="text",v-model="item2.description",id="`description_egreso_${index}_${index2}`")
+                                        label(for="`description_egreso_${index}_${index2}`") Descripción del egreso
+
+                                    div(v-for="(mes, index_mes) in item2.meses",:key="index_mes",class="input-field col s12 m6 l3")
+                                        money(v-model="mes.value",v-bind="money",id="`mes_egreso_${index}_${index2}_${index_mes}`")
+                                        label(for="`mes_egreso_${index}_${index2}_${index_mes}`",class="active") Mes {{ mes.id }}
+
+
+                            div(class="card-action")
+                                a(href="#",@click="removeEgreso(index, index2)") Borrar egreso # {{ index2 + 1 }}
+
+
+                    div(class="col s12",style="padding-left:20px;margin-top:10px;margin-bottom:200px;")
+                        a(@click="addEgreso(index)",class="btn-floating btn-small waves-effect waves-light red tooltipped",data-position="top",data-delay="50",data-tooltip="Nuevo egreso")
+                            i(class="material-icons") add
+
+
+
+            |{% endverbatim %}
+
+            div(class="row")
+                div(class="col s12 right-align")
+                    input(type="submit",name="submit",value="Guardar",class="btn btn-primary button-submit")
+
+
+
+
+block body_script_auth
+    script(src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js")
+    script(src="https://cdn.jsdelivr.net/npm/v-money@0.8.1/dist/v-money.min.js")
+
+    script.
+        var app = new Vue({
+            el: '#app',
+            data: {
+                flujo_caja: [],
+                meses: "{{ meses }}",
+                lineas: {},
+                money: {
+                    decimal: '.',
+                    thousands: ',',
+                    prefix: '$ ',
+                    precision: 2,
+                    masked: false
+                }
+            },
+            created() {
+                this.lineas = JSON.parse("{{ lineas|escapejs }}")
+
+                flujo_caja = JSON.parse("{{ flujo_caja|escapejs }}")
+
+                if(flujo_caja.length === undefined){
+                    for (const x of Array(this.lineas.length).keys()) {
+                        this.flujo_caja.push({
+                            "ingresos": [],
+                            "egresos": [],
+                        })
+                    }
+                }
+                else{
+                    this.flujo_caja = flujo_caja
+                }
+
+
+
+            },
+            methods: {
+
+                addIngreso(index) {
+
+                    var meses = []
+
+                    for (const x of Array(parseInt(this.meses)).keys()) {
+                        meses.push({
+                            id: x+1,
+                            value: 0
+                        })
+                    }
+
+                    this.flujo_caja[index].ingresos.push({
+                        description: '',
+                        meses: meses
+                    })
+                },
+                addEgreso(index) {
+
+                    var meses = []
+
+                    for (const x of Array(parseInt(this.meses)).keys()) {
+                        meses.push({
+                            id: x + 1,
+                            value: 0
+                        })
+                    }
+
+                    this.flujo_caja[index].egresos.push({
+                        description: '',
+                        meses: meses
+                    })
+                },
+                removeIngreso(index, index2) {
+                    this.flujo_caja[index].ingresos.splice(index2, 1)
+                },
+                removeEgreso(index, index2) {
+                    this.flujo_caja[index].egresos.splice(index2, 1)
+                },
+            }
+        })
+
+    script.
+
+        $(document).ready(function () {
+
+
+            $("#form_flujo_caja").submit(function (event) {
+
+                var data = JSON.stringify(app.flujo_caja)
+
+                $("#id_flujo_caja").val(data);
+
+            });
+
+        });

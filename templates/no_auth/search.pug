@@ -1,0 +1,83 @@
+extends ../base_no_auth
+
+block title
+    |Consulta de certificaciones
+
+
+block body_content_no_auth
+    div(class="section white")
+        div(class="container",style="margin-top:40px;")
+            div(class="row")
+                div(class="col s12")
+                    div(class="")
+                        form(action="",method="POST",enctype="multipart/form-data")
+                            | {% crispy form %}
+
+
+block body_script
+    script.
+        $(document).ready(function () {
+            $('form').submit(function (evt) {
+                evt.preventDefault();
+
+                $("#certificaciones-div").empty();
+                $("#certificaciones-div").append("<div class='progress'><div class='indeterminate'></div></div>");
+
+                var captcha_value = grecaptcha.getResponse();
+
+                if(captcha_value != ''){
+                    $.ajax({
+                        url: "{{ url_consulta }}",
+                        data: {
+                            'cedula': $("#id_cedula").val(),
+                            'captcha': $("#g-recaptcha-response").val(),
+                        },
+                        type: 'GET',
+                        success: function (data) {
+                            $("#certificaciones-div").empty();
+
+                            if (data.contratista != '') {
+                                $("#certificaciones-div").empty();
+                                $("#certificaciones-div").append(
+                                    "<p><b class='teal-text text-darken-4'>Nombre: </b>" + data.contratista + "</p>" +
+                                    "<p><b class='teal-text text-darken-4'>Cedula: </b>" + data.cedula + "</p>"
+                                );
+
+                                for (i = 0; i < data.certificaciones.length; i++) {
+                                    $("#certificaciones-div").append(
+                                        "<div class='certificacion-container'>" +
+                                        "<p><b class='teal-text text-darken-4'>ID: </b>" + data.certificaciones[i].codigo + "</p>" +
+                                        "<p><b class='teal-text text-darken-4'>Fecha: </b>" + data.certificaciones[i].fecha + "</p>" +
+                                        "<div><p style='display: inline;'><b class='teal-text text-darken-4'>PDF: </b></p><a target = 'blank' href='" + data.certificaciones[i].pdf + "'>Link</a></div>" +
+                                        "<div><p style='display: inline;'><b class='teal-text text-darken-4'>WEB: </b></p><a target = 'blank' href='" + data.certificaciones[i].url + "'>Link</a></div>" +
+                                        "</div>"
+                                    );
+                                }
+                            }
+                            else {
+                                $("#certificaciones-div").empty();
+                                $("#certificaciones-div").append(
+                                    "<span>No hemos encontrado ningun contratista con el documento de identidad que ingresaste.</span>" +
+                                    "<p class='center'><i class='large material-icons orange-text text-darken-4'>do_not_disturb</i></p>"
+                                );
+                            }
+                        },
+                        error: function (data) {
+                            $("#certificaciones-div").empty();
+                            $("#certificaciones-div").append(
+                                "<span>Hubo un error, por favor intenta nuevamente.</span>" +
+                                "<p class='center'><i class='large material-icons orange-text text-darken-4'>do_not_disturb</i></p>"
+                            );
+                        }
+                    });
+                    grecaptcha.reset();
+                }
+                else{
+                    $("#certificaciones-div").empty();
+                    $("#certificaciones-div").append(
+                        "<span>Por favor valida el captcha, debes hacer clic en el checkbox <b>'No soy un robot'.</b></span>" +
+                        "<p class='center'><i class='large material-icons orange-text text-darken-4'>do_not_disturb</i></p>"
+                    );
+                }
+            });
+        });

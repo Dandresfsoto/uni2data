@@ -1,0 +1,4 @@
+<option value="">----------</option>
+{% for corregimiento in corregimientos %}
+<option value="{{ corregimiento.pk }}">{{ corregimiento.nombre }}</option>
+{% endfor %}

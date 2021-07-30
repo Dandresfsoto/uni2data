@@ -1,0 +1,781 @@
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+{% load mathfilters %}
+{% load ofertas_tags %}<!DOCTYPE html><html lang="es"><head><title>{{title | upper}}</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png'%}"><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/alertify.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/themes/default.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css"><link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css"><link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.dataTables.min.css"><link rel="stylesheet" href="//unpkg.com/materialize-stepper@3.0.0/dist/css/mstepper.min.css"><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/css/dropify.min.css"><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css"><link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.12/css/all.css" integrity="sha384-G0fIWCsCzJIMAVNQPfjH08cyYaUtMwjJwqiRKxxE/rx96Uroj1BtIQ6MLJuheaO9" crossorigin="anonymous"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/materialize-social@1.0.3/materialize-social.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/jquery-background-video@1.0.0/jquery.background-video.min.css"><link rel="stylesheet" href="{% static 'css/base.css'%}"><link rel="stylesheet" href="{% static 'css/quilljs.css'%}"></head><body><header><nav><div class="nav-wrapper nav-wrapper-principal"><a class="brand-logo" href="#"><object class="responsive-img brand-logo-object-navbar" height="40" type="image/svg+xml" data="{% static 'img/op.svg'%}"></object></a><a class="brand-logo center hide-on-med-and-down title-logo" href="#">{{title | upper}}</a><a class="button-collapse full hide-on-large-only" href="#" data-activates="nav-mobile"><i class="material-icons">menu</i></a><ul class="right hide-on-large-only"><li><a class="waves-effect waves-light" href="#"><span class="new badge" id="notifications_navbar" data-badge-caption="">{{user.notifications|add:user.messages}}</span></a></li></ul></div><ul class="side-nav fixed side-nav-principal" id="nav-mobile"><li class="center-align"><object class="responsive-img brand-logo-object" height="70" type="image/svg+xml" data="{% static 'img/op.svg'%}"></object></li><ul class="collapsible" id="menu-sican" data-collapsible="accordion"><li class="bold waves-effect waves-light" id="color-button-menu"><div class="collapsible-header"><i class="material-icons" id="icon-menu-sican">arrow_drop_down</i>{{user.email | truncatechars:22}}&nbsp;&nbsp;&nbsp;<span class="new badge hide" id="notifications_header" data-badge-caption="">{{user.notifications|add:user.messages}}</span></div><div class="collapsible-body collapsible-body-blue"><ul><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/perfil/">Perfil<i class="material-icons icon-sican">person</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/notificaciones/">Notificaciones&nbsp;&nbsp;&nbsp;<i class="material-icons icon-sican">notifications</i><span class="new badge hide" id="notifications_body" data-badge-caption="">{{user.notifications}}</span></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/chat/">Chat&nbsp;&nbsp;&nbsp;<i class="material-icons icon-sican">message</i><span class="new badge hide" id="message_body" data-badge-caption="">{{user.messages}}</span></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/password/">Cambiar contraseña<i class="material-icons icon-sican">security</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/logout/">Cerrar sesión<i class="material-icons icon-sican">exit_to_app</i></a></li><div class="divider divider-perfil"></div></ul></div></li></ul><div class="space-navbar-items"></div><ul class="collapsible" data-collapsible="accordion"><li class="bold waves-effect waves-light button-menu"><div class="collapsible-header active"><i class="material-icons">local_activity</i>Breadcrums</div><div class="collapsible-body collapsible-body-blue"><ul><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/">Inicio<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/iraca/">IRACA<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="{{ url_ruta_breadcrum }}">{{ ruta_breadcrum }}<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="../../../../../../">Actividades: {{ breadcrum_1 | truncatechars:15 }}<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="../../../../">{{ breadcrum_2 | truncatechars:15 }}<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="../../">Hogar: {{ breadcrum_3 | truncatechars:15 }}<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light breadcrum-active"><a href="#">{{ breadcrum_active | truncatechars:25 }}<i class="material-icons icon-sican">check_circle</i></a></li><div class="divider divider-perfil"></div></ul></div></li></ul><div class="space-navbar-footer"></div></ul></nav></header><main><div class="container" style="margin-top:20px;width:90%;height:900px;"><form method="post">{% csrf_token %}<ul class="stepper"><li class="step active"><div class="step-title waves-effect waves-dark">Hogar</div><div class="step-content" id="step_1"><div class="row"><div class="col s12"><b>Lugar de atención:</b></div></div><div class="row"><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.departamento_atencion.id_for_label }}">{{ form.departamento_atencion.label }}</label>{{ form.departamento_atencion }}</div></div><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.municipio_atencion.id_for_label }}">{{ form.municipio_atencion.label }}</label>{{ form.municipio_atencion }}</div></div></div><div class="row" style="margin-top:30px;"><div class="col s12"><b>Lugar de residencia:</b></div></div><div class="row"><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.departamento_residencia.id_for_label }}">{{ form.departamento_residencia.label }}</label>{{ form.departamento_residencia }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.municipio_residencia.id_for_label }}">{{ form.municipio_residencia.label }}</label>{{ form.municipio_residencia }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.zona_residencia.id_for_label }}">{{ form.zona_residencia.label }}</label>{{ form.zona_residencia }}</div></div></div><div class="hide" id="row_cabecera_municipal"><div class="row" style="margin-top:30px;"><div class="col s12"><b>Información cabecera municipal:</b></div></div><div class="row"><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label for="{{ form.localidad.id_for_label }}">{{ form.localidad.label }}</label>{{ form.localidad }}</div></div><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label for="{{ form.barrio.id_for_label }}">{{ form.barrio.label }}</label>{{ form.barrio }}</div></div><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label for="{{ form.direccion_predio.id_for_label }}">{{ form.direccion_predio.label }}</label>{{ form.direccion_predio }}</div></div></div></div><div class="hide" id="row_otra_zona_residencia"><div class="row" style="margin-top:30px;"><div class="col s12"><b>Información centro poblado o rural disperso:</b></div></div><div class="row"><div class="col s12 m6 l6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.corregimiento.id_for_label }}">{{ form.corregimiento.label }}</label>{{ form.corregimiento }}</div></div><div class="col s12 m6 l6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.vereda.id_for_label }}">{{ form.vereda.label }}</label>{{ form.vereda }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label for="{{ form.ubicacion_predio.id_for_label }}">{{ form.ubicacion_predio.label }}</label>{{ form.ubicacion_predio }}</div></div></div></div><div class="row" style="margin-top:30px;"><div class="col s12"><b>Contacto:</b></div></div><div class="row"><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label class="active" for="{{ form.telefono_fijo.id_for_label }}">{{ form.telefono_fijo.label }}</label>{{ form.telefono_fijo }}</div></div></div><div class="row" style="margin-top:30px;"><div class="col s12"><b>Vivienda:</b></div></div><div class="row"><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.tipo_vivienda.id_for_label }}">{{ form.tipo_vivienda.label }}</label>{{ form.tipo_vivienda }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.propiedad_vivienda.id_for_label }}">{{ form.propiedad_vivienda.label }}</label>{{ form.propiedad_vivienda }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.estrato_vivienda.id_for_label }}">{{ form.estrato_vivienda.label }}</label>{{ form.estrato_vivienda }}</div></div></div><div class="hide" id="row_otro_tipo_vivienda"><div class="row" style="margin-top:30px;"><div class="col s12"><b>Otro tipo de vivienda:</b></div></div><div class="row"><div class="col s12 m6 l6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.otro_tipo_vivienda.id_for_label }}">{{ form.otro_tipo_vivienda.label }}</label>{{ form.otro_tipo_vivienda }}</div></div></div></div><div class="red lighten-5 hide" id="warning_step_1" style="margin-top:20px;padding:10px;border-radius:5px;"><div class="row"><div class="col s12"><p><b>Por favor realice las siguientes correcciones:</b></p><ul class="collection"><div id="warning_step_1_div"></div></ul></div></div></div><div class="step-actions"><button class="waves-effect waves-dark btn green darken-3 next-step">Siguiente</button></div></div></li><li class="step"><div class="step-title waves-effect">Geo-referenciación</div><div class="step-content" id="step_2"><div class="row"><div class="col s12"><b>Datos de Geo-referenciación:</b></div></div><div class="row"><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.longitud.id_for_label }}">{{ form.longitud.label }}</label>{{ form.longitud }}</div></div><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.latitud.id_for_label }}">{{ form.latitud.label }}</label>{{ form.latitud }}</div></div><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.precision.id_for_label }}">{{ form.precision.label }}</label>{{ form.precision }}</div></div><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.altitud.id_for_label }}">{{ form.altitud.label }}</label>{{ form.altitud }}</div></div></div><div class="red lighten-5 hide" id="warning_step_2" style="margin-top:20px;padding:10px;border-radius:5px;"><div class="row"><div class="col s12"><p><b>Por favor realice las siguientes correcciones:</b></p><ul class="collection"><div id="warning_step_2_div"></div></ul></div></div></div><div class="step-actions"><button class="waves-effect waves-dark btn green darken-3 next-step">Siguiente</button><button class="waves-effect waves-dark btn-flat previous-step">Anterior</button></div></div></li><li class="step"><div class="step-title waves-effect">Familia</div><div class="step-content" id="step_3"><div class="row"><div class="col s12"><b>Información sobre la familia:</b></div></div><div class="row"><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.otro_telefono.id_for_label }}">{{ form.otro_telefono.label }}</label>{{ form.otro_telefono }}</div></div><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.descripcion_direccion.id_for_label }}">{{ form.descripcion_direccion.label }}</label>{{ form.descripcion_direccion }}</div></div></div><div class="row"><div class="col s12"><b>Caracterización nucleo familiar:</b></div></div><div class="row"><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.numero_personas_familia.id_for_label }}">{{ form.numero_personas_familia.label }}</label>{{ form.numero_personas_familia }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.menores_5_anios.id_for_label }}">{{ form.menores_5_anios.label }}</label>{{ form.menores_5_anios }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.mayores_60_anios.id_for_label }}">{{ form.mayores_60_anios.label }}</label>{{ form.mayores_60_anios }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.mujeres_gestantes_lactantes.id_for_label }}">{{ form.mujeres_gestantes_lactantes.label }}</label>{{ form.mujeres_gestantes_lactantes }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.discapacitados_familia.id_for_label }}">{{ form.discapacitados_familia.label }}</label>{{ form.discapacitados_familia }}</div></div></div><div class="red lighten-5 hide" id="warning_step_3" style="margin-top:20px;padding:10px;border-radius:5px;"><div class="row"><div class="col s12"><p><b>Por favor realice las siguientes correcciones:</b></p><ul class="collection"><div id="warning_step_3_div"></div></ul></div></div></div><div class="step-actions"><button class="waves-effect waves-dark btn green darken-3 next-step">Siguiente</button><button class="waves-effect waves-dark btn-flat previous-step">Anterior</button></div></div></li><li class="step"><div class="step-title waves-effect">Datos Personales</div><div class="step-content" id="step_4"><div class="row"><div class="col s12"><b>Identificación contacto:</b></div></div><div class="row"><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.tipo_documento.id_for_label }}">{{ form.tipo_documento.label }}</label>{{ form.tipo_documento }}</div></div></div><div class="row"><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.numero_documento.id_for_label }}">{{ form.numero_documento.label }}</label>{{ form.numero_documento }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.primer_apellido.id_for_label }}">{{ form.primer_apellido.label }}</label>{{ form.primer_apellido }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.segundo_apellido.id_for_label }}">{{ form.segundo_apellido.label }}</label>{{ form.segundo_apellido }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.primer_nombre.id_for_label }}">{{ form.primer_nombre.label }}</label>{{ form.primer_nombre }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.segundo_nombre.id_for_label }}">{{ form.segundo_nombre.label }}</label>{{ form.segundo_nombre }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.celular_1.id_for_label }}">{{ form.celular_1.label }}</label>{{ form.celular_1 }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.celular_2.id_for_label }}">{{ form.celular_2.label }}</label>{{ form.celular_2 }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.correo_electronico.id_for_label }}">{{ form.correo_electronico.label }}</label>{{ form.correo_electronico }}</div></div></div><div class="row"><div class="col s12"><b>Lugar y fecha de nacimiento:</b></div></div><div class="row"><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.departamento_nacimiento.id_for_label }}">{{ form.departamento_nacimiento.label }}</label>{{ form.departamento_nacimiento }}</div></div><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.municipio_nacimiento.id_for_label }}">{{ form.municipio_nacimiento.label }}</label>{{ form.municipio_nacimiento }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.fecha_nacimiento.id_for_label }}">{{ form.fecha_nacimiento.label }}</label>{{ form.fecha_nacimiento }}</div></div></div><div class="row"><div class="col s12"><b>Lugar y fecha de expedición del documento:</b></div></div><div class="row"><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.departamento_expedicion.id_for_label }}">{{ form.departamento_expedicion.label }}</label>{{ form.departamento_expedicion }}</div></div><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.municipio_expedicion.id_for_label }}">{{ form.municipio_expedicion.label }}</label>{{ form.municipio_expedicion }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.fecha_expedicion.id_for_label }}">{{ form.fecha_expedicion.label }}</label>{{ form.fecha_expedicion }}</div></div></div><div class="red lighten-5 hide" id="warning_step_4" style="margin-top:20px;padding:10px;border-radius:5px;"><div class="row"><div class="col s12"><p><b>Por favor realice las siguientes correcciones:</b></p><ul class="collection"><div id="warning_step_4_div"></div></ul></div></div></div><div class="step-actions"><button class="waves-effect waves-dark btn green darken-3 next-step">Siguiente</button><button class="waves-effect waves-dark btn-flat previous-step">Anterior</button></div></div></li><li class="step"><div class="step-title waves-effect">Caracteristicas Generales</div><div class="step-content" id="step_5"><div class="row"><div class="col s12"><b>Sexo, identidad de género y condición sexual:</b></div></div><div class="row"><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.sexo.id_for_label }}">{{ form.sexo.label }}</label>{{ form.sexo }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.sexo.identidad_genero }}">{{ form.identidad_genero.label }}</label>{{ form.identidad_genero }}</div></div><div class="col s12 m6 l4" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.condicion_sexual.id_for_label }}">{{ form.condicion_sexual.label }}</label>{{ form.condicion_sexual }}</div></div></div><div class="row" style="margin-top:15px;"><div class="col s12"><b>Información militar:</b></div><div class="col s12 m6"><div class="input-field fieldWrapper">{{ form.tiene_libreta }}<label for="{{ form.tiene_libreta.id_for_label }}" style="margin-bottom:15px;">{{ form.tiene_libreta.label }}</label></div></div></div><div class="hide" id="row_numero_libreta"><div class="row"><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.numero_libreta.id_for_label }}">{{ form.numero_libreta.label }}</label>{{ form.numero_libreta }}</div></div></div></div><div class="row" style="margin-top:15px;"><div class="col s12"><b>Estado civil y Étnia:</b></div><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.estado_civil.id_for_label }}">{{ form.estado_civil.label }}</label>{{ form.estado_civil }}</div></div><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.etnia.id_for_label }}">{{ form.etnia.label }}</label>{{ form.etnia }}</div></div></div><div class="hide" id="row_etnia_indigena"><div class="row" style="margin-top:15px;"><div class="col s12"><b>Etnia indigena:</b></div></div><div class="row"><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label class="active" for="{{ form.pueblo_indigena.id_for_label }}">{{ form.pueblo_indigena.label }}</label>{{ form.pueblo_indigena }}</div></div><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label class="active" for="{{ form.resguardo_indigena.id_for_label }}">{{ form.resguardo_indigena.label }}</label>{{ form.resguardo_indigena }}</div></div><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label class="active" for="{{ form.comunidad_indigena.id_for_label }}">{{ form.comunidad_indigena.label }}</label>{{ form.comunidad_indigena }}</div></div><div class="col s12"><div class="input-field fieldWrapper">{{ form.lengua_nativa_indigena }}<label for="{{ form.lengua_nativa_indigena.id_for_label }}" style="margin-bottom:15px;">{{ form.lengua_nativa_indigena.label }}</label></div></div><div class="hide" id="row_lengua_indigena"><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.cual_lengua_indigena.id_for_label }}">{{ form.cual_lengua_indigena.label }}</label>{{ form.cual_lengua_indigena }}</div></div></div></div></div><div class="hide" id="row_etnia_afro"><div class="row" style="margin-top:15px;"><div class="col s12"><b>Etnia Afrocolombiano:</b></div></div><div class="row"><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.consejo_afro.id_for_label }}">{{ form.consejo_afro.label }}</label>{{ form.consejo_afro }}</div></div><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.comunidad_afro.id_for_label }}">{{ form.comunidad_afro.label }}</label>{{ form.comunidad_afro }}</div></div><div class="col s12"><div class="input-field fieldWrapper">{{ form.lengua_nativa_afro }}<label for="{{ form.lengua_nativa_afro.id_for_label }}" style="margin-bottom:15px;">{{ form.lengua_nativa_afro.label }}</label></div></div><div class="hide" id="row_lengua_afro"><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.cual_lengua_afro.id_for_label }}">{{ form.cual_lengua_afro.label }}</label>{{ form.cual_lengua_afro }}</div></div></div></div></div><div class="row" style="margin-top:15px;"><div class="col s12"><b>Datos acerca de la discapacidad:</b></div><div class="col s12 m6"><div class="input-field fieldWrapper">{{ form.discapacidad }}<label for="{{ form.discapacidad.id_for_label }}" style="margin-bottom:15px;">{{ form.discapacidad.label }}</label></div></div></div><div class="hide" id="row_discapacidad"><div class="row"><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.registro_discapacidad.id_for_label }}">{{ form.registro_discapacidad.label }}</label>{{ form.registro_discapacidad }}</div></div></div><div class="row" style="margin-top:15px;"><div class="col s12"><div class="input-field fieldWrapper"><label class="active" for="{{ form.categoria_discapacidad.id_for_label }}">{{ form.categoria_discapacidad.label }}</label>{{ form.categoria_discapacidad }}</div></div></div><div class="row" style="margin-top:15px;"><div class="col s12"><div class="input-field fieldWrapper"><label class="active" for="{{ form.dificultades_permanentes.id_for_label }}">{{ form.dificultades_permanentes.label }}</label>{{ form.dificultades_permanentes }}</div></div></div><div class="row" style="margin-top:15px;"><div class="col s12"><div class="input-field fieldWrapper"><label class="active" for="{{ form.utiliza_actualmente.id_for_label }}">{{ form.utiliza_actualmente.label }}</label>{{ form.utiliza_actualmente }}</div></div></div><div class="row" style="margin-top:15px;"><div class="col s12"><div class="input-field fieldWrapper"><label class="active" for="{{ form.rehabilitacion.id_for_label }}">{{ form.rehabilitacion.label }}</label>{{ form.rehabilitacion }}</div></div></div><div class="row" style="margin-top:15px;"><div class="col s12"><div class="input-field fieldWrapper">{{ form.tiene_cuidador }}<label for="{{ form.tiene_cuidador.id_for_label }}" style="margin-bottom:15px;">{{ form.tiene_cuidador.label }}</label></div></div></div><div class="hide" id="row_cuidador" style="margin-top:15px;"><div class="row"><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.cuidador.id_for_label }}">{{ form.cuidador.label }}</label>{{ form.cuidador }}</div></div></div></div></div><div class="row" style="margin-top:15px;margin-bottom:15px;"><div class="col s12"><b>Parentesco y relación con el hogar:</b></div><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.parentezco.id_for_label }}">{{ form.parentezco.label }}</label>{{ form.parentezco }}</div></div></div><div class="row"><div class="col s12"><div class="input-field fieldWrapper">{{ form.es_jefe }}<label for="{{ form.es_jefe.id_for_label }}" style="margin-bottom:15px;">{{ form.es_jefe.label }}</label></div></div><div class="col s12"><div class="input-field fieldWrapper">{{ form.es_representante_hogar }}<label for="{{ form.es_representante_hogar.id_for_label }}" style="margin-bottom:15px;">{{ form.es_representante_hogar.label }}</label></div></div></div><div class="row" style="margin-top:15px;margin-bottom:15px;"><div class="col s12"><b>Información bancaria:</b></div><div class="col s12"><div class="input-field fieldWrapper">{{ form.bancarizacion }}<label for="{{ form.bancarizacion.id_for_label }}" style="margin-bottom:15px;">{{ form.bancarizacion.label }}</label></div></div></div><div class="hide" id="row_bancarizacion"><div class="row"><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.banco.id_for_label }}">{{ form.banco.label }}</label>{{ form.banco }}</div></div><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.banco.tipo_cuenta }}">{{ form.tipo_cuenta.label }}</label>{{ form.tipo_cuenta }}</div></div></div><div class="row"><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.numero_cuenta.tipo_cuenta }}">{{ form.numero_cuenta.label }}</label>{{ form.numero_cuenta }}</div></div></div></div><div class="red lighten-5 hide" id="warning_step_5" style="margin-top:20px;padding:10px;border-radius:5px;"><div class="row"><div class="col s12"><p><b>Por favor realice las siguientes correcciones:</b></p><ul class="collection"><div id="warning_step_5_div"></div></ul></div></div></div><div class="step-actions"><button class="waves-effect waves-dark btn green darken-3 next-step">Siguiente</button><button class="waves-effect waves-dark btn-flat previous-step">Anterior</button></div></div></li><li class="step"><div class="step-title waves-effect">Educación y salud</div><div class="step-content" id="step_6"><div class="row"><div class="col s12"><b>Educación:</b></div></div><div class="row"><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.nivel_escolaridad.id_for_label }}">{{ form.nivel_escolaridad.label }}</label>{{ form.nivel_escolaridad }}</div></div></div><div class="row"><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.grado_titulo.id_for_label }}">{{ form.grado_titulo.label }}</label>{{ form.grado_titulo }}</div></div></div><div class="row"><div class="col s12"><div class="input-field fieldWrapper">{{ form.sabe_leer }}<label for="{{ form.sabe_leer.id_for_label }}" style="margin-bottom:15px;">{{ form.sabe_leer.label }}</label></div></div><div class="col s12"><div class="input-field fieldWrapper">{{ form.sabe_sumar_restar }}<label for="{{ form.sabe_sumar_restar.id_for_label }}" style="margin-bottom:15px;">{{ form.sabe_sumar_restar.label }}</label></div></div><div class="col s12"><div class="input-field fieldWrapper">{{ form.actualmente_estudia }}<label for="{{ form.actualmente_estudia.id_for_label }}" style="margin-bottom:15px;">{{ form.actualmente_estudia.label }}</label></div></div></div><div class="hide" id="row_si_estudia"><div class="row"><div class="col s12"><div class="input-field fieldWrapper">{{ form.recibe_alimentos }}<label for="{{ form.recibe_alimentos.id_for_label }}" style="margin-bottom:15px;">{{ form.recibe_alimentos.label }}</label></div></div></div></div><div id="row_no_estudia" style="margin-top:15px;"><div class="row"><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.razon_no_estudia.id_for_label }}">{{ form.razon_no_estudia.label }}</label>{{ form.razon_no_estudia }}</div></div></div><div class="hide" id="row_no_estudia_otra"><div class="row"><div class="col s12 m6"><div class="input-field fieldWrapper"><label class="active" for="{{ form.razon_no_estudia_otra.id_for_label }}">{{ form.razon_no_estudia_otra.label }}</label>{{ form.razon_no_estudia_otra }}</div></div></div></div></div><div class="row" style="margin-top:15px;"><div class="col s12"><b>Salud y Seguridad Social:</b></div><div class="col s12 m6" style="margin-top:15px;"><div class="input-field fieldWrapper"><label class="active" for="{{ form.regimen_seguridad_social.id_for_label }}">{{ form.regimen_seguridad_social.label }}</label>{{ form.regimen_seguridad_social }}</div></div></div><div class="red lighten-5 hide" id="warning_step_6" style="margin-top:20px;padding:10px;border-radius:5px;"><div class="row"><div class="col s12"><p><b>Por favor realice las siguientes correcciones:</b></p><ul class="collection"><div id="warning_step_6_div"></div></ul></div></div></div><div class="step-actions"><button class="waves-effect waves-dark btn green darken-3 next-step">Siguiente</button><button class="waves-effect waves-dark btn-flat previous-step">Anterior</button></div></div></li><li class="step"><div class="step-title waves-effect">Enviar</div><div class="step-content" id="step_7"><div class="row"><div class="col s12"><b>Si la información es correcta por favor envia el formulario.</b></div></div><div class="step-actions"><button class="waves-effect waves-dark btn-flat previous-step">Anterior</button><button class="waves-effect waves-dark btn green darken-3" type="submit">Enviar</button></div></div></li></ul></form></div></main><script src="//code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><script src="//cdnjs.cloudflare.com/ajax/libs/mixitup/3.3.0/mixitup.min.js"></script><script src="{% static 'js/materialize.js'%}"></script><script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/alertify.min.js"></script><script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script><script src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script><script src="//unpkg.com/materialize-stepper@3.0.0/dist/js/mstepper.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/js/dropify.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/i18n/es.js"></script><script src="//cdn.jsdelivr.net/npm/jquery-background-video@1.0.0/jquery.background-video.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.5/push.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.5/serviceWorker.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/SoundJS/1.0.1/soundjs.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/shortcuts/infinite.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment-with-locales.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/localization/messages_es.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.3/chosen.jquery.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/autonumeric/4.1.0/autoNumeric.min.js"></script><script src="{% static 'js/quill.js'%}"></script><script src="//www.google.com/recaptcha/api.js"></script><script>var error = '{{ error }}'
+if(error != ""){
+    alertify.error(error);
+}
+</script><script>var success = '{{ success }}'
+if (success != "") {
+    alertify.success(success);
+}
+</script>{% if debug %}<script>var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host);</script>{% else %}<script>var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/realtime");</script>{% endif %}<script src="{% static 'js/jquery.animatecss.min.js'%}"></script><script src="{% static 'js/Csrftoken.js'%}"></script><script src="{% static 'js/Socket.js'%}"></script><script>$(document).ready(function(){
+
+
+
+    var user_notifications= {{user.notifications}};
+
+    var user_messages= {{user.notifications}};
+
+    if(user_notifications+user_messages > 0){
+        $("#notifications_header").removeClass('hide');
+        $("#notifications_navbar").removeClass('hide');
+    }
+
+    if(user_notifications > 0){
+        $("#notifications_body").removeClass('hide');
+    }
+
+    if (user_messages > 0) {
+        $("#message_body").removeClass('hide');
+    }
+
+
+
+
+    $(".button-collapse").sideNav({
+        menuWidth: 300,
+        closeOnClick: true
+    });
+
+    $("#menu-sican").click(function () {
+        var state = $("#icon-menu-sican").text();
+        if( state == 'arrow_drop_down' ){
+            $("#icon-menu-sican").text("arrow_drop_up");
+        }
+        else{
+            $("#icon-menu-sican").text("arrow_drop_down");
+        }
+    });
+
+
+});</script><script src="//cdnjs.cloudflare.com/ajax/libs/validate.js/0.12.0/validate.min.js"></script><script>$(document).ready(function () {
+
+    $(document).ready(function () {
+
+        var stepper = document.querySelector('.stepper');
+        var stepperInstace = new MStepper(stepper, {
+            // options
+            firstActive: 0,
+            stepTitleNavigation: false,
+            validationFunction: ValidationFunctionStep,
+        })
+
+
+        function ValidationFunctionStep(stepperForm, activeStepContent){
+            var id = activeStepContent.id;
+            var correcciones = []
+            var status = true
+
+            if(id === 'step_1') {
+
+                var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                var dict = {}
+
+                for(let i = 0;i < inputs.length; i++){
+                    label = $("label[for='" + inputs[i].id + "']").text()
+                    dict[inputs[i].id] = {'valor':inputs[i].value,'label':label}
+                }
+
+                /* Aca va la validacion */
+
+                /* Campos requeridos */
+                var requeridos = [
+                    'id_departamento_atencion',
+                    'id_municipio_atencion',
+                    'id_departamento_residencia',
+                    'id_municipio_residencia',
+                    'id_zona_residencia',
+                    'id_tipo_vivienda',
+                    'id_propiedad_vivienda'
+                ]
+
+                for (let i = 0; i < requeridos.length; i++) {
+                    if (dict[requeridos[i]]['valor'] === "") {
+                        correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                        status = false
+                    }
+                }
+
+
+                if(dict['id_zona_residencia']['valor'] === 'Cabecera municipal'){
+                    var requeridos_cabecera = [
+                        'id_barrio',
+                        'id_direccion_predio'
+                    ]
+
+                    for (let i = 0; i < requeridos_cabecera.length; i++) {
+                        if (dict[requeridos_cabecera[i]]['valor'] === "") {
+                            correcciones.push('Completa el campo: ' + dict[requeridos_cabecera[i]]['label'])
+                            status = false
+                        }
+                    }
+                }
+
+                if (dict['id_zona_residencia']['valor'] === 'Centro poblado' || dict['id_zona_residencia']['valor'] === 'Rural disperso') {
+                    var requeridos_centro_poblado = [
+                        'id_ubicacion_predio'
+                    ]
+
+                    for (let i = 0; i < requeridos_centro_poblado.length; i++) {
+                        if (dict[requeridos_centro_poblado[i]]['valor'] === "") {
+                            correcciones.push('Completa el campo: ' + dict[requeridos_centro_poblado[i]]['label'])
+                            status = false
+                        }
+                    }
+                }
+
+                if (dict['id_tipo_vivienda']['valor'] === 'Otro tipo de Vivienda (Carpa, Tienda, Vagon, Embarcacion, Cueva, Refugio Natural, Puente, etc,) Cual?') {
+                    var requeridos_tipo_vivienda = [
+                        'id_otro_tipo_vivienda'
+                    ]
+
+                    for (let i = 0; i < requeridos_tipo_vivienda.length; i++) {
+                        if (dict[requeridos_tipo_vivienda[i]]['valor'] === "") {
+                            correcciones.push('Completa el campo: ' + dict[requeridos_tipo_vivienda[i]]['label'])
+                            status = false
+                        }
+                    }
+                }
+
+
+
+                if(status === false){
+                    $("#warning_step_1").removeClass('hide')
+                    $("#warning_step_1_div").empty()
+                    $("#warning_step_1_div").append(CorreccionesHtml(correcciones))
+                }
+                else{
+                    $("#warning_step_1").addClass('hide')
+                    $("#warning_step_1_div").empty()
+                }
+            }
+            else if(id === 'step_2') {
+
+                var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                var dict = {}
+
+                var constraints = {
+                    coordenadas: {
+                        format: {
+                            pattern: "((?:[-]+)?(\\d+)(\\.\\d{5,10}))$"
+                        }
+                    },
+                    presicion: {
+                        format: {
+                            pattern: "((\\d+)(\\.\\d{1,2}))$"
+                        }
+                    },
+                    altitud: {
+                        format: {
+                            pattern: "((\\d+)(\\.\\d{1,3}))$"
+                        }
+                    }
+                };
+
+                for (let i = 0; i < inputs.length; i++) {
+                    label = $("label[for='" + inputs[i].id + "']").text()
+                    dict[inputs[i].id] = {'valor': inputs[i].value, 'label': label}
+                }
+
+                /* Aca va la validacion */
+
+                /* Campos requeridos */
+                var requeridos = [
+                    'id_longitud',
+                    'id_latitud',
+                    'id_precision',
+                    'id_altitud'
+                ]
+
+                for (let i = 0; i < requeridos.length; i++) {
+                    if (dict[requeridos[i]]['valor'] === "") {
+                        correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                        status = false
+                    }
+                    else{
+                        if(requeridos[i] === "id_longitud" ){
+                            var dict_validate = validate({coordenadas: dict['id_longitud']['valor']}, constraints)
+                            if(dict_validate !== undefined){
+                                correcciones.push('La longitud debe contener un numero entero y 5 a 7 decimales separados por un punto, ejemplo: 7.1149319')
+                                status = false
+                            }
+                        }
+                        else if (requeridos[i] === "id_latitud") {
+                            var dict_validate = validate({coordenadas: dict['id_latitud']['valor']}, constraints)
+                            if (dict_validate !== undefined) {
+                                correcciones.push('La latitud debe contener un numero entero y 5 a 7 decimales separados por un punto, ejemplo: -73.1121367')
+                                status = false
+                            }
+                        }
+                        else if (requeridos[i] === "id_precision") {
+                            var dict_validate = validate({presicion: dict['id_precision']['valor']}, constraints)
+                            if (dict_validate !== undefined) {
+                                correcciones.push('La presición debe contener un numero entero y 1 o 2 decimales separados por un punto, ejemplo: 28.99')
+                                status = false
+                            }
+                        }
+                        else if (requeridos[i] === "id_altitud") {
+                            var dict_validate = validate({presicion: dict['id_altitud']['valor']}, constraints)
+                            if (dict_validate !== undefined) {
+                                correcciones.push('La presición debe contener un numero entero y 1,2 o 3 decimales separados por un punto, ejemplo: 978.97')
+                                status = false
+                            }
+                        }
+                    }
+                }
+
+                if (status === false) {
+                    $("#warning_step_2").removeClass('hide')
+                    $("#warning_step_2_div").empty()
+                    $("#warning_step_2_div").append(CorreccionesHtml(correcciones))
+                }
+                else {
+                    $("#warning_step_2").addClass('hide')
+                    $("#warning_step_2_div").empty()
+                }
+
+            }
+            else if(id === 'step_3') {
+                var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                var dict = {}
+
+                for (let i = 0; i < inputs.length; i++) {
+                    label = $("label[for='" + inputs[i].id + "']").text()
+                    dict[inputs[i].id] = {'valor': inputs[i].value, 'label': label}
+                }
+
+                /* Aca va la validacion */
+
+                /* Campos requeridos */
+                var requeridos = [
+                    'id_numero_personas_familia',
+                    'id_menores_5_anios',
+                    'id_mayores_60_anios',
+                    'id_mujeres_gestantes_lactantes',
+                    'id_discapacitados_familia'
+                ]
+
+                for (let i = 0; i < requeridos.length; i++) {
+                    if (dict[requeridos[i]]['valor'] === "") {
+                        correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                        status = false
+                    }
+                }
+
+
+                if (status === false) {
+                    $("#warning_step_3").removeClass('hide')
+                    $("#warning_step_3_div").empty()
+                    $("#warning_step_3_div").append(CorreccionesHtml(correcciones))
+                }
+                else {
+                    $("#warning_step_3").addClass('hide')
+                    $("#warning_step_3_div").empty()
+                }
+
+            }
+            else if (id === 'step_4') {
+                var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                var dict = {}
+
+                for (let i = 0; i < inputs.length; i++) {
+                    label = $("label[for='" + inputs[i].id + "']").text()
+                    dict[inputs[i].id] = {'valor': inputs[i].value, 'label': label}
+                }
+
+                /* Aca va la validacion */
+
+                /* Campos requeridos */
+                var requeridos = [
+                    'id_tipo_documento',
+                    'id_numero_documento',
+                    'id_primer_apellido',
+                    'id_primer_nombre',
+                    'id_celular_1',
+                    'id_departamento_nacimiento',
+                    'id_municipio_nacimiento',
+                    'id_fecha_nacimiento',
+                    'id_departamento_expedicion',
+                    'id_municipio_expedicion',
+                    'id_fecha_expedicion'
+                ]
+
+                for (let i = 0; i < requeridos.length; i++) {
+                    if (dict[requeridos[i]]['valor'] === "") {
+                        correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                        status = false
+                    }
+                }
+
+
+                if (status === false) {
+                    $("#warning_step_4").removeClass('hide')
+                    $("#warning_step_4_div").empty()
+                    $("#warning_step_4_div").append(CorreccionesHtml(correcciones))
+                }
+                else {
+                    $("#warning_step_4").addClass('hide')
+                    $("#warning_step_4_div").empty()
+                }
+
+            }
+            else if (id === 'step_5') {
+                var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                var dict = {}
+
+                for (let i = 0; i < inputs.length; i++) {
+                    label = $("label[for='" + inputs[i].id + "']").text()
+
+                    if(inputs[i].type === "checkbox"){
+                        dict[inputs[i].id] = {'valor': inputs[i].checked, 'label': label}
+                    }
+                    else{
+                        dict[inputs[i].id] = {'valor': inputs[i].value, 'label': label}
+                    }
+                }
+
+                /* Aca va la validacion */
+
+                /* Campos requeridos */
+                var requeridos = [
+                    'id_sexo',
+                    'id_estado_civil',
+                    'id_etnia',
+                    'id_parentezco'
+                ]
+
+                for (let i = 0; i < requeridos.length; i++) {
+                    if (dict[requeridos[i]]['valor'] === "") {
+                        correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                        status = false
+                    }
+                }
+
+
+                if (dict['id_tiene_libreta']['valor'] === true) {
+                    var requeridos_libreta = [
+                        'id_numero_libreta',
+                    ]
+
+                    for (let i = 0; i < requeridos_libreta.length; i++) {
+                        if (dict[requeridos_libreta[i]]['valor'] === "") {
+                            correcciones.push('Completa el campo: ' + dict[requeridos_libreta[i]]['label'])
+                            status = false
+                        }
+                    }
+                }
+
+
+
+                if (status === false) {
+                    $("#warning_step_5").removeClass('hide')
+                    $("#warning_step_5_div").empty()
+                    $("#warning_step_5_div").append(CorreccionesHtml(correcciones))
+                }
+                else {
+                    $("#warning_step_5").addClass('hide')
+                    $("#warning_step_5_div").empty()
+                }
+
+            }
+
+            else if (id === 'step_6') {
+                var inputs = activeStepContent.querySelectorAll('input, textarea, select');
+                var dict = {}
+
+                for (let i = 0; i < inputs.length; i++) {
+                    label = $("label[for='" + inputs[i].id + "']").text()
+
+                    if (inputs[i].type === "checkbox") {
+                        dict[inputs[i].id] = {'valor': inputs[i].checked, 'label': label}
+                    }
+                    else {
+                        dict[inputs[i].id] = {'valor': inputs[i].value, 'label': label}
+                    }
+                }
+
+                /* Aca va la validacion */
+
+                /* Campos requeridos */
+                var requeridos = [
+                    'id_nivel_escolaridad',
+                    'id_regimen_seguridad_social'
+                ]
+
+                for (let i = 0; i < requeridos.length; i++) {
+                    if (dict[requeridos[i]]['valor'] === "") {
+                        correcciones.push('Completa el campo: ' + dict[requeridos[i]]['label'])
+                        status = false
+                    }
+                }
+
+
+                if (dict['id_actualmente_estudia']['valor'] === false) {
+                    var requeridos_estudia = [
+                        'id_razon_no_estudia',
+                    ]
+
+                    for (let i = 0; i < requeridos_estudia.length; i++) {
+                        if (dict[requeridos_estudia[i]]['valor'] === "") {
+                            correcciones.push('Completa el campo: ' + dict[requeridos_estudia[i]]['label'])
+                            status = false
+                        }
+                    }
+                }
+
+
+                if (dict['id_razon_no_estudia']['valor'] === "Otro - Cual?") {
+                    var requeridos_estudia = [
+                        'id_razon_no_estudia_otra',
+                    ]
+
+                    for (let i = 0; i < requeridos_estudia.length; i++) {
+                        if (dict[requeridos_estudia[i]]['valor'] === "") {
+                            correcciones.push('Completa el campo: ' + dict[requeridos_estudia[i]]['label'])
+                            status = false
+                        }
+                    }
+                }
+
+
+                if (status === false) {
+                    $("#warning_step_6").removeClass('hide')
+                    $("#warning_step_6_div").empty()
+                    $("#warning_step_6_div").append(CorreccionesHtml(correcciones))
+                }
+                else {
+                    $("#warning_step_6").addClass('hide')
+                    $("#warning_step_6_div").empty()
+                }
+
+            }
+
+            return status;
+        }
+
+        function CorreccionesHtml(correcciones_list){
+            var data = ''
+            for(let i = 0;i < correcciones_list.length; i++){
+                data += '<li class="collection-item">'+ correcciones_list[i] +'<a class="secondary-content"><i class="material-icons red-text">warning</i></a></li>'
+
+            }
+            return data
+        }
+
+        $('#id_departamento_atencion').select2();
+        $('#id_municipio_atencion').select2();
+
+        $('#id_departamento_nacimiento').select2();
+        $('#id_municipio_nacimiento').select2();
+
+        $('#id_departamento_expedicion').select2();
+        $('#id_municipio_expedicion').select2();
+
+        $('#id_departamento_residencia').select2();
+        $('#id_municipio_residencia').select2();
+
+        $('#id_zona_residencia').select2();
+
+        $('#id_corregimiento').select2();
+        $('#id_vereda').select2();
+
+        $('#id_tipo_vivienda').select2();
+        $('#id_propiedad_vivienda').select2();
+        $('#id_estrato_vivienda').select2();
+        $('#id_tipo_documento').select2();
+
+        $('#id_sexo').select2();
+        $('#id_identidad_genero').select2();
+        $('#id_condicion_sexual').select2();
+
+        $('#id_estado_civil').select2();
+        $('#id_etnia').select2();
+
+        $('#id_pueblo_indigena').select2();
+        $('#id_comunidad_afro').select2();
+        $('#id_comunidad_indigena').select2();
+        $('#id_cual_lengua_indigena').select2();
+
+        $('#id_consejo_afro').select2();
+        $('#id_resguardo_indigena').select2();
+        $('#id_cual_lengua_afro').select2();
+
+        $('#id_registro_discapacidad').select2();
+        $('#id_categoria_discapacidad').select2();
+        $('#id_dificultades_permanentes').select2();
+
+        $('#id_utiliza_actualmente').select2();
+        $('#id_rehabilitacion').select2();
+
+        $('#id_cuidador').select2();
+        $('#id_parentezco').select2();
+
+        $('#id_banco').select2();
+        $('#id_tipo_cuenta').select2();
+
+        $('#id_nivel_escolaridad').select2();
+        $('#id_razon_no_estudia').select2();
+
+        $('#id_regimen_seguridad_social').select2();
+
+        $('.datepicker').pickadate({
+            format: 'dd/mm/yyyy',
+            selectMonths: true,
+            selectYears: 120,
+            monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                'Octubre', 'Noviembre', 'Diciembre'],
+            weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+            today: 'Hoy',
+            clear: 'Borrar',
+            close: 'Ok',
+            closeOnSelect: false,
+            max: new Date()
+        });
+
+
+        $("#id_departamento_nacimiento").change(function () {
+            var url = '/rest/v1.0/fest_2019/misrutas/cargar-municipios/'
+            var departamento_id = $(this).val();
+
+            $.ajax({
+                url: url,
+                data: {
+                    'departamento': departamento_id
+                },
+                success: function (data) {
+                    $("#id_municipio_nacimiento").html(data);
+                    $('#id_municipio_nacimiento').select2();
+                }
+            });
+
+        });
+
+
+        $("#id_departamento_expedicion").change(function () {
+            var url = '/rest/v1.0/fest_2019/misrutas/cargar-municipios/'
+            var departamento_id = $(this).val();
+
+            $.ajax({
+                url: url,
+                data: {
+                    'departamento': departamento_id
+                },
+                success: function (data) {
+                    $("#id_municipio_expedicion").html(data);
+                    $('#id_municipio_expedicion').select2();
+                }
+            });
+
+        });
+
+
+        $("#id_departamento_atencion").change(function () {
+            var url = '/rest/v1.0/fest_2019/misrutas/cargar-municipios/'
+            var departamento_id = $(this).val();
+
+            $.ajax({
+                url: url,
+                data: {
+                    'departamento': departamento_id
+                },
+                success: function (data) {
+                    $("#id_municipio_atencion").html(data);
+                    $('#id_municipio_atencion').select2();
+                }
+            });
+
+        });
+
+
+        $("#id_tiene_libreta").change(function () {
+            var estado = $(this).is(':checked');
+            if (estado === true) {
+                $("#row_numero_libreta").removeClass('hide')
+            }
+            else{
+                $("#row_numero_libreta").addClass('hide')
+            }
+        });
+
+
+        $("#id_actualmente_estudia").change(function () {
+            var estado = $(this).is(':checked');
+            if (estado === true) {
+                $("#row_si_estudia").removeClass('hide')
+                $("#row_no_estudia").addClass('hide')
+            }
+            else {
+                $("#row_si_estudia").addClass('hide')
+                $("#row_no_estudia").removeClass('hide')
+            }
+        });
+
+
+
+
+        $("#id_tiene_cuidador").change(function () {
+            var estado = $(this).is(':checked');
+            if (estado === true) {
+                $("#row_cuidador").removeClass('hide')
+            }
+            else {
+                $("#row_cuidador").addClass('hide')
+            }
+        });
+
+
+        $("#id_bancarizacion").change(function () {
+            var estado = $(this).is(':checked');
+            if (estado === true) {
+                $("#row_bancarizacion").removeClass('hide')
+            }
+            else {
+                $("#row_bancarizacion").addClass('hide')
+            }
+        });
+
+
+        $("#id_discapacidad").change(function () {
+            var estado = $(this).is(':checked');
+            if (estado === true) {
+                $("#row_discapacidad").removeClass('hide')
+            }
+            else {
+                $("#row_discapacidad").addClass('hide')
+            }
+        });
+
+
+        $("#id_departamento_residencia").change(function () {
+            var url = '/rest/v1.0/fest_2019/misrutas/cargar-municipios/'
+            var departamento_id = $(this).val();
+
+            $.ajax({
+                url: url,
+                data: {
+                    'departamento': departamento_id
+                },
+                success: function (data) {
+                    $("#id_municipio_residencia").html(data);
+                    $('#id_municipio_residencia').select2();
+                }
+            });
+
+        });
+
+        $("#id_municipio_residencia").change(function () {
+            var url = '/rest/v1.0/fest_2019/misrutas/cargar-corregimientos/'
+            var url_2 = '/rest/v1.0/fest_2019/misrutas/cargar-veredas/'
+            var municipio_id = $(this).val();
+
+            $.ajax({
+                url: url,
+                data: {
+                    'municipio': municipio_id
+                },
+                success: function (data) {
+                    $("#id_corregimiento").html(data);
+                    $('#id_corregimiento').select2();
+                }
+            });
+
+            $.ajax({
+                url: url_2,
+                data: {
+                    'municipio': municipio_id
+                },
+                success: function (data) {
+                    $("#id_vereda").html(data);
+                    $('#id_vereda').select2();
+                }
+            });
+
+        });
+
+
+        $("#id_zona_residencia").change(function () {
+            if($(this).val() === "Cabecera municipal"){
+                $("#row_cabecera_municipal").removeClass('hide')
+                $("#row_otra_zona_residencia").addClass('hide')
+            }
+            else if ($(this).val() === "") {
+                $("#row_cabecera_municipal").addClass('hide')
+                $("#row_otra_zona_residencia").addClass('hide')
+            }
+            else{
+                $("#row_cabecera_municipal").addClass('hide')
+                $("#row_otra_zona_residencia").removeClass('hide')
+            }
+        });
+
+
+        $("#id_razon_no_estudia").change(function () {
+            if ($(this).val() === "Otro - Cual?") {
+                $("#row_no_estudia_otra").removeClass('hide')
+            }
+            else {
+                $("#row_no_estudia_otra").addClass('hide')
+            }
+        });
+
+
+
+
+
+        $("#id_etnia").change(function () {
+            if ($(this).val() === "Indigena") {
+                $("#row_etnia_indigena").removeClass('hide')
+                $("#row_etnia_afro").addClass('hide')
+            }
+            else if ($(this).val() === "Afrocolombiano / Negro") {
+                $("#row_etnia_afro").removeClass('hide')
+                $("#row_etnia_indigena").addClass('hide')
+            }
+            else {
+                $("#row_etnia_afro").addClass('hide')
+                $("#row_etnia_indigena").addClass('hide')
+            }
+        });
+
+
+        $("#id_lengua_nativa_indigena").change(function () {
+            var estado = $(this).is(':checked');
+            if (estado === true) {
+                $("#row_lengua_indigena").removeClass('hide')
+            }
+            else {
+                $("#row_lengua_indigena").addClass('hide')
+            }
+        });
+
+
+        $("#id_lengua_nativa_afro").change(function () {
+            var estado = $(this).is(':checked');
+            if (estado === true) {
+                $("#row_lengua_afro").removeClass('hide')
+            }
+            else {
+                $("#row_lengua_afro").addClass('hide')
+            }
+        });
+
+
+
+
+        $("#id_tipo_vivienda").change(function () {
+            if ($(this).val() === "Otro tipo de Vivienda (Carpa, Tienda, Vagon, Embarcacion, Cueva, Refugio Natural, Puente, etc,) Cual?") {
+                $("#row_otro_tipo_vivienda").removeClass('hide')
+            }
+            else {
+                $("#row_otro_tipo_vivienda").addClass('hide')
+            }
+        });
+
+
+    });
+
+});</script></body></html>

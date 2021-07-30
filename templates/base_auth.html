@@ -1,0 +1,32 @@
+
+{% load staticfiles %}
+{% load crispy_forms_tags %}<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>
+    </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png'%}">
+    <link rel="stylesheet" href="{% static 'node_modules/bootstrap/dist/css/bootstrap.css'%}">
+    <link rel="stylesheet" href="{% static 'node_modules/alertifyjs/build/css/alertify.min.css'%}">
+    <link rel="stylesheet" href="{% static 'node_modules/alertifyjs/build/css/themes/bootstrap.min.css'%}">
+    <link rel="stylesheet" href="{% static 'css/base.css'%}">
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-light"><a class="navbar-brand" href="#"><img src="/assets/brand/bootstrap-solid.svg" width="30" height="30" alt=""></a></nav>
+    <script src="{% static 'node_modules/jquery/dist/jquery.slim.js'%}"></script>
+    <script src="{% static 'node_modules/popper.js/dist/umd/popper.js'%}"></script>
+    <script src="{% static 'node_modules/bootstrap/dist/js/bootstrap.js'%}"></script>
+    <script src="{% static 'node_modules/reconnectingwebsocket/reconnecting-websocket.js'%}"></script>
+    <script src="{% static 'node_modules/alertifyjs/build/alertify.min.js'%}"></script>
+    <script src="{% static 'js/Socket.js' %}"></script>
+    <script>
+      var error = '{{ error }}'
+      if(error != ""){
+          alertify.error(error);
+      }
+      
+    </script>
+  </body>
+</html>

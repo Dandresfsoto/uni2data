@@ -1,0 +1,4 @@
+-r base.txt
+
+gunicorn==19.8.1
+pyopenssl==17.5.0

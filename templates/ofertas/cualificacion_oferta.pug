@@ -1,0 +1,184 @@
+extends ../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/ofertas/") Ofertas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_active | truncatechars:25 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Cualificar aplicación
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container",style="margin-top:40px;")
+        div(class="row")
+            div(class="col s12 m5 l4 center-align")
+                |{% if usuario.usuario.photo != None %}
+                img(class = 'responsive-img materialboxed',src="{{ usuario.usuario.photo }}")
+                |{% else %}
+                img(class = 'responsive-img materialboxed',src="{% static 'img/icon-192.png'%}")
+                |{% endif %}
+            div(class="col s12 m7 l8")
+                p(style="margin-top: 0px;margin-bottom: 0px;font-size: 1.7rem;")
+                    b {{ usuario.usuario.fullname }}
+                p(style="margin-top: 0px;margin-bottom: 10px;font-size: 1rem;")
+                    b Aspirante {{ usuario.usuario.sexo }} de {{ usuario.usuario.edad }} años, reside en {{ usuario.usuario.lugar_residencia }}
+                p(style="margin-top: 0px;margin-bottom: 0px;font-size: 1rem;")
+                    b(style="margin-right:5px;") Cedula:
+                    | {{ usuario.usuario.cedula }} de {{ usuario.usuario.lugar_expedicion }}
+                p(style="margin-top: 0px;margin-bottom: 0px;font-size: 0.8rem;")
+                    b(style="margin-right:5px;") Lugar de nacimiento:
+                    | {{ usuario.usuario.lugar_nacimiento }}
+                p(style="margin-top: 0px;margin-bottom: 0px;font-size: 0.8rem;")
+                    b(style="margin-right:5px;") Dirección de residencia:
+                    | {{ usuario.usuario.direccion }}
+                p(style="margin-top: 0px;margin-bottom: 0px;font-size: 0.8rem;")
+                    b(style="margin-right:5px;") Email:
+                    | {{ usuario.usuario.email }}
+                p(style="margin-top: 0px;margin-bottom: 0px;font-size: 0.8rem;")
+                    b(style="margin-right:5px;") Celular:
+                    | {{ usuario.usuario.celular }}
+                p(style="margin-top: 0px;margin-bottom: 0px;font-size: 0.8rem;")
+                    b(style="margin-right:5px;") Grupo sanguineo:
+                    | {{ usuario.usuario.tipo_sangre }}
+
+        div(class="row")
+            div(class="col s12")
+                h5
+                    b APLICACIÓN
+                p(style="margin-top: 10px;margin-bottom: 0px;font-size: 1rem;")
+                    b(style="margin-right:5px;") Fecha:
+                    | {{ usuario.aplicacion.creation }}
+                p(style="margin-top: 10px;margin-bottom: 0px;font-size: 1rem;")
+                    b(style="margin-right:5px;") Municipios:
+                    | {{ usuario.aplicacion.municipios }}
+                p(style='text-align: justify;margin-top: 10px;margin-bottom: 0px;font-size: 1rem;')
+                    b(style="margin-right:5px;") Observación:
+                    | {{ usuario.aplicacion.observacion }}
+
+        div(class="row")
+            div(class="col s12")
+                h5
+                    b TITULOS ACADÉMICOS:
+                |{% for titulo in usuario.titulos %}
+                div(class="col s12")
+                    div(class='card teal darken-4')
+                        div(class='card-content white-text')
+                            span(style='font-size: 1.4rem;',class='card-title')
+                                b {{ titulo.nombre }}
+                            p
+                                b(style="margin-right:5px;") Modalidad:
+                                | {{ titulo.modalidad }}
+                            p
+                                b(style="margin-right:5px;") Semestres aprobados:
+                                | {{ titulo.semestres }}
+                            p
+                                b(style="margin-right:5px;") Graduado:
+                                | {{ titulo.graduado }}
+                            p
+                                b(style="margin-right:5px;") Fecha de terminación:
+                                | {{ titulo.fecha_terminacion }}
+
+
+
+                |{% endfor %}
+
+        div(class="row")
+            div(class="col s12")
+                h5
+                    b EXPERIENCIA LABORAL:
+                | {% for experiencia in usuario.experiencias %}
+                div(class="col s12")
+                    div(class='card orange darken-4')
+                        div(class='card-content white-text')
+                            span(style='font-size: 1.4rem;',class='card-title')
+                                b {{ experiencia.cargo }}
+                            p
+                                b(style="margin-right:5px;") Empresa:
+                                | {{ experiencia.nombre_empresa }}
+                            p
+                                b(style="margin-right:5px;") Tipo de empresa:
+                                | {{ experiencia.tipo_empresa }}
+                            p
+                                b(style="margin-right:5px;") Dependencia:
+                                | {{ experiencia.dependencia }}
+                            p
+                                b(style="margin-right:5px;") Duración:
+                                | {{ experiencia.meses }} mes(es)
+                            p
+                                b(style="margin-right:5px;") Fecha de ingreso:
+                                | {{ experiencia.fecha_ingreso }}
+                            p
+                                b(style="margin-right:5px;") Fecha de retiro:
+                                | {{ experiencia.fecha_retiro }}
+                            p
+                                b(style="margin-right:5px;") Municipio:
+                                | {{ experiencia.municipio }}
+
+                            | {% if experiencia.email_empresa != '' %}
+                            p
+                                b(style="margin-right:5px;") Email:
+                                | {{ experiencia.email_empresa }}
+                            | {% endif %}
+
+                            | {% if experiencia.telefono_empresa != '' %}
+                            p
+                                b(style="margin-right:5px;") Telefono:
+                                | {{ experiencia.telefono_empresa }}
+                            | {% endif %}
+
+                            | {% if experiencia.direccion != '' %}
+                            p
+                                b(style="margin-right:5px;") Dirección:
+                                | {{ experiencia.direccion }}
+                            | {% endif %}
+
+                | {% endfor %}
+
+        |{% crispy form %}
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+            $('select').material_select();
+            $("label[for='id_cualificacion_perfil']").addClass('active');
+            $("label[for='id_cualificacion_experiencia']").addClass('active');
+            $("label[for='id_cualificacion_seleccion']").addClass('active');
+        });

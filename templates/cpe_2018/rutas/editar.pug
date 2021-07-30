@@ -1,0 +1,164 @@
+extends ../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/rutas/") Rutas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_active | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") {{ breadcrum_active_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+    | {% if permiso_liquidacion %}
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") call_to_action
+                | Acciones
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="estado/") Estado de la ruta
+                            i(class="material-icons icon-sican") assignment
+
+                    div(class="divider divider-perfil")
+
+    | {% endif %}
+
+
+block container_principal
+    div(class="container",style="margin-top:40px;")
+        |{% crispy form %}
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+            $("label[for='id_contrato']").addClass('active');
+            $("label[for='id_radicados']").addClass('active');
+
+            $('#id_contrato').select2({
+                ajax: {
+                    url: '{{ url_contratos }}',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 1,
+            });
+
+
+
+            $('#id_radicados').select2({
+                closeOnSelect: false,
+                tags: true,
+                tokenSeparators: [',', ' '],
+
+                ajax: {
+                    url: '{{ url_radicados }}',
+                    dataType: 'json',
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                },
+                escapeMarkup: function (markup) {
+                    return markup;
+                },
+                minimumInputLength: 1,
+                templateResult: function (data) {
+
+                    if(data.radicado != undefined){
+                        template = "<div class = 'radicado-container-select'>" +
+                            "<div class='radicado-container-select-title'>" +
+                            "<p>" +
+                            "Radicado: <b>" + data.radicado + "</b>" +
+                            "</p>" +
+                            "</div>" +
+                            "<div class='radicado-container-select-contenido'>" +
+                            "<p>" +
+                            data.municipio + ", " + data.departamento +
+                            "</p>" +
+                            "<p>" +
+                            "<b>Tipo: </b>" + data.tipologia_sede +
+                            "</p>" +
+                            "<p>" +
+                            "<b>Estado: </b>" + data.estado +
+                            "</p>" +
+                            "<p>" +
+                            "<b>Progreso: </b>" + data.progreso +
+                            "</p>"+
+                            "<p>" +
+                            "<b>Actividades pendientes: </b>" + data.pendientes +
+                            "</p>"
+
+                        if (data.ruta != '') {
+                            template += "<p><b>Ruta: </b>" + data.ruta + " - " + data.contratista + "</p></div></div>"
+                        }
+                        else {
+                            template += "</div></div>"
+                        }
+
+                        return template
+                    }
+                    else{
+                        return ''
+                    }
+
+
+                }
+            });
+
+
+        });

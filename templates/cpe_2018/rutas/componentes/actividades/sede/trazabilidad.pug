@@ -1,0 +1,133 @@
+extends ../../../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/rutas/") Rutas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../../../../../../../") {{ breadcrum_1 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../../../../../") {{ breadcrum_2 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../../../") Acceso
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../") Radicado: {{ breadcrum_3 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../") {{ breadcrum_active | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../") Ver
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Trazabilidad
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+
+    div(class="container container-form",style="margin-top:40px;")
+        div(class="registro-history")
+            ul
+                | {% for registro in registros %}
+                | {% if not registro.propio %}
+                li(class="clearfix")
+                    div(class="row")
+                        div(class="message-data right-align")
+                            span(class="message-data-time",style="margin-right: 5px;") {{ registro.fecha }}
+                            span(class="message-data-name",style="margin-right: 5px;") {{ registro.usuario }}
+                    div(class="row")
+                        div(class="message other-message float-right")
+                            div(class="container-html-delta")
+                                | {{ registro.html | safe }}
+
+                | {% else %}
+                li
+                    div(class="row")
+                        div(class="message-data")
+                            span(class="message-data-name",style="margin-right: 5px;") {{ registro.fecha }}
+                            span(class="message-data-time",style="margin-right: 5px;") {{ registro.usuario }}
+                    div(class="row")
+                        div(class="message my-message")
+                            div(class="container-html-delta")
+                                | {{ registro.html | safe }}
+                                | {% if registro.hito != None %}
+                                ul(class="collection")
+                                    li(class="collection-item avatar",style="color: black;")
+                                        a(href="{{ registro.hito.url_file }}")
+                                            i(class="material-icons circle green") insert_drive_file
+                                        span(class="title") Hito:
+                                            b {{ registro.hito.tipo }}
+                                        p(style="font-size:0.8rem;color: #9b9da6;") {{ registro.fecha }}
+                                | {% endif %}
+                | {% endif %}
+                | {% endfor %}
+
+
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+        });

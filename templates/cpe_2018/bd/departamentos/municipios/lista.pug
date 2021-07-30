@@ -1,0 +1,143 @@
+extends ../../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/") CPE 2018
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/cpe_2018/bd/") Base de datos
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_active | truncatechars:22 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") {{ breadcrum_active_1 | truncatechars:22 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+    |{% if permiso_crear %}
+
+    //ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") call_to_action
+                | Acciones
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="crear/") Añadir municipio
+                            i(class="material-icons icon-sican") map
+
+                    div(class="divider divider-perfil")
+
+    |{% endif %}
+
+
+block container_principal
+    div(class="container-datatable")
+        table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
+            thead
+                tr
+                    th Ver Radicados
+                    th Ver Docentes
+                    th Nombre
+                    th Código
+                    th N° Radicados
+                    th N° Docentes
+                    th Ver Mapa
+            tbody
+                tr
+                    td Ver Radicados
+                    td Ver Docentes
+                    td Nombre
+                    td Código
+                    td N° Radicados
+                    td N° Docentes
+                    td Ver Mapa
+
+    div(id="modalmap" class="modal")
+        div(class="modal-content")
+            div(id="map",style="height:60vh;")
+
+block body_script_auth
+    script(async,defer,src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDVkWc8DZW5fqa5rbKvJiH2JfBEarTuvM")
+    script.
+
+        $(document).ready(function () {
+
+            $('.modal').modal();
+
+            var table = $('#table').DataTable({
+                responsive: true,
+                stateSave: true,
+                searching: true,
+                processing: true,
+                serverSide: true,
+                ajax: "{{ url_datatable }}",
+                order: [[ 2, "asc" ]],
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
+                },
+                drawCallback: function (settings) {
+                    $('.tooltipped').tooltip({delay: 50});
+                }
+            });
+
+            table.on('responsive-display', function (e, datatable, row, showHide, update) {
+                $('.tooltipped').tooltip({delay: 50});
+            });
+
+
+        });
+
+        function mapa(latitud, longitud, title) {
+
+            var uluru = {lat: latitud, lng: longitud};
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 14,
+                center: uluru
+            });
+            var marker = new google.maps.Marker({
+                position: uluru,
+                map: map,
+                title: 'Cabecera municipal'
+            });
+
+            $('#modalmap').modal('open');
+        }

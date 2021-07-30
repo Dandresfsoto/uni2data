@@ -1,0 +1,13 @@
+<li class = "step {{ step.css_class }} {{ form_style }}" {% if step.css_id %}id="{{ step.css_id }}"{% endif %}
+    {{ step.flat_attrs|safe }}>
+    {% if title %}<div class="step-title waves-effect">{{ title|safe }}</div>{% endif %}
+    <div class="step-content">
+        <div class="row">
+            {{ fields|safe }}
+        </div>
+        <div class="step-actions">
+            <button class="waves-effect waves-dark btn next-step">CONTINUAR</button>
+            <button class="waves-effect waves-dark btn-flat previous-step">ANTERIOR</button>
+        </div>
+    </div>
+</li>

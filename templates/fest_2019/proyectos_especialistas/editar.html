@@ -1,0 +1,1026 @@
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% load humanize %}
+{% load mathfilters %}
+{% load ofertas_tags %}<!DOCTYPE html><html lang="es"><head><title>{{title | upper}}</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png'%}"><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/alertify.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/css/themes/default.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css"><link rel="stylesheet" href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css"><link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.dataTables.min.css"><link rel="stylesheet" href="//unpkg.com/materialize-stepper@3.0.0/dist/css/mstepper.min.css"><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/css/dropify.min.css"><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css"><link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.12/css/all.css" integrity="sha384-G0fIWCsCzJIMAVNQPfjH08cyYaUtMwjJwqiRKxxE/rx96Uroj1BtIQ6MLJuheaO9" crossorigin="anonymous"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/materialize-social@1.0.3/materialize-social.min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/jquery-background-video@1.0.0/jquery.background-video.min.css"><link rel="stylesheet" href="{% static 'css/base.css'%}"><link rel="stylesheet" href="{% static 'css/quilljs.css'%}"></head><body><header><nav><div class="nav-wrapper nav-wrapper-principal"><a class="brand-logo" href="#"><object class="responsive-img brand-logo-object-navbar" height="40" type="image/svg+xml" data="{% static 'img/op.svg'%}"></object></a><a class="brand-logo center hide-on-med-and-down title-logo" href="#">{{title | upper}}</a><a class="button-collapse full hide-on-large-only" href="#" data-activates="nav-mobile"><i class="material-icons">menu</i></a><ul class="right hide-on-large-only"><li><a class="waves-effect waves-light" href="#"><span class="new badge" id="notifications_navbar" data-badge-caption="">{{user.notifications|add:user.messages}}</span></a></li></ul></div><ul class="side-nav fixed side-nav-principal" id="nav-mobile"><li class="center-align"><object class="responsive-img brand-logo-object" height="70" type="image/svg+xml" data="{% static 'img/op.svg'%}"></object></li><ul class="collapsible" id="menu-sican" data-collapsible="accordion"><li class="bold waves-effect waves-light" id="color-button-menu"><div class="collapsible-header"><i class="material-icons" id="icon-menu-sican">arrow_drop_down</i>{{user.email | truncatechars:22}}&nbsp;&nbsp;&nbsp;<span class="new badge hide" id="notifications_header" data-badge-caption="">{{user.notifications|add:user.messages}}</span></div><div class="collapsible-body collapsible-body-blue"><ul><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/perfil/">Perfil<i class="material-icons icon-sican">person</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/notificaciones/">Notificaciones&nbsp;&nbsp;&nbsp;<i class="material-icons icon-sican">notifications</i><span class="new badge hide" id="notifications_body" data-badge-caption="">{{user.notifications}}</span></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/chat/">Chat&nbsp;&nbsp;&nbsp;<i class="material-icons icon-sican">message</i><span class="new badge hide" id="message_body" data-badge-caption="">{{user.messages}}</span></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/password/">Cambiar contraseña<i class="material-icons icon-sican">security</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/logout/">Cerrar sesión<i class="material-icons icon-sican">exit_to_app</i></a></li><div class="divider divider-perfil"></div></ul></div></li></ul><div class="space-navbar-items"></div><ul class="collapsible" data-collapsible="accordion"><li class="bold waves-effect waves-light button-menu"><div class="collapsible-header active"><i class="material-icons">local_activity</i>Breadcrums</div><div class="collapsible-body collapsible-body-blue"><ul><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/">Inicio<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/iraca/">IRACA<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light"><a href="/iraca/proyectos_monitoreo/">{{ nombre_modulo | truncatechars:22 }}<i class="material-icons icon-sican">keyboard_arrow_right</i></a></li><div class="divider divider-perfil"></div><li class="bold waves-effect waves-light breadcrum-active"><a href="#">Editar: {{ breadcrumb_active| truncatechars:18 }}<i class="material-icons icon-sican">check_circle</i></a></li><div class="divider divider-perfil"></div></ul></div></li></ul><div class="space-navbar-footer"></div></ul></nav></header><main><div class="row" style="margin-top:40px;padding: 0px 20px;"><form method="post" enctype="multipart/form-data">{% csrf_token %}<div class="step-content" id="step_1"></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l4"><img class="responsive-img" src="{% static 'img/logo_prosperidad.png'%}"></div><div class="col s12 m6 l4"><p>FORMATO FICHA DE PROYECTO IRACA</p></div><div class="col s12 m6 l4"><p>Código: F-GI-IP-4</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 offset-l2"><p>PROCESO: GESTIÓN PARA LA INCLUSIÓN SOCIAL</p></div><div class="col s12 m6 l4"><p>Fecha de Aprobación: Septiembre 06 de 2019</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Convenio</p></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.convenio.id_for_label }}">{{ form.convenio.label }}</label>{{ form.convenio }}</div></div><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Código</p></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.codigo_proyecto.id_for_label }}">{{ form.codigo_proyecto.label }}</label>{{ form.codigo_proyecto }}</div></div><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Fecha Elaboración</p></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.fecha_elaboracion.id_for_label }}">{{ form.fecha_elaboracion.label }}</label>{{ form.fecha_elaboracion }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Sección I.</p></div><div class="col s12 m10" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">IDENTIFICACIÓN DE LA (S) COMUNIDAD (ES) BENEFICIARIA (S)</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l3" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Municipio</p></div><div class="col s12 m6 l3" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.municipio.id_for_label }}">{{ form.municipio.label }}</label>{{ form.municipio }}</div></div><div class="col s12 m6 l3" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Consejo(s) / Resguardo(s)</p></div><div class="col s12 m6 l3" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.resguado_indigena_consejo_comunitario.id_for_label }}">{{ form.resguado_indigena_consejo_comunitario.label }}</label>{{ form.resguado_indigena_consejo_comunitario }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Nombre de la(s) Comunidad (es)</p></div><div class="col s12 m6 l2" style="margin-top:0px;"><div class="input-field fieldWrapper" style="margin-top:0px;">{{ form.nombre_comunidad }}</div></div><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Nombre Representante Legal/Gobernador</p></div><div class="col s12 m6 l2" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.nombre_representante.id_for_label }}">{{ form.nombre_representante.label }}</label>{{ form.nombre_representante }}</div></div><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">No. Hogares Beneficiarios</p></div><div class="col s12 m6 l2" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.numero_hogares.id_for_label }}">{{ form.numero_hogares.label }}</label>{{ form.numero_hogares }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Sección II.</p></div><div class="col s12 m10" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">INFORMACIÓN GENERAL DEL PROYECTO</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">1. Nombre del Proyecto</p></div><div class="col s12 m10" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.nombre_proyecto.id_for_label }}">{{ form.nombre_proyecto.label }}</label>{{ form.nombre_proyecto }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">1.1 Linea (Comercial, Agropecuaria, comunitaria, otros)</p></div><div class="col s12 m10" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.linea.id_for_label }}">{{ form.linea.label }}</label>{{ form.linea }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">1.2 Duración:</p></div><div class="col s12 m6 l2" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.duracion.id_for_label }}">{{ form.duracion.label }}</label>{{ form.duracion }}</div></div><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">1.3 Ubicación del Proyecto</p></div><div class="col s12 m6 l2" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.ubicacion_proyecto.id_for_label }}">{{ form.ubicacion_proyecto.label }}</label>{{ form.ubicacion_proyecto }}</div></div><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">1.4 Producto/Servicio:</p></div><div class="col s12 m6 l2" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.producto_servicio.id_for_label }}">{{ form.producto_servicio.label }}</label>{{ form.producto_servicio }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">2. Problema</p></div><div class="col s12 m10" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.problema.id_for_label }}">{{ form.problema.label }}</label>{{ form.problema }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">3. Justificación</p></div><div class="col s12 m10" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.justificacion.id_for_label }}">{{ form.justificacion.label }}</label>{{ form.justificacion }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">4. Criterios Socioculturales y técnicos.</p></div><div class="col s12 m10" style="margin-top:0px;"><div class="input-field fieldWrapper" style="margin-top:0px;"><label for="{{ form.criterios_socioculturales.id_for_label }}">{{ form.criterios_socioculturales.label }}</label>{{ form.criterios_socioculturales }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">5. Objetivo General</p></div><div class="col s12 m10" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.objetivo_general.id_for_label }}">{{ form.objetivo_general.label }}</label>{{ form.objetivo_general }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">5.1 Objetivos Específicos</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m1"><p class="center-align" style="padding-bottom:15px;">1.</p></div><div class="col s12 m11" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.objetivo_especifico_1.id_for_label }}">{{ form.objetivo_especifico_1.label }}</label>{{ form.objetivo_especifico_1 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m1"><p class="center-align" style="padding-bottom:15px;">2.</p></div><div class="col s12 m11" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.objetivo_especifico_2.id_for_label }}">{{ form.objetivo_especifico_2.label }}</label>{{ form.objetivo_especifico_2 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m1"><p class="center-align" style="padding-bottom:15px;">3.</p></div><div class="col s12 m11" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.objetivo_especifico_3.id_for_label }}">{{ form.objetivo_especifico_3.label }}</label>{{ form.objetivo_especifico_3 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Sección III.</p></div><div class="col s12 m10" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">PRESUPUESTO Y CRONOGRAMA</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">1. Cronograma</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">Actividad</p></div><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">Distribución de meta x meses</p></div><div class="col s12 m6 l1" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">Indicador</p></div><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">Unidad de Medida</p></div><div class="col s12 m6 l1" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">Meta</p></div><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">Medio de Verificación</p></div><div class="col s12 m6 l2" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">Observaciones</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.actividad_1.id_for_label }}">{{ form.actividad_1.label }}</label>{{ form.actividad_1 }}</div></div><div class="col s12 m6 l2"><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_1_1.id_for_label }}">{{ form.mes_1_1.label }}</label>{{ form.mes_1_1 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_2_1.id_for_label }}">{{ form.mes_2_1.label }}</label>{{ form.mes_2_1 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_3_1.id_for_label }}">{{ form.mes_3_1.label }}</label>{{ form.mes_3_1 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_4_1.id_for_label }}">{{ form.mes_4_1.label }}</label>{{ form.mes_4_1 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_5_1.id_for_label }}">{{ form.mes_5_1.label }}</label>{{ form.mes_5_1 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_6_1.id_for_label }}">{{ form.mes_6_1.label }}</label>{{ form.mes_6_1 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_7_1.id_for_label }}">{{ form.mes_7_1.label }}</label>{{ form.mes_7_1 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_8_1.id_for_label }}">{{ form.mes_8_1.label }}</label>{{ form.mes_8_1 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_9_1.id_for_label }}">{{ form.mes_9_1.label }}</label>{{ form.mes_9_1 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_10_1.id_for_label }}">{{ form.mes_10_1.label }}</label>{{ form.mes_10_1 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_11_1.id_for_label }}">{{ form.mes_11_1.label }}</label>{{ form.mes_11_1 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_12_1.id_for_label }}">{{ form.mes_12_1.label }}</label>{{ form.mes_12_1 }}</div></div></div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper"><label for="{{ form.indicador_1.id_for_label }}">{{ form.indicador_1.label }}</label>{{ form.indicador_1 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.unidad_medida_1.id_for_label }}">{{ form.unidad_medida_1.label }}</label>{{ form.unidad_medida_1 }}</div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper">{{ form.meta_1 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.medio_verificacion_1.id_for_label }}">{{ form.medio_verificacion_1.label }}</label>{{ form.medio_verificacion_1 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.observaciones_1.id_for_label }}">{{ form.observaciones_1.label }}</label>{{ form.observaciones_1 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.actividad_2.id_for_label }}">{{ form.actividad_2.label }}</label>{{ form.actividad_2 }}</div></div><div class="col s12 m6 l2"><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_1_2.id_for_label }}">{{ form.mes_1_2.label }}</label>{{ form.mes_1_2 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_2_2.id_for_label }}">{{ form.mes_2_2.label }}</label>{{ form.mes_2_2 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_3_2.id_for_label }}">{{ form.mes_3_2.label }}</label>{{ form.mes_3_2 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_4_2.id_for_label }}">{{ form.mes_4_2.label }}</label>{{ form.mes_4_2 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_5_2.id_for_label }}">{{ form.mes_5_2.label }}</label>{{ form.mes_5_2 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_6_2.id_for_label }}">{{ form.mes_6_2.label }}</label>{{ form.mes_6_2 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_7_2.id_for_label }}">{{ form.mes_7_2.label }}</label>{{ form.mes_7_2 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_8_2.id_for_label }}">{{ form.mes_8_2.label }}</label>{{ form.mes_8_2 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_9_2.id_for_label }}">{{ form.mes_9_2.label }}</label>{{ form.mes_9_2 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_10_2.id_for_label }}">{{ form.mes_10_2.label }}</label>{{ form.mes_10_2 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_11_2.id_for_label }}">{{ form.mes_11_2.label }}</label>{{ form.mes_11_2 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_12_2.id_for_label }}">{{ form.mes_12_2.label }}</label>{{ form.mes_12_2 }}</div></div></div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper"><label for="{{ form.indicador_2.id_for_label }}">{{ form.indicador_2.label }}</label>{{ form.indicador_2 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.unidad_medida_2.id_for_label }}">{{ form.unidad_medida_2.label }}</label>{{ form.unidad_medida_2 }}</div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper">{{ form.meta_2 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.medio_verificacion_2.id_for_label }}">{{ form.medio_verificacion_2.label }}</label>{{ form.medio_verificacion_2 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.observaciones_2.id_for_label }}">{{ form.observaciones_2.label }}</label>{{ form.observaciones_2 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.actividad_3.id_for_label }}">{{ form.actividad_3.label }}</label>{{ form.actividad_3 }}</div></div><div class="col s12 m6 l2"><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_1_3.id_for_label }}">{{ form.mes_1_3.label }}</label>{{ form.mes_1_3 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_2_3.id_for_label }}">{{ form.mes_2_3.label }}</label>{{ form.mes_2_3 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_3_3.id_for_label }}">{{ form.mes_3_3.label }}</label>{{ form.mes_3_3 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_4_3.id_for_label }}">{{ form.mes_4_3.label }}</label>{{ form.mes_4_3 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_5_3.id_for_label }}">{{ form.mes_5_3.label }}</label>{{ form.mes_5_3 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_6_3.id_for_label }}">{{ form.mes_6_3.label }}</label>{{ form.mes_6_3 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_7_3.id_for_label }}">{{ form.mes_7_3.label }}</label>{{ form.mes_7_3 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_8_3.id_for_label }}">{{ form.mes_8_3.label }}</label>{{ form.mes_8_3 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_9_3.id_for_label }}">{{ form.mes_9_3.label }}</label>{{ form.mes_9_3 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_10_3.id_for_label }}">{{ form.mes_10_3.label }}</label>{{ form.mes_10_3 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_11_3.id_for_label }}">{{ form.mes_11_3.label }}</label>{{ form.mes_11_3 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_12_3.id_for_label }}">{{ form.mes_12_3.label }}</label>{{ form.mes_12_3 }}</div></div></div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper"><label for="{{ form.indicador_3.id_for_label }}">{{ form.indicador_3.label }}</label>{{ form.indicador_3 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.unidad_medida_3.id_for_label }}">{{ form.unidad_medida_3.label }}</label>{{ form.unidad_medida_3 }}</div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper">{{ form.meta_3 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.medio_verificacion_3.id_for_label }}">{{ form.medio_verificacion_3.label }}</label>{{ form.medio_verificacion_3 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.observaciones_3.id_for_label }}">{{ form.observaciones_3.label }}</label>{{ form.observaciones_3 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.actividad_4.id_for_label }}">{{ form.actividad_4.label }}</label>{{ form.actividad_4 }}</div></div><div class="col s12 m6 l2"><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_1_4.id_for_label }}">{{ form.mes_1_4.label }}</label>{{ form.mes_1_4 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_2_4.id_for_label }}">{{ form.mes_2_4.label }}</label>{{ form.mes_2_4 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_3_4.id_for_label }}">{{ form.mes_3_4.label }}</label>{{ form.mes_3_4 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_4_4.id_for_label }}">{{ form.mes_4_4.label }}</label>{{ form.mes_4_4 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_5_4.id_for_label }}">{{ form.mes_5_4.label }}</label>{{ form.mes_5_4 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_6_4.id_for_label }}">{{ form.mes_6_4.label }}</label>{{ form.mes_6_4 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_7_4.id_for_label }}">{{ form.mes_7_4.label }}</label>{{ form.mes_7_4 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_8_4.id_for_label }}">{{ form.mes_8_4.label }}</label>{{ form.mes_8_4 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_9_4.id_for_label }}">{{ form.mes_9_4.label }}</label>{{ form.mes_9_4 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_10_4.id_for_label }}">{{ form.mes_10_4.label }}</label>{{ form.mes_10_4 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_11_4.id_for_label }}">{{ form.mes_11_4.label }}</label>{{ form.mes_11_4 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_12_4.id_for_label }}">{{ form.mes_12_4.label }}</label>{{ form.mes_12_4 }}</div></div></div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper"><label for="{{ form.indicador_4.id_for_label }}">{{ form.indicador_4.label }}</label>{{ form.indicador_4 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.unidad_medida_4.id_for_label }}">{{ form.unidad_medida_4.label }}</label>{{ form.unidad_medida_4 }}</div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper">{{ form.meta_4 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.medio_verificacion_4.id_for_label }}">{{ form.medio_verificacion_4.label }}</label>{{ form.medio_verificacion_4 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.observaciones_4.id_for_label }}">{{ form.observaciones_4.label }}</label>{{ form.observaciones_4 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.actividad_5.id_for_label }}">{{ form.actividad_5.label }}</label>{{ form.actividad_5 }}</div></div><div class="col s12 m6 l2"><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_1_5.id_for_label }}">{{ form.mes_1_5.label }}</label>{{ form.mes_1_5 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_2_5.id_for_label }}">{{ form.mes_2_5.label }}</label>{{ form.mes_2_5 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_3_5.id_for_label }}">{{ form.mes_3_5.label }}</label>{{ form.mes_3_5 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_4_5.id_for_label }}">{{ form.mes_4_5.label }}</label>{{ form.mes_4_5 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_5_5.id_for_label }}">{{ form.mes_5_5.label }}</label>{{ form.mes_5_5 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_6_5.id_for_label }}">{{ form.mes_6_5.label }}</label>{{ form.mes_6_5 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_7_5.id_for_label }}">{{ form.mes_7_5.label }}</label>{{ form.mes_7_5 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_8_5.id_for_label }}">{{ form.mes_8_5.label }}</label>{{ form.mes_8_5 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_9_5.id_for_label }}">{{ form.mes_9_5.label }}</label>{{ form.mes_9_5 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_10_5.id_for_label }}">{{ form.mes_10_5.label }}</label>{{ form.mes_10_5 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_11_5.id_for_label }}">{{ form.mes_11_5.label }}</label>{{ form.mes_11_5 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_12_5.id_for_label }}">{{ form.mes_12_5.label }}</label>{{ form.mes_12_5 }}</div></div></div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper"><label for="{{ form.indicador_5.id_for_label }}">{{ form.indicador_5.label }}</label>{{ form.indicador_5 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.unidad_medida_5.id_for_label }}">{{ form.unidad_medida_5.label }}</label>{{ form.unidad_medida_5 }}</div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper">{{ form.meta_5 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.medio_verificacion_5.id_for_label }}">{{ form.medio_verificacion_5.label }}</label>{{ form.medio_verificacion_5 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.observaciones_5.id_for_label }}">{{ form.observaciones_5.label }}</label>{{ form.observaciones_5 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.actividad_6.id_for_label }}">{{ form.actividad_6.label }}</label>{{ form.actividad_6 }}</div></div><div class="col s12 m6 l2"><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_1_6.id_for_label }}">{{ form.mes_1_6.label }}</label>{{ form.mes_1_6 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_2_6.id_for_label }}">{{ form.mes_2_6.label }}</label>{{ form.mes_2_6 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_3_6.id_for_label }}">{{ form.mes_3_6.label }}</label>{{ form.mes_3_6 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_4_6.id_for_label }}">{{ form.mes_4_6.label }}</label>{{ form.mes_4_6 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_5_6.id_for_label }}">{{ form.mes_5_6.label }}</label>{{ form.mes_5_6 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_6_6.id_for_label }}">{{ form.mes_6_6.label }}</label>{{ form.mes_6_6 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_7_6.id_for_label }}">{{ form.mes_7_6.label }}</label>{{ form.mes_7_6 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_8_6.id_for_label }}">{{ form.mes_8_6.label }}</label>{{ form.mes_8_6 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_9_6.id_for_label }}">{{ form.mes_9_6.label }}</label>{{ form.mes_9_6 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_10_6.id_for_label }}">{{ form.mes_10_6.label }}</label>{{ form.mes_10_6 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_11_6.id_for_label }}">{{ form.mes_11_6.label }}</label>{{ form.mes_11_6 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_12_6.id_for_label }}">{{ form.mes_12_6.label }}</label>{{ form.mes_12_6 }}</div></div></div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper"><label for="{{ form.indicador_6.id_for_label }}">{{ form.indicador_6.label }}</label>{{ form.indicador_6 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.unidad_medida_6.id_for_label }}">{{ form.unidad_medida_6.label }}</label>{{ form.unidad_medida_6 }}</div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper">{{ form.meta_6 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.medio_verificacion_6.id_for_label }}">{{ form.medio_verificacion_6.label }}</label>{{ form.medio_verificacion_6 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.observaciones_6.id_for_label }}">{{ form.observaciones_6.label }}</label>{{ form.observaciones_6 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.actividad_7.id_for_label }}">{{ form.actividad_7.label }}</label>{{ form.actividad_7 }}</div></div><div class="col s12 m6 l2"><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_1_7.id_for_label }}">{{ form.mes_1_7.label }}</label>{{ form.mes_1_7 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_2_7.id_for_label }}">{{ form.mes_2_7.label }}</label>{{ form.mes_2_7 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_3_7.id_for_label }}">{{ form.mes_3_7.label }}</label>{{ form.mes_3_7 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_4_7.id_for_label }}">{{ form.mes_4_7.label }}</label>{{ form.mes_4_7 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_5_7.id_for_label }}">{{ form.mes_5_7.label }}</label>{{ form.mes_5_7 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_6_7.id_for_label }}">{{ form.mes_6_7.label }}</label>{{ form.mes_6_7 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_7_7.id_for_label }}">{{ form.mes_7_7.label }}</label>{{ form.mes_7_7 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_8_7.id_for_label }}">{{ form.mes_8_7.label }}</label>{{ form.mes_8_7 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_9_7.id_for_label }}">{{ form.mes_9_7.label }}</label>{{ form.mes_9_7 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_10_7.id_for_label }}">{{ form.mes_10_7.label }}</label>{{ form.mes_10_7 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_11_7.id_for_label }}">{{ form.mes_11_7.label }}</label>{{ form.mes_11_7 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_12_7.id_for_label }}">{{ form.mes_12_7.label }}</label>{{ form.mes_12_7 }}</div></div></div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper"><label for="{{ form.indicador_7.id_for_label }}">{{ form.indicador_7.label }}</label>{{ form.indicador_7 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.unidad_medida_7.id_for_label }}">{{ form.unidad_medida_7.label }}</label>{{ form.unidad_medida_7 }}</div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper">{{ form.meta_7 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.medio_verificacion_7.id_for_label }}">{{ form.medio_verificacion_7.label }}</label>{{ form.medio_verificacion_7 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.observaciones_7.id_for_label }}">{{ form.observaciones_7.label }}</label>{{ form.observaciones_7 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.actividad_8.id_for_label }}">{{ form.actividad_8.label }}</label>{{ form.actividad_8 }}</div></div><div class="col s12 m6 l2"><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_1_8.id_for_label }}">{{ form.mes_1_8.label }}</label>{{ form.mes_1_8 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_2_8.id_for_label }}">{{ form.mes_2_8.label }}</label>{{ form.mes_2_8 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_3_8.id_for_label }}">{{ form.mes_3_8.label }}</label>{{ form.mes_3_8 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_4_8.id_for_label }}">{{ form.mes_4_8.label }}</label>{{ form.mes_4_8 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_5_8.id_for_label }}">{{ form.mes_5_8.label }}</label>{{ form.mes_5_8 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_6_8.id_for_label }}">{{ form.mes_6_8.label }}</label>{{ form.mes_6_8 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_7_8.id_for_label }}">{{ form.mes_7_8.label }}</label>{{ form.mes_7_8 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_8_8.id_for_label }}">{{ form.mes_8_8.label }}</label>{{ form.mes_8_8 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_9_8.id_for_label }}">{{ form.mes_9_8.label }}</label>{{ form.mes_9_8 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_10_8.id_for_label }}">{{ form.mes_10_8.label }}</label>{{ form.mes_10_8 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_11_8.id_for_label }}">{{ form.mes_11_8.label }}</label>{{ form.mes_11_8 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_12_8.id_for_label }}">{{ form.mes_12_8.label }}</label>{{ form.mes_12_8 }}</div></div></div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper"><label for="{{ form.indicador_8.id_for_label }}">{{ form.indicador_8.label }}</label>{{ form.indicador_8 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.unidad_medida_8.id_for_label }}">{{ form.unidad_medida_8.label }}</label>{{ form.unidad_medida_8 }}</div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper">{{ form.meta_8 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.medio_verificacion_8.id_for_label }}">{{ form.medio_verificacion_8.label }}</label>{{ form.medio_verificacion_8 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.observaciones_8.id_for_label }}">{{ form.observaciones_8.label }}</label>{{ form.observaciones_8 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.actividad_9.id_for_label }}">{{ form.actividad_9.label }}</label>{{ form.actividad_9 }}</div></div><div class="col s12 m6 l2"><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_1_9.id_for_label }}">{{ form.mes_1_9.label }}</label>{{ form.mes_1_9 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_2_9.id_for_label }}">{{ form.mes_2_9.label }}</label>{{ form.mes_2_9 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_3_9.id_for_label }}">{{ form.mes_3_9.label }}</label>{{ form.mes_3_9 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_4_9.id_for_label }}">{{ form.mes_4_9.label }}</label>{{ form.mes_4_9 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_5_9.id_for_label }}">{{ form.mes_5_9.label }}</label>{{ form.mes_5_9 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_6_9.id_for_label }}">{{ form.mes_6_9.label }}</label>{{ form.mes_6_9 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_7_9.id_for_label }}">{{ form.mes_7_9.label }}</label>{{ form.mes_7_9 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_8_9.id_for_label }}">{{ form.mes_8_9.label }}</label>{{ form.mes_8_9 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_9_9.id_for_label }}">{{ form.mes_9_9.label }}</label>{{ form.mes_9_9 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_10_9.id_for_label }}">{{ form.mes_10_9.label }}</label>{{ form.mes_10_9 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_11_9.id_for_label }}">{{ form.mes_11_9.label }}</label>{{ form.mes_11_9 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_12_9.id_for_label }}">{{ form.mes_12_9.label }}</label>{{ form.mes_12_9 }}</div></div></div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper"><label for="{{ form.indicador_9.id_for_label }}">{{ form.indicador_9.label }}</label>{{ form.indicador_9 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.unidad_medida_9.id_for_label }}">{{ form.unidad_medida_9.label }}</label>{{ form.unidad_medida_9 }}</div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper">{{ form.meta_9 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.medio_verificacion_9.id_for_label }}">{{ form.medio_verificacion_9.label }}</label>{{ form.medio_verificacion_9 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.observaciones_9.id_for_label }}">{{ form.observaciones_9.label }}</label>{{ form.observaciones_9 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.actividad_10.id_for_label }}">{{ form.actividad_10.label }}</label>{{ form.actividad_10 }}</div></div><div class="col s12 m6 l2"><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_1_10.id_for_label }}">{{ form.mes_1_10.label }}</label>{{ form.mes_1_10 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_2_10.id_for_label }}">{{ form.mes_2_10.label }}</label>{{ form.mes_2_10 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_3_10.id_for_label }}">{{ form.mes_3_10.label }}</label>{{ form.mes_3_10 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_4_10.id_for_label }}">{{ form.mes_4_10.label }}</label>{{ form.mes_4_10 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_5_10.id_for_label }}">{{ form.mes_5_10.label }}</label>{{ form.mes_5_10 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_6_10.id_for_label }}">{{ form.mes_6_10.label }}</label>{{ form.mes_6_10 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_7_10.id_for_label }}">{{ form.mes_7_10.label }}</label>{{ form.mes_7_10 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_8_10.id_for_label }}">{{ form.mes_8_10.label }}</label>{{ form.mes_8_10 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_9_10.id_for_label }}">{{ form.mes_9_10.label }}</label>{{ form.mes_9_10 }}</div></div></div><div class="row"><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_10_10.id_for_label }}">{{ form.mes_10_10.label }}</label>{{ form.mes_10_10 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_11_10.id_for_label }}">{{ form.mes_11_10.label }}</label>{{ form.mes_11_10 }}</div></div><div class="col s6 m4"><div class="input-field fieldWrapper"><label for="{{ form.mes_12_10.id_for_label }}">{{ form.mes_12_10.label }}</label>{{ form.mes_12_10 }}</div></div></div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper"><label for="{{ form.indicador_10.id_for_label }}">{{ form.indicador_10.label }}</label>{{ form.indicador_10 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.unidad_medida_10.id_for_label }}">{{ form.unidad_medida_10.label }}</label>{{ form.unidad_medida_10 }}</div></div><div class="col s12 m6 l1"><div class="input-field fieldWrapper">{{ form.meta_10 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.medio_verificacion_10.id_for_label }}">{{ form.medio_verificacion_10.label }}</label>{{ form.medio_verificacion_10 }}</div></div><div class="col s12 m6 l2"><div class="input-field fieldWrapper"><label for="{{ form.observaciones_10.id_for_label }}">{{ form.observaciones_10.label }}</label>{{ form.observaciones_10 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m2" style="background-color:#365f91;color:white;"><p style="padding-bottom:15px;">Sección IV.</p></div><div class="col s12 m10" style="background-color:#365f91;color:white;"><p class="center-align" style="padding-bottom:15px;">ASPECTOS TRANSVERSALES</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="background-color:#365f91;color:white;"><p>1. Conservación y manejo ambiental</p><p style="padding-bottom:15px;">Identifique los impactos ambientales generados por las actividades del proyecto, describa las buenas prácticas ambientales que implementará el proyecto y las estrategias para la mitigación o compensación de posibles daños ambientales.</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.conservacion_manejo_ambiental.id_for_label }}">{{ form.conservacion_manejo_ambiental.label }}</label>{{ form.conservacion_manejo_ambiental }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="background-color:#365f91;color:white;"><p>2. Sustentabilidad</p><p style="padding-bottom:15px;">Indique las estrategias que se contemplan para que el proyecto siga en funcionamiento cuando el programa haya terminado su intevención.</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.sustentabilidad.id_for_label }}">{{ form.sustentabilidad.label }}</label>{{ form.sustentabilidad }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="background-color:#365f91;color:white;"><p>3. Riesgos  y Acciones de tratamiento.</p><p>Indique los posibles riesgos (estratégicos, operativos, financieros, tecnológicos, de cumplimiento, de imagen o reputación, de seguridad digital, corrupción) identificados, que pueden afectar la ejecución del  proyecto.</p><p style="padding-bottom:15px;">Consultar la G-DE-2 GUIA PARA LA ADMINISTRACIÓN DE RIESGO, donde se especifican los tipos de riesgo.</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.riesgos_acciones.id_for_label }}">{{ form.riesgos_acciones.label }}</label>{{ form.riesgos_acciones }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="background-color:#365f91;color:white;"><p>4. Articulación</p><p style="padding-bottom:15px;">Indique si existen otros aliados estratégicos, menciónelos y describa el tipo de apoyo que puede brindar al proyecto.</p></div><div class="col s12 m6 l3" style="background-color:#aaaaaa;"><p class="center-align" style="padding-bottom:15px;">Aliado</p></div><div class="col s12 m6 l3" style="background-color:#aaaaaa;"><p class="center-align" style="padding-bottom:15px;">Que puede aportar al proyecto</p></div><div class="col s12 m6 l3" style="background-color:#aaaaaa;"><p class="center-align" style="padding-bottom:15px;">Nombre de contacto</p></div><div class="col s12 m6 l3" style="background-color:#aaaaaa;"><p class="center-align" style="padding-bottom:15px;">Datos de contacto</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.aliado_1.id_for_label }}">{{ form.aliado_1.label }}</label>{{ form.aliado_1 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.aporte_aliado_1.id_for_label }}">{{ form.aporte_aliado_1.label }}</label>{{ form.aporte_aliado_1 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.nombre_aliado_1.id_for_label }}">{{ form.nombre_aliado_1.label }}</label>{{ form.nombre_aliado_1 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.datos_contacto_aliado_1.id_for_label }}">{{ form.datos_contacto_aliado_1.label }}</label>{{ form.datos_contacto_aliado_1 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.aliado_2.id_for_label }}">{{ form.aliado_2.label }}</label>{{ form.aliado_2 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.aporte_aliado_2.id_for_label }}">{{ form.aporte_aliado_2.label }}</label>{{ form.aporte_aliado_2 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.nombre_aliado_2.id_for_label }}">{{ form.nombre_aliado_2.label }}</label>{{ form.nombre_aliado_2 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.datos_contacto_aliado_2.id_for_label }}">{{ form.datos_contacto_aliado_2.label }}</label>{{ form.datos_contacto_aliado_2 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.aliado_3.id_for_label }}">{{ form.aliado_3.label }}</label>{{ form.aliado_3 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.aporte_aliado_3.id_for_label }}">{{ form.aporte_aliado_3.label }}</label>{{ form.aporte_aliado_3 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.nombre_aliado_3.id_for_label }}">{{ form.nombre_aliado_3.label }}</label>{{ form.nombre_aliado_3 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.datos_contacto_aliado_3.id_for_label }}">{{ form.datos_contacto_aliado_3.label }}</label>{{ form.datos_contacto_aliado_3 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.aliado_4.id_for_label }}">{{ form.aliado_4.label }}</label>{{ form.aliado_4 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.aporte_aliado_4.id_for_label }}">{{ form.aporte_aliado_4.label }}</label>{{ form.aporte_aliado_4 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.nombre_aliado_4.id_for_label }}">{{ form.nombre_aliado_4.label }}</label>{{ form.nombre_aliado_4 }}</div></div><div class="col s12 m6 l3"><div class="input-field fieldWrapper"><label for="{{ form.datos_contacto_aliado_4.id_for_label }}">{{ form.datos_contacto_aliado_4.label }}</label>{{ form.datos_contacto_aliado_4 }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="background-color:#365f91;color:white;"><p>5. Concepto Técnico socio/operador/Contratista</p><p style="padding-bottom:15px;">El concepto técnico debe sustentar la viabilidad del proyecto, teniendo en cuenta las variables analizadas durante la formulación del mismo.</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="margin-top:10px;"><div class="input-field fieldWrapper"><label for="{{ form.concepto_tecnico.id_for_label }}">{{ form.concepto_tecnico.label }}</label>{{ form.concepto_tecnico }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12" style="background-color:#365f91;color:white;"><p>ANEXOS:</p><p style="padding-bottom:15px;">Mencione los anexos que considere soporten el proyecto como cartas de intención, registro fotográfico, etc.</p></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6"><div class="input-field fieldWrapper"><label for="{{ form.anexo_1.id_for_label }}">{{ form.anexo_1.label }}</label>{{ form.anexo_1 }}</div></div><div class="col s12 m6">{{ form.file2 }}</div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6"><div class="input-field fieldWrapper"><label for="{{ form.anexo_2.id_for_label }}">{{ form.anexo_2.label }}</label>{{ form.anexo_2 }}</div></div><div class="col s12 m6">{{ form.file3 }}</div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6"><div class="input-field fieldWrapper"><label for="{{ form.anexo_3.id_for_label }}">{{ form.anexo_3.label }}</label>{{ form.anexo_3 }}</div></div><div class="col s12 m6">{{ form.file4 }}</div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6"><div class="input-field fieldWrapper"><label for="{{ form.anexo_4.id_for_label }}">{{ form.anexo_4.label }}</label>{{ form.anexo_4 }}</div></div><div class="col s12 m6">{{ form.file5 }}</div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label for="{{ form.nombre_representante_consejo.id_for_label }}">{{ form.nombre_representante_consejo.label }}</label>{{ form.nombre_representante_consejo }}</div></div><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label for="{{ form.nombre_representante_comite.id_for_label }}">{{ form.nombre_representante_comite.label }}</label>{{ form.nombre_representante_comite }}</div></div><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label for="{{ form.nombre_funcionario.id_for_label }}">{{ form.nombre_funcionario.label }}</label>{{ form.nombre_funcionario }}</div></div></div><div class="row" style="border: solid 1px #eaeaea;padding:5px;"><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label for="{{ form.cedula_representante_consejo.id_for_label }}">{{ form.cedula_representante_consejo.label }}</label>{{ form.cedula_representante_consejo }}</div></div><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label for="{{ form.cedula_representante_comite.id_for_label }}">{{ form.cedula_representante_comite.label }}</label>{{ form.cedula_representante_comite }}</div></div><div class="col s12 m6 l4"><div class="input-field fieldWrapper"><label for="{{ form.cedula_funcionario.id_for_label }}">{{ form.cedula_funcionario.label }}</label>{{ form.cedula_funcionario }}</div></div></div><div class="row"><div class="col s12"><input class="btn btn-primary button-submit" type="submit" name="submit" value="Guardar"></div></div></form></div></main><script src="//code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><script src="//cdnjs.cloudflare.com/ajax/libs/mixitup/3.3.0/mixitup.min.js"></script><script src="{% static 'js/materialize.js'%}"></script><script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.0/build/alertify.min.js"></script><script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script><script src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script><script src="//unpkg.com/materialize-stepper@3.0.0/dist/js/mstepper.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/js/dropify.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/i18n/es.js"></script><script src="//cdn.jsdelivr.net/npm/jquery-background-video@1.0.0/jquery.background-video.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.5/push.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.5/serviceWorker.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/SoundJS/1.0.1/soundjs.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/shortcuts/infinite.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment-with-locales.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/localization/messages_es.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.8.3/chosen.jquery.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/autonumeric/4.1.0/autoNumeric.min.js"></script><script src="{% static 'js/quill.js'%}"></script><script src="//www.google.com/recaptcha/api.js"></script><script>var error = '{{ error }}'
+if(error != ""){
+    alertify.error(error);
+}
+</script><script>var success = '{{ success }}'
+if (success != "") {
+    alertify.success(success);
+}
+</script>{% if debug %}<script>var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host);</script>{% else %}<script>var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host + "/realtime");</script>{% endif %}<script src="{% static 'js/jquery.animatecss.min.js'%}"></script><script src="{% static 'js/Csrftoken.js'%}"></script><script src="{% static 'js/Socket.js'%}"></script><script>$(document).ready(function(){
+
+
+
+    var user_notifications= {{user.notifications}};
+
+    var user_messages= {{user.notifications}};
+
+    if(user_notifications+user_messages > 0){
+        $("#notifications_header").removeClass('hide');
+        $("#notifications_navbar").removeClass('hide');
+    }
+
+    if(user_notifications > 0){
+        $("#notifications_body").removeClass('hide');
+    }
+
+    if (user_messages > 0) {
+        $("#message_body").removeClass('hide');
+    }
+
+
+
+
+    $(".button-collapse").sideNav({
+        menuWidth: 300,
+        closeOnClick: true
+    });
+
+    $("#menu-sican").click(function () {
+        var state = $("#icon-menu-sican").text();
+        if( state == 'arrow_drop_down' ){
+            $("#icon-menu-sican").text("arrow_drop_up");
+        }
+        else{
+            $("#icon-menu-sican").text("arrow_drop_down");
+        }
+    });
+
+
+});</script><script src="//cdnjs.cloudflare.com/ajax/libs/validate.js/0.12.0/validate.min.js"></script><script>$(document).ready(function () {
+
+    $("label[for='id_hogares']").addClass('active');
+    $("label[for='id_municipio']").addClass('active');
+    $("label[for='id_resguado_indigena_consejo_comunitario']").addClass('active');
+    $("label[for='id_nombre_comunidad']").addClass('active');
+    $("label[for='id_duracion']").addClass('active');
+
+    $('#id_hogares').select2();
+    $('#id_municipio').select2();
+    $('#id_resguado_indigena_consejo_comunitario').select2();
+    $('#id_nombre_comunidad').select2();
+    $('#id_duracion').select2();
+
+
+    $('#id_file2').dropify({
+        error: {
+            'fileSize': 'El archivo es demasiado grande.',
+        },
+        messages: {
+            'default': 'Haz clic y selecciona el archivo, tambien puedes arrastrarlo y soltarlo aqui',
+            'replace': 'Haz clic y selecciona el archivo, tambien puedes arrastrarlo y soltarlo aqui',
+            'remove': 'Eliminar',
+            'error': 'Ooops, algo malo paso.'
+        }
+    });
+
+
+    $('#id_file3').dropify({
+        error: {
+            'fileSize': 'El archivo es demasiado grande.',
+        },
+        messages: {
+            'default': 'Haz clic y selecciona el archivo, tambien puedes arrastrarlo y soltarlo aqui',
+            'replace': 'Haz clic y selecciona el archivo, tambien puedes arrastrarlo y soltarlo aqui',
+            'remove': 'Eliminar',
+            'error': 'Ooops, algo malo paso.'
+        }
+    });
+
+    $('#id_file4').dropify({
+        error: {
+            'fileSize': 'El archivo es demasiado grande.',
+        },
+        messages: {
+            'default': 'Haz clic y selecciona el archivo, tambien puedes arrastrarlo y soltarlo aqui',
+            'replace': 'Haz clic y selecciona el archivo, tambien puedes arrastrarlo y soltarlo aqui',
+            'remove': 'Eliminar',
+            'error': 'Ooops, algo malo paso.'
+        }
+    });
+
+    $('#id_file5').dropify({
+        error: {
+            'fileSize': 'El archivo es demasiado grande.',
+        },
+        messages: {
+            'default': 'Haz clic y selecciona el archivo, tambien puedes arrastrarlo y soltarlo aqui',
+            'replace': 'Haz clic y selecciona el archivo, tambien puedes arrastrarlo y soltarlo aqui',
+            'remove': 'Eliminar',
+            'error': 'Ooops, algo malo paso.'
+        }
+    });
+
+
+
+    update_meses($('#id_duracion').val())
+
+
+    $("#id_duracion").change(function () {
+        var duracion = $(this).val();
+        update_meses(duracion)
+    });
+
+
+    $("#id_mes_1_1").change(function () {
+        update_meta_1()
+    });
+
+    $("#id_mes_2_1").change(function () {
+        update_meta_1()
+    });
+
+    $("#id_mes_3_1").change(function () {
+        update_meta_1()
+    });
+
+    $("#id_mes_4_1").change(function () {
+        update_meta_1()
+    });
+
+    $("#id_mes_5_1").change(function () {
+        update_meta_1()
+    });
+
+    $("#id_mes_6_1").change(function () {
+        update_meta_1()
+    });
+
+
+    $("#id_mes_7_1").change(function () {
+        update_meta_1()
+    });
+
+    $("#id_mes_8_1").change(function () {
+        update_meta_1()
+    });
+
+    $("#id_mes_9_1").change(function () {
+        update_meta_1()
+    });
+
+    $("#id_mes_10_1").change(function () {
+        update_meta_1()
+    });
+
+    $("#id_mes_11_1").change(function () {
+        update_meta_1()
+    });
+
+    $("#id_mes_12_1").change(function () {
+        update_meta_1()
+    });
+
+
+
+
+
+
+
+    $("#id_mes_1_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_2_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_3_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_4_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_5_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_6_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_7_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_8_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_9_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_10_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_11_2").change(function () {
+        update_meta_2()
+    });
+
+    $("#id_mes_12_2").change(function () {
+        update_meta_2()
+    });
+
+
+
+
+
+
+
+    $("#id_mes_1_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_2_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_3_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_4_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_5_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_6_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_7_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_8_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_9_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_10_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_11_3").change(function () {
+        update_meta_3()
+    });
+
+    $("#id_mes_12_3").change(function () {
+        update_meta_3()
+    });
+
+
+
+
+
+
+    $("#id_mes_1_4").change(function () {
+        update_meta_4()
+    });
+
+    $("#id_mes_2_4").change(function () {
+        update_meta_4()
+    });
+
+    $("#id_mes_3_4").change(function () {
+        update_meta_4()
+    });
+
+    $("#id_mes_4_4").change(function () {
+        update_meta_4()
+    });
+
+    $("#id_mes_5_4").change(function () {
+        update_meta_4()
+    });
+
+    $("#id_mes_6_4").change(function () {
+        update_meta_4()
+    });
+
+
+    $("#id_mes_7_4").change(function () {
+        update_meta_4()
+    });
+
+    $("#id_mes_8_4").change(function () {
+        update_meta_4()
+    });
+
+    $("#id_mes_9_4").change(function () {
+        update_meta_4()
+    });
+
+    $("#id_mes_10_4").change(function () {
+        update_meta_4()
+    });
+
+    $("#id_mes_11_4").change(function () {
+        update_meta_4()
+    });
+
+    $("#id_mes_12_4").change(function () {
+        update_meta_4()
+    });
+
+
+
+
+
+    $("#id_mes_1_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_2_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_3_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_4_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_5_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_6_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_7_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_8_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_9_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_10_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_11_5").change(function () {
+        update_meta_5()
+    });
+
+    $("#id_mes_12_5").change(function () {
+        update_meta_5()
+    });
+
+
+
+
+
+    $("#id_mes_1_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_2_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_3_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_4_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_5_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_6_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_7_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_8_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_9_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_10_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_11_6").change(function () {
+        update_meta_6()
+    });
+
+    $("#id_mes_12_6").change(function () {
+        update_meta_6()
+    });
+
+
+
+    $("#id_mes_1_7").change(function () {
+        update_meta_7()
+    });
+
+    $("#id_mes_2_7").change(function () {
+        update_meta_7()
+    });
+
+    $("#id_mes_3_7").change(function () {
+        update_meta_7()
+    });
+
+    $("#id_mes_4_7").change(function () {
+        update_meta_7()
+    });
+
+    $("#id_mes_5_7").change(function () {
+        update_meta_7()
+    });
+
+    $("#id_mes_6_7").change(function () {
+        update_meta_7()
+    });
+
+
+    $("#id_mes_7_7").change(function () {
+        update_meta_7()
+    });
+
+    $("#id_mes_8_7").change(function () {
+        update_meta_7()
+    });
+
+    $("#id_mes_9_7").change(function () {
+        update_meta_7()
+    });
+
+    $("#id_mes_10_7").change(function () {
+        update_meta_7()
+    });
+
+    $("#id_mes_11_7").change(function () {
+        update_meta_7()
+    });
+
+    $("#id_mes_12_7").change(function () {
+        update_meta_7()
+    });
+
+
+
+
+
+    $("#id_mes_1_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_2_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_3_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_4_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_5_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_6_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_7_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_8_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_9_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_10_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_11_8").change(function () {
+        update_meta_8()
+    });
+
+    $("#id_mes_12_8").change(function () {
+        update_meta_8()
+    });
+
+
+
+
+
+
+    $("#id_mes_1_9").change(function () {
+        update_meta_9()
+    });
+
+    $("#id_mes_2_9").change(function () {
+        update_meta_9()
+    });
+
+    $("#id_mes_3_9").change(function () {
+        update_meta_9()
+    });
+
+    $("#id_mes_4_9").change(function () {
+        update_meta_9()
+    });
+
+    $("#id_mes_5_9").change(function () {
+        update_meta_9()
+    });
+
+    $("#id_mes_6_9").change(function () {
+        update_meta_9()
+    });
+
+
+    $("#id_mes_7_9").change(function () {
+        update_meta_9()
+    });
+
+    $("#id_mes_8_9").change(function () {
+        update_meta_9()
+    });
+
+    $("#id_mes_9_9").change(function () {
+        update_meta_9()
+    });
+
+    $("#id_mes_10_9").change(function () {
+        update_meta_9()
+    });
+
+    $("#id_mes_11_9").change(function () {
+        update_meta_9()
+    });
+
+    $("#id_mes_12_9").change(function () {
+        update_meta_9()
+    });
+
+
+
+
+
+    $("#id_mes_1_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_2_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_3_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_4_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_5_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_6_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_7_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_8_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_9_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_10_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_11_10").change(function () {
+        update_meta_10()
+    });
+
+    $("#id_mes_12_10").change(function () {
+        update_meta_10()
+    });
+
+
+
+
+
+    $("#id_municipio").change(function () {
+        var url = '{{ url_carga_consejos }}'
+        var municipio_id = $(this).val();
+
+        $.ajax({
+            url: url,
+            data: {
+                'municipio': municipio_id
+            },
+            success: function (data) {
+                $("#id_resguado_indigena_consejo_comunitario").html(data);
+                $('#id_resguado_indigena_consejo_comunitario').select2();
+            }
+        });
+
+    });
+
+    $("#id_resguado_indigena_consejo_comunitario").change(function () {
+        var url = '{{ url_carga_comunidades }}'
+        var consejo_id = $(this).val();
+
+        $.ajax({
+            url: url,
+            data: {
+                'consejo': consejo_id
+            },
+            success: function (data) {
+                $("#id_nombre_comunidad").html(data);
+                $('#id_nombre_comunidad').select2();
+            }
+        });
+
+    });
+
+
+    $('#id_file').dropify({
+        error: {
+            'fileSize': 'El archivo es demasiado grande.',
+        },
+        messages: {
+            'default': 'Haz clic y selecciona el archivo, tambien puedes arrastrarlo y soltarlo aqui',
+            'replace': 'Haz clic y selecciona el archivo, tambien puedes arrastrarlo y soltarlo aqui',
+            'remove': 'Eliminar',
+            'error': 'Ooops, algo malo paso.'
+        }
+    });
+
+
+
+
+    function update_meta_1() {
+        var value = 0
+        value += parseInt($("#id_mes_1_1").val())
+        value += parseInt($("#id_mes_2_1").val())
+        value += parseInt($("#id_mes_3_1").val())
+        value += parseInt($("#id_mes_4_1").val())
+        value += parseInt($("#id_mes_5_1").val())
+        value += parseInt($("#id_mes_6_1").val())
+        value += parseInt($("#id_mes_7_1").val())
+        value += parseInt($("#id_mes_8_1").val())
+        value += parseInt($("#id_mes_9_1").val())
+        value += parseInt($("#id_mes_10_1").val())
+        value += parseInt($("#id_mes_11_1").val())
+        value += parseInt($("#id_mes_12_1").val())
+
+        $("#id_meta_1").val(value)
+    }
+
+    function update_meta_2() {
+        var value = 0
+        value += parseInt($("#id_mes_1_2").val())
+        value += parseInt($("#id_mes_2_2").val())
+        value += parseInt($("#id_mes_3_2").val())
+        value += parseInt($("#id_mes_4_2").val())
+        value += parseInt($("#id_mes_5_2").val())
+        value += parseInt($("#id_mes_6_2").val())
+        value += parseInt($("#id_mes_7_2").val())
+        value += parseInt($("#id_mes_8_2").val())
+        value += parseInt($("#id_mes_9_2").val())
+        value += parseInt($("#id_mes_10_2").val())
+        value += parseInt($("#id_mes_11_2").val())
+        value += parseInt($("#id_mes_12_2").val())
+
+        $("#id_meta_2").val(value)
+    }
+
+    function update_meta_3() {
+        var value = 0
+        value += parseInt($("#id_mes_1_3").val())
+        value += parseInt($("#id_mes_2_3").val())
+        value += parseInt($("#id_mes_3_3").val())
+        value += parseInt($("#id_mes_4_3").val())
+        value += parseInt($("#id_mes_5_3").val())
+        value += parseInt($("#id_mes_6_3").val())
+        value += parseInt($("#id_mes_7_3").val())
+        value += parseInt($("#id_mes_8_3").val())
+        value += parseInt($("#id_mes_9_3").val())
+        value += parseInt($("#id_mes_10_3").val())
+        value += parseInt($("#id_mes_11_3").val())
+        value += parseInt($("#id_mes_12_3").val())
+
+        $("#id_meta_3").val(value)
+    }
+
+    function update_meta_4() {
+        var value = 0
+        value += parseInt($("#id_mes_1_4").val())
+        value += parseInt($("#id_mes_2_4").val())
+        value += parseInt($("#id_mes_3_4").val())
+        value += parseInt($("#id_mes_4_4").val())
+        value += parseInt($("#id_mes_5_4").val())
+        value += parseInt($("#id_mes_6_4").val())
+        value += parseInt($("#id_mes_7_4").val())
+        value += parseInt($("#id_mes_8_4").val())
+        value += parseInt($("#id_mes_9_4").val())
+        value += parseInt($("#id_mes_10_4").val())
+        value += parseInt($("#id_mes_11_4").val())
+        value += parseInt($("#id_mes_12_4").val())
+
+        $("#id_meta_4").val(value)
+    }
+
+    function update_meta_5() {
+        var value = 0
+        value += parseInt($("#id_mes_1_5").val())
+        value += parseInt($("#id_mes_2_5").val())
+        value += parseInt($("#id_mes_3_5").val())
+        value += parseInt($("#id_mes_4_5").val())
+        value += parseInt($("#id_mes_5_5").val())
+        value += parseInt($("#id_mes_6_5").val())
+        value += parseInt($("#id_mes_7_5").val())
+        value += parseInt($("#id_mes_8_5").val())
+        value += parseInt($("#id_mes_9_5").val())
+        value += parseInt($("#id_mes_10_5").val())
+        value += parseInt($("#id_mes_11_5").val())
+        value += parseInt($("#id_mes_12_5").val())
+
+        $("#id_meta_5").val(value)
+    }
+
+    function update_meta_6() {
+        var value = 0
+        value += parseInt($("#id_mes_1_6").val())
+        value += parseInt($("#id_mes_2_6").val())
+        value += parseInt($("#id_mes_3_6").val())
+        value += parseInt($("#id_mes_4_6").val())
+        value += parseInt($("#id_mes_5_6").val())
+        value += parseInt($("#id_mes_6_6").val())
+        value += parseInt($("#id_mes_7_6").val())
+        value += parseInt($("#id_mes_8_6").val())
+        value += parseInt($("#id_mes_9_6").val())
+        value += parseInt($("#id_mes_10_6").val())
+        value += parseInt($("#id_mes_11_6").val())
+        value += parseInt($("#id_mes_12_6").val())
+
+        $("#id_meta_6").val(value)
+    }
+
+    function update_meta_7() {
+        var value = 0
+        value += parseInt($("#id_mes_1_7").val())
+        value += parseInt($("#id_mes_2_7").val())
+        value += parseInt($("#id_mes_3_7").val())
+        value += parseInt($("#id_mes_4_7").val())
+        value += parseInt($("#id_mes_5_7").val())
+        value += parseInt($("#id_mes_6_7").val())
+        value += parseInt($("#id_mes_7_7").val())
+        value += parseInt($("#id_mes_8_7").val())
+        value += parseInt($("#id_mes_9_7").val())
+        value += parseInt($("#id_mes_10_7").val())
+        value += parseInt($("#id_mes_11_7").val())
+        value += parseInt($("#id_mes_12_7").val())
+
+        $("#id_meta_7").val(value)
+    }
+
+    function update_meta_8() {
+        var value = 0
+        value += parseInt($("#id_mes_1_8").val())
+        value += parseInt($("#id_mes_2_8").val())
+        value += parseInt($("#id_mes_3_8").val())
+        value += parseInt($("#id_mes_4_8").val())
+        value += parseInt($("#id_mes_5_8").val())
+        value += parseInt($("#id_mes_6_8").val())
+        value += parseInt($("#id_mes_7_8").val())
+        value += parseInt($("#id_mes_8_8").val())
+        value += parseInt($("#id_mes_9_8").val())
+        value += parseInt($("#id_mes_10_8").val())
+        value += parseInt($("#id_mes_11_8").val())
+        value += parseInt($("#id_mes_12_8").val())
+
+        $("#id_meta_8").val(value)
+    }
+
+    function update_meta_9() {
+        var value = 0
+        value += parseInt($("#id_mes_1_9").val())
+        value += parseInt($("#id_mes_2_9").val())
+        value += parseInt($("#id_mes_3_9").val())
+        value += parseInt($("#id_mes_4_9").val())
+        value += parseInt($("#id_mes_5_9").val())
+        value += parseInt($("#id_mes_6_9").val())
+        value += parseInt($("#id_mes_7_9").val())
+        value += parseInt($("#id_mes_8_9").val())
+        value += parseInt($("#id_mes_9_9").val())
+        value += parseInt($("#id_mes_10_9").val())
+        value += parseInt($("#id_mes_11_9").val())
+        value += parseInt($("#id_mes_12_9").val())
+
+        $("#id_meta_9").val(value)
+    }
+
+    function update_meta_10() {
+        var value = 0
+        value += parseInt($("#id_mes_1_10").val())
+        value += parseInt($("#id_mes_2_10").val())
+        value += parseInt($("#id_mes_3_10").val())
+        value += parseInt($("#id_mes_4_10").val())
+        value += parseInt($("#id_mes_5_10").val())
+        value += parseInt($("#id_mes_6_10").val())
+        value += parseInt($("#id_mes_7_10").val())
+        value += parseInt($("#id_mes_8_10").val())
+        value += parseInt($("#id_mes_9_10").val())
+        value += parseInt($("#id_mes_10_10").val())
+        value += parseInt($("#id_mes_11_10").val())
+        value += parseInt($("#id_mes_12_10").val())
+
+        $("#id_meta_10").val(value)
+    }
+
+    update_meses(parseInt($("#id_duracion").val()))
+
+    function update_meses(duracion) {
+        if (duracion === 1) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_2_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_3_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_4_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_5_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_6_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_7_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_8_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_9_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_10_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_11_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+        if (duracion === 2) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_3_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_4_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_5_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_6_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_7_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_8_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_9_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_10_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_11_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+        if (duracion === 3) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_4_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_5_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_6_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_7_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_8_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_9_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_10_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_11_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+        if (duracion === 4) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_5_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_6_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_7_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_8_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_9_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_10_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_11_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+        if (duracion === 5) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_6_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_7_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_8_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_9_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_10_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_11_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+        if (duracion === 6) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_7_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_8_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_9_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_10_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_11_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+        if (duracion === 7) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_8_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_9_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_10_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_11_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+        if (duracion === 8) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_9_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_10_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_11_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+        if (duracion === 9) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_10_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_11_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+        if (duracion === 10) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_11_" + i.toLocaleString()).prop("disabled", true);
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+        if (duracion === 11) {
+
+            for (var i = 1; i <= 10; i++) {
+                $("#id_mes_12_" + i.toLocaleString()).prop("disabled", true);
+            }
+        }
+
+    }
+
+
+});</script></body></html>
