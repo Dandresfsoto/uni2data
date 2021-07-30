@@ -13459,11 +13459,11 @@ class CaracterizacionInicialForm(forms.Form):
         ('No', 'No'),
         ('No sabe', 'No sabe')
     ]), required=False)
-    categoria_discapacidad = forms.MultipleChoiceField(label='Categoria discapacidad', choices=CategoriaDiscapacidad.objects.all().values_list('id','nombre'), required=False)
-    dificultades_permanentes = forms.MultipleChoiceField(label='Dificualtades permanentes para', choices=DificultadesPermanentesDiscapacidad.objects.all().values_list('id','nombre'), required=False)
+    categoria_discapacidad = forms.MultipleChoiceField(label='Categoria discapacidad', choices=[], required=False)
+    dificultades_permanentes = forms.MultipleChoiceField(label='Dificualtades permanentes para', choices=[], required=False)
 
-    utiliza_actualmente = forms.MultipleChoiceField(label='Utiliza actualmente algun dispositivo de apoyo',choices=ElementosDiscapacidad.objects.all().values_list('id','nombre'),required=False)
-    rehabilitacion = forms.MultipleChoiceField(label='Esta en rehabilitación?',choices=TiposRehabilitacionDiscapacidad.objects.all().values_list('id', 'nombre'), required=False)
+    utiliza_actualmente = forms.MultipleChoiceField(label='Utiliza actualmente algun dispositivo de apoyo',choices=[],required=False)
+    rehabilitacion = forms.MultipleChoiceField(label='Esta en rehabilitación?',choices=[], required=False)
 
 
     tiene_cuidador = forms.BooleanField(initial=False, required=False,widget=forms.CheckboxInput(attrs={'class':'filled-in checkboxinput'}))
