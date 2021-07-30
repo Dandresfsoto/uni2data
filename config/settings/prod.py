@@ -3,7 +3,7 @@ from .base import env
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['iracaz1.com','localhost','70.37.62.38']
+ALLOWED_HOSTS = ['uni2data.com','localhost']
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
