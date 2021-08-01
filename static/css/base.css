@@ -136,7 +136,7 @@ span.badge.nuevo {
   font-size: 10px;
 }
 span.badge.actualizado {
-  background-color: #aebaca;
+  background-color: #5d7ca6;
   color: #fff;
   font-size: 10px;
 }
@@ -534,7 +534,7 @@ nav {
   color: #fff;
 }
 .collapsible-body-blue {
-  background-color: #aebaca !important;
+  background-color: #5d7ca6 !important;
 }
 .waves-effect {
   display: list-item;
@@ -782,7 +782,7 @@ span.badge.new {
   cursor: pointer;
 }
 .user-container {
-  background-color: #aebaca !important;
+  background-color: #5d7ca6 !important;
   border-bottom: 1px solid #e0e0e0 !important;
 }
 .user-container i {
