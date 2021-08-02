@@ -1,7 +1,7 @@
 {% extends "mail_templated/base.tpl" %}
 
 {% block subject %}
-Hola {{ first_name }}, código de recuperación SION
+Hola {{ first_name }}, código de recuperación UNI2DATA
 {% endblock %}
 
 
@@ -34,7 +34,7 @@ Hola {{ first_name }}, código de recuperación SION
 								<tr>
 									<td style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
 										Se ha solicitado cambiar la contraseña para tu cuenta en el sistema de información
-                                        SION, a continuación encontraras el codigo solicitado.
+                                        UNI2DATA, a continuación encontraras el codigo solicitado.
 									</td>
 								</tr>
 								<tr>

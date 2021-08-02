@@ -1,7 +1,7 @@
 {% extends "mail_templated/base.tpl" %}
 
 {% block subject %}
-Hola {{ first_name }}, bienvenido a SION
+Hola {{ first_name }}, bienvenido a UNI2DATA
 {% endblock %}
 
 
@@ -33,7 +33,7 @@ Hola {{ first_name }}, bienvenido a SION
 								</tr>
 								<tr>
 									<td style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
-										Has creado una cuenta en el sistema de información SION usando este correo electrónico,
+										Has creado una cuenta en el sistema de información UNI2DATA usando este correo electrónico,
                                         a continuación encuentras los datos de acceso y el vinculo para verificar tu cuenta.
 									</td>
 								</tr>

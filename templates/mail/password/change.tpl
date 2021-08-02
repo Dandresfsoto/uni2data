@@ -1,7 +1,7 @@
 {% extends "mail_templated/base.tpl" %}
 
 {% block subject %}
-Hola {{ first_name }}, cambiaste la contraseña SION
+Hola {{ first_name }}, cambiaste la contraseña UNI2DATA
 {% endblock %}
 
 
@@ -34,7 +34,7 @@ Hola {{ first_name }}, cambiaste la contraseña SION
 								<tr>
 									<td style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
 										Se ha cambiado la contraseña de acceso a tu cuenta en el sistema de información
-                                        SION, a continuación encontraras una fracción de la nueva contraseña.
+                                        UNI2DATA, a continuación encontraras una fracción de la nueva contraseña.
 									</td>
 								</tr>
 								<tr>
