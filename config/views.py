@@ -93,7 +93,7 @@ class Index(LoginRequiredMixin,
             'sican_description': 'Actualizar la información de mi hoja de vida',
             'sican_color': 'orange darken-4',
             'sican_url': '/perfil/',
-            'sican_categoria': 'sion',
+            'sican_categoria': 'uni2data',
             'sican_order': 9
         })
 
@@ -103,7 +103,7 @@ class Index(LoginRequiredMixin,
             'sican_description': 'Postular mi hoja de vida a una oferta laboral',
             'sican_color': 'teal darken-4',
             'sican_url': '/ofertas/aplicar/',
-            'sican_categoria': 'sion',
+            'sican_categoria': 'uni2data',
             'sican_order': 10
         })
 
@@ -114,7 +114,7 @@ class Index(LoginRequiredMixin,
                 'sican_description': 'Gestión de contratos suscritos y soportes para legalización',
                 'sican_color': 'purple darken-4',
                 'sican_url': '/contratos/',
-                'sican_categoria': 'sion',
+                'sican_categoria': 'uni2data',
                 'sican_order': 7
             })
 
