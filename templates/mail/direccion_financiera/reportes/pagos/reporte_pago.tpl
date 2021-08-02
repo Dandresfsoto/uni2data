@@ -19,8 +19,8 @@ Hola {{ first_name }}, notificación de consignación
 			<td style="padding: 10px 0 30px 0;">
 				<table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border: 1px solid #cccccc; border-collapse: collapse;">
 					<tr>
-						<td align="center" bgcolor="#4C666E" style="padding: 50px; color: #fff; font-size: 100px; font-weight: bold; font-family: Arial, sans-serif;">
-							<img src="{{ url_base }}/static/img/sion.png" alt="SION" height="100" style="display: block;" />
+						<td align="center" bgcolor="#6B90BF" style="padding: 50px; color: #fff; font-size: 100px; font-weight: bold; font-family: Arial, sans-serif;">
+							<img src="{{ url_base }}/static/img/uni2data.png" alt="UNI2DATA" height="100" style="display: block;" />
 						</td>
 					</tr>
 					<tr>
@@ -76,11 +76,11 @@ Hola {{ first_name }}, notificación de consignación
 						</td>
 					</tr>
 					<tr>
-						<td bgcolor="#4C666E" style="padding: 30px 30px 30px 30px;">
+						<td bgcolor="#6B90BF" style="padding: 30px 30px 30px 30px;">
 							<table border="0" cellpadding="0" cellspacing="0" width="100%">
 								<tr>
 									<td style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px;" width="75%">
-										&copy; 2019
+										&copy; 2021
 									</td>
 								</tr>
 							</table>

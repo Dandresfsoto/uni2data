@@ -19,8 +19,8 @@ Hola {{ first_name }}, bienvenido a SION
 			<td style="padding: 10px 0 30px 0;">
 				<table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border: 1px solid #cccccc; border-collapse: collapse;">
 					<tr>
-						<td align="center" bgcolor="#4C666E" style="padding: 50px; color: #fff; font-size: 100px; font-weight: bold; font-family: Arial, sans-serif;">
-							<img src="{{ url_base }}/static/img/sion.png" alt="SION" height="100" style="display: block;" />
+						<td align="center" bgcolor="#6B90BF" style="padding: 50px; color: #fff; font-size: 100px; font-weight: bold; font-family: Arial, sans-serif;">
+							<img src="{{ url_base }}/static/img/uni2data.png" alt="UNI2DATA" height="100" style="display: block;" />
 						</td>
 					</tr>
 					<tr>
@@ -58,12 +58,12 @@ Hola {{ first_name }}, bienvenido a SION
 
 														<tr>
 															<td style="padding: 25px 0 0 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
-																<p>Url: <b><a href="http://iracaz1.com/">http://iracaz1.com/</a></b></p>
+																<p>Url: <b><a href="http://uni2data.com/">http://uni2data.com/</a></b></p>
                                                                 <p>Email: <b>{{ email }}</b></p>
                                                                 <p>Contraseña: <b>{{ password }}</b></p>
-                                                                <table class="buttonwrapper" bgcolor="#4C666E" border="0" cellspacing="0" cellpadding="0">
+                                                                <table class="buttonwrapper" bgcolor="#6B90BF" border="0" cellspacing="0" cellpadding="0">
                                                                     <tr>
-                                                                      <td width="240" class="button" height="45" style="text-align: center; font-size: 16px; font-family: sans-serif; font-weight: bold; padding: 0 30px 0 30px;background:#4C666E;">
+                                                                      <td width="240" class="button" height="45" style="text-align: center; font-size: 16px; font-family: sans-serif; font-weight: bold; padding: 0 30px 0 30px;background:#6B90BF;">
                                                                         <a href="{{ url_base }}/verificar?email={{email}}&code={{code}}" style="color: #ffffff; text-decoration: none;">Verificar cuenta</a>
                                                                       </td>
                                                                     </tr>
@@ -95,11 +95,11 @@ Hola {{ first_name }}, bienvenido a SION
 						</td>
 					</tr>
 					<tr>
-						<td bgcolor="#4C666E" style="padding: 30px 30px 30px 30px;">
+						<td bgcolor="#6B90BF" style="padding: 30px 30px 30px 30px;">
 							<table border="0" cellpadding="0" cellspacing="0" width="100%">
 								<tr>
 									<td style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px;" width="75%">
-										&copy; 2019
+										&copy; 2021
 									</td>
 								</tr>
 							</table>
