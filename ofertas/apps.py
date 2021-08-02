@@ -10,7 +10,7 @@ class OfertasConfig(AppConfig):
         self.sican_description = "Recolección de información y soportes para vacantes en la asociación"
         self.sican_color = "pink darken-4"
         self.sican_url = '/ofertas/'
-        self.sican_categoria = 'sion'
+        self.sican_categoria = 'uni2data'
         self.sican_order = 8
         self.sican_permiso = 'usuarios.ofertas.ver'
         self.sican_publico = True

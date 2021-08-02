@@ -10,6 +10,6 @@ class ReportesConfig(AppConfig):
         self.sican_description = "Consulta y descarga de los reportes generados por el sistema"
         self.sican_color = "brown darken-3"
         self.sican_url = '/reportes/'
-        self.sican_categoria = 'sion'
+        self.sican_categoria = 'uni2data'
         self.sican_order = 4
         self.sican_permiso = 'usuarios.reportes.ver'
