@@ -35,7 +35,7 @@ def construir_reporte(titulos,contenidos,formatos,ancho_columnas,nombre,fecha,us
                 ws.column_dimensions[get_column_letter(col_num+1)].width = ancho_columnas[col_num]
 
             ws.cell(row=row_num, column=col_num + 1).font = Font(name='Arial',size=11,bold=True,color='FFFFFFFF')
-            ws.cell(row=row_num, column=col_num + 1).fill = PatternFill(fill_type='solid',start_color='FF4C666E',end_color='FF000000')
+            ws.cell(row=row_num, column=col_num + 1).fill = PatternFill(fill_type='solid',start_color='FF6B90BF',end_color='FF000000')
             ws.cell(row=row_num, column=col_num + 1).alignment = Alignment(horizontal='center',vertical='center',wrap_text=True)
             ws.cell(row=row_num, column=col_num + 1).number_format = 'General'
 
@@ -59,7 +59,7 @@ def construir_reporte(titulos,contenidos,formatos,ancho_columnas,nombre,fecha,us
                         ws.cell(row=row_num,column=col_num+1).value = contenido[col_num][0]
                         ws.cell(row=row_num, column=col_num + 1).hyperlink = contenido[col_num][1]
 
-                    ws.cell(row=row_num, column=col_num + 1).font = Font(name='Arial', size=10, bold=True,color='FF4C666E')
+                    ws.cell(row=row_num, column=col_num + 1).font = Font(name='Arial', size=10, bold=True,color='FF6B90BF')
                     ws.cell(row=row_num, column=col_num + 1).alignment = Alignment(horizontal='center',vertical='center',wrap_text=True)
                     ws.cell(row=row_num, column=col_num + 1).number_format = formatos[col_num][0]
 

@@ -43,3 +43,4 @@ class CargaMasivaContratosAdmin(admin.ModelAdmin):
 admin.site.register(models.CargaMasivaContratos, CargaMasivaContratosAdmin)
 
 admin.site.register(models.Cargos)
+admin.site.register(models.CargosHv)

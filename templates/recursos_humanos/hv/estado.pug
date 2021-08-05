@@ -58,20 +58,16 @@ block container_principal
                 p
                     b(style="margin-right:5px;") Cédula:
                     | {{ hv.contratista.cedula }}
-                p
-                    b(style="margin-right:5px;") Hoja de vida:
-                    a(href="{{ file_url }}",target="_blank") Link
+
 
             div(class="col s12 m6")
                 p
-                    b(style="margin-right:5px;") Región:
-                    | {{ hv.region }}
-                p
                     b(style="margin-right:5px;") Envio:
                     | Envio {{ hv.envio }}
+
                 p
-                    b(style="margin-right:5px;") Formato de experiencia:
-                    a(href="{{ hv.url_excel }}",target="_blank") Link
+                    b(style="margin-right:5px;") Hoja de vida:
+                    a(href="{{ file_url }}",target="_blank") Link
 
             div(class="col s12")
 

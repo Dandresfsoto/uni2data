@@ -111,8 +111,8 @@ class ContratistasListApi(BaseDatatableView):
 
 class HvListApi(BaseDatatableView):
     model = Hv
-    columns = ['id','region','contratista','observacion','consecutivo_cargo','cargo','creation','file','excel','estado']
-    order_columns = ['id','region','contratista','observacion','consecutivo_cargo','cargo','creation','file','excel','estado']
+    columns = ['id','contratista','observacion','cargo', 'municipio','creation','file','estado']
+    order_columns = ['id','contratista','observacion','cargo', 'municipio','creation','file','estado']
 
 
     def filter_queryset(self, qs):
@@ -152,8 +152,14 @@ class HvListApi(BaseDatatableView):
         elif column == 'creation':
             return row.pretty_creation_datetime()
 
+        elif column == 'cargo':
+            return row.cargo.name
+
         elif column == 'contratista':
             return str(row.contratista)
+
+        elif column == 'municipio':
+            return str(row.municipio)
 
         elif column == 'observacion':
             return 'Envio {0}'.format(row.envio)

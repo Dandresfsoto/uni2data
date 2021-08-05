@@ -240,14 +240,14 @@ def build_listado_contratos(id):
 def build_reporte_hv(id):
     from recursos_humanos.models import Hv
     reporte = models_reportes.Reportes.objects.get(id = id)
-    proceso = "SICAN-LST-HV"
+    proceso = "LST-HV"
 
 
-    titulos = ['Consecutivo', 'Contratista', 'Cedula', 'Región', 'Envio', 'Consecutivo', 'Cargo', 'Estado', 'Observaciones', 'Hv', 'Excel']
+    titulos = ['Consecutivo', 'Contratista', 'Cedula', 'Envio', 'Cargo', 'Estado', 'Observaciones', 'Hv']
 
-    formatos = ['0', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General']
+    formatos = ['0', 'General', 'General', 'General', 'General', 'General', 'General', 'General']
 
-    ancho_columnas = [20, 40, 30, 30, 30, 30, 30, 30, 40, 30, 30]
+    ancho_columnas = [20, 40, 30, 30, 30, 30, 30, 40]
 
     contenidos = []
 
@@ -260,14 +260,11 @@ def build_reporte_hv(id):
             int(i),
             hv.contratista.get_full_name(),
             hv.contratista.cedula,
-            hv.region,
             hv.envio,
-            hv.consecutivo_cargo,
-            hv.cargo,
+            hv.cargo.name,
             hv.estado,
             hv.observacion,
-            ('LINK','https://sican.asoandes.org/'+hv.url_file()),
-            ('LINK', 'https://sican.asoandes.org/' + hv.url_excel())
+            ('LINK','http://uni2data.com/'+hv.url_file())
         ])
 
     output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)

@@ -15,6 +15,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import Permission, Group
 from direccion_financiera.models import Proyecto
+from usuarios.models import Municipios
 
 settings_time_zone = timezone_pyzt(settings.TIME_ZONE)
 # Create your models here.
@@ -586,12 +587,20 @@ def SoportesContratosPostSave(sender, instance, **kwargs):
 
 
 def upload_dinamic_dir_hv(instance, filename):
-    return '/'.join(['Recursos Humanos', 'Hv',str(instance.region),str(instance.cargo),
-                     str(instance.consecutivo_cargo).zfill(2) + '. ' + str(instance.contratista.nombres.lower())+ " " +str(instance.contratista.apellidos.lower()), filename])
+    return '/'.join(['Recursos Humanos', 'Hv', filename])
 
 def upload_dinamic_dir_excel(instance, filename):
     return '/'.join(['Recursos Humanos', 'Hv',str(instance.region),str(instance.cargo),
                      str(instance.consecutivo_cargo).zfill(2) + '. ' + str(instance.contratista.nombres.lower())+ " " +str(instance.contratista.apellidos.lower()), filename])
+
+
+class CargosHv(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
 
 class Hv(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -602,138 +611,11 @@ class Hv(models.Model):
                         max_upload_size=20971520,
                         blank=True, null=True
                         )
-    excel = models.FileField(upload_to=upload_dinamic_dir_excel,max_length=250,blank=True,null=True)
-    region = models.CharField(max_length=100, blank=True, null=True)
     envio = models.IntegerField()
-    consecutivo_cargo = models.IntegerField(blank=True,null=True)
-    cargo = models.CharField(max_length=100,blank=True,null=True)
-    estado = models.CharField(max_length=100, blank=True, null=True)
+    cargo = models.ForeignKey(CargosHv, blank=True, null=True, on_delete=models.DO_NOTHING)
+    municipio = models.ForeignKey(Municipios, blank=True, null=True, on_delete=models.DO_NOTHING)
+    estado = models.CharField(max_length=100, default="Esperando aprobación")
     observacion = models.CharField(max_length=500, blank=True, null=True)
-
-    numero_tarjeta = models.CharField(max_length=200, blank=True, null=True)
-    fecha_expedicion = models.DateField(blank=True, null=True)
-    folio = models.IntegerField(blank=True, null=True)
-
-    titulo_1 = models.CharField(max_length=200)
-    institucion_1 = models.CharField(max_length=200)
-    nivel_1 = models.CharField(max_length=200)
-    grado_1 = models.DateField()
-    folio_1 = models.IntegerField()
-
-    titulo_2 = models.CharField(max_length=200,blank=True,null=True)
-    institucion_2 = models.CharField(max_length=200,blank=True,null=True)
-    nivel_2 = models.CharField(max_length=200,blank=True,null=True)
-    grado_2 = models.DateField(blank=True,null=True)
-    folio_2 = models.IntegerField(blank=True,null=True)
-
-    titulo_3 = models.CharField(max_length=200,blank=True,null=True)
-    institucion_3 = models.CharField(max_length=200,blank=True,null=True)
-    nivel_3 = models.CharField(max_length=200,blank=True,null=True)
-    grado_3 = models.DateField(blank=True,null=True)
-    folio_3 = models.IntegerField(blank=True,null=True)
-
-    titulo_4 = models.CharField(max_length=200,blank=True,null=True)
-    institucion_4 = models.CharField(max_length=200,blank=True,null=True)
-    nivel_4 = models.CharField(max_length=200,blank=True,null=True)
-    grado_4 = models.DateField(blank=True,null=True)
-    folio_4 = models.IntegerField(blank=True,null=True)
-
-    titulo_5 = models.CharField(max_length=200,blank=True,null=True)
-    institucion_5 = models.CharField(max_length=200,blank=True,null=True)
-    nivel_5 = models.CharField(max_length=200,blank=True,null=True)
-    grado_5 = models.DateField(blank=True,null=True)
-    folio_5 = models.IntegerField(blank=True,null=True)
-
-    titulo_6 = models.CharField(max_length=200,blank=True,null=True)
-    institucion_6 = models.CharField(max_length=200,blank=True,null=True)
-    nivel_6 = models.CharField(max_length=200,blank=True,null=True)
-    grado_6 = models.DateField(blank=True,null=True)
-    folio_6 = models.IntegerField(blank=True,null=True)
-
-    titulo_7 = models.CharField(max_length=200,blank=True,null=True)
-    institucion_7 = models.CharField(max_length=200,blank=True,null=True)
-    nivel_7 = models.CharField(max_length=200,blank=True,null=True)
-    grado_7 = models.DateField(blank=True,null=True)
-    folio_7 = models.IntegerField(blank=True,null=True)
-
-    empresa_1 = models.CharField(max_length=200)
-    fecha_inicio_1 = models.DateField()
-    fecha_fin_1 = models.DateField()
-    cargo_1 = models.CharField(max_length=200)
-    folio_empresa_1 = models.IntegerField()
-    observaciones_1 = models.CharField(max_length=200)
-
-    empresa_2 = models.CharField(max_length=200,blank=True,null=True)
-    fecha_inicio_2 = models.DateField(blank=True,null=True)
-    fecha_fin_2 = models.DateField(blank=True,null=True)
-    cargo_2 = models.CharField(max_length=200,blank=True,null=True)
-    folio_empresa_2 = models.IntegerField(blank=True,null=True)
-    observaciones_2 = models.CharField(max_length=200,blank=True,null=True)
-
-    empresa_3 = models.CharField(max_length=200,blank=True,null=True)
-    fecha_inicio_3 = models.DateField(blank=True,null=True)
-    fecha_fin_3 = models.DateField(blank=True,null=True)
-    cargo_3 = models.CharField(max_length=200,blank=True,null=True)
-    folio_empresa_3 = models.IntegerField(blank=True,null=True)
-    observaciones_3 = models.CharField(max_length=200,blank=True,null=True)
-
-    empresa_4 = models.CharField(max_length=200,blank=True,null=True)
-    fecha_inicio_4 = models.DateField(blank=True,null=True)
-    fecha_fin_4 = models.DateField(blank=True,null=True)
-    cargo_4 = models.CharField(max_length=200,blank=True,null=True)
-    folio_empresa_4 = models.IntegerField(blank=True,null=True)
-    observaciones_4 = models.CharField(max_length=200,blank=True,null=True)
-
-    empresa_5 = models.CharField(max_length=200,blank=True,null=True)
-    fecha_inicio_5 = models.DateField(blank=True,null=True)
-    fecha_fin_5 = models.DateField(blank=True,null=True)
-    cargo_5 = models.CharField(max_length=200,blank=True,null=True)
-    folio_empresa_5 = models.IntegerField(blank=True,null=True)
-    observaciones_5 = models.CharField(max_length=200,blank=True,null=True)
-
-    empresa_6 = models.CharField(max_length=200,blank=True,null=True)
-    fecha_inicio_6 = models.DateField(blank=True,null=True)
-    fecha_fin_6 = models.DateField(blank=True,null=True)
-    cargo_6 = models.CharField(max_length=200,blank=True,null=True)
-    folio_empresa_6 = models.IntegerField(blank=True,null=True)
-    observaciones_6 = models.CharField(max_length=200,blank=True,null=True)
-
-    empresa_7 = models.CharField(max_length=200,blank=True,null=True)
-    fecha_inicio_7 = models.DateField(blank=True,null=True)
-    fecha_fin_7 = models.DateField(blank=True,null=True)
-    cargo_7 = models.CharField(max_length=200,blank=True,null=True)
-    folio_empresa_7 = models.IntegerField(blank=True,null=True)
-    observaciones_7 = models.CharField(max_length=200,blank=True,null=True)
-
-    empresa_8 = models.CharField(max_length=200,blank=True,null=True)
-    fecha_inicio_8 = models.DateField(blank=True,null=True)
-    fecha_fin_8 = models.DateField(blank=True,null=True)
-    cargo_8 = models.CharField(max_length=200,blank=True,null=True)
-    folio_empresa_8 = models.IntegerField(blank=True,null=True)
-    observaciones_8 = models.CharField(max_length=200,blank=True,null=True)
-
-    empresa_9 = models.CharField(max_length=200,blank=True,null=True)
-    fecha_inicio_9 = models.DateField(blank=True,null=True)
-    fecha_fin_9 = models.DateField(blank=True,null=True)
-    cargo_9 = models.CharField(max_length=200,blank=True,null=True)
-    folio_empresa_9 = models.IntegerField(blank=True,null=True)
-    observaciones_9 = models.CharField(max_length=200,blank=True,null=True)
-
-    empresa_10 = models.CharField(max_length=200,blank=True,null=True)
-    fecha_inicio_10 = models.DateField(blank=True,null=True)
-    fecha_fin_10 = models.DateField(blank=True,null=True)
-    cargo_10 = models.CharField(max_length=200,blank=True,null=True)
-    folio_empresa_10 = models.IntegerField(blank=True,null=True)
-    observaciones_10 = models.CharField(max_length=200,blank=True,null=True)
-
-    empresa_11 = models.CharField(max_length=200,blank=True,null=True)
-    fecha_inicio_11 = models.DateField(blank=True,null=True)
-    fecha_fin_11 = models.DateField(blank=True,null=True)
-    cargo_11 = models.CharField(max_length=200,blank=True,null=True)
-    folio_empresa_11 = models.IntegerField(blank=True,null=True)
-    observaciones_11 = models.CharField(max_length=200,blank=True,null=True)
-
-
 
     def __str__(self):
         return self.cargo

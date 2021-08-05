@@ -1020,7 +1020,7 @@ class HvListView(LoginRequiredMixin,
 
 class HvCreateView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
-                        FormView):
+                        CreateView):
 
     permissions = {
         "all": [
@@ -1034,150 +1034,18 @@ class HvCreateView(LoginRequiredMixin,
     success_url = "../"
 
     def form_valid(self, form):
-        consecutivo_cargo = models.Hv.objects.filter(cargo=form.cleaned_data['cargo']).count() + 1
-        hv = models.Hv.objects.create(
-            contratista = models.Contratistas.objects.get(id = form.cleaned_data['contratista']),
-            cargo = form.cleaned_data['cargo'],
-            file = form.cleaned_data['file'],
-            envio = form.cleaned_data['envio'],
-            consecutivo_cargo = consecutivo_cargo,
-            region=form.cleaned_data['region'],
-            estado='Esperando aprobación',
+        self.object = form.save()
 
-            numero_tarjeta=form.cleaned_data['numero_tarjeta'],
-            fecha_expedicion=form.cleaned_data['fecha_expedicion'],
-            folio=form.cleaned_data['folio'],
-
-            titulo_1=form.cleaned_data['titulo_1'],
-            institucion_1=form.cleaned_data['institucion_1'],
-            nivel_1=form.cleaned_data['nivel_1'],
-            grado_1=form.cleaned_data['grado_1'],
-            folio_1=form.cleaned_data['folio_1'],
-
-            titulo_2=form.cleaned_data['titulo_2'],
-            institucion_2=form.cleaned_data['institucion_2'],
-            nivel_2=form.cleaned_data['nivel_2'],
-            grado_2=form.cleaned_data['grado_2'],
-            folio_2=form.cleaned_data['folio_2'],
-
-            titulo_3=form.cleaned_data['titulo_3'],
-            institucion_3=form.cleaned_data['institucion_3'],
-            nivel_3=form.cleaned_data['nivel_3'],
-            grado_3=form.cleaned_data['grado_3'],
-            folio_3=form.cleaned_data['folio_3'],
-
-            titulo_4=form.cleaned_data['titulo_4'],
-            institucion_4=form.cleaned_data['institucion_4'],
-            nivel_4=form.cleaned_data['nivel_4'],
-            grado_4=form.cleaned_data['grado_4'],
-            folio_4=form.cleaned_data['folio_4'],
-
-            titulo_5=form.cleaned_data['titulo_5'],
-            institucion_5=form.cleaned_data['institucion_5'],
-            nivel_5=form.cleaned_data['nivel_5'],
-            grado_5=form.cleaned_data['grado_5'],
-            folio_5=form.cleaned_data['folio_5'],
-
-            titulo_6=form.cleaned_data['titulo_6'],
-            institucion_6=form.cleaned_data['institucion_6'],
-            nivel_6=form.cleaned_data['nivel_6'],
-            grado_6=form.cleaned_data['grado_6'],
-            folio_6=form.cleaned_data['folio_6'],
-
-            titulo_7=form.cleaned_data['titulo_7'],
-            institucion_7=form.cleaned_data['institucion_7'],
-            nivel_7=form.cleaned_data['nivel_7'],
-            grado_7=form.cleaned_data['grado_7'],
-            folio_7=form.cleaned_data['folio_7'],
-
-            empresa_1=form.cleaned_data['empresa_1'],
-            fecha_inicio_1=form.cleaned_data['fecha_inicio_1'],
-            fecha_fin_1=form.cleaned_data['fecha_fin_1'],
-            cargo_1=form.cleaned_data['cargo_1'],
-            folio_empresa_1=form.cleaned_data['folio_empresa_1'],
-            observaciones_1=form.cleaned_data['observaciones_1'],
-
-            empresa_2=form.cleaned_data['empresa_2'],
-            fecha_inicio_2=form.cleaned_data['fecha_inicio_2'],
-            fecha_fin_2=form.cleaned_data['fecha_fin_2'],
-            cargo_2=form.cleaned_data['cargo_2'],
-            folio_empresa_2=form.cleaned_data['folio_empresa_2'],
-            observaciones_2=form.cleaned_data['observaciones_2'],
-
-            empresa_3=form.cleaned_data['empresa_3'],
-            fecha_inicio_3=form.cleaned_data['fecha_inicio_3'],
-            fecha_fin_3=form.cleaned_data['fecha_fin_3'],
-            cargo_3=form.cleaned_data['cargo_3'],
-            folio_empresa_3=form.cleaned_data['folio_empresa_3'],
-            observaciones_3=form.cleaned_data['observaciones_3'],
-
-            empresa_4=form.cleaned_data['empresa_4'],
-            fecha_inicio_4=form.cleaned_data['fecha_inicio_4'],
-            fecha_fin_4=form.cleaned_data['fecha_fin_4'],
-            cargo_4=form.cleaned_data['cargo_4'],
-            folio_empresa_4=form.cleaned_data['folio_empresa_4'],
-            observaciones_4=form.cleaned_data['observaciones_4'],
-
-            empresa_5=form.cleaned_data['empresa_5'],
-            fecha_inicio_5=form.cleaned_data['fecha_inicio_5'],
-            fecha_fin_5=form.cleaned_data['fecha_fin_5'],
-            cargo_5=form.cleaned_data['cargo_5'],
-            folio_empresa_5=form.cleaned_data['folio_empresa_5'],
-            observaciones_5=form.cleaned_data['observaciones_5'],
-
-            empresa_6=form.cleaned_data['empresa_6'],
-            fecha_inicio_6=form.cleaned_data['fecha_inicio_6'],
-            fecha_fin_6=form.cleaned_data['fecha_fin_6'],
-            cargo_6=form.cleaned_data['cargo_6'],
-            folio_empresa_6=form.cleaned_data['folio_empresa_6'],
-            observaciones_6=form.cleaned_data['observaciones_6'],
-
-            empresa_7=form.cleaned_data['empresa_7'],
-            fecha_inicio_7=form.cleaned_data['fecha_inicio_7'],
-            fecha_fin_7=form.cleaned_data['fecha_fin_7'],
-            cargo_7=form.cleaned_data['cargo_7'],
-            folio_empresa_7=form.cleaned_data['folio_empresa_7'],
-            observaciones_7=form.cleaned_data['observaciones_7'],
-
-            empresa_8=form.cleaned_data['empresa_8'],
-            fecha_inicio_8=form.cleaned_data['fecha_inicio_8'],
-            fecha_fin_8=form.cleaned_data['fecha_fin_8'],
-            cargo_8=form.cleaned_data['cargo_8'],
-            folio_empresa_8=form.cleaned_data['folio_empresa_8'],
-            observaciones_8=form.cleaned_data['observaciones_8'],
-
-            empresa_9=form.cleaned_data['empresa_9'],
-            fecha_inicio_9=form.cleaned_data['fecha_inicio_9'],
-            fecha_fin_9=form.cleaned_data['fecha_fin_9'],
-            cargo_9=form.cleaned_data['cargo_9'],
-            folio_empresa_9=form.cleaned_data['folio_empresa_9'],
-            observaciones_9=form.cleaned_data['observaciones_9'],
-
-            empresa_10=form.cleaned_data['empresa_10'],
-            fecha_inicio_10=form.cleaned_data['fecha_inicio_10'],
-            fecha_fin_10=form.cleaned_data['fecha_fin_10'],
-            cargo_10=form.cleaned_data['cargo_10'],
-            folio_empresa_10=form.cleaned_data['folio_empresa_10'],
-            observaciones_10=form.cleaned_data['observaciones_10'],
-
-            empresa_11=form.cleaned_data['empresa_11'],
-            fecha_inicio_11=form.cleaned_data['fecha_inicio_11'],
-            fecha_fin_11=form.cleaned_data['fecha_fin_11'],
-            cargo_11=form.cleaned_data['cargo_11'],
-            folio_empresa_11=form.cleaned_data['folio_empresa_11'],
-            observaciones_11=form.cleaned_data['observaciones_11']
-        )
-        trazabilidad = models.TrazabilidadHv.objects.create(
-            hv = hv,
-            usuario_creacion = self.request.user,
-            observacion = 'Carga de la hoja de vida, contratista: {0} - cargo: {1} - región: {2} - envio: Envio {3}'.format(
+        hv = self.object
+        models.TrazabilidadHv.objects.create(
+            hv=hv,
+            usuario_creacion=self.request.user,
+            observacion='Creación de la hoja de vida, contratista: {0} - cargo: {1} - envio: Envio {2}'.format(
                 str(hv.contratista),
                 hv.cargo,
-                hv.region,
                 hv.envio
             )
         )
-        tasks.build_formato_hv(str(hv.id))
         return super(HvCreateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -1190,7 +1058,7 @@ class HvCreateView(LoginRequiredMixin,
 
 class HvUpdateView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
-                        FormView):
+                        UpdateView):
     permissions = {
         "all": [
             "usuarios.recursos_humanos.ver",
@@ -1201,157 +1069,22 @@ class HvUpdateView(LoginRequiredMixin,
     login_url = settings.LOGIN_URL
     template_name = 'recursos_humanos/hv/editar.html'
     form_class = forms.HvForm
+    model = models.Hv
     success_url = "../../"
 
     def form_valid(self, form):
-        hvs = models.Hv.objects.filter(id = self.kwargs['pk'])
+        self.object = form.save()
 
-        hvs.update(
-            contratista=models.Contratistas.objects.get(id=form.cleaned_data['contratista']),
-            cargo=form.cleaned_data['cargo'],
-            envio=form.cleaned_data['envio'],
-            region=form.cleaned_data['region'],
-            estado='Esperando aprobación',
-
-            numero_tarjeta=form.cleaned_data['numero_tarjeta'],
-            fecha_expedicion=form.cleaned_data['fecha_expedicion'],
-            folio=form.cleaned_data['folio'],
-
-            titulo_1=form.cleaned_data['titulo_1'],
-            institucion_1=form.cleaned_data['institucion_1'],
-            nivel_1=form.cleaned_data['nivel_1'],
-            grado_1=form.cleaned_data['grado_1'],
-            folio_1=form.cleaned_data['folio_1'],
-
-            titulo_2=form.cleaned_data['titulo_2'],
-            institucion_2=form.cleaned_data['institucion_2'],
-            nivel_2=form.cleaned_data['nivel_2'],
-            grado_2=form.cleaned_data['grado_2'],
-            folio_2=form.cleaned_data['folio_2'],
-
-            titulo_3=form.cleaned_data['titulo_3'],
-            institucion_3=form.cleaned_data['institucion_3'],
-            nivel_3=form.cleaned_data['nivel_3'],
-            grado_3=form.cleaned_data['grado_3'],
-            folio_3=form.cleaned_data['folio_3'],
-
-            titulo_4=form.cleaned_data['titulo_4'],
-            institucion_4=form.cleaned_data['institucion_4'],
-            nivel_4=form.cleaned_data['nivel_4'],
-            grado_4=form.cleaned_data['grado_4'],
-            folio_4=form.cleaned_data['folio_4'],
-
-            titulo_5=form.cleaned_data['titulo_5'],
-            institucion_5=form.cleaned_data['institucion_5'],
-            nivel_5=form.cleaned_data['nivel_5'],
-            grado_5=form.cleaned_data['grado_5'],
-            folio_5=form.cleaned_data['folio_5'],
-
-            titulo_6=form.cleaned_data['titulo_6'],
-            institucion_6=form.cleaned_data['institucion_6'],
-            nivel_6=form.cleaned_data['nivel_6'],
-            grado_6=form.cleaned_data['grado_6'],
-            folio_6=form.cleaned_data['folio_6'],
-
-            titulo_7=form.cleaned_data['titulo_7'],
-            institucion_7=form.cleaned_data['institucion_7'],
-            nivel_7=form.cleaned_data['nivel_7'],
-            grado_7=form.cleaned_data['grado_7'],
-            folio_7=form.cleaned_data['folio_7'],
-
-            empresa_1=form.cleaned_data['empresa_1'],
-            fecha_inicio_1=form.cleaned_data['fecha_inicio_1'],
-            fecha_fin_1=form.cleaned_data['fecha_fin_1'],
-            cargo_1=form.cleaned_data['cargo_1'],
-            folio_empresa_1=form.cleaned_data['folio_empresa_1'],
-            observaciones_1=form.cleaned_data['observaciones_1'],
-
-            empresa_2=form.cleaned_data['empresa_2'],
-            fecha_inicio_2=form.cleaned_data['fecha_inicio_2'],
-            fecha_fin_2=form.cleaned_data['fecha_fin_2'],
-            cargo_2=form.cleaned_data['cargo_2'],
-            folio_empresa_2=form.cleaned_data['folio_empresa_2'],
-            observaciones_2=form.cleaned_data['observaciones_2'],
-
-            empresa_3=form.cleaned_data['empresa_3'],
-            fecha_inicio_3=form.cleaned_data['fecha_inicio_3'],
-            fecha_fin_3=form.cleaned_data['fecha_fin_3'],
-            cargo_3=form.cleaned_data['cargo_3'],
-            folio_empresa_3=form.cleaned_data['folio_empresa_3'],
-            observaciones_3=form.cleaned_data['observaciones_3'],
-
-            empresa_4=form.cleaned_data['empresa_4'],
-            fecha_inicio_4=form.cleaned_data['fecha_inicio_4'],
-            fecha_fin_4=form.cleaned_data['fecha_fin_4'],
-            cargo_4=form.cleaned_data['cargo_4'],
-            folio_empresa_4=form.cleaned_data['folio_empresa_4'],
-            observaciones_4=form.cleaned_data['observaciones_4'],
-
-            empresa_5=form.cleaned_data['empresa_5'],
-            fecha_inicio_5=form.cleaned_data['fecha_inicio_5'],
-            fecha_fin_5=form.cleaned_data['fecha_fin_5'],
-            cargo_5=form.cleaned_data['cargo_5'],
-            folio_empresa_5=form.cleaned_data['folio_empresa_5'],
-            observaciones_5=form.cleaned_data['observaciones_5'],
-
-            empresa_6=form.cleaned_data['empresa_6'],
-            fecha_inicio_6=form.cleaned_data['fecha_inicio_6'],
-            fecha_fin_6=form.cleaned_data['fecha_fin_6'],
-            cargo_6=form.cleaned_data['cargo_6'],
-            folio_empresa_6=form.cleaned_data['folio_empresa_6'],
-            observaciones_6=form.cleaned_data['observaciones_6'],
-
-            empresa_7=form.cleaned_data['empresa_7'],
-            fecha_inicio_7=form.cleaned_data['fecha_inicio_7'],
-            fecha_fin_7=form.cleaned_data['fecha_fin_7'],
-            cargo_7=form.cleaned_data['cargo_7'],
-            folio_empresa_7=form.cleaned_data['folio_empresa_7'],
-            observaciones_7=form.cleaned_data['observaciones_7'],
-
-            empresa_8=form.cleaned_data['empresa_8'],
-            fecha_inicio_8=form.cleaned_data['fecha_inicio_8'],
-            fecha_fin_8=form.cleaned_data['fecha_fin_8'],
-            cargo_8=form.cleaned_data['cargo_8'],
-            folio_empresa_8=form.cleaned_data['folio_empresa_8'],
-            observaciones_8=form.cleaned_data['observaciones_8'],
-
-            empresa_9=form.cleaned_data['empresa_9'],
-            fecha_inicio_9=form.cleaned_data['fecha_inicio_9'],
-            fecha_fin_9=form.cleaned_data['fecha_fin_9'],
-            cargo_9=form.cleaned_data['cargo_9'],
-            folio_empresa_9=form.cleaned_data['folio_empresa_9'],
-            observaciones_9=form.cleaned_data['observaciones_9'],
-
-            empresa_10=form.cleaned_data['empresa_10'],
-            fecha_inicio_10=form.cleaned_data['fecha_inicio_10'],
-            fecha_fin_10=form.cleaned_data['fecha_fin_10'],
-            cargo_10=form.cleaned_data['cargo_10'],
-            folio_empresa_10=form.cleaned_data['folio_empresa_10'],
-            observaciones_10=form.cleaned_data['observaciones_10'],
-
-            empresa_11=form.cleaned_data['empresa_11'],
-            fecha_inicio_11=form.cleaned_data['fecha_inicio_11'],
-            fecha_fin_11=form.cleaned_data['fecha_fin_11'],
-            cargo_11=form.cleaned_data['cargo_11'],
-            folio_empresa_11=form.cleaned_data['folio_empresa_11'],
-            observaciones_11=form.cleaned_data['observaciones_11']
-        )
-
-        hv = models.Hv.objects.get(id=self.kwargs['pk'])
-        hv.file = form.cleaned_data['file']
-        hv.save()
-        trazabilidad = models.TrazabilidadHv.objects.create(
+        hv = self.object
+        models.TrazabilidadHv.objects.create(
             hv=hv,
             usuario_creacion=self.request.user,
-            observacion='Actualización de la hoja de vida, contratista: {0} - cargo: {1} - región: {2} - envio: Envio {3}'.format(
+            observacion='Actualización de la hoja de vida, contratista: {0} - cargo: {1} - envio: Envio {2}'.format(
                 str(hv.contratista),
                 hv.cargo,
-                hv.region,
                 hv.envio
             )
         )
-        tasks.build_formato_hv(str(hv.id))
-
         return super(HvUpdateView, self).form_valid(form)
 
 
@@ -1448,7 +1181,7 @@ class HvReporteView(LoginRequiredMixin,
             consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
         )
 
-        tasks.build_reporte_hv.delay(reporte.id)
+        tasks.build_reporte_hv(reporte.id)
 
         return HttpResponseRedirect('/reportes/')
 #----------------------------------------------------------------------------------
