@@ -1181,7 +1181,7 @@ class HvReporteView(LoginRequiredMixin,
             consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
         )
 
-        tasks.build_reporte_hv(reporte.id)
+        tasks.build_reporte_hv.delay(reporte.id)
 
         return HttpResponseRedirect('/reportes/')
 #----------------------------------------------------------------------------------
