@@ -277,7 +277,7 @@ class Contratos(models.Model):
 
     grupo_soportes = models.ForeignKey(GruposSoportes, on_delete=models.DO_NOTHING)
 
-    valor = MoneyField(max_digits=10,decimal_places=2,default_currency = 'COP')
+    valor = MoneyField(max_digits=20,decimal_places=2,default_currency = 'COP')
 
     file = PDFFileField(upload_to=upload_dinamic_dir,
                         max_upload_size=20971520,
@@ -662,26 +662,26 @@ class TrazabilidadHv(models.Model):
         return self.creation.astimezone(settings_time_zone).strftime('%d/%m/%Y a las %I:%M:%S %p')
 
 
-@receiver(post_save, sender=SoportesContratos)
-def SoportesUpdate(sender, instance, **kwargs):
-    contrato = instance.contrato
+#@receiver(post_save, sender=SoportesContratos)
+#def SoportesUpdate(sender, instance, **kwargs):
+#    contrato = instance.contrato
 
-    soportes_obligatorios = SoportesContratos.objects.filter(contrato = contrato,soporte__requerido = True)
-    soportes_opcionales = SoportesContratos.objects.filter(contrato=contrato, soporte__requerido = False)
+#    soportes_obligatorios = SoportesContratos.objects.filter(contrato = contrato,soporte__requerido = True)
+#    soportes_opcionales = SoportesContratos.objects.filter(contrato=contrato, soporte__requerido = False)
 
-    if contrato.proyecto.nombre in ['IRACA','IRACA Z1','BMO','EEAF','FAST WORK COLOMBIA','UT PROSPERIDAD IRACA','NATIONAL COMMER S.A.S','VENTAS Y SERVICIOS']:
-        group = Group.objects.get(name='FEST 2019, gestores')
-    else:
-        group = Group.objects.get(name='CPE 2018, gestionar solicitudes desplazamiento')
-    user = contrato.get_user_or_none()
+#    if contrato.proyecto.nombre in ['IRACA','IRACA Z1','BMO','EEAF','FAST WORK COLOMBIA','UT PROSPERIDAD IRACA','NATIONAL COMMER S.A.S','VENTAS Y SERVICIOS']:
+#        group = Group.objects.get(name='FEST 2019, gestores')
+#    else:
+#        group = Group.objects.get(name='CPE 2018, gestionar solicitudes desplazamiento')
+#    user = contrato.get_user_or_none()
 
-    if soportes_obligatorios.exclude(estado = 'Aprobado').count() <= 0:
-        contrato.fecha_legalizacion = timezone.now().date()
-        contrato.save()
-        if user != None:
-            user.groups.add(group)
-    else:
-        contrato.fecha_legalizacion = None
-        contrato.save()
+#    if soportes_obligatorios.exclude(estado = 'Aprobado').count() <= 0:
+#        contrato.fecha_legalizacion = timezone.now().date()
+#        contrato.save()
+#        if user != None:
+#            user.groups.add(group)
+#    else:
+#        contrato.fecha_legalizacion = None
+#        contrato.save()
         #if user != None:
         #    user.groups.remove(group)
