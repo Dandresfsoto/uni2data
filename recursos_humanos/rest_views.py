@@ -245,7 +245,19 @@ class ContratosListApi(BaseDatatableView):
         elif column == 'valor':
             return row.pretty_print_valor()
 
+        elif column == 'estado':
+            ret=''
 
+            if row.suscrito == True:
+                ret +='<div class="center-align"><b> Suscrito </b></div>'
+            if row.ejecucion == True:
+                ret += '<div class="center-align"><b> Ejecutandose </b></div>'
+            if row.ejecutado == True:
+                ret += '<div class="center-align"><b> Ejecutado </b></div>'
+            if row.liquidado == True:
+                ret += '<div class="center-align"><b> Liquidado </b></div>'
+
+            return ret
         elif column == 'file':
             render = ""
 
@@ -344,8 +356,11 @@ class ContratosEstadoListApi(BaseDatatableView):
             return row.pretty_print_valor()
 
         elif column == 'estado':
-            return '<div class="center-align"><b>' + str(row.cantidad_soportes()) + '</b></div>'
-
+            render = ''
+            if row.fecha_legalizacion != None:
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Contrato legalizado el {0}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
+                          '</a>'.format(row.fecha_legalizacion)
 
         elif column == 'file':
             render = ""
