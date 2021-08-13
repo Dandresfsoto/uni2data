@@ -140,7 +140,8 @@ THIRD_PARTY_APPS = [
     'mail_templated',
     'storages',
     'djmoney',
-    'mathfilters'
+    'mathfilters',
+    'sequences'
 ]
 
 LOCAL_APPS = [

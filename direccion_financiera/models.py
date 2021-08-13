@@ -1,13 +1,14 @@
-from djmoney.models.fields import MoneyField
-from django.db import models
 import uuid
-from usuarios.models import User
+
 from django.conf import settings
-from pytz import timezone
-from django.db.models.signals import post_save, post_delete
+from django.db import models
+from django.db.models.signals import post_save
 from django.dispatch import receiver
-from direccion_financiera import tasks
-from direccion_financiera import functions
+from djmoney.models.fields import MoneyField
+from pytz import timezone
+
+from common.models import BaseModel
+from usuarios.models import User
 
 settings_time_zone = timezone(settings.TIME_ZONE)
 
@@ -37,10 +38,22 @@ class Bancos(models.Model):
     def __str__(self):
         return str(self.codigo) + " - " + self.nombre
 
+class Enterprise(BaseModel):
+    name = models.CharField(max_length=200)
+    description = models.CharField(max_length=200)
+    tax_number = models.CharField(max_length=10)
+    color = models.CharField(max_length=100)
+    icon = models.CharField(max_length=100)
+    code = models.CharField(max_length=10, unique=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.tax_number}"
+
 class Servicios(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     nombre = models.CharField(max_length=100)
     descontable = models.BooleanField(default= False)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
         return self.nombre
@@ -48,6 +61,7 @@ class Servicios(models.Model):
 class TipoSoporte(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     nombre = models.CharField(max_length=100)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
         return self.nombre
@@ -56,6 +70,7 @@ class Proyecto(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     nombre = models.CharField(max_length=100)
     cuenta = models.CharField(max_length=100)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
         return self.nombre
@@ -66,21 +81,32 @@ class ConsecutivoReportes(models.Model):
     def __str__(self):
         return str(self.id)
 
-
 class RubroPresupuestal(models.Model):
     nombre = models.CharField(max_length=500)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
         return self.nombre
 
+class RubroPresupuestalLevel2(models.Model):
+    nombre = models.CharField(max_length=500)
+    rubro = models.ForeignKey(RubroPresupuestal, on_delete=models.DO_NOTHING)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
 
-class Reportes(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    consecutivo = models.ForeignKey(ConsecutivoReportes, on_delete=models.DO_NOTHING, blank=True, null=True)
-    number = models.BigIntegerField(blank=True,null=True)
-    creation = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.nombre
+
+class RubroPresupuestalLevel3(models.Model):
+    nombre = models.CharField(max_length=500)
+    rubro_level_2 = models.ForeignKey(RubroPresupuestalLevel2, on_delete=models.DO_NOTHING)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
+
+    def __str__(self):
+        return self.nombre
+
+class Reportes(BaseModel):
+
     usuario_creacion = models.ForeignKey(User, related_name="usuario_creacion_reporte", on_delete=models.DO_NOTHING)
-    update_datetime = models.DateTimeField(auto_now=True)
     usuario_actualizacion = models.ForeignKey(User, related_name="usuario_actualizacion_reporte",
                                               on_delete=models.DO_NOTHING,
                                               blank=True, null=True)
@@ -89,6 +115,9 @@ class Reportes(models.Model):
     servicio = models.ForeignKey(Servicios, on_delete=models.DO_NOTHING)
     proyecto = models.ForeignKey(Proyecto, on_delete=models.DO_NOTHING)
     rubro = models.ForeignKey(RubroPresupuestal, on_delete=models.DO_NOTHING, blank=True, null=True)
+    rubro_level_2 = models.ForeignKey(RubroPresupuestalLevel2, on_delete=models.DO_NOTHING, blank=True, null=True)
+    rubro_level_3 = models.ForeignKey(RubroPresupuestalLevel3, on_delete=models.DO_NOTHING, blank=True, null=True)
+
     tipo_soporte = models.ForeignKey(TipoSoporte, on_delete=models.DO_NOTHING)
     inicio = models.DateField()
     fin = models.DateField()
