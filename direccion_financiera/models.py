@@ -74,6 +74,17 @@ class RubroPresupuestal(models.Model):
         return self.nombre
 
 
+class Empresas(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    nombre = models.CharField(max_length=100)
+    color = models.CharField(max_length=100)
+    icono = models.CharField(max_length=100)
+    numero = models.BigIntegerField(blank=True)
+
+    def __str__(self):
+        return self.nombre
+
+
 class Reportes(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     consecutivo = models.ForeignKey(ConsecutivoReportes, on_delete=models.DO_NOTHING, blank=True, null=True)
@@ -84,7 +95,7 @@ class Reportes(models.Model):
     usuario_actualizacion = models.ForeignKey(User, related_name="usuario_actualizacion_reporte",
                                               on_delete=models.DO_NOTHING,
                                               blank=True, null=True)
-
+    empresa = models.ForeignKey(Empresas, on_delete=models.DO_NOTHING, related_name="empresa_reporte",blank=True, null=True)
     nombre = models.CharField(max_length=100)
     servicio = models.ForeignKey(Servicios, on_delete=models.DO_NOTHING)
     proyecto = models.ForeignKey(Proyecto, on_delete=models.DO_NOTHING)

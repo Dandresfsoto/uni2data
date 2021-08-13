@@ -232,7 +232,7 @@ class ReporteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ReporteForm, self).__init__(*args, **kwargs)
 
-        pk = kwargs['initial'].get('pk')
+        pk = kwargs['initial'].get('pk_reporte')
 
         if pk != None:
             reporte = Reportes.objects.get(id = pk)
@@ -846,7 +846,7 @@ class PagoForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(PagoForm, self).__init__(*args, **kwargs)
 
-        self.pk = kwargs['initial'].get('pk')
+        self.pk = kwargs['initial'].get('pk_reporte')
         self.pk_pago = kwargs['initial'].get('pk_pago')
         self.fields['publico'].widget.attrs['class'] = 'filled-in'
 

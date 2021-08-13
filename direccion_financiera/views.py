@@ -4,6 +4,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, FormView,
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
 from direccion_financiera import forms, models
+from direccion_financiera.models import Empresas
 from recursos_humanos import models as rh_models
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
@@ -64,13 +65,13 @@ class DireccionFinancieraOptionsView(LoginRequiredMixin,
 
         if self.request.user.has_perm('usuarios.direccion_financiera.reportes.ver'):
             items.append({
-                'sican_categoria': 'Reportes de pago',
+                'sican_categoria': 'Empresas',
                 'sican_color': 'brown darken-4',
                 'sican_order': 3,
-                'sican_url': 'reportes/',
-                'sican_name': 'Reportes',
-                'sican_icon': 'monetization_on',
-                'sican_description': 'Reporte y notificación de pagos a terceros'
+                'sican_url': 'empresas/',
+                'sican_name': 'Empresas',
+                'sican_icon': 'business',
+                'sican_description': 'Listado de empresas asociadas'
             })
 
         if self.request.user.has_perm('usuarios.direccion_financiera.consulta_pagos.ver'):
@@ -359,6 +360,105 @@ class TercerosUpdateView(LoginRequiredMixin,
 
 #------------------------------------ REPORTES ------------------------------------
 
+
+class EmpresasListView(TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/empresas/lista.html'
+
+    def get_items(self):
+        items = []
+
+        for empresa in Empresas.objects.all().order_by('numero'):
+            if self.request.user.has_perm("usuarios.direccion_financiera.reportes.ver"):
+                items.append({
+                    'sican_categoria': '{0}'.format(empresa.nombre),
+                    'sican_color': empresa.color,
+                    'sican_order': empresa.numero,
+                    'sican_url': '{0}/'.format(str(empresa.id)),
+                    'sican_name': '{0}'.format(empresa.nombre),
+                    'sican_icon': empresa.icono,
+                    'sican_description': 'Area financiera de la empresa {0}.'.format(empresa.nombre)
+                })
+
+
+        return items
+
+    def dispatch(self, request, *args, **kwargs):
+        items = self.get_items()
+        if len(items) == 0:
+            return redirect(self.login_url)
+        return super(EmpresasListView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Empresas"
+        kwargs['items'] = self.get_items()
+        return super(EmpresasListView, self).get_context_data(**kwargs)
+
+
+class EmpresasreportesListView(TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/empresas/modulos/lista.html'
+    permissions = {
+        "all": ["usuarios.direccion_financiera.reportes.ver"]
+    }
+
+    def dispatch(self, request, *args, **kwargs):
+        items = self.get_items()
+        if len(items) == 0:
+            return redirect(self.login_url)
+        return super(EmpresasreportesListView, self).dispatch(request, *args, **kwargs)
+
+    def get_items(self):
+        items = []
+
+        if self.request.user.has_perm('usuarios.direccion_financiera.reportes.ver'):
+            items.append({
+                'sican_categoria': 'Proyectos',
+                'sican_color': 'teal darken-4',
+                'sican_order': 1,
+                'sican_url': 'proyectos/',
+                'sican_name': 'Proyectos',
+                'sican_icon': 'account_balance',
+                'sican_description': 'Listado de proyectos asociados'
+            })
+
+        if self.request.user.has_perm('usuarios.direccion_financiera.reportes.ver'):
+            items.append({
+                'sican_categoria': 'Ordenes de pago',
+                'sican_color': 'purple darken-4',
+                'sican_order': 2,
+                'sican_url': 'orden_pago/',
+                'sican_name': 'Ordenes de pago',
+                'sican_icon': 'monetization_on',
+                'sican_description': 'Consulta y listado de ordenes de pago'
+            })
+
+        if self.request.user.has_perm('usuarios.direccion_financiera.reportes.ver'):
+            items.append({
+                'sican_categoria': 'Reportes de pago',
+                'sican_color': 'brown darken-4',
+                'sican_order': 3,
+                'sican_url': 'reportes/',
+                'sican_name': 'Reportes',
+                'sican_icon': 'monetization_on',
+                'sican_description': 'Reporte y notificación de pagos a terceros'
+            })
+
+
+        return items
+
+    def get_context_data(self, **kwargs):
+        empresa = models.Empresas.objects.get(id=self.kwargs['pk'])
+        kwargs['breadcrum_active'] = empresa.nombre
+        kwargs['title'] = "Dirección financiera"
+        kwargs['items'] = self.get_items()
+        return super(EmpresasreportesListView, self).get_context_data(**kwargs)
+
+
 class ReportesListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
                       TemplateView):
@@ -372,8 +472,10 @@ class ReportesListView(LoginRequiredMixin,
 
 
     def get_context_data(self, **kwargs):
+        empresa = models.Empresas.objects.get(id=self.kwargs['pk'])
         kwargs['title'] = "reportes de pago"
-        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/reportes/'
+        kwargs['breadcrum_1'] = empresa.nombre
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/empresas/{0}/reportes/'.format(self.kwargs['pk'])
         kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.direccion_financiera.reportes.crear')
         kwargs['permiso_informe'] = self.request.user.has_perm('usuarios.direccion_financiera.reportes.informe')
         return super(ReportesListView,self).get_context_data(**kwargs)
@@ -418,6 +520,7 @@ class ReportesCreateView(LoginRequiredMixin,
     success_url = "../"
     model = models.Reportes
 
+
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.usuario_creacion = self.request.user
@@ -425,11 +528,14 @@ class ReportesCreateView(LoginRequiredMixin,
         self.object.estado = 'Carga de pagos'
         self.object.valor = 0
         self.object.consecutivo = models.ConsecutivoReportes.objects.create()
+        self.object.empresa = models.Empresas.objects.get(id=self.kwargs['pk'])
         self.object.save()
         return super(ReportesCreateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
+        empresa = models.Empresas.objects.get(id=self.kwargs['pk'])
         kwargs['title'] = "CREAR REPORTE"
+        kwargs['breadcrum_1'] = empresa.nombre
         kwargs['respaldo_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
         kwargs['firma_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
         return super(ReportesCreateView,self).get_context_data(**kwargs)
@@ -449,6 +555,8 @@ class ReportesUpdateView(LoginRequiredMixin,
     form_class = forms.ReporteUpdateForm
     success_url = "../../"
     model = models.Reportes
+    pk_url_kwarg = 'pk_reporte'
+
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -457,7 +565,9 @@ class ReportesUpdateView(LoginRequiredMixin,
         return super(ReportesUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
-        reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
+        empresa = models.Empresas.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
+        kwargs['breadcrum_1'] = empresa.nombre
         kwargs['title'] = "ACTUALIZAR REPORTE DE PAGO"
         kwargs['breadcrum_active'] = reporte.nombre
         kwargs['respaldo_url'] = reporte.pretty_print_respaldo()
@@ -467,6 +577,7 @@ class ReportesUpdateView(LoginRequiredMixin,
         kwargs['show_reporte_enviado'] = True if self.request.user.is_superuser and reporte.estado == 'Reportado' else False
         kwargs['show_resultado'] = True if reporte.firma.name != '' and reporte.estado == 'En pagaduria' else False
         return super(ReportesUpdateView,self).get_context_data(**kwargs)
+
 
 
 class ReportesResultadoUpdateView(LoginRequiredMixin,
@@ -483,14 +594,13 @@ class ReportesResultadoUpdateView(LoginRequiredMixin,
     form_class = forms.ResultadoReporteForm
     success_url = "../../../"
     model = models.Reportes
+    pk_url_kwarg = 'pk_reporte'
 
-    def get_initial(self):
-        return {'pk':self.kwargs['pk']}
 
     def form_valid(self, form):
         self.object = form.save()
 
-        for pago in models.Pagos.objects.filter(reporte__id = self.kwargs['pk']):
+        for pago in models.Pagos.objects.filter(reporte__id = self.kwargs['pk_reporte']):
             estado = form.cleaned_data[str(pago.id)]
 
             if pago.estado != estado:
@@ -508,7 +618,7 @@ class ReportesResultadoUpdateView(LoginRequiredMixin,
 
                     tercero = pago.tercero
 
-                    send_mail_templated_pago.delay(str(pago.id),'mail/direccion_financiera/reportes/pagos/reporte_pago.tpl',
+                    send_mail_templated_pago.delay(str(pago.id),'mail/direccion_financiera/reportes/pagos/modulos.tpl',
                                               {
                                                   'url_base': url_base,
                                                   'first_name': tercero.nombres,
@@ -525,8 +635,10 @@ class ReportesResultadoUpdateView(LoginRequiredMixin,
         return super(ReportesResultadoUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
-        reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
+        empresa = models.Empresas.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
         kwargs['title'] = "RESULTADO REPORTE DE PAGO"
+        kwargs['breadcrum_1'] = empresa.nombre
         kwargs['breadcrum_active'] = reporte.nombre
         kwargs['file_banco_url'] = reporte.pretty_print_file_banco()
         return super(ReportesResultadoUpdateView,self).get_context_data(**kwargs)
@@ -548,17 +660,19 @@ class ReporteReportesView(LoginRequiredMixin,
     template_name = 'direccion_financiera/reportes/reporte.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if models.Reportes.objects.get(id=self.kwargs['pk']).estado == 'Reportado':
+        if models.Reportes.objects.get(id=self.kwargs['pk_reporte']).estado == 'Reportado':
             return HttpResponseRedirect('../')
         else:
             return super(ReporteReportesView, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        kwargs['breadcrum_active'] = models.Reportes.objects.get(id=self.kwargs['pk']).nombre
+        empresa = models.Empresas.objects.get(id=self.kwargs['pk'])
+        kwargs['breadcrum_active'] = models.Reportes.objects.get(id=self.kwargs['pk_reporte']).nombre
+        kwargs['breadcrum_1'] = empresa.nombre
         return super(ReporteReportesView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
-        reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
 
         if reporte.estado != 'Reportado':
 
@@ -613,7 +727,7 @@ class ReporteReportesView(LoginRequiredMixin,
                 attachments=adjuntos
             )
 
-            models.Reportes.objects.filter(id=self.kwargs['pk']).update(estado='Reportado')
+            models.Reportes.objects.filter(id=self.kwargs['pk_reporte']).update(estado='Reportado')
             models.Pagos.objects.filter(reporte=reporte).update(estado='Reportado')
 
             for amortizacion in models.Amortizaciones.objects.filter(estado = 'Asignada', pago_descontado__in = models.Pagos.objects.filter(reporte = reporte)):
@@ -646,8 +760,8 @@ class ReporteEnvioView(LoginRequiredMixin,
     def dispatch(self, request, *args, **kwargs):
 
         if self.request.user.is_superuser:
-            models.Reportes.objects.filter(id = self.kwargs['pk']).update(estado = 'En pagaduria')
-            models.Pagos.objects.filter(reporte__id = self.kwargs['pk']).update(estado='En pagaduria')
+            models.Reportes.objects.filter(id = self.kwargs['pk_reporte']).update(estado = 'En pagaduria')
+            models.Pagos.objects.filter(reporte__id = self.kwargs['pk_reporte']).update(estado='En pagaduria')
 
         return HttpResponseRedirect('../../../')
 
@@ -666,7 +780,7 @@ class ReportesDeleteView(LoginRequiredMixin,
     success_url = "../../"
 
     def dispatch(self, request, *args, **kwargs):
-        reporte = models.Reportes.objects.get(id = self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
 
         if reporte.estado == 'Carga de pagos':
 
@@ -696,11 +810,13 @@ class PagosListView(LoginRequiredMixin,
 
 
     def get_context_data(self, **kwargs):
-        reporte = models.Reportes.objects.get(id = self.kwargs['pk'])
+        empresa = models.Empresas.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
         kwargs['title'] = "reportes de pago"
-        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/reportes/pagos/' + str(self.kwargs['pk'])
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/reportes/pagos/' + str(self.kwargs['pk_reporte'])
         kwargs['permiso_crear'] = False if reporte.estado != 'Carga de pagos' else self.request.user.has_perm('usuarios.direccion_financiera.reportes.crear')
         kwargs['breadcrum_active'] = reporte.nombre
+        kwargs['breadcrum_1'] = empresa.nombre
         kwargs['show'] = True if reporte.file.name != '' or reporte.plano.name != '' else False
         kwargs['file'] = reporte.url_file()
         kwargs['plano'] = reporte.url_plano()
@@ -722,7 +838,7 @@ class PagosCreateView(LoginRequiredMixin,
     success_url = "../"
 
     def get_form_class(self):
-        reporte = models.Reportes.objects.get(id = self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
 
         if reporte.servicio.descontable:
             return forms.PagoDescontableForm
@@ -731,18 +847,18 @@ class PagosCreateView(LoginRequiredMixin,
 
     def get_initial(self):
         return {
-            'pk': self.kwargs['pk']
+            'pk_reporte': self.kwargs['pk_reporte']
         }
 
     def form_valid(self, form):
-        reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
 
 
         if reporte.servicio.descontable:
             pago = models.Pagos.objects.create(
                 usuario_creacion = self.request.user,
                 usuario_actualizacion = self.request.user,
-                reporte = models.Reportes.objects.get(id = self.kwargs['pk']),
+                reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte']),
                 valor = float(form.cleaned_data['valor'].replace('$ ','').replace(',','')),
                 tercero = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']),
                 observacion = form.cleaned_data['observacion'],
@@ -783,7 +899,7 @@ class PagosCreateView(LoginRequiredMixin,
             pago_new = models.Pagos.objects.create(
                 usuario_creacion=self.request.user,
                 usuario_actualizacion=self.request.user,
-                reporte=models.Reportes.objects.get(id=self.kwargs['pk']),
+                reporte=models.Reportes.objects.get(id=self.kwargs['pk_reporte']),
                 valor=float(form.cleaned_data['valor'].replace('$ ', '').replace(',', '')),
                 tercero=rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']),
                 observacion=form.cleaned_data['observacion'],
@@ -849,9 +965,11 @@ class PagosCreateView(LoginRequiredMixin,
         return super(PagosCreateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
-        reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
         kwargs['title'] = "CREAR PAGO"
-        kwargs['breadcrum_1'] = models.Reportes.objects.get(id=self.kwargs['pk']).nombre
+        kwargs['breadcrum_1'] = models.Reportes.objects.get(id=self.kwargs['pk_reporte']).nombre
+        kwargs['breadcrum_2'] = models.Empresas.objects.get(id=self.kwargs['pk']).nombre
+        kwargs['breadcrum_active'] = reporte.nombre
         kwargs['reporte'] = reporte
 
         return super(PagosCreateView,self).get_context_data(**kwargs)

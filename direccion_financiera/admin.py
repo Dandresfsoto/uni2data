@@ -7,6 +7,7 @@ admin.site.register(models.Servicios)
 admin.site.register(models.TipoSoporte)
 admin.site.register(models.Proyecto)
 admin.site.register(models.Descuentos)
+admin.site.register(models.Empresas)
 admin.site.register(models.RubroPresupuestal)
 
 def delete_reporte(modeladmin, request, queryset):

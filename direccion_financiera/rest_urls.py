@@ -11,7 +11,7 @@ urlpatterns = [
 
     path('terceros/list/', rest_views.TercerosListApiJson.as_view()),
 
-    path('reportes/', rest_views.ReportesListApi.as_view()),
+    path('empresas/<uuid:pk>/reportes/', rest_views.ReportesListApi.as_view()),
     path('reportes/pagos/<uuid:pk>/', rest_views.PagosListApi.as_view()),
     path('reportes/pagos/<uuid:pk>/amortizaciones/<uuid:pk_pago>/', rest_views.AmortizacionesPagosApi.as_view()),
 

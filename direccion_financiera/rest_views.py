@@ -213,6 +213,9 @@ class ReportesListApi(BaseDatatableView):
                'plano', 'valor', 'estado', 'servicio']
 
 
+    def get_initial_queryset(self):
+        return self.model.objects.filter(empresa__id = self.kwargs['pk'])
+
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
