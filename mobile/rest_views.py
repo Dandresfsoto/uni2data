@@ -17,7 +17,11 @@ class FormAPIView(mixins.CreateModelMixin,
     def get_object(self):
         serializer = FormMobileSerializer(data=self.request.data)
         serializer.is_valid(raise_exception=True)
-        return FormMobile.objects.get(id=serializer.data.get("id"))
+        try:
+            obj = FormMobile.objects.get(id=serializer.data.get("id"))
+        except FormMobile.DoesNotExist:
+            obj = None
+        return obj
 
     def get_queryset(self):
         serializer = GetFormMobileSerializer(data=self.request.query_params)
