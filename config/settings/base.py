@@ -157,6 +157,7 @@ LOCAL_APPS = [
     'formatos',
     'fest_2019',
     'fest_2020_',
+    'mobile'
 ]
 
 
