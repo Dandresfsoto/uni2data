@@ -4,6 +4,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, FormView,
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
 from direccion_financiera import forms, models
+from direccion_financiera.models import Enterprise
 from recursos_humanos import models as rh_models
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
@@ -64,13 +65,13 @@ class DireccionFinancieraOptionsView(LoginRequiredMixin,
 
         if self.request.user.has_perm('usuarios.direccion_financiera.reportes.ver'):
             items.append({
-                'sican_categoria': 'Reportes de pago',
+                'sican_categoria': 'Lista de asociados',
                 'sican_color': 'brown darken-4',
                 'sican_order': 3,
-                'sican_url': 'reportes/',
-                'sican_name': 'Reportes',
+                'sican_url': 'enterprise/',
+                'sican_name': 'Asociados',
                 'sican_icon': 'monetization_on',
-                'sican_description': 'Reporte y notificación de pagos a terceros'
+                'sican_description': 'Reportes y notificaciónes de asociados'
             })
 
         if self.request.user.has_perm('usuarios.direccion_financiera.consulta_pagos.ver'):
@@ -359,6 +360,118 @@ class TercerosUpdateView(LoginRequiredMixin,
 
 #------------------------------------ REPORTES ------------------------------------
 
+
+class EnterpriseListView(TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/enterprise/list.html'
+
+    def get_items(self):
+        items = []
+
+        for empresa in Enterprise.objects.all().order_by('code'):
+            if self.request.user.has_perm("usuarios.direccion_financiera.reportes.ver"):
+                items.append({
+                    'sican_categoria': '{0}'.format(empresa.name),
+                    'sican_color': empresa.color,
+                    'sican_order': empresa.code,
+                    'sican_url': '{0}/'.format(str(empresa.id)),
+                    'sican_name': '{0}'.format(empresa.name),
+                    'sican_icon': empresa.icon,
+                    'sican_description': 'Area financiera de la empresa {0}.'.format(empresa.name)
+                })
+
+
+        return items
+
+    def dispatch(self, request, *args, **kwargs):
+        items = self.get_items()
+        if len(items) == 0:
+            return redirect(self.login_url)
+        return super(EnterpriseListView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Empresas"
+        kwargs['items'] = self.get_items()
+        return super(EnterpriseListView, self).get_context_data(**kwargs)
+
+
+class EnterpriseOptionListView(LoginRequiredMixin,
+                          MultiplePermissionsRequiredMixin,
+                          TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/enterprise/options/list.html'
+    permissions = {
+        "all": ["usuarios.direccion_financiera.ver"]
+    }
+
+    def dispatch(self, request, *args, **kwargs):
+        items = self.get_items()
+        if len(items) == 0:
+            return redirect(self.login_url)
+        return super(EnterpriseOptionListView, self).dispatch(request, *args, **kwargs)
+
+    def get_items(self):
+        items = []
+
+        if self.request.user.has_perm('usuarios.direccion_financiera.pagos.ver'):
+            items.append({
+                'sican_categoria': 'Pagos',
+                'sican_color': 'teal darken-4',
+                'sican_order': 1,
+                'sican_url': 'pagos/',
+                'sican_name': 'Pagos',
+                'sican_icon': 'monetization_on',
+                'sican_description': 'Consulta y reportes de pagos a terceros'
+            })
+
+        if self.request.user.has_perm('usuarios.direccion_financiera.proyectos.ver'):
+            items.append({
+                'sican_categoria': 'Proyectos',
+                'sican_color': 'orange darken-4',
+                'sican_order': 2,
+                'sican_url': '´proyectos/',
+                'sican_name': 'Proyectos',
+                'sican_icon': 'account_balance',
+                'sican_description': 'Información general de los proyectos registrados'
+            })
+
+        if self.request.user.has_perm('usuarios.direccion_financiera.reportes.ver'):
+            items.append({
+                'sican_categoria': 'Lista de asociados',
+                'sican_color': 'brown darken-4',
+                'sican_order': 3,
+                'sican_url': 'reportes/',
+                'sican_name': 'Reportes',
+                'sican_icon': 'art_track',
+                'sican_description': 'Reporte y notificación de pagos a terceros'
+            })
+
+        if self.request.user.has_perm('usuarios.direccion_financiera.orden_compra.ver'):
+            items.append({
+                'sican_categoria': 'Ordenes de compra',
+                'sican_color': 'purple darken-4',
+                'sican_order': 4,
+                'sican_url': 'orden_compra/',
+                'sican_name': 'Ordenes de compra',
+                'sican_icon': 'chrome_reader_mode',
+                'sican_description': 'Consulta y reportes de las ordenes de compra'
+            })
+
+
+        return items
+
+    def get_context_data(self, **kwargs):
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        kwargs['breadcrum_active'] = enterprice.name
+        kwargs['title'] = enterprice.name
+        kwargs['items'] = self.get_items()
+        return super(EnterpriseOptionListView,self).get_context_data(**kwargs)
+
+
 class ReportesListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
                       TemplateView):
@@ -372,8 +485,10 @@ class ReportesListView(LoginRequiredMixin,
 
 
     def get_context_data(self, **kwargs):
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
         kwargs['title'] = "reportes de pago"
-        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/reportes/'
+        kwargs['breadcrum_1'] = enterprice.name
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/reportes/'.format(enterprice.id)
         kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.direccion_financiera.reportes.crear')
         kwargs['permiso_informe'] = self.request.user.has_perm('usuarios.direccion_financiera.reportes.informe')
         return super(ReportesListView,self).get_context_data(**kwargs)

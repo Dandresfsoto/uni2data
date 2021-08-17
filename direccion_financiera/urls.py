@@ -16,7 +16,10 @@ urlpatterns = [
     path('terceros/crear/', views.TercerosCreateView.as_view()),
     path('terceros/editar/<uuid:pk>/', views.TercerosUpdateView.as_view()),
 
-    path('reportes/', views.ReportesListView.as_view()),
+    path('enterprise/', views.EnterpriseListView.as_view()),
+    path('enterprise/<uuid:pk>/', views.EnterpriseOptionListView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/', views.ReportesListView.as_view()),
+
     path('reportes/informe/', views.InformePagosView.as_view()),
     path('reportes/crear/', views.ReportesCreateView.as_view()),
     path('reportes/editar/<uuid:pk>/', views.ReportesUpdateView.as_view()),
