@@ -989,7 +989,7 @@ class PagosUpdateView(LoginRequiredMixin,
     success_url = "../../"
 
     def get_form_class(self):
-        reporte = models.Reportes.objects.get(id = self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
 
         if reporte.servicio.descontable:
             return forms.PagoDescontableForm
@@ -998,13 +998,13 @@ class PagosUpdateView(LoginRequiredMixin,
 
     def get_initial(self):
         return {
-            'pk': self.kwargs['pk'],
+            'pk': self.kwargs['pk_reporte'],
             'pk_pago': self.kwargs['pk_pago']
         }
 
     def form_valid(self, form):
 
-        reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
 
         if reporte.servicio.descontable:
 
@@ -1134,11 +1134,12 @@ class PagosUpdateView(LoginRequiredMixin,
         return super(PagosUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
-        reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
         kwargs['reporte'] = reporte
         pago = models.Pagos.objects.get(id=self.kwargs['pk_pago'])
         kwargs['title'] = "ACTUALIZAR PAGO"
-        kwargs['breadcrum_1'] = models.Reportes.objects.get(id=self.kwargs['pk']).nombre
+        kwargs['breadcrum_1'] = models.Reportes.objects.get(id=self.kwargs['pk_reporte']).nombre
+        kwargs['breadcrum_2'] = models.Empresas.objects.get(id=self.kwargs['pk']).nombre
         kwargs['breadcrum_active'] = pago.tercero.fullname()
         kwargs['tipo_cuenta'] = pago.tercero.tipo_cuenta
         kwargs['banco'] = pago.tercero.banco.nombre
@@ -1163,7 +1164,7 @@ class PagosDeleteView(LoginRequiredMixin,
     success_url = "../../"
 
     def dispatch(self, request, *args, **kwargs):
-        reporte = models.Reportes.objects.get(id = self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
         pago = models.Pagos.objects.get(id = self.kwargs['pk_pago'])
 
         models.Amortizaciones.objects.filter(pago_descontado = pago).update(estado = 'Pendiente', pago_descontado = None)
@@ -1203,7 +1204,7 @@ class AmortizacionesPagosListView(LoginRequiredMixin,
 
 
     def get_context_data(self, **kwargs):
-        reporte = models.Reportes.objects.get(id = self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
         pago = models.Pagos.objects.get(id = self.kwargs['pk_pago'])
         kwargs['title'] = "AMORTIZACIONES"
         kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/reportes/pagos/{0}/amortizaciones/{1}/'.format(
@@ -1232,7 +1233,7 @@ class AmortizacionesPagosUpdateView(LoginRequiredMixin,
 
     def dispatch(self, request, *args, **kwargs):
 
-        reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
         pago = models.Pagos.objects.get(id=self.kwargs['pk_pago'])
         amortizacion = models.Amortizaciones.objects.get(id=self.kwargs['pk_amortizacion'])
 
@@ -1247,13 +1248,13 @@ class AmortizacionesPagosUpdateView(LoginRequiredMixin,
 
     def get_initial(self):
         return {
-            'pk': self.kwargs['pk'],
+            'pk': self.kwargs['pk_reporte'],
             'pk_pago': self.kwargs['pk_pago'],
             'pk_amortizacion': self.kwargs['pk_amortizacion']
         }
 
     def form_valid(self, form):
-        reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
         pago = models.Pagos.objects.get(id=self.kwargs['pk_pago'])
         amortizacion = models.Amortizaciones.objects.get(id=self.kwargs['pk_amortizacion'])
 
@@ -1285,7 +1286,7 @@ class AmortizacionesPagosUpdateView(LoginRequiredMixin,
         return super(AmortizacionesPagosUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
-        reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
         pago = models.Pagos.objects.get(id=self.kwargs['pk_pago'])
         amortizacion = models.Amortizaciones.objects.get(id=self.kwargs['pk_amortizacion'])
         kwargs['title'] = "Editar amortización"

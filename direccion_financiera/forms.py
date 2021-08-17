@@ -527,7 +527,7 @@ class ResultadoReporteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ResultadoReporteForm, self).__init__(*args, **kwargs)
 
-        pk = kwargs['initial'].get('pk')
+        pk = kwargs['initial'].get('pk_reporte')
         self.pk = pk
         self.fields['file_banco'].widget = forms.FileInput()
 
