@@ -21,7 +21,7 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/reportes/', views.ReportesListView.as_view()),
 
     path('reportes/informe/', views.InformePagosView.as_view()),
-    path('reportes/crear/', views.ReportesCreateView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/crear/', views.ReportesCreateView.as_view()),
     path('reportes/editar/<uuid:pk>/', views.ReportesUpdateView.as_view()),
     path('reportes/editar/<uuid:pk>/resultado/', views.ReportesResultadoUpdateView.as_view()),
     path('reportes/editar/<uuid:pk>/reportar/', views.ReporteReportesView.as_view()),
@@ -50,4 +50,5 @@ urlpatterns = [
 
     path('solicitudes_desplazamiento/editar/<uuid:pk>/aprobar/', views.DesplazamientosAprobarView.as_view()),
     path('solicitudes_desplazamiento/editar/<uuid:pk>/rechazar/', views.DesplazamientosRechazarView.as_view()),
+
 ]

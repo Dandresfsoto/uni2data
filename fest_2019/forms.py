@@ -6086,7 +6086,7 @@ class FichaProyectoForm(forms.ModelForm):
             self.fields['nombre_comunidad'].queryset = models.ComunidadesProyectosIraca.objects.none()
 
             if instance.resguado_indigena_consejo_comunitario != None:
-                self.fields['nombre_comunidad'].queryset = models.ComunidadesProyectosIraca.objects.filter(consejo_resguardo = instance.resguado_indigena_consejo_comunitario)
+                    self.fields['nombre_comunidad'].queryset = models.ComunidadesProyectosIraca.objects.filter(consejo_resguardo = instance.resguado_indigena_consejo_comunitario)
 
 
     class Meta:

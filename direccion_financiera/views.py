@@ -1,13 +1,16 @@
 import mimetypes
 
+from django.core.mail.backends import console
 from django.views.generic import TemplateView, CreateView, UpdateView, FormView, View
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
+from sequences import get_next_value
+
 from direccion_financiera import forms, models
-from direccion_financiera.models import Enterprise
+from direccion_financiera.models import Enterprise, RubroPresupuestalLevel2, RubroPresupuestal
 from recursos_humanos import models as rh_models
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import redirect, render
 from direccion_financiera.tasks import send_mail_templated_pago, send_mail_templated_reporte
 from direccion_financiera import tasks
 from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA
@@ -488,7 +491,7 @@ class ReportesListView(LoginRequiredMixin,
         enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
         kwargs['title'] = "reportes de pago"
         kwargs['breadcrum_1'] = enterprice.name
-        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/reportes/'.format(enterprice.id)
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/reportes/'.format(self.kwargs['pk'])
         kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.direccion_financiera.reportes.crear')
         kwargs['permiso_informe'] = self.request.user.has_perm('usuarios.direccion_financiera.reportes.informe')
         return super(ReportesListView,self).get_context_data(**kwargs)
@@ -533,17 +536,25 @@ class ReportesCreateView(LoginRequiredMixin,
     success_url = "../"
     model = models.Reportes
 
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+
     def form_valid(self, form):
+
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
         self.object = form.save(commit=False)
         self.object.usuario_creacion = self.request.user
         self.object.usuario_actualizacion = self.request.user
         self.object.estado = 'Carga de pagos'
         self.object.valor = 0
-        self.object.consecutivo = models.ConsecutivoReportes.objects.create()
+        self.object.enterprise = enterprise
+        self.object.consecutive = get_next_value(enterprise.tax_number)
         self.object.save()
         return super(ReportesCreateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
         kwargs['title'] = "CREAR REPORTE"
         kwargs['respaldo_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
         kwargs['firma_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
@@ -565,6 +576,8 @@ class ReportesUpdateView(LoginRequiredMixin,
     success_url = "../../"
     model = models.Reportes
 
+
+
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.usuario_actualizacion = self.request.user
@@ -582,6 +595,9 @@ class ReportesUpdateView(LoginRequiredMixin,
         kwargs['show_reporte_enviado'] = True if self.request.user.is_superuser and reporte.estado == 'Reportado' else False
         kwargs['show_resultado'] = True if reporte.firma.name != '' and reporte.estado == 'En pagaduria' else False
         return super(ReportesUpdateView,self).get_context_data(**kwargs)
+
+
+
 
 
 class ReportesResultadoUpdateView(LoginRequiredMixin,
@@ -848,6 +864,7 @@ class PagosCreateView(LoginRequiredMixin,
         return {
             'pk': self.kwargs['pk']
         }
+
 
     def form_valid(self, form):
         reporte = models.Reportes.objects.get(id=self.kwargs['pk'])
@@ -1563,3 +1580,5 @@ class DesplazamientosRechazarView(LoginRequiredMixin,
         return HttpResponseRedirect('../../../')
 
 #----------------------------------------------------------------------------------
+
+

@@ -141,7 +141,7 @@ THIRD_PARTY_APPS = [
     'storages',
     'djmoney',
     'mathfilters',
-    #'sequences'
+    'sequences'
 ]
 
 LOCAL_APPS = [

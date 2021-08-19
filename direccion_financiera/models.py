@@ -1,5 +1,5 @@
 import uuid
-
+from sequences import get_next_value
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
@@ -110,7 +110,7 @@ class Reportes(BaseModel):
     usuario_actualizacion = models.ForeignKey(User, related_name="usuario_actualizacion_reporte",
                                               on_delete=models.DO_NOTHING,
                                               blank=True, null=True)
-
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
     nombre = models.CharField(max_length=100)
     servicio = models.ForeignKey(Servicios, on_delete=models.DO_NOTHING)
     proyecto = models.ForeignKey(Proyecto, on_delete=models.DO_NOTHING)
@@ -124,7 +124,7 @@ class Reportes(BaseModel):
 
     file = models.FileField(upload_to=upload_dinamic_dir_soporte_reporte, blank=True, null=True)
     plano = models.FileField(upload_to=upload_dinamic_dir_soporte_plano, blank=True, null=True)
-
+    consecutive = models.IntegerField()
     respaldo = models.FileField(upload_to=upload_dinamic_dir_soporte_respaldo, blank=True, null=True)
     firma = models.FileField(upload_to=upload_dinamic_dir_soporte_firma, blank=True, null=True)
     file_banco = models.FileField(upload_to=upload_dinamic_dir_soporte_file_banco, blank=True, null=True)
@@ -139,6 +139,7 @@ class Reportes(BaseModel):
 
     numero_contrato = models.CharField(max_length=200,blank=True,null=True)
     numero_documento_equivalente = models.CharField(max_length=200,blank=True,null=True)
+
 
 
     def pretty_print_respaldo(self):
@@ -214,13 +215,13 @@ class Reportes(BaseModel):
         return url
 
     def pretty_creation_datetime(self):
-        return self.creation.astimezone(settings_time_zone).strftime('%d/%m/%Y a las %I:%M:%S %p')
+        return self.created_at.astimezone(settings_time_zone).strftime('%d/%m/%Y a las %I:%M:%S %p')
 
     def pretty_update_datetime_datetime(self):
-        return self.update_datetime.astimezone(settings_time_zone).strftime('%d/%m/%Y a las %I:%M:%S %p')
+        return self.updated_at.astimezone(settings_time_zone).strftime('%d/%m/%Y a las %I:%M:%S %p')
 
     def reporte_update_datetime(self):
-        return self.update_datetime.astimezone(settings_time_zone).strftime('%d/%m/%Y')
+        return self.updated_at.astimezone(settings_time_zone).strftime('%d/%m/%Y')
 
     def reporte_inicio_datetime(self):
         return self.inicio.strftime('%d/%m/%Y')
@@ -640,3 +641,10 @@ def ReportesUpdate(sender, instance, **kwargs):
         #else:
         #    Reportes.objects.filter(id = instance.id).update(estado = 'Reportado')
         #    Pagos.objects.filter(reporte = instance).update(estado = 'Reportado')
+
+@receiver(post_save, sender=Reportes)
+def ReportesUpdate(sender, instance, **kwargs):
+    if instance.firma.name != None and instance.firma.name != '':
+        if instance.file_banco.name != None and instance.file_banco.name != '':
+            Reportes.objects.filter(id=instance.id).update(estado='Completo')
+        #else:

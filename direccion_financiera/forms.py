@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+from dal import autocomplete
 from django import forms
-from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones
+from django.shortcuts import render
+
+from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, Enterprise, Servicios, \
+    Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
@@ -233,11 +238,11 @@ class ReporteForm(forms.ModelForm):
         super(ReporteForm, self).__init__(*args, **kwargs)
 
         pk = kwargs['initial'].get('pk')
-
-        if pk != None:
-            reporte = Reportes.objects.get(id = pk)
-            self.fields['servicio'].widget.attrs['disabled'] = 'disabled'
-            self.fields['servicio'].initial = reporte.servicio
+        enterprise = Enterprise.objects.get(id=pk)
+        self.fields['servicio'].queryset = Servicios.objects.filter(enterprise=enterprise)
+        self.fields['proyecto'].queryset = Proyecto.objects.filter(enterprise=enterprise)
+        self.fields['tipo_soporte'].queryset = TipoSoporte.objects.filter(enterprise=enterprise)
+        self.fields['rubro'].queryset = RubroPresupuestal.objects.filter(enterprise=enterprise)
 
         self.fields['respaldo'].widget = forms.FileInput()
         self.fields['firma'].widget = forms.FileInput()
@@ -279,7 +284,11 @@ class ReporteForm(forms.ModelForm):
                         ),
                         Column(
                             'rubro',
-                            css_class='s12 m6 l4'
+                            css_class='s12 m6 l4 personForm'
+                        ),
+                        Column(
+                            'rubro_level_2',
+                            css_class='s12 m6 l4 personForm',
                         ),
                     ),
 
@@ -363,7 +372,7 @@ class ReporteForm(forms.ModelForm):
 
     class Meta:
         model = Reportes
-        fields = ['nombre','servicio','proyecto','tipo_soporte','inicio','fin','respaldo','firma','efectivo','numero_contrato','numero_documento_equivalente', 'rubro', 'observacion']
+        fields = ['nombre','servicio','proyecto','tipo_soporte','inicio','fin','respaldo','firma','efectivo','numero_contrato','numero_documento_equivalente', 'rubro', 'rubro_level_2','observacion']
         labels = {
             'servicio': 'Bien o servicio a gestionar',
             'tipo_soporte': 'Respaldo del reporte',
@@ -373,7 +382,7 @@ class ReporteForm(forms.ModelForm):
         }
         widgets = {
             'efectivo': forms.Select(choices=[(False,'Bancarizado'),(True,'Efectivo')]),
-            'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'})
+            'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
         }
 
 class ReporteUpdateForm(forms.ModelForm):

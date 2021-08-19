@@ -59,6 +59,7 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
     $('#id_tipo_soporte').select2();
     $('#id_efectivo').select2();
     $('#id_rubro').select2();
+    $('#id_rubro_level_2').select2();
 
 
     $("label[for='id_servicio']").addClass('active');
@@ -66,6 +67,7 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
     $("label[for='id_tipo_soporte']").addClass('active');
     $("label[for='id_efectivo']").addClass('active');
     $("label[for='id_rubro']").addClass('active');
+    $("label[for='id_rubro_level_2']").addClass('active');
 
     $('#id_inicio').pickadate({
         format: 'dd/mm/yyyy',
@@ -119,4 +121,5 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
             'error': 'Ooops, algo malo paso.'
         }
     });
+
 });</script></body></html>
