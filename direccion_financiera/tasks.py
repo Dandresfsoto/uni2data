@@ -36,7 +36,7 @@ def build_reporte_interno(id, email):
 
         ws.add_image(logo_sican, 'C2')
 
-        ws['F4'] = 'F-GAF-17-C' + str(reporte.consecutivo.id)
+        ws['F4'] = 'F-GAF-17-C' + str(reporte.consecutive)
         ws['I4'] = reporte.reporte_update_datetime()
         ws['O4'] = usuario.get_full_name_string()
 
@@ -109,7 +109,7 @@ def build_listado_terceros(id):
     proceso = "SICAN-LST-TERCEROS"
 
 
-    titulos = ['Consecutivo', 'Nombres', 'Apellidos', 'Tipo identificación', '# Documento', 'Cargo', 'Usuario', 'Celular',
+    titulos = ['Consecutive', 'Nombres', 'Apellidos', 'Tipo identificación', '# Documento', 'Cargo', 'Usuario', 'Celular',
                'Correo', 'Fecha de nacimiento', '# Cuenta', 'Banco', 'Tipo de cuenta']
 
     formatos = ['0', 'General', 'General', 'General', '0', 'General', 'General', 'General',
@@ -188,7 +188,7 @@ def build_listado_tercero_especifico(id, tercero_id):
             int(i),
             pago.creation,
             pago.usuario_actualizacion.get_full_name_string(),
-            pago.reporte.consecutivo.id,
+            pago.reporte.consecutive,
             pago.observacion,
             pago.estado,
             pago.valor.amount.__float__()] + pago.get_list_descuentos() + [
@@ -235,7 +235,7 @@ def build_reporte_pagos(id):
         contenidos.append([
             int(i),
             pago.creation,
-            pago.reporte.consecutivo.id,
+            pago.reporte.consecutive,
             pago.get_rubro(),
             'Efectivo' if pago.reporte.efectivo else 'Bancarizado',
             pago.reporte.nombre,
@@ -294,7 +294,7 @@ def build_listado_solicitudes(id):
                 int(i),
                 solicitud.get_contratista(),
                 solicitud.get_contratista_cedula(),
-                solicitud.consecutivo,
+                solicitud.consecutive,
                 solicitud.nombre,
                 desplazamiento.fecha,
                 desplazamiento.origen,

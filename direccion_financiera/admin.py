@@ -9,6 +9,7 @@ admin.site.register(models.Proyecto)
 admin.site.register(models.Descuentos)
 admin.site.register(models.RubroPresupuestal)
 admin.site.register(models.RubroPresupuestalLevel2)
+admin.site.register(models.RubroPresupuestalLevel3)
 admin.site.register(models.Enterprise)
 admin.site.register(models.Reportes)
 

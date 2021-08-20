@@ -1,7 +1,7 @@
 extends ../../../base_auth
 
 block title
-    |{{title | upper}}
+    | {{title | upper}}
 
 
 block side_nav_container
@@ -30,16 +30,29 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="/direccion_financiera/reportes/") Reportes de pago
+                        a(href="/direccion_financiera/enterprise/") Empresas asociadas
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
-                    li(class="bold waves-effect waves-light")
+                    li(class="bold waves-effect waves-light ")
+                        a(href="../../../../") {{ breadcrum_2 | truncatechars:25 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light ")
+                        a(href="../../../") Reportes de pago
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light ")
                         a(href="../") {{ breadcrum_1 | truncatechars:25 }}
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
+
 
                     li(class="bold waves-effect waves-light breadcrum-active")
                         a(href="#") Añadir pago
@@ -51,7 +64,7 @@ block side_nav_container
 
 block container_principal
     div(class="container",style="margin-top:40px;")
-        |{% crispy form %}
+        | {% crispy form %}
 
     | {% if reporte.servicio.descontable %}
     div(id="modal_pago_descontable",class="modal modal-fixed-footer")
@@ -75,7 +88,7 @@ block body_script_auth
     script.
         $(document).ready(function () {
 
-            new AutoNumeric('#id_valor', { currencySymbol : '$ ' });
+            new AutoNumeric('#id_valor', {currencySymbol: '$ '});
 
             $('#modal_pago_descontable').modal({
                 dismissible: false,
@@ -131,25 +144,22 @@ block body_script_auth
                 var id_pago = $(this).attr('id_pago');
                 var json_dict = JSON.parse($('#id_descuentos_pendientes').val());
 
-                if(id_pago in json_dict){
-                    if(id in json_dict[id_pago]){
-                        if('descontar' in json_dict[id_pago][id]){
+                if (id_pago in json_dict) {
+                    if (id in json_dict[id_pago]) {
+                        if ('descontar' in json_dict[id_pago][id]) {
                             json_dict[id_pago][id]['descontar'] = $(this).is(':checked');
+                        } else {
+                            json_dict[id_pago][id] = {'descontar': $(this).is(':checked')}
                         }
-                        else{
-                            json_dict[id_pago][id] = {'descontar':$(this).is(':checked')}
-                        }
-                    }
-                    else{
-                        json_dict[id_pago] = {[id]:{'descontar':$(this).is(':checked')}}
+                    } else {
+                        json_dict[id_pago] = {[id]: {'descontar': $(this).is(':checked')}}
                     }
 
-                }
-                else{
-                    json_dict[id_pago] = {[id]:{'descontar':$(this).is(':checked')}}
+                } else {
+                    json_dict[id_pago] = {[id]: {'descontar': $(this).is(':checked')}}
                 }
 
-                $('#id_descuentos_pendientes').val( JSON.stringify(json_dict) );
+                $('#id_descuentos_pendientes').val(JSON.stringify(json_dict));
 
             });
 
@@ -168,15 +178,15 @@ block body_script_auth
             $("label[for='id_concepto_descuento_5']").addClass('active');
 
 
-            new AutoNumeric('#id_valor', { currencySymbol : '$ ' });
+            new AutoNumeric('#id_valor', {currencySymbol: '$ '});
 
-            new AutoNumeric('#id_valor_descuento_1', { currencySymbol : '$ ' });
-            new AutoNumeric('#id_valor_descuento_2', { currencySymbol : '$ ' });
-            new AutoNumeric('#id_valor_descuento_3', { currencySymbol : '$ ' });
-            new AutoNumeric('#id_valor_descuento_4', { currencySymbol : '$ ' });
-            new AutoNumeric('#id_valor_descuento_5', { currencySymbol : '$ ' });
+            new AutoNumeric('#id_valor_descuento_1', {currencySymbol: '$ '});
+            new AutoNumeric('#id_valor_descuento_2', {currencySymbol: '$ '});
+            new AutoNumeric('#id_valor_descuento_3', {currencySymbol: '$ '});
+            new AutoNumeric('#id_valor_descuento_4', {currencySymbol: '$ '});
+            new AutoNumeric('#id_valor_descuento_5', {currencySymbol: '$ '});
 
-            $("#id_tercero").on('keydown',function () {
+            $("#id_tercero").on('keydown', function () {
                 $("#tipo_cuenta").text(null);
                 $("#banco").text(null);
                 $("#cuenta").text(null);
@@ -188,7 +198,7 @@ block body_script_auth
 
                 $.ajax({
                     type: 'GET',
-                    url: '/rest/v1.0/direccion_financiera/terceros/list/?name='+$("#id_tercero").val() + '&reporte={{reporte.id}}',
+                    url: '/rest/v1.0/direccion_financiera/terceros/list/?name=' + $("#id_tercero").val() + '&reporte={{reporte.id}}',
                     success: function (response) {
                         $('#id_descuentos_pendientes').val('{}');
                         var tercerosArray = response.lista;
@@ -199,7 +209,7 @@ block body_script_auth
                         $('input.autocomplete').autocomplete({
                             data: dataTerceros,
                             limit: 5,
-                            onAutocomplete: function( val ) {
+                            onAutocomplete: function (val) {
 
                                 var cedula = parseInt(val.split(' - ')[1]);
                                 var data = response.diccionario[cedula];
@@ -211,62 +221,61 @@ block body_script_auth
                                 $("label[for='id_cedula']").addClass('active');
                                 $("#id_cedula").val(cedula);
 
-                                if(Object.keys(data.descuentos).length > 0){
+                                if (Object.keys(data.descuentos).length > 0) {
                                     $("#descuentos-pendientes").empty();
 
                                     for (var descuento in data.descuentos) {
 
                                         var amortizaciones = '';
 
-                                        for(i=0;i<data.descuentos[descuento].amortizaciones.length;i++){
+                                        for (i = 0; i < data.descuentos[descuento].amortizaciones.length; i++) {
                                             amortizaciones +=
                                                 "<p>" +
-                                                    "<input type='checkbox' class='filled-in input-amortizacion' id='"+
-                                                    data.descuentos[descuento].amortizaciones[i].id + "' id_pago='" +
-                                                    data.descuentos[descuento].amortizaciones[i].id_pago + "' " +
-                                                    data.descuentos[descuento].amortizaciones[i].checked + " " +
-                                                    data.descuentos[descuento].amortizaciones[i].disabled +" />"+
-                                                    "<label for='"+ data.descuentos[descuento].amortizaciones[i].id + "'>"+ data.descuentos[descuento].amortizaciones[i].consecutivo +" - " + data.descuentos[descuento].amortizaciones[i].valor + data.descuentos[descuento].amortizaciones[i].descripcion + "</label>" +
+                                                "<input type='checkbox' class='filled-in input-amortizacion' id='" +
+                                                data.descuentos[descuento].amortizaciones[i].id + "' id_pago='" +
+                                                data.descuentos[descuento].amortizaciones[i].id_pago + "' " +
+                                                data.descuentos[descuento].amortizaciones[i].checked + " " +
+                                                data.descuentos[descuento].amortizaciones[i].disabled + " />" +
+                                                "<label for='" + data.descuentos[descuento].amortizaciones[i].id + "'>" + data.descuentos[descuento].amortizaciones[i].consecutivo + " - " + data.descuentos[descuento].amortizaciones[i].valor + data.descuentos[descuento].amortizaciones[i].descripcion + "</label>" +
                                                 "</p>"
                                         }
 
                                         $("#descuentos-pendientes").append(
                                             "<div class='row'>" +
-                                                "<div class='col s12'>" +
-                                                        "<div class='card horizontal hoverable'>" +
-                                                            "<div class='card-image'>" +
-                                                                "<div class='descuento-card valign-wrapper'>" +
-                                                                    "<div class='center-align' style='width: 100%;'>" +
-                                                                        "<span class='pago-card'> Reporte " + data.descuentos[descuento].pago.reporte + "</span>" +
-                                                                    "</div>" +
-                                                                "</div>"+
-                                                            "</div>" +
-                                                            "<div class='card-stacked'>" +
-                                                                "<div class='card-content'>" +
-                                                                    "<div style='margin-bottom: 20px;'>" +
-                                                                        "<p><b>Valor: </b>" + data.descuentos[descuento].pago.valor_total + "</p>" +
-                                                                        "<p><b>Cuotas: </b>" + data.descuentos[descuento].pago.cuotas + "</p>" +
-                                                                    "</div>" +
-                                                                    "<div style='margin-bottom: 20px;'>" +
-                                                                        "<p><b>Amortizaciones:</b></p>" +
-                                                                        "<div style='margin-top: 10px;'>" +
-                                                                            "<form action='#'>" +
-                                                                                amortizaciones +
-                                                                            "</form>" +
-                                                                        "</div>" +
-                                                                    "</div>" +
+                                            "<div class='col s12'>" +
+                                            "<div class='card horizontal hoverable'>" +
+                                            "<div class='card-image'>" +
+                                            "<div class='descuento-card valign-wrapper'>" +
+                                            "<div class='center-align' style='width: 100%;'>" +
+                                            "<span class='pago-card'> Reporte " + data.descuentos[descuento].pago.reporte + "</span>" +
+                                            "</div>" +
+                                            "</div>" +
+                                            "</div>" +
+                                            "<div class='card-stacked'>" +
+                                            "<div class='card-content'>" +
+                                            "<div style='margin-bottom: 20px;'>" +
+                                            "<p><b>Valor: </b>" + data.descuentos[descuento].pago.valor_total + "</p>" +
+                                            "<p><b>Cuotas: </b>" + data.descuentos[descuento].pago.cuotas + "</p>" +
+                                            "</div>" +
+                                            "<div style='margin-bottom: 20px;'>" +
+                                            "<p><b>Amortizaciones:</b></p>" +
+                                            "<div style='margin-top: 10px;'>" +
+                                            "<form action='#'>" +
+                                            amortizaciones +
+                                            "</form>" +
+                                            "</div>" +
+                                            "</div>" +
 
-                                                                "</div>" +
-                                                            "</div>" +
-                                                        "</div>" +
-                                                "</div>" +
+                                            "</div>" +
+                                            "</div>" +
+                                            "</div>" +
+                                            "</div>" +
                                             "</div></div>"
                                         );
 
 
                                     }
-                                }
-                                else{
+                                } else {
                                     $("#descuentos-pendientes").empty();
                                     $("#descuentos-pendientes").append("<p><b>El tercero no tiene descuentos pendientes.</b></p>");
                                 }

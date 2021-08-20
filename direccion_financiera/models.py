@@ -91,7 +91,6 @@ class RubroPresupuestal(models.Model):
 class RubroPresupuestalLevel2(models.Model):
     nombre = models.CharField(max_length=500)
     rubro = models.ForeignKey(RubroPresupuestal, on_delete=models.DO_NOTHING)
-    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
         return self.nombre
@@ -99,7 +98,6 @@ class RubroPresupuestalLevel2(models.Model):
 class RubroPresupuestalLevel3(models.Model):
     nombre = models.CharField(max_length=500)
     rubro_level_2 = models.ForeignKey(RubroPresupuestalLevel2, on_delete=models.DO_NOTHING)
-    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
         return self.nombre
@@ -368,7 +366,7 @@ class Pagos(models.Model):
             data += '<p>{0} - Estado: {1}, Reporte {2}</p>'.format(
                 str(amortizacion.valor).replace('COL', ''),
                 amortizacion.estado,
-                amortizacion.pago.reporte.consecutivo
+                amortizacion.pago.reporte.consecutive
             )
         return data
 
@@ -428,7 +426,7 @@ class Pagos(models.Model):
                 amortizaciones += 'Amortización # {1} - {0}, Reporte: {2}\n'.format(
                     amortizacion.pretty_print_valor(),
                     amortizacion.consecutivo,
-                    amortizacion.pago.reporte.consecutivo
+                    amortizacion.pago.reporte.consecutive
                 )
 
             if descuentos == '':
@@ -462,7 +460,7 @@ class Pagos(models.Model):
             descuentos += '<p><span style="font-weight:bold;">{0}</span> - Amortización #{1} reporte {2}: {3}</p>'.format(
                 i,
                 amortizacion.consecutivo,
-                amortizacion.pago.reporte.consecutivo,
+                amortizacion.pago.reporte.consecutive,
                 amortizacion.pretty_print_valor()
             )
             i += 1
@@ -477,7 +475,7 @@ class Pagos(models.Model):
                     data += '<p>{0}: {1} en el reporte {2}</p>'.format(
                         str(amortizacion.valor).replace('COL', ''),
                         amortizacion.estado,
-                        amortizacion.pago_descontado.reporte.consecutivo
+                        amortizacion.pago_descontado.reporte.consecutive
                     )
                 else:
                     data += '<p>{0}: {1}</p>'.format(str(amortizacion.valor).replace('COL',''), amortizacion.estado)
@@ -564,7 +562,7 @@ class Amortizaciones(models.Model):
             if str(self.pago_descontado.id) != str(id):
                 descripcion = ' - {0} en el reporte {1}'.format(
                     self.estado,
-                    self.pago_descontado.reporte.consecutivo
+                    self.pago_descontado.reporte.consecutive
                 )
             else:
                 descripcion = ' - {0} en este reporte'.format(
@@ -580,7 +578,7 @@ class Amortizaciones(models.Model):
         if self.estado == 'Asignada' or self.estado == 'Descontada':
             descripcion = '{0} en el reporte {1}'.format(
                 self.estado,
-                self.pago_descontado.reporte.consecutivo
+                self.pago_descontado.reporte.consecutive
             )
         else:
             descripcion = self.estado

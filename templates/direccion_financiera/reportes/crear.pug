@@ -30,7 +30,19 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="/direccion_financiera/reportes/") Reportes de pago
+                        a(href="/direccion_financiera/enterprise/") Empresas asociadas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_1 | truncatechars:25 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../") Reportes de pago
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
@@ -58,6 +70,7 @@ block body_script_auth
             $('#id_efectivo').select2();
             $('#id_rubro').select2();
             $('#id_rubro_level_2').select2();
+            $('#id_rubro_level_3').select2();
 
 
             $("label[for='id_servicio']").addClass('active');
@@ -66,6 +79,44 @@ block body_script_auth
             $("label[for='id_efectivo']").addClass('active');
             $("label[for='id_rubro']").addClass('active');
             $("label[for='id_rubro_level_2']").addClass('active');
+            $("label[for='id_rubro_level_3']").addClass('active');
+
+            $("#id_rubro").change(function () {
+                var url = '/rest/v1.0/direccion_financiera/reportes/cargar-rubro/'
+                var rubro_id = $(this).val();
+
+                $.ajax({
+                    url: url,
+                    data: {
+                        'rubro': rubro_id
+                    },
+
+                    success: function (data) {
+                        $("#id_rubro_level_2").html(data);
+                        $('#id_rubro_level_2').select2();
+                    }
+                });
+
+            });
+
+            $("#id_rubro_level_2").change(function () {
+                var url = '/rest/v1.0/direccion_financiera/reportes/cargar-rubro_2/'
+                var rubro_2_id = $(this).val();
+
+                $.ajax({
+                    url: url,
+                    data: {
+                        'rubro_2': rubro_2_id
+                    },
+
+                    success: function (data) {
+                        $("#id_rubro_level_3").html(data);
+                        $('#id_rubro_level_3').select2();
+                    }
+                });
+
+            });
+
 
             $('#id_inicio').pickadate({
                 format: 'dd/mm/yyyy',

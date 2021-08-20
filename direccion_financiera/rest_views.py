@@ -1,5 +1,8 @@
+from uuid import UUID
+from django.shortcuts import render
 from django_datatables_view.base_datatable_view import BaseDatatableView
-from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones
+from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, RubroPresupuestalLevel2, \
+    RubroPresupuestalLevel3
 from recursos_humanos.models import Contratistas
 from django.db.models import Q
 from rest_framework.views import APIView
@@ -206,12 +209,14 @@ class TerceroPagosListApi(BaseDatatableView):
 
 class ReportesListApi(BaseDatatableView):
     model = Reportes
-    columns = ['consecutivo', 'usuario_actualizacion','usuario_creacion', 'efectivo', 'proyecto','creation', 'nombre',
+    columns = ['consecutive', 'usuario_actualizacion','usuario_creacion', 'efectivo', 'proyecto','creation', 'nombre',
                'plano', 'valor', 'estado', 'servicio']
 
-    order_columns = ['consecutivo', 'usuario_actualizacion','usuario_creacion', 'efectivo','proyecto','creation', 'nombre',
+    order_columns = ['consecutive', 'usuario_actualizacion','usuario_creacion', 'efectivo','proyecto','creation', 'nombre',
                'plano', 'valor', 'estado', 'servicio']
 
+    def get_initial_queryset(self):
+        return self.model.objects.filter(enterprise__id=self.kwargs['pk'])
 
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
@@ -228,7 +233,7 @@ class ReportesListApi(BaseDatatableView):
 
 
     def render_column(self, row, column):
-        if column == 'consecutivo':
+        if column == 'consecutive':
             ret = ''
 
             observacion = ''
@@ -240,15 +245,15 @@ class ReportesListApi(BaseDatatableView):
             if self.request.user.has_perm('usuarios.direccion_financiera.reportes.editar'):
                 ret = '<div class="center-align">' \
                            '<a href="editar/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar reporte: {1}">' \
-                                '<p style="font-weight:bold;">{2}</p>' \
+                                '<p style="font-weight:bold;">{2}-{3}</p>' \
                            '</a>' \
-                           '{3}' \
-                      '</div>'.format(row.id,row.nombre,row.consecutivo.id,observacion)
+                           '{4}' \
+                      '</div>'.format(row.id,row.nombre,row.enterprise.code,row.consecutive,observacion)
 
             else:
                 ret = '<div class="center-align">' \
                            '<p style="font-weight:bold;">{0}</p>' \
-                       '</div>'.format(row.consecutivo.id)
+                       '</div>'.format(row.consecutive)
 
             return ret
 
@@ -362,9 +367,9 @@ class PagosListApi(BaseDatatableView):
 
     def get_initial_queryset(self):
 
-        self.reporte = Reportes.objects.get(id = self.kwargs['pk'])
+        self.reporte = Reportes.objects.get(id = self.kwargs['pk_reporte'])
 
-        return self.model.objects.filter(reporte__id = self.kwargs['pk'])
+        return self.model.objects.filter(reporte__id = self.kwargs['pk_reporte'])
 
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
@@ -573,7 +578,7 @@ class TercerosListApiJson(APIView):
                                 'amortizaciones' : [],
                                 'pago': {
                                     'id': str(amortizacion.pago.id),
-                                    'reporte': str(amortizacion.pago.reporte.consecutivo),
+                                    'reporte': str(amortizacion.pago.reporte.consecutive),
                                     'cantidad_amortizaciones_pendientes': amortizacion.pago.get_cantidad_amortizaciones_pendientes(),
                                     'fecha_ultimo_descuento': ultimo_descuento if ultimo_descuento != '' else 'No se ha aplicado ningún descuento',
                                     'cuotas': amortizacion.pago.cuotas,
@@ -617,7 +622,7 @@ class PagoApiJson(APIView):
                         'amortizaciones': [],
                         'pago': {
                             'id': str(amortizacion.pago.id),
-                            'reporte': str(amortizacion.pago.reporte.consecutivo),
+                            'reporte': str(amortizacion.pago.reporte.consecutive),
                             'cantidad_amortizaciones_pendientes': amortizacion.pago.get_cantidad_amortizaciones_pendientes(),
                             'fecha_ultimo_descuento': ultimo_descuento if ultimo_descuento != '' else 'No se ha aplicado ningún descuento',
                             'cuotas': amortizacion.pago.cuotas,
@@ -628,7 +633,7 @@ class PagoApiJson(APIView):
                 diccionario[str(pago.tercero.cedula)]['descuentos'][id_pago]['amortizaciones'].append({
                     'id': str(amortizacion.id),
                     'id_pago': str(amortizacion.pago.id),
-                    'consecutivo': amortizacion.consecutivo,
+                    'v': amortizacion.consecutivo,
                     'valor': '${:20,.2f}'.format(amortizacion.valor.amount),
                     'estado': amortizacion.estado,
                     'pago_descontado': amortizacion.get_dict_pago_descontado(),
@@ -1012,3 +1017,27 @@ class DesplazamientosListApi(BaseDatatableView):
 
         else:
             return super(DesplazamientosListApi, self).render_column(row, column)
+
+
+
+def cargar_rubro(request):
+    rubro_id = request.GET.get('rubro')
+    try:
+        id(rubro_id)
+    except:
+        rubros_level_2 = RubroPresupuestalLevel2.objects.none()
+    else:
+        rubros_level_2 = RubroPresupuestalLevel2.objects.filter(rubro=rubro_id).order_by('nombre')
+
+    return render(request, 'direccion_financiera/reportes/load/rubros_dropdown_list_options.html', {'rubros_level_2': rubros_level_2})
+
+def cargar_rubro_2(request):
+    rubro_2_id = request.GET.get('rubro_2')
+    try:
+        id(rubro_2_id)
+    except:
+        rubros_level_3 = RubroPresupuestalLevel3.objects.none()
+    else:
+        rubros_level_3 = RubroPresupuestalLevel3.objects.filter(rubro_level_2=rubro_2_id).order_by('nombre')
+
+    return render(request, 'direccion_financiera/reportes/load/rubros_2_dropdown_list_options.html', {'rubros_level_3': rubros_level_3})

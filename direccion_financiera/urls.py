@@ -1,3 +1,4 @@
+from django.conf.urls import url
 from django.urls import path
 from direccion_financiera import views
 
@@ -22,18 +23,18 @@ urlpatterns = [
 
     path('reportes/informe/', views.InformePagosView.as_view()),
     path('enterprise/<uuid:pk>/reportes/crear/', views.ReportesCreateView.as_view()),
-    path('reportes/editar/<uuid:pk>/', views.ReportesUpdateView.as_view()),
-    path('reportes/editar/<uuid:pk>/resultado/', views.ReportesResultadoUpdateView.as_view()),
-    path('reportes/editar/<uuid:pk>/reportar/', views.ReporteReportesView.as_view()),
-    path('reportes/editar/<uuid:pk>/enviado/', views.ReporteEnvioView.as_view()),
-    path('reportes/eliminar/<uuid:pk>/', views.ReportesDeleteView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/editar/<uuid:pk_reporte>/', views.ReportesUpdateView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/editar/<uuid:pk_reporte>/resultado/', views.ReportesResultadoUpdateView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/editar/<uuid:pk_reporte>/reportar/', views.ReporteReportesView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/editar/<uuid:pk_reporte>/enviado/', views.ReporteEnvioView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/eliminar/<uuid:pk_reporte>/', views.ReportesDeleteView.as_view()),
 
-    path('reportes/pagos/<uuid:pk>/', views.PagosListView.as_view()),
-    path('reportes/pagos/<uuid:pk>/crear/', views.PagosCreateView.as_view()),
-    path('reportes/pagos/<uuid:pk>/editar/<uuid:pk_pago>/', views.PagosUpdateView.as_view()),
-    path('reportes/pagos/<uuid:pk>/eliminar/<uuid:pk_pago>/', views.PagosDeleteView.as_view()),
-    path('reportes/pagos/<uuid:pk>/amortizaciones/<uuid:pk_pago>/', views.AmortizacionesPagosListView.as_view()),
-    path('reportes/pagos/<uuid:pk>/amortizaciones/<uuid:pk_pago>/editar/<uuid:pk_amortizacion>/', views.AmortizacionesPagosUpdateView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/', views.PagosListView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/crear/', views.PagosCreateView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/editar/<uuid:pk_pago>/', views.PagosUpdateView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/eliminar/<uuid:pk_pago>/', views.PagosDeleteView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/amortizaciones/<uuid:pk_pago>/', views.AmortizacionesPagosListView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/amortizaciones/<uuid:pk_pago>/editar/<uuid:pk_amortizacion>/', views.AmortizacionesPagosUpdateView.as_view()),
 
     path('consulta_pagos/', views.ConsultaPagosListView.as_view()),
     path('consulta_pagos/ver/<uuid:pk>/', views.ConsultaPagosTerceroListView.as_view()),
@@ -49,6 +50,5 @@ urlpatterns = [
     path('solicitudes_desplazamiento/editar/<uuid:pk>/eliminar/<uuid:pk_desplazamiento>/', views.DesplazamientosDeleteView.as_view()),
 
     path('solicitudes_desplazamiento/editar/<uuid:pk>/aprobar/', views.DesplazamientosAprobarView.as_view()),
-    path('solicitudes_desplazamiento/editar/<uuid:pk>/rechazar/', views.DesplazamientosRechazarView.as_view()),
 
 ]

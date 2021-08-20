@@ -6,6 +6,8 @@ from dal import autocomplete
 from django import forms
 from django.shortcuts import render
 
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
+from django.forms.fields import Field, FileField
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, Enterprise, Servicios, \
     Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2
 from crispy_forms.helper import FormHelper
@@ -233,7 +235,6 @@ class TerceroForm(forms.ModelForm):
 
 class ReporteForm(forms.ModelForm):
 
-
     def __init__(self, *args, **kwargs):
         super(ReporteForm, self).__init__(*args, **kwargs)
 
@@ -243,6 +244,7 @@ class ReporteForm(forms.ModelForm):
         self.fields['proyecto'].queryset = Proyecto.objects.filter(enterprise=enterprise)
         self.fields['tipo_soporte'].queryset = TipoSoporte.objects.filter(enterprise=enterprise)
         self.fields['rubro'].queryset = RubroPresupuestal.objects.filter(enterprise=enterprise)
+
 
         self.fields['respaldo'].widget = forms.FileInput()
         self.fields['firma'].widget = forms.FileInput()
@@ -282,13 +284,19 @@ class ReporteForm(forms.ModelForm):
                             'efectivo',
                             css_class='s12 m6 l4'
                         ),
+                    ),
+                    Row(
                         Column(
                             'rubro',
-                            css_class='s12 m6 l4 personForm'
+                            css_class='s12 m6 l4 '
                         ),
                         Column(
                             'rubro_level_2',
-                            css_class='s12 m6 l4 personForm',
+                            css_class='s12 m6 l4',
+                        ),
+                        Column(
+                            'rubro_level_3',
+                            css_class='s12 m6 l4',
                         ),
                     ),
 
@@ -302,17 +310,6 @@ class ReporteForm(forms.ModelForm):
                             css_class='s12 m6'
                         )
                     ),
-                    Row(
-                        Column(
-                            'numero_contrato',
-                            css_class='s12 m6'
-                        ),
-                        Column(
-                            'numero_documento_equivalente',
-                            css_class='s12 m6'
-                        )
-                    ),
-                    css_class="s12"
                 ),
             ),
             Row(
@@ -372,7 +369,7 @@ class ReporteForm(forms.ModelForm):
 
     class Meta:
         model = Reportes
-        fields = ['nombre','servicio','proyecto','tipo_soporte','inicio','fin','respaldo','firma','efectivo','numero_contrato','numero_documento_equivalente', 'rubro', 'rubro_level_2','observacion']
+        fields = ['nombre','servicio','proyecto','tipo_soporte','inicio','fin','respaldo','firma','efectivo', 'rubro', 'rubro_level_2','rubro_level_3','observacion']
         labels = {
             'servicio': 'Bien o servicio a gestionar',
             'tipo_soporte': 'Respaldo del reporte',
@@ -390,7 +387,9 @@ class ReporteUpdateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ReporteUpdateForm, self).__init__(*args, **kwargs)
-
+        pk = kwargs['initial'].get('pk')
+        enterprise = Enterprise.objects.get(id=pk)
+        self.fields['rubro'].queryset = RubroPresupuestal.objects.filter(enterprise=enterprise)
 
         self.fields['respaldo'].widget = forms.FileInput()
         self.fields['firma'].widget = forms.FileInput()
@@ -424,7 +423,15 @@ class ReporteUpdateForm(forms.ModelForm):
                     Row(
                         Column(
                             'rubro',
-                            css_class='s12 m6 l4'
+                            css_class='s12 m6 l4 '
+                        ),
+                        Column(
+                            'rubro_level_2',
+                            css_class='s12 m6 l4',
+                        ),
+                        Column(
+                            'rubro_level_3',
+                            css_class='s12 m6 l4',
                         ),
                     ),
                     Row(
@@ -507,7 +514,7 @@ class ReporteUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Reportes
-        fields = ['nombre','proyecto','tipo_soporte','inicio','fin','respaldo','firma','numero_contrato','numero_documento_equivalente', 'observacion', 'rubro']
+        fields = ['nombre','proyecto','tipo_soporte','inicio','fin','respaldo','firma','numero_contrato','numero_documento_equivalente', 'observacion', 'rubro', 'rubro_level_2','rubro_level_3']
         labels = {
             'tipo_soporte': 'Respaldo del reporte',
             'inicio': 'Fecha de pago',
@@ -536,7 +543,7 @@ class ResultadoReporteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ResultadoReporteForm, self).__init__(*args, **kwargs)
 
-        pk = kwargs['initial'].get('pk')
+        pk = kwargs['initial'].get('pk_reporte')
         self.pk = pk
         self.fields['file_banco'].widget = forms.FileInput()
 

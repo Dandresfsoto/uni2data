@@ -12,8 +12,8 @@ urlpatterns = [
     path('terceros/list/', rest_views.TercerosListApiJson.as_view()),
 
     path('enterprise/<uuid:pk>/reportes/', rest_views.ReportesListApi.as_view()),
-    path('reportes/pagos/<uuid:pk>/', rest_views.PagosListApi.as_view()),
-    path('reportes/pagos/<uuid:pk>/amortizaciones/<uuid:pk_pago>/', rest_views.AmortizacionesPagosApi.as_view()),
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/', rest_views.PagosListApi.as_view()),
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/amortizaciones/<uuid:pk_pago>/', rest_views.AmortizacionesPagosApi.as_view()),
 
     path('consulta_pagos/', rest_views.ConsultaPagosListApi.as_view()),
 
@@ -21,4 +21,7 @@ urlpatterns = [
     path('solicitudes_desplazamiento/desplazamientos/<uuid:pk>/', rest_views.DesplazamientosListApi.as_view()),
 
     path('pagos/<uuid:pk>/', rest_views.PagoApiJson.as_view()),
+
+    path('reportes/cargar-rubro/', rest_views.cargar_rubro),
+    path('reportes/cargar-rubro_2/', rest_views.cargar_rubro_2),
 ]
