@@ -14,6 +14,7 @@ from django.shortcuts import redirect, render
 from direccion_financiera.tasks import send_mail_templated_pago, send_mail_templated_reporte
 from direccion_financiera import tasks
 from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA
+from recursos_humanos.models import Contratos
 from reportes.models import Reportes
 import json
 from desplazamiento.models import Desplazamiento, Solicitudes
@@ -885,6 +886,7 @@ class PagosCreateView(LoginRequiredMixin,
 
     def form_valid(self, form):
         reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
+        contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
 
 
         if reporte.servicio.descontable:
@@ -895,6 +897,7 @@ class PagosCreateView(LoginRequiredMixin,
                 valor = float(form.cleaned_data['valor'].replace('$ ','').replace(',','')),
                 tercero = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']),
                 observacion = form.cleaned_data['observacion'],
+                contrato=contrato,
                 estado = 'Pago creado',
                 publico=form.cleaned_data['publico'],
                 cuotas=form.cleaned_data['cuotas'],
@@ -937,6 +940,7 @@ class PagosCreateView(LoginRequiredMixin,
                 tercero=rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']),
                 observacion=form.cleaned_data['observacion'],
                 estado='Pago creado',
+                contrato=contrato,
                 publico=form.cleaned_data['publico'],
                 descuentos_pendientes=form.cleaned_data['descuentos_pendientes'],
                 descuentos_pendientes_otro_valor=form.cleaned_data['descuentos_pendientes_otro_valor'],

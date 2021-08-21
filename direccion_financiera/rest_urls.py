@@ -24,4 +24,5 @@ urlpatterns = [
 
     path('reportes/cargar-rubro/', rest_views.cargar_rubro),
     path('reportes/cargar-rubro_2/', rest_views.cargar_rubro_2),
+    path('reportes/pagos/cargar-contrato/', rest_views.cargar_contrato),
 ]

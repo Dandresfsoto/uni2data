@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, RubroPresupuestalLevel2, \
     RubroPresupuestalLevel3
-from recursos_humanos.models import Contratistas
+from recursos_humanos.models import Contratistas, Contratos
 from django.db.models import Q
 from rest_framework.views import APIView
 from django.http import Http404
@@ -1041,3 +1041,18 @@ def cargar_rubro_2(request):
         rubros_level_3 = RubroPresupuestalLevel3.objects.filter(rubro_level_2=rubro_2_id).order_by('nombre')
 
     return render(request, 'direccion_financiera/reportes/load/rubros_2_dropdown_list_options.html', {'rubros_level_3': rubros_level_3})
+
+
+
+
+def cargar_contrato(request):
+    contrato_cedula = request.GET.get('contrato')
+    print(contrato_cedula)
+    try:
+        id(contrato_cedula)
+    except:
+        contratos_cedula = Contratos.objects.none()
+    else:
+        contratos_cedula = Contratos.objects.filter(contratista__cedula=contrato_cedula)
+
+    return render(request, 'direccion_financiera/reportes/load/contratos_2_dropdown_list_options.html', {'contratos_cedula': contratos_cedula})

@@ -13,7 +13,7 @@ from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amo
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
-from recursos_humanos.models import Contratistas
+from recursos_humanos.models import Contratistas, Contratos
 from django.db.models import Q
 from django.conf import settings
 from desplazamiento.models import Desplazamiento
@@ -663,6 +663,8 @@ class PagoForm(forms.Form):
     cedula = forms.IntegerField(label="Cédula",widget=forms.HiddenInput())
     publico = forms.BooleanField(initial=True, required=False)
 
+    contrato = forms.ModelChoiceField(label='Contrato', queryset=Contratos.objects.none())
+
     uuid_descuento_1 = forms.UUIDField(required=False, widget=forms.HiddenInput())
     valor_descuento_1 = forms.CharField(label = "Valor ($)",required=False)
     concepto_descuento_1 = forms.CharField(label="Concepto",widget = forms.Select(choices=CHOICES),required=False)
@@ -870,6 +872,8 @@ class PagoForm(forms.Form):
             pago = Pagos.objects.get(id = self.pk_pago)
             self.pk = pago.reporte.id
             self.fields['tercero'].initial = pago.tercero.fullname() + ' - ' + str(pago.tercero.cedula)
+            self.fields['contrato'].queryset = Contratos.objects.filter(contratista__cedula=pago.tercero.cedula)
+            self.fields['contrato'].initial = pago.contrato.id
             self.fields['valor'].initial = pago.valor.amount
             self.fields['observacion'].initial = pago.observacion
             self.fields['cedula'].initial = pago.tercero.cedula
@@ -913,6 +917,15 @@ class PagoForm(forms.Form):
                                 <p><b>Número de cuenta:</b><span id="cuenta" style="margin-left:5px;">{{cuenta}}</span></p>
                                 """
                             ),
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Fieldset(
+                            'Información del contrato',
+                        ),
+                        Column(
+                            'contrato',
                             css_class='s12'
                         ),
                     ),

@@ -169,6 +169,7 @@ block body_script_auth
             $('#id_concepto_descuento_3').select2();
             $('#id_concepto_descuento_4').select2();
             $('#id_concepto_descuento_5').select2();
+            $('#id_contrato').select2();
 
 
             $("label[for='id_concepto_descuento_1']").addClass('active');
@@ -176,6 +177,7 @@ block body_script_auth
             $("label[for='id_concepto_descuento_3']").addClass('active');
             $("label[for='id_concepto_descuento_4']").addClass('active');
             $("label[for='id_concepto_descuento_5']").addClass('active');
+            $("label[for='id_contrato']").addClass('active');
 
 
             new AutoNumeric('#id_valor', {currencySymbol: '$ '});
@@ -220,6 +222,20 @@ block body_script_auth
 
                                 $("label[for='id_cedula']").addClass('active');
                                 $("#id_cedula").val(cedula);
+
+                                var url_2 = '/rest/v1.0/direccion_financiera/reportes/pagos/cargar-contrato/'
+                                var contrato_cedula = cedula;
+
+                                $.ajax({
+                                    url: url_2,
+                                    data: {
+                                        'contrato': contrato_cedula
+                                    },
+                                    success: function (data) {
+                                        $("#id_contrato").html(data);
+                                        $('#id_contrato').select2();
+                                    }
+                                });
 
                                 if (Object.keys(data.descuentos).length > 0) {
                                     $("#descuentos-pendientes").empty();

@@ -267,7 +267,10 @@ class Pagos(models.Model):
     reporte = models.ForeignKey(Reportes, on_delete=models.DO_NOTHING)
     valor = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
     tercero = models.ForeignKey(to='recursos_humanos.Contratistas', on_delete=models.DO_NOTHING)
+    banco = models.CharField(max_length=500, blank=True, null=True)
     observacion = models.TextField(max_length=500)
+    contrato = models.ForeignKey(to='recursos_humanos.Contratos', on_delete=models.DO_NOTHING,blank=True, null=True)
+
 
     estado = models.CharField(max_length=100)
     notificado = models.BooleanField(default=False)
