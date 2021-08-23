@@ -426,7 +426,7 @@ class EnterpriseOptionListView(LoginRequiredMixin,
                 'sican_categoria': 'Pagos',
                 'sican_color': 'teal darken-4',
                 'sican_order': 1,
-                'sican_url': 'pagos/',
+                'sican_url': 'consulta_pagos/',
                 'sican_name': 'Pagos',
                 'sican_icon': 'monetization_on',
                 'sican_description': 'Consulta y reportes de pagos a terceros'
@@ -568,6 +568,77 @@ class EnterpriseProjectsUpdateView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = models.Proyecto.objects.get(id=self.kwargs['pk_proyecto']).nombre
 
         return super(EnterpriseProjectsUpdateView,self).get_context_data(**kwargs)
+
+
+
+class ConsultaEnterprisePagosListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": ["usuarios.direccion_financiera.consulta_pagos.ver"]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/enterprise/consulta_pagos/lista.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "consulta de pagos"
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        kwargs['breadcrum_1'] = enterprice.name
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/consulta_pagos/'.format(enterprice.id)
+        return super(ConsultaEnterprisePagosListView,self).get_context_data(**kwargs)
+
+
+class ConsultaPagosEnterpriseTerceroListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.consulta_pagos.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/enterprise/consulta_pagos/tercero/lista.html'
+
+
+    def get_context_data(self, **kwargs):
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        contratista = rh_models.Contratistas.objects.get(id=self.kwargs['pk_contratista'])
+        kwargs['title'] = "PAGOS DE TERCEROS"
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/terceros/pagos/{1}'.format(enterprise.id,contratista.id)
+        kwargs['breadcrum_active'] = rh_models.Contratistas.objects.get(pk = kwargs['pk_contratista']).fullname()
+        kwargs['breadcrum_1'] = enterprise.name
+        kwargs['consulta_dinamica'] = models.Pagos.objects.filter(tercero_id=self.kwargs['pk_contratista']).count() > 0
+        return super(ConsultaPagosEnterpriseTerceroListView,self).get_context_data(**kwargs)
+
+
+
+class ConsultaEnterprisePagosTerceroDinamicaListView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.consulta_pagos.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/enterprise/consulta_pagos/tercero/consulta_dinamica.html'
+
+    def get_context_data(self, **kwargs):
+        contratista = rh_models.Contratistas.objects.get(id = self.kwargs['pk_contratista'])
+        enterprise = Enterprise.objects.get(id = self.kwargs['pk'])
+        kwargs['title'] = "CONSULTA DINAMICA DE PAGOS"
+        kwargs['breadcrum_active'] = contratista.fullname()
+        kwargs['breadcrum_1'] = enterprise.name
+        kwargs['pk_ent'] = self.kwargs['pk']
+        kwargs['pk_str'] = self.kwargs['pk_contratista']
+        kwargs['years'] = json.dumps(contratista.get_years_pagos())
+        return super(ConsultaEnterprisePagosTerceroDinamicaListView,self).get_context_data(**kwargs)
 
 
 

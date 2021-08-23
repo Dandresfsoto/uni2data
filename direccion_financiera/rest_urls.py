@@ -9,13 +9,19 @@ urlpatterns = [
     path('terceros/pagos/<uuid:pk>/', rest_views.TerceroPagosListApi.as_view()),
     path('terceros/pagos/<uuid:pk>/dinamica/pagos/', rest_views.PagosDinamicaAPI.as_view()),
 
+
     path('terceros/list/', rest_views.TercerosListApiJson.as_view()),
 
     path('enterprise/<uuid:pk>/reportes/', rest_views.ReportesListApi.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/', rest_views.PagosListApi.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/amortizaciones/<uuid:pk_pago>/', rest_views.AmortizacionesPagosApi.as_view()),
 
-    path('enterprise/<uuid:pk>/projects/', rest_views.EnterpriseProjectsListApi.as_view()),
+    path('enterprise/<uuid:pk>/consulta_pagos/', rest_views.ConsultaEnterprisePagosListApi.as_view()),
+    path('enterprise/<uuid:pk>/terceros/pagos/<uuid:pk_contratista>/', rest_views.EnterperiseTerceroPagosListApi.as_view()),
+    path('enterprise/<uuid:pk>/terceros/pagos/<uuid:pk_contratista>/dinamica/pagos/', rest_views.EnterprisePagosDinamicaAPI.as_view()),
+
+
+    path('terceros/pagos/<uuid:pk>/dinamica/pagos/', rest_views.PagosDinamicaAPI.as_view()),
 
     path('consulta_pagos/', rest_views.ConsultaPagosListApi.as_view()),
 

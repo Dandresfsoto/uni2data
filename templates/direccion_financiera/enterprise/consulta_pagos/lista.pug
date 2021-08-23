@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -29,8 +29,9 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
+
                     li(class="bold waves-effect waves-light")
-                        a(href="../../") Empresas asociadas
+                        a(href="/direccion_financiera/enterprise") Empresas asociadas
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
@@ -41,8 +42,9 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
+
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Reportes de pago
+                        a(href="#") Consulta de pagos
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -68,57 +70,30 @@ block side_nav_container
 
     |{% endif %}
 
-    | {% if permiso_informe %}
-
-    ul(class="collapsible",data-collapsible="accordion")
-        li(class="bold waves-effect waves-light button-menu")
-
-            div(class="collapsible-header active")
-                i(class="material-icons") dashboard
-                | Informes
-
-            div(class="collapsible-body collapsible-body-blue")
-                ul
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="informe/") Informe acumulado
-                            i(class="material-icons icon-sican") import_export
-
-                    div(class="divider divider-perfil")
-
-    | {% endif %}
-
 
 block container_principal
     div(class="container-datatable")
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
             thead
                 tr
-                    th Editar
-                    th Pagos
-                    th Usuario
-                    th Tipo
-                    th Proyecto
-                    th Fecha
+                    th Todos los pagos
                     th Nombre
-                    th Respaldo
-                    th Valor
+                    th Cédula
+                    th Fecha actualización
                     th Estado
-                    th Eliminar
+                    th Valor
+                    th Archivos
+                    th Información
             tbody
                 tr
-                    td Editar
-                    td Pagos
-                    td Usuario
-                    td Tipo
-                    td Proyecto
-                    td Fecha
+                    td Todos los pagos
                     td Nombre
-                    td Respaldo
-                    td Valor
+                    td Cédula
+                    td Fecha actualización
                     td Estado
-                    td Eliminar
+                    td Valor
+                    td Archivos
+                    td Información
 
 
 block body_script_auth
@@ -133,7 +108,7 @@ block body_script_auth
                 processing: true,
                 serverSide: true,
                 ajax: "{{ url_datatable }}",
-                "order": [[ 0, "desc" ]],
+                order: [[ 3, "desc" ]],
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
                 },

@@ -19,13 +19,18 @@ urlpatterns = [
 
     path('enterprise/', views.EnterpriseListView.as_view()),
     path('enterprise/<uuid:pk>/', views.EnterpriseOptionListView.as_view()),
-    path('enterprise/<uuid:pk>/reportes/', views.ReportesListView.as_view()),
+
 
     path('enterprise/<uuid:pk>/projects/', views.EnterpriseProjectsListView.as_view()),
     path('enterprise/<uuid:pk>/projects/crear/', views.EnterpriseProjectsCreateView.as_view()),
     path('enterprise/<uuid:pk>/projects/editar/<uuid:pk_proyecto>/', views.EnterpriseProjectsUpdateView.as_view()),
 
+    path('enterprise/<uuid:pk>/consulta_pagos/', views.ConsultaEnterprisePagosListView.as_view()),
+    path('enterprise/<uuid:pk>/consulta_pagos/ver/<uuid:pk_contratista>/', views.ConsultaPagosEnterpriseTerceroListView.as_view()),
+    path('enterprise/<uuid:pk>/consulta_pagos/ver/<uuid:pk_contratista>/dinamica/pagos/', views.ConsultaEnterprisePagosTerceroDinamicaListView.as_view()),
+
     path('reportes/informe/', views.InformePagosView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/', views.ReportesListView.as_view()),
     path('enterprise/<uuid:pk>/reportes/crear/', views.ReportesCreateView.as_view()),
     path('enterprise/<uuid:pk>/reportes/editar/<uuid:pk_reporte>/', views.ReportesUpdateView.as_view()),
     path('enterprise/<uuid:pk>/reportes/editar/<uuid:pk_reporte>/resultado/', views.ReportesResultadoUpdateView.as_view()),
