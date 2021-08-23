@@ -21,6 +21,10 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/', views.EnterpriseOptionListView.as_view()),
     path('enterprise/<uuid:pk>/reportes/', views.ReportesListView.as_view()),
 
+    path('enterprise/<uuid:pk>/projects/', views.EnterpriseProjectsListView.as_view()),
+    path('enterprise/<uuid:pk>/projects/crear/', views.EnterpriseProjectsCreateView.as_view()),
+    path('enterprise/<uuid:pk>/projects/editar/<uuid:pk_proyecto>/', views.EnterpriseProjectsUpdateView.as_view()),
+
     path('reportes/informe/', views.InformePagosView.as_view()),
     path('enterprise/<uuid:pk>/reportes/crear/', views.ReportesCreateView.as_view()),
     path('enterprise/<uuid:pk>/reportes/editar/<uuid:pk_reporte>/', views.ReportesUpdateView.as_view()),
@@ -35,6 +39,7 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/eliminar/<uuid:pk_pago>/', views.PagosDeleteView.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/amortizaciones/<uuid:pk_pago>/', views.AmortizacionesPagosListView.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/amortizaciones/<uuid:pk_pago>/editar/<uuid:pk_amortizacion>/', views.AmortizacionesPagosUpdateView.as_view()),
+
 
     path('consulta_pagos/', views.ConsultaPagosListView.as_view()),
     path('consulta_pagos/ver/<uuid:pk>/', views.ConsultaPagosTerceroListView.as_view()),

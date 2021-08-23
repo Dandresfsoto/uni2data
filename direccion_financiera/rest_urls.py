@@ -15,6 +15,8 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/', rest_views.PagosListApi.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/amortizaciones/<uuid:pk_pago>/', rest_views.AmortizacionesPagosApi.as_view()),
 
+    path('enterprise/<uuid:pk>/projects/', rest_views.EnterpriseProjectsListApi.as_view()),
+
     path('consulta_pagos/', rest_views.ConsultaPagosListApi.as_view()),
 
     path('solicitudes_desplazamiento/', rest_views.SolicitudesDesplazamientoListApi.as_view()),

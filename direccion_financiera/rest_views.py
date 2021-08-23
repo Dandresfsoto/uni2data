@@ -2,7 +2,7 @@ from uuid import UUID
 from django.shortcuts import render
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, RubroPresupuestalLevel2, \
-    RubroPresupuestalLevel3
+    RubroPresupuestalLevel3, Proyecto
 from recursos_humanos.models import Contratistas, Contratos
 from django.db.models import Q
 from rest_framework.views import APIView
@@ -527,6 +527,44 @@ class AmortizacionesPagosApi(BaseDatatableView):
 
         else:
             return super(AmortizacionesPagosApi, self).render_column(row, column)
+
+
+class EnterpriseProjectsListApi(BaseDatatableView):
+    model = Proyecto
+    columns = ['id','nombre','cuenta']
+    order_columns = ['id','nombre','cuenta']
+
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(cuenta__icontains=search) | Q(nombre__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+
+    def render_column(self, row, column):
+        if column == 'id':
+            ret = ''
+            if self.request.user.has_perm('usuarios.direccion_financiera.proyectos.editar'):
+                ret = '<div class="center-align">' \
+                           '<a href="editar/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar proyecto: {1}">' \
+                                '<i class="material-icons">edit</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">edit</i>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            return ret
+
+
+
+
+        else:
+            return super(EnterpriseProjectsListApi, self).render_column(row, column)
 
 
 

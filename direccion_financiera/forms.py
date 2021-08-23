@@ -1385,3 +1385,50 @@ class AmortizacionesUpdate(forms.Form):
                 ),
             )
         )
+
+class ProjectForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ProjectForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información del proyecto',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'nombre',
+                            css_class='s12 m6 l6'
+                        ),
+                        Column(
+                            'cuenta',
+                            css_class='s12 m12 l6'
+                        ),
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Proyecto
+        fields = ['cuenta','nombre']

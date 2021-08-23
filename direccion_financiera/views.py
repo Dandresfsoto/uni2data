@@ -437,7 +437,7 @@ class EnterpriseOptionListView(LoginRequiredMixin,
                 'sican_categoria': 'Proyectos',
                 'sican_color': 'orange darken-4',
                 'sican_order': 2,
-                'sican_url': '´proyectos/',
+                'sican_url': 'projects/',
                 'sican_name': 'Proyectos',
                 'sican_icon': 'account_balance',
                 'sican_description': 'Información general de los proyectos registrados'
@@ -496,6 +496,79 @@ class ReportesListView(LoginRequiredMixin,
         kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.direccion_financiera.reportes.crear')
         kwargs['permiso_informe'] = self.request.user.has_perm('usuarios.direccion_financiera.reportes.informe')
         return super(ReportesListView,self).get_context_data(**kwargs)
+
+
+
+
+class EnterpriseProjectsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": ["usuarios.direccion_financiera.proyectos.ver"]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/projects/lista.html'
+
+
+    def get_context_data(self, **kwargs):
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "Proyectos"
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/projects/'.format(self.kwargs['pk'])
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.direccion_financiera.proyectos.crear')
+        kwargs['breadcrum_1'] = enterprice.name
+        return super(EnterpriseProjectsListView,self).get_context_data(**kwargs)
+
+
+class EnterpriseProjectsCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.proyectos.ver",
+            "usuarios.direccion_financiera.proyectos.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/projects/crear.html'
+    form_class = forms.ProjectForm
+    success_url = "../"
+    model = models.Proyecto
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CREAR PROYECTO"
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        kwargs['breadcrum_1'] = enterprice.name
+        return super(EnterpriseProjectsCreateView,self).get_context_data(**kwargs)
+
+
+class EnterpriseProjectsUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.proyectos.ver",
+            "usuarios.direccion_financiera.proyectos.editar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/projects/editar.html'
+    form_class = forms.ProjectForm
+    success_url = "../../"
+    model = models.Proyecto
+    pk_url_kwarg = "pk_proyecto"
+
+
+    def get_context_data(self, **kwargs):
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "ACTUALIZAR PROYECTO"
+        kwargs['breadcrum_1'] = enterprice.name
+        kwargs['breadcrum_active'] = models.Proyecto.objects.get(id=self.kwargs['pk_proyecto']).nombre
+
+        return super(EnterpriseProjectsUpdateView,self).get_context_data(**kwargs)
+
 
 
 class InformePagosView(LoginRequiredMixin,
