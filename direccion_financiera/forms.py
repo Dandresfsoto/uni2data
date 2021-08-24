@@ -719,7 +719,7 @@ class PagoForm(forms.Form):
 
 
 
-        q = Q(reporte__id = self.pk) & Q(tercero__cedula = cedula)
+        q = Q(reporte__id = self.pk_reporte) & Q(tercero__cedula = cedula)
 
         pagos = Pagos.objects.filter(q)
 
@@ -787,7 +787,7 @@ class PagoForm(forms.Form):
             if pagos.count() > 0:
                 self.add_error('tercero', 'Existe un pago registrado en el reporte para esta persona.')
 
-            if Pagos.objects.filter(reporte__id = self.pk).count() > 19:
+            if Pagos.objects.filter(reporte__id = self.pk_reporte).count() > 19:
                 self.add_error('tercero', 'Por reporte solo se permiten 20 pagos.')
 
 
@@ -855,13 +855,14 @@ class PagoForm(forms.Form):
         super(PagoForm, self).__init__(*args, **kwargs)
 
         self.pk = kwargs['initial'].get('pk')
+        self.pk_reporte = kwargs['initial'].get('pk_reporte')
         self.pk_pago = kwargs['initial'].get('pk_pago')
         self.fields['publico'].widget.attrs['class'] = 'filled-in'
 
 
         if self.pk_pago != None:
             pago = Pagos.objects.get(id = self.pk_pago)
-            self.pk = pago.reporte.id
+            self.pk_reporte = pago.reporte.id
             self.fields['tercero'].initial = pago.tercero.fullname() + ' - ' + str(pago.tercero.cedula)
             self.fields['contrato'].queryset = Contratos.objects.filter(contratista__cedula=pago.tercero.cedula)
             self.fields['valor'].initial = pago.valor.amount
@@ -873,6 +874,7 @@ class PagoForm(forms.Form):
             if pago.contrato != None:
                 self.fields['contrato'].initial = pago.contrato.id
 
+
             descuentos = Descuentos.objects.filter(pago = pago).order_by('creation')
             i = 1
 
@@ -882,7 +884,8 @@ class PagoForm(forms.Form):
                 self.fields['concepto_descuento_' + str(i)].initial = descuento.concepto
                 self.fields['observacion_descuento_' + str(i)].initial = descuento.observacion
                 i += 1
-
+        else:
+            self.fields['contrato'].queryset = Contratos.objects.all()
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -1073,7 +1076,7 @@ class PagoDescontableForm(forms.Form):
         cuotas = cleaned_data.get("cuotas")
 
 
-        q = Q(reporte__id = self.pk) & Q(tercero__cedula = cedula)
+        q = Q(reporte__id = self.pk_reporte) & Q(tercero__cedula = cedula)
 
         pagos = Pagos.objects.filter(q)
 
@@ -1087,7 +1090,7 @@ class PagoDescontableForm(forms.Form):
             if pagos.count() > 0:
                 self.add_error('tercero', 'Existe un pago registrado en el reporte para esta persona.')
 
-            if Pagos.objects.filter(reporte__id = self.pk).count() > 19:
+            if Pagos.objects.filter(reporte__id = self.pk_reporte).count() > 19:
                 self.add_error('tercero', 'Por reporte solo se permiten 20 pagos.')
 
         if cuotas < 1:
@@ -1100,11 +1103,12 @@ class PagoDescontableForm(forms.Form):
 
         self.pk = kwargs['initial'].get('pk')
         self.pk_pago = kwargs['initial'].get('pk_pago')
+        self.pk_reporte = kwargs['initial'].get('pk_reporte')
         self.fields['publico'].widget.attrs['class'] = 'filled-in'
 
         if self.pk_pago != None:
             pago = Pagos.objects.get(id = self.pk_pago)
-            self.pk = pago.reporte.id
+            self.pk_reporte = pago.reporte.id
             self.fields['tercero'].initial = pago.tercero.fullname() + ' - ' + str(pago.tercero.cedula)
             self.fields['valor'].initial = pago.valor.amount
             self.fields['observacion'].initial = pago.observacion

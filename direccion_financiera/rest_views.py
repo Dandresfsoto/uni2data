@@ -1628,4 +1628,5 @@ def cargar_contrato(request):
     else:
         contratos_cedula = Contratos.objects.filter(contratista__cedula=contrato_cedula)
 
+
     return render(request, 'direccion_financiera/reportes/load/contratos_2_dropdown_list_options.html', {'contratos_cedula': contratos_cedula})

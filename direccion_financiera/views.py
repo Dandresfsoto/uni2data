@@ -1020,6 +1020,7 @@ class PagosCreateView(LoginRequiredMixin,
 
     def get_initial(self):
         return {
+            'pk': self.kwargs['pk'],
             'pk_reporte': self.kwargs['pk_reporte']
         }
 
