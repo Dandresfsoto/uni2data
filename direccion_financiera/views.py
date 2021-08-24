@@ -13,7 +13,8 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from direccion_financiera.tasks import send_mail_templated_pago, send_mail_templated_reporte
 from direccion_financiera import tasks
-from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA
+from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA, EMAIL_CONTABILIDAD, \
+    EMAIL_GERENCIA
 from recursos_humanos.models import Contratos
 from reportes.models import Reportes
 import json
@@ -959,10 +960,24 @@ class ReportesDeleteView(LoginRequiredMixin,
     def dispatch(self, request, *args, **kwargs):
         reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
 
-        if reporte.estado == 'Carga de pagos':
+        reporte.activo = False
+        reporte.save()
 
-            reporte.activo=False
-            reporte.save()
+
+        if reporte.estado == 'En pagaduria' or reporte.estado == 'Reportado':
+            template = 'mail/direccion_financiera/reportes/reporte_sin_respaldo.tpl'
+
+            send_mail_templated_reporte(
+                template,
+                {
+                    'consecutivo': str(reporte.consecutive),
+                    'nombre_reporte': str(reporte.consecutive) + ' - ' + reporte.nombre,
+                    'valor': reporte.pretty_print_valor_descuentos(),
+                    'proyecto': reporte.proyecto.nombre,
+                },
+                DEFAULT_FROM_EMAIL,
+                [self.request.user.email, EMAIL_HOST_USER,EMAIL_DIRECCION_FINANCIERA,EMAIL_CONTABILIDAD,EMAIL_GERENCIA]
+            )
 
         return HttpResponseRedirect('../../')
 
