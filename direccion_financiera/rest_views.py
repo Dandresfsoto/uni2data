@@ -326,7 +326,7 @@ class ReportesListApi(BaseDatatableView):
                'plano', 'valor', 'estado', 'servicio']
 
     def get_initial_queryset(self):
-        return self.model.objects.filter(enterprise__id=self.kwargs['pk'])
+        return self.model.objects.filter(enterprise__id=self.kwargs['pk'], activo=True)
 
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
@@ -1084,6 +1084,248 @@ class EnterprisePagosDinamicaAPI(APIView):
 
         return Response(response,status=status.HTTP_200_OK)
 
+
+
+class ReportsRecycleListApi(BaseDatatableView):
+    model = Reportes
+    columns = ['consecutive', 'usuario_actualizacion','usuario_creacion', 'efectivo', 'proyecto','creation', 'nombre',
+               'plano', 'valor', 'estado', 'servicio']
+
+    order_columns = ['consecutive', 'usuario_actualizacion','usuario_creacion', 'efectivo','proyecto','creation', 'nombre',
+               'plano', 'valor', 'estado', 'servicio']
+
+    def get_initial_queryset(self):
+        return self.model.objects.filter(enterprise__id=self.kwargs['pk'], activo=False)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+
+            pagos_q = Q(tercero__nombres__icontains=search) | Q(tercero__apellidos__icontains=search) | Q(tercero__cedula__icontains=search)
+
+            ids = Pagos.objects.filter(pagos_q).values_list('reporte__id',flat=True)
+
+            q = Q(id__icontains=search) | Q(nombre__icontains=search) | \
+                Q(id__in = ids)
+            qs = qs.filter(q)
+        return qs
+
+
+    def render_column(self, row, column):
+        if column == 'consecutive':
+            ret = ''
+
+            observacion = ''
+
+            if row.observacion != None and row.observacion != '':
+
+                observacion = '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0}"><i class="material-icons">announcement</i></a>'.format(row.observacion)
+
+            ret = '<div class="center-align">' \
+                  '<p style="font-weight:bold;">{0}-{1}</p>' \
+                  '</div>'.format(row.enterprise.code, row.consecutive, )
+
+            return ret
+
+        elif column == 'nombre':
+            if row.servicio.descontable:
+                return '<span class="new badge" data-badge-caption="Descontable"></span>{0}'.format(row.nombre)
+            else:
+                return row.nombre
+
+
+        elif column == 'usuario_actualizacion':
+
+            cantidad = Pagos.objects.filter(reporte=row.id).count()
+
+            if self.request.user.has_perm('usuarios.direccion_financiera.reportes.editar'):
+                ret = '<div class="center-align">' \
+                      '<a href="pagos/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver {1} pago(s): {2}">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, cantidad, row.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</div>'.format(row.id, row.nombre)
+
+            return ret
+
+        elif column == 'usuario_creacion':
+            return row.usuario_actualizacion.first_name
+
+
+
+        elif column == 'efectivo':
+
+            if row.efectivo:
+                tipo = "Efectivo"
+
+            else:
+                tipo = "Bancarizado"
+
+            return tipo
+
+
+        elif column == 'creation':
+            return row.pretty_creation_datetime()
+
+
+
+        elif column == 'proyecto':
+            return row.proyecto.nombre
+
+
+
+        elif column == 'plano':
+
+            url_respaldo = row.url_respaldo()
+            url_firma = row.url_firma()
+            url_file_banco = row.url_file_banco()
+
+            ret = '<div class="center-align">'
+
+            if url_respaldo != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Archivo de respaldo: {1}">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_respaldo, row.nombre)
+
+            if url_firma != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Formato interno firmado: {1}">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_firma, row.nombre)
+
+            if url_file_banco != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Archivo del banco: {1}">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file_banco, row.nombre)
+
+            ret += '</div>'
+
+            return ret
+
+        elif column == 'valor':
+            return row.pretty_print_valor_descuentos()
+
+
+        elif column == 'servicio':
+            ret = ''
+            if self.request.user.has_perm('usuarios.direccion_financiera.reportes_eliminado.restaurar'):
+                ret = '<div class="center-align">' \
+                           '<a href="restaurar/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Eliminar reporte: {1}">' \
+                                '<i class="material-icons">autorenew</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">autorenew</i>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            return ret
+
+
+        else:
+            return super(ReportsRecycleListApi, self).render_column(row, column)
+
+
+class PaymentsRecycleListApi(BaseDatatableView):
+    model = Pagos
+    columns = ['id', 'usuario_creacion', 'creation', 'tercero', 'usuario_actualizacion', 'update_datetime', 'valor', 'estado']
+    order_columns = ['id', 'usuario_creacion', 'creation', 'tercero', 'usuario_actualizacion', 'update_datetime', 'valor', 'estado']
+
+
+    def get_initial_queryset(self):
+
+        self.reporte = Reportes.objects.get(id = self.kwargs['pk_reporte'])
+
+        return self.model.objects.filter(reporte__id = self.kwargs['pk_reporte'])
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(tercero__cedula__icontains=search) | Q(tercero__nombres__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+
+            ret = '<div class="center-align">' \
+                       '<i class="material-icons">edit</i>' \
+                   '</div>'.format(row.id,row.observacion)
+
+            return ret
+
+        elif column == 'usuario_creacion':
+            return row.usuario_actualizacion.first_name
+
+
+        elif column == 'creation':
+            return row.chart_creation_datetime()
+
+        elif column == 'tercero':
+            return row.tercero.fullname()
+
+        elif column == 'usuario_actualizacion':
+            return row.tercero.cedula
+
+        elif column == 'update_datetime':
+
+            descuentos = Descuentos.objects.filter(pago__id = row.id)
+            amortizaciones = Amortizaciones.objects.filter(pago_descontado__id = row.id)
+            render = ""
+
+
+            if not self.reporte.efectivo:
+
+                if row.tercero.cuenta != '' and row.tercero.cuenta != None and row.tercero.banco != None:
+                    render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0} cuenta {1} # {2}">' \
+                              '<i class="material-icons">monetization_on</i>' \
+                              '</a>'.format(row.tercero.banco.nombre,row.tercero.tipo_cuenta,row.tercero.cuenta)
+
+            if row.notificado:
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Pago notificado a {0}">' \
+                          '<i style="font-size:24px;" class="material-icons">check_circle</i>' \
+                          '</a>'.format(row.tercero.email)
+
+            if descuentos.count() > 0:
+
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Descuentos: {0}">' \
+                          '<i style="font-size:24px;" class="material-icons">remove_circle</i>' \
+                          '</a>'.format(row.pretty_print_valor_solo_descuentos())
+
+            if amortizaciones.count() > 0:
+
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-html="true" data-tooltip="{0}">' \
+                          '<i style="font-size:24px;" class="material-icons">donut_small</i>' \
+                          '</a>'.format(row.pretty_print_valor_solo_amortizaciones())
+
+
+            if row.reporte.servicio.descontable:
+                if row.estado == 'Pago creado':
+                    render += '<a class="tooltipped edit-table" data-position="left" data-delay="50" data-html="true" data-tooltip="{0}">' \
+                              '<i style="font-size:24px;" class="material-icons">donut_small</i>' \
+                              '</a>'.format(row.get_amortizacion_html())
+                else:
+                    render += '<a href="amortizaciones/{0}/" class="tooltipped edit-table" data-position="left" data-delay="50" data-html="true" data-tooltip="{1}">' \
+                              '<i style="font-size:24px;" class="material-icons">donut_small</i>' \
+                              '</a>'.format(row.id,row.get_amortizacion_html())
+
+
+            return '<div class="center-align">' + render + '</div>'
+
+        elif column == 'valor':
+            return row.pretty_print_valor_descuentos()
+
+
+        else:
+            return super(PaymentsRecycleListApi, self).render_column(row, column)
+
+
 class ConsultaPagosListApi(BaseDatatableView):
     model = Pagos
     columns = ['id','creation', 'usuario_creacion', 'update_datetime', 'estado', 'valor', 'reporte','observacion']
@@ -1378,7 +1620,7 @@ def cargar_rubro_2(request):
 
 def cargar_contrato(request):
     contrato_cedula = request.GET.get('contrato')
-    print(contrato_cedula)
+
     try:
         id(contrato_cedula)
     except:

@@ -128,7 +128,7 @@ class Reportes(BaseModel):
     file_banco = models.FileField(upload_to=upload_dinamic_dir_soporte_file_banco, blank=True, null=True)
 
     estado = models.CharField(max_length=100)
-
+    activo=models.BooleanField(default=True)
     valor = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
 
     efectivo = models.BooleanField(default=False)

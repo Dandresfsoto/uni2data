@@ -20,6 +20,8 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/terceros/pagos/<uuid:pk_contratista>/', rest_views.EnterperiseTerceroPagosListApi.as_view()),
     path('enterprise/<uuid:pk>/terceros/pagos/<uuid:pk_contratista>/dinamica/pagos/', rest_views.EnterprisePagosDinamicaAPI.as_view()),
 
+    path('enterprise/<uuid:pk>/reportes_eliminados/', rest_views.ReportsRecycleListApi.as_view()),
+    path('enterprise/<uuid:pk>/reportes_eliminados/pagos/<uuid:pk_reporte>/', rest_views.PaymentsRecycleListApi.as_view()),
 
     path('terceros/pagos/<uuid:pk>/dinamica/pagos/', rest_views.PagosDinamicaAPI.as_view()),
 

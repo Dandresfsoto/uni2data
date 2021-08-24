@@ -454,15 +454,15 @@ class EnterpriseOptionListView(LoginRequiredMixin,
                 'sican_description': 'Reporte y notificación de pagos a terceros'
             })
 
-        if self.request.user.has_perm('usuarios.direccion_financiera.orden_compra.ver'):
+        if self.request.user.has_perm('usuarios.direccion_financiera.reportes_eliminados.ver'):
             items.append({
-                'sican_categoria': 'Ordenes de compra',
+                'sican_categoria': 'Reportes eliminados',
                 'sican_color': 'purple darken-4',
                 'sican_order': 4,
-                'sican_url': 'orden_compra/',
-                'sican_name': 'Ordenes de compra',
-                'sican_icon': 'chrome_reader_mode',
-                'sican_description': 'Consulta y reportes de las ordenes de compra'
+                'sican_url': 'reporte_eliminado/',
+                'sican_name': 'Reporte eliminado',
+                'sican_icon': 'delete',
+                'sican_description': 'Listado de reportes eliminados'
             })
 
 
@@ -961,12 +961,8 @@ class ReportesDeleteView(LoginRequiredMixin,
 
         if reporte.estado == 'Carga de pagos':
 
-            for pago in models.Pagos.objects.filter(reporte=reporte):
-                models.Amortizaciones.objects.filter(pago_descontado=pago).update(estado='Pendiente',pago_descontado=None)
-                models.Descuentos.objects.filter(pago = pago).delete()
-                pago.delete()
-
-            reporte.delete()
+            reporte.activo=False
+            reporte.save()
 
         return HttpResponseRedirect('../../')
 
@@ -1030,7 +1026,6 @@ class PagosCreateView(LoginRequiredMixin,
 
     def form_valid(self, form):
         reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
-        contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
 
 
         if reporte.servicio.descontable:
@@ -1041,7 +1036,6 @@ class PagosCreateView(LoginRequiredMixin,
                 valor = float(form.cleaned_data['valor'].replace('$ ','').replace(',','')),
                 tercero = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']),
                 observacion = form.cleaned_data['observacion'],
-                contrato=contrato,
                 estado = 'Pago creado',
                 publico=form.cleaned_data['publico'],
                 cuotas=form.cleaned_data['cuotas'],
@@ -1052,6 +1046,7 @@ class PagosCreateView(LoginRequiredMixin,
                 pago.banco = pago.tercero.banco.nombre
                 pago.cuenta = pago.tercero.cuenta
                 pago.cargo = pago.tercero.cargo.nombre
+                pago.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
                 pago.save()
             except:
                 pass
@@ -1084,7 +1079,6 @@ class PagosCreateView(LoginRequiredMixin,
                 tercero=rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']),
                 observacion=form.cleaned_data['observacion'],
                 estado='Pago creado',
-                contrato=contrato,
                 publico=form.cleaned_data['publico'],
                 descuentos_pendientes=form.cleaned_data['descuentos_pendientes'],
                 descuentos_pendientes_otro_valor=form.cleaned_data['descuentos_pendientes_otro_valor'],
@@ -1095,6 +1089,7 @@ class PagosCreateView(LoginRequiredMixin,
                 pago_new.banco = pago_new.tercero.banco.nombre
                 pago_new.cuenta = pago_new.tercero.cuenta
                 pago_new.cargo = pago_new.tercero.cargo.nombre
+                pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
                 pago_new.save()
             except:
                 pass
@@ -1204,6 +1199,7 @@ class PagosUpdateView(LoginRequiredMixin,
                 pago.banco = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).banco.nombre
                 pago.cuenta = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).cuenta
                 pago.cargo = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).cargo.nombre
+                pago.contrato = form.cleaned_data['contrato']
                 pago.save()
             except:
                 pass
@@ -1250,6 +1246,7 @@ class PagosUpdateView(LoginRequiredMixin,
                 pago.banco = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).banco.nombre
                 pago.cuenta = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).cuenta
                 pago.cargo = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).cargo.nombre
+                pago.contrato = form.cleaned_data['contrato']
                 pago.save()
             except:
                 pass
@@ -1479,6 +1476,74 @@ class AmortizacionesPagosUpdateView(LoginRequiredMixin,
         kwargs['breadcrum_2'] = pago.tercero.get_full_name()
         kwargs['breadcrum_active'] = amortizacion.consecutive
         return super(AmortizacionesPagosUpdateView,self).get_context_data(**kwargs)
+
+# -------------------------------------- REPORTES ELIMINADOS -------------------------------------
+class ReportsRecycleListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": ["usuarios.direccion_financiera.reportes_eliminados.ver"]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/recycle/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "REPORTES DE PAGO ELIMINADOS"
+        kwargs['breadcrum_1'] = enterprice.name
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/reportes_eliminados/'.format(self.kwargs['pk'])
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.direccion_financiera.reportes_eliminados.crear')
+        kwargs['permiso_informe'] = self.request.user.has_perm('usuarios.direccion_financiera.reportes_eliminados.informe')
+        return super(ReportsRecycleListView,self).get_context_data(**kwargs)
+
+
+
+class ReportsRecycleRestoreListView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.reportes_eliminados.ver",
+            "usuarios.direccion_financiera.reportes_eliminados.restaurar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../"
+
+    def dispatch(self, request, *args, **kwargs):
+        reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
+
+        reporte.activo=True
+        reporte.save()
+
+        return HttpResponseRedirect('../')
+
+
+class PaymentsRecycleListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": ["usuarios.direccion_financiera.reportes.ver"]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/recycle/payments/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
+        kwargs['title'] = "reportes de pago"
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/reportes_eliminados/pagos/{1}'.format(enterprise.id,reporte.id)
+        kwargs['breadcrum_active'] = reporte.nombre
+        kwargs['breadcrum_1'] = enterprise.name
+        return super(PaymentsRecycleListView,self).get_context_data(**kwargs)
+
 #----------------------------------------------------------------------------------
 
 #-------------------------------------- PAGOS -------------------------------------

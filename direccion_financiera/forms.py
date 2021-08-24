@@ -444,16 +444,6 @@ class ReporteUpdateForm(forms.ModelForm):
                             css_class='s12 m6'
                         )
                     ),
-                    Row(
-                        Column(
-                            'numero_contrato',
-                            css_class='s12 m6'
-                        ),
-                        Column(
-                            'numero_documento_equivalente',
-                            css_class='s12 m6'
-                        )
-                    ),
                     css_class="s12"
                 ),
             ),
@@ -514,7 +504,7 @@ class ReporteUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Reportes
-        fields = ['nombre','proyecto','tipo_soporte','inicio','fin','respaldo','firma','numero_contrato','numero_documento_equivalente', 'observacion', 'rubro', 'rubro_level_2','rubro_level_3']
+        fields = ['nombre','proyecto','tipo_soporte','inicio','fin','respaldo','firma', 'observacion', 'rubro', 'rubro_level_2','rubro_level_3']
         labels = {
             'tipo_soporte': 'Respaldo del reporte',
             'inicio': 'Fecha de pago',
@@ -663,7 +653,7 @@ class PagoForm(forms.Form):
     cedula = forms.IntegerField(label="Cédula",widget=forms.HiddenInput())
     publico = forms.BooleanField(initial=True, required=False)
 
-    contrato = forms.ModelChoiceField(label='Contrato', queryset=Contratos.objects.none())
+    contrato = forms.ModelChoiceField(label='Contrato', queryset=Contratos.objects.none(), required=False)
 
     uuid_descuento_1 = forms.UUIDField(required=False, widget=forms.HiddenInput())
     valor_descuento_1 = forms.CharField(label = "Valor ($)",required=False)
@@ -868,18 +858,20 @@ class PagoForm(forms.Form):
         self.pk_pago = kwargs['initial'].get('pk_pago')
         self.fields['publico'].widget.attrs['class'] = 'filled-in'
 
+
         if self.pk_pago != None:
             pago = Pagos.objects.get(id = self.pk_pago)
             self.pk = pago.reporte.id
             self.fields['tercero'].initial = pago.tercero.fullname() + ' - ' + str(pago.tercero.cedula)
             self.fields['contrato'].queryset = Contratos.objects.filter(contratista__cedula=pago.tercero.cedula)
-            self.fields['contrato'].initial = pago.contrato.id
             self.fields['valor'].initial = pago.valor.amount
             self.fields['observacion'].initial = pago.observacion
             self.fields['cedula'].initial = pago.tercero.cedula
             self.fields['publico'].initial = pago.publico
             self.fields['descuentos_pendientes'].initial = pago.descuentos_pendientes
             self.fields['descuentos_pendientes_otro_valor'].initial = pago.descuentos_pendientes_otro_valor
+            if pago.contrato != None:
+                self.fields['contrato'].initial = pago.contrato.id
 
             descuentos = Descuentos.objects.filter(pago = pago).order_by('creation')
             i = 1
