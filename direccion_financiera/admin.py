@@ -12,6 +12,7 @@ admin.site.register(models.RubroPresupuestalLevel2)
 admin.site.register(models.RubroPresupuestalLevel3)
 admin.site.register(models.Enterprise)
 admin.site.register(models.Reportes)
+admin.site.register(models.PurchaseOrders)
 
 
 def delete_reporte(modeladmin, request, queryset):

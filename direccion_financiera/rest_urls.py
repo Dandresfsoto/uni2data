@@ -11,6 +11,7 @@ urlpatterns = [
 
 
     path('terceros/list/', rest_views.TercerosListApiJson.as_view()),
+    path('terceros/purchaseorder/list/', rest_views.TercerosPurchaseOrderListApiJson.as_view()),
 
     path('enterprise/<uuid:pk>/reportes/', rest_views.ReportesListApi.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/', rest_views.PagosListApi.as_view()),
@@ -24,6 +25,8 @@ urlpatterns = [
 
     path('enterprise/<uuid:pk>/reportes_eliminados/', rest_views.ReportsRecycleListApi.as_view()),
     path('enterprise/<uuid:pk>/reportes_eliminados/pagos/<uuid:pk_reporte>/', rest_views.PaymentsRecycleListApi.as_view()),
+
+    path('enterprise/<uuid:pk>/purchase_order/', rest_views.PurchaseOrderListApi.as_view()),
 
     path('terceros/pagos/<uuid:pk>/dinamica/pagos/', rest_views.PagosDinamicaAPI.as_view()),
 

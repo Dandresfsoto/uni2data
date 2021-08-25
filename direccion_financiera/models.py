@@ -8,7 +8,7 @@ from djmoney.models.fields import MoneyField
 from pytz import timezone
 
 from common.models import BaseModel
-from usuarios.models import User
+from usuarios.models import User, Departamentos, Municipios
 
 settings_time_zone = timezone(settings.TIME_ZONE)
 
@@ -662,6 +662,56 @@ class Descuentos(models.Model):
 
     def pretty_print_valor(self):
         return str(self.valor).replace('COL','')
+
+def upload_dinamic_dir_purchase_order(instance, filename):
+    return '/'.join(['Orden de compra', str(instance.id), 'Orden de compra', filename])
+
+class PurchaseOrders(BaseModel):
+    creation_user = models.ForeignKey(User, related_name="creation_user_purchase_order", on_delete=models.DO_NOTHING)
+    update_user = models.ForeignKey(User, related_name="update_user_purchase_order",on_delete=models.DO_NOTHING,blank=True, null=True)
+    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
+    consecutive = models.IntegerField(null=True, blank=True)
+    third = models.ForeignKey(to='recursos_humanos.Contratistas', on_delete=models.DO_NOTHING)
+    date = models.DateField()
+    beneficiary = models.CharField(max_length=100)
+    department = models.ForeignKey(Departamentos, on_delete=models.DO_NOTHING,related_name='department_purchase_order',blank=True,null=True)
+    municipality = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING,related_name='municipality_purchase_order',blank=True,null=True)
+    project = models.ForeignKey(Proyecto, on_delete=models.DO_NOTHING)
+    observation = models.TextField(blank=True, null=True)
+    subtotal = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
+    total = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
+    file_purchase_order = models.FileField(upload_to=upload_dinamic_dir_purchase_order, blank=True, null=True)
+
+    def pretty_date_datetime(self):
+        return self.date.strftime('%d/%m/%Y')
+
+    def pretty_print_total(self):
+        valor_bruto = self.total
+        return str(valor_bruto).replace('COL', '')
+
+    def url_file_purchase_order(self):
+        url = None
+        try:
+            url = self.file_purchase_order.url
+        except:
+            pass
+        return url
+
+
+
+class Products(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    name = models.CharField(max_length=150, verbose_name='Nombre')
+    purchase_order = models.ForeignKey(PurchaseOrders, on_delete=models.DO_NOTHING, verbose_name='Orden de compra')
+    price = models.DecimalField(default=0.00, max_digits=9, decimal_places=2, verbose_name='Precio de venta')
+    stock = models.IntegerField(default=0, verbose_name='Cantidad')
+
+    def __str__(self):
+        return self.name
+
+
+
+
 
 #@receiver(post_save, sender=Pagos)
 #@receiver(post_delete, sender=Pagos)

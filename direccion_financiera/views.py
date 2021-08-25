@@ -466,6 +466,17 @@ class EnterpriseOptionListView(LoginRequiredMixin,
                 'sican_description': 'Listado de reportes eliminados'
             })
 
+        if self.request.user.has_perm('usuarios.direccion_financiera.orden_compra.ver'):
+            items.append({
+                'sican_categoria': 'Ordenes de compra',
+                'sican_color': 'brown darken-1',
+                'sican_order': 4,
+                'sican_url': 'purchase_order/',
+                'sican_name': 'Ordenes de compra',
+                'sican_icon': 'storage',
+                'sican_description': 'Listado de ordenes de compra'
+            })
+
 
         return items
 
@@ -1627,6 +1638,69 @@ class PaymentsRecycleListView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = reporte.nombre
         kwargs['breadcrum_1'] = enterprise.name
         return super(PaymentsRecycleListView,self).get_context_data(**kwargs)
+
+
+class PurchaseOrderListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": ["usuarios.direccion_financiera.orden_compra.ver"]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/purchase_order/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "ORDENES DE COMPRA"
+        kwargs['breadcrum_1'] = enterprice.name
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/purchase_order/'.format(self.kwargs['pk'])
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.direccion_financiera.purchase_order.crear')
+        kwargs['permiso_informe'] = self.request.user.has_perm('usuarios.direccion_financiera.purchase_order.informe')
+        return super(PurchaseOrderListView,self).get_context_data(**kwargs)
+
+
+class PurchaseOrderCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.orden_compra.ver",
+            "usuarios.direccion_financiera.orden_compra.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/purchase_order/create.html'
+    form_class = forms.PurchaseOrderForm
+    success_url = "../"
+    model = models.PurchaseOrders
+
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+
+    def form_valid(self, form):
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        self.object = form.save(commit=False)
+        self.object.creation_user = self.request.user
+        self.object.update_user = self.request.user
+        self.object.valor = 0
+        self.object.enterprise = enterprise
+        self.object.third = form.cleaned_data['third']
+        self.object.consecutive = get_next_value(enterprise.tax_number)
+        self.object.save()
+        return super(PurchaseOrderCreateView, self).form_valid(form)
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CREAR ORDEN DE COMPRA"
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        kwargs['breadcrum_1'] = enterprice.name
+        return super(PurchaseOrderCreateView,self).get_context_data(**kwargs)
 
 #----------------------------------------------------------------------------------
 

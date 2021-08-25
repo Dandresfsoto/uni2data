@@ -1,8 +1,10 @@
 from uuid import UUID
+
+from dal import autocomplete
 from django.shortcuts import render
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, RubroPresupuestalLevel2, \
-    RubroPresupuestalLevel3, Proyecto, Enterprise
+    RubroPresupuestalLevel3, Proyecto, Enterprise, PurchaseOrders, Products
 from recursos_humanos.models import Contratistas, Contratos
 from django.db.models import Q
 from rest_framework.views import APIView
@@ -10,6 +12,8 @@ from django.http import Http404
 from rest_framework.response import Response
 from rest_framework import status
 from desplazamiento import models as models_desplazamiento
+from usuarios.models import Municipios
+
 
 class BancosListApi(BaseDatatableView):
     model = Bancos
@@ -958,6 +962,42 @@ class TercerosListApiJson(APIView):
 
         return Response({'lista':lista,'diccionario':diccionario},status=status.HTTP_200_OK)
 
+
+class TercerosPurchaseOrderListApiJson(APIView):
+    """
+    """
+
+    def get(self, request, format=None):
+        lista = []
+        diccionario = {}
+        name = request.query_params.get('name')
+
+
+        if name != None:
+
+            q = Q(nombres__icontains = name) | Q(apellidos__icontains = name) | Q(cedula__icontains = name)
+
+
+            filtro = Contratistas.objects.all()
+
+
+
+            for contratista in filtro.filter(q).exclude(cargo = None):
+                lista.append({
+                    'name': contratista.fullname() + " - " +str(contratista.cedula)
+                })
+
+                diccionario[str(contratista.id)] = {
+                    'id': str(contratista.id),
+                    'tipo_cuenta': contratista.tipo_cuenta,
+                    'banco': contratista.get_banco_name(),
+                    'cuenta': contratista.cuenta,
+                }
+
+        return Response({'lista':lista,'diccionario':diccionario},status=status.HTTP_200_OK)
+
+
+
 class PagoApiJson(APIView):
     """
     """
@@ -1349,6 +1389,112 @@ class PaymentsRecycleListApi(BaseDatatableView):
 
         else:
             return super(PaymentsRecycleListApi, self).render_column(row, column)
+
+
+
+class PurchaseOrderListApi(BaseDatatableView):
+    model = PurchaseOrders
+    columns = ['consecutive','creation_user', 'update_user','third','project','date','total','file_purchase_order','enterprise']
+
+    order_columns = ['consecutive','creation_user', 'update_user','third','project','date','total','file_purchase_order','enterprise']
+
+    def get_initial_queryset(self):
+        return self.model.objects.filter(enterprise__id=self.kwargs['pk']).order_by('consecutive')
+
+
+    def render_column(self, row, column):
+        if column == 'consecutive':
+            ret = ''
+
+            observation = ''
+
+            if row.observation != None and row.observation != '':
+                observation = '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0}"><i class="material-icons">announcement</i></a>'.format(
+                    row.observation)
+
+            if self.request.user.has_perm('usuarios.direccion_financiera.reportes.editar'):
+                ret = '<div class="center-align">' \
+                      '<a href="editar/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar orden de compra: {1}">' \
+                      '<p style="font-weight:bold;">{2}-{3}</p>' \
+                      '</a>' \
+                      '{4}' \
+                      '</div>'.format(row.id, row.third, row.enterprise.code, row.consecutive, observation)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<p style="font-weight:bold;">{0}</p>' \
+                      '</div>'.format(row.consecutive)
+
+            return ret
+
+        elif column == 'creation_user':
+
+            cantidad = Products.objects.filter(purchase_order=row.id).count()
+
+            if self.request.user.has_perm('usuarios.direccion_financiera.orden_compra.editar'):
+                ret = '<div class="center-align">' \
+                      '<a href="productos/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver {1} orden(es) de pago(s)">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, cantidad)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'update_user':
+            return row.update_user.first_name
+
+        elif column == 'third':
+            return row.third.fullname()
+
+        elif column == 'project':
+            return row.project.nombre
+
+        elif column == 'date':
+            return row.pretty_date_datetime()
+
+        elif column == 'total':
+            return row.pretty_print_total()
+
+        elif column == 'file_purchase_order':
+
+            url_file_purchase_order = row.url_file_purchase_order()
+
+
+            ret = '<div class="center-align">'
+
+            if url_file_purchase_order != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Archivo de respaldo: {1}">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file_purchase_order, row.nombre)
+
+
+            ret += '</div>'
+
+            return ret
+
+        elif column == 'enterprise':
+            ret = ''
+            if self.request.user.is_superuser :
+                ret = '<div class="center-align">' \
+                           '<a href="eliminar/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar orden de compra">' \
+                                '<i class="material-icons">delete</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">delete</i>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            return ret
+
+        else:
+            return super(PurchaseOrderListApi, self).render_column(row, column)
 
 
 class ConsultaPagosListApi(BaseDatatableView):

@@ -1,0 +1,116 @@
+extends ../../base_auth
+
+block title
+    | {{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/direccion_financiera/") Dirección financiera
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") Empresas asociadas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light ")
+                        a(href="../") {{ breadcrum_1 | truncatechars:25 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Crear Orden de compra
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+    div(class="container",style="margin-top:40px;")
+        | {% crispy form %}
+
+    | {% if reporte.servicio.descontable %}
+    div(id="modal_pago_descontable",class="modal modal-fixed-footer")
+        div(class="modal-content")
+            h5
+                b Pago descontable!!
+            p(style = "text-align: justify;").
+                Este pago se cargara con una novedad de descuento para el tercero, si no es correcto por favor agregue un
+                nuevo reporte con un servicio no descontable.
+            div(class="row")
+                div(class="col s12 m6 offset-m3")
+                    img(class="responsive-img",src="{% static 'img/atencion.png'%}")
+
+        div(class="modal-footer")
+            a(href="#!",class="modal-action modal-close waves-effect waves-green btn-flat") Cerrar
+    | {% endif %}
+
+block body_script_auth
+    script.
+        $(document).ready(function () {
+
+            $('#id_department').select2();
+            $('#id_municipality').select2();
+            $('#id_project').select2();
+            $('#id_third').select2();
+            $("label[for='id_third']").addClass('active');
+
+            $("label[for='id_proyecto']").addClass('active');
+
+            $("#id_department").change(function () {
+                var url = '/rest/v1.0/fest_2019/misrutas/cargar-municipios/'
+                var departamento_id = $(this).val();
+
+                $.ajax({
+                    url: url,
+                    data: {
+                        'departamento': departamento_id
+                    },
+                    success: function (data) {
+                        $("#id_municipality").html(data);
+                        $('#id_municipality').select2();
+                    }
+                });
+
+            });
+
+            $('#id_date').pickadate({
+                format: 'dd/mm/yyyy',
+                selectMonths: true,
+                selectYears: 90,
+                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
+                    'Octubre', 'Noviembre', 'Diciembre'],
+                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
+                today: 'Hoy',
+                clear: 'Borrar',
+                close: 'Ok',
+                closeOnSelect: false
+            });
+
+        });
+
+

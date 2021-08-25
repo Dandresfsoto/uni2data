@@ -9,15 +9,18 @@ from django.shortcuts import render
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.forms.fields import Field, FileField
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, Enterprise, Servicios, \
-    Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2
+    Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2, PurchaseOrders
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
+
 from recursos_humanos.models import Contratistas, Contratos
 from django.db.models import Q
 from django.conf import settings
 from desplazamiento.models import Desplazamiento
 import json
+
+from usuarios.models import Departamentos, Municipios
 
 
 class BancoForm(forms.ModelForm):
@@ -1507,3 +1510,105 @@ class ProjectForm(forms.ModelForm):
     class Meta:
         model = Proyecto
         fields = ['cuenta','nombre']
+
+
+class PurchaseOrderForm(forms.ModelForm):
+    third = forms.ModelChoiceField(label='Tercero*',queryset=Contratistas.objects.all(), required=False)
+    department = forms.ModelChoiceField(label='Departamento*',queryset=Departamentos.objects.all(), required=False)
+    municipality = forms.ModelChoiceField(label='Municipio', queryset=Municipios.objects.all(), required=False)
+
+
+    def __init__(self, *args, **kwargs):
+        super(PurchaseOrderForm, self).__init__(*args, **kwargs)
+        self.pk = kwargs['initial'].get('pk')
+
+        self.fields['third'].queryset = Contratistas.objects.all()
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Column(
+                    Row(
+                        Fieldset(
+                            'Información del tercero',
+                        ),
+                        Column(
+                            'third',
+                            css_class='s12'
+                        ),
+                    ),
+                ),
+                Column(
+                    Row(
+                        Fieldset(
+                            'ubicaccion de compra',
+                        ),
+                        Column(
+                            'department',
+                            css_class='s6'
+                        ),
+                        Column(
+                            'municipality',
+                            css_class='s6'
+                        ),
+                    ),
+                ),
+                Column(
+                    Row(
+                        Fieldset(
+                            'Informacion de la orden de compra',
+                        ),
+                        Column(
+                            'project',
+                            css_class='s6'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'beneficiary',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'date',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'observation',
+                            css_class='s12'
+                        ),
+                    ),
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            ),
+        )
+    class Meta:
+        model = PurchaseOrders
+        fields = ['third','department','municipality','project','beneficiary','observation','date']
+        labels = {
+            'department': 'Departamento',
+            'municipality': 'Municipio',
+            'project': 'Projectos',
+            'beneficiary': 'Beneficiario',
+            'observation': 'Observaciones',
+            'date': 'fecha',
+        }
+        widgets = {
+            'observation': forms.Textarea(attrs={'class': 'materialize-textarea'}),
+        }

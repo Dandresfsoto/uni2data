@@ -53,6 +53,9 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/reporte_eliminado/pagos/<uuid:pk_reporte>/', views.PaymentsRecycleListView.as_view()),
 
 
+    path('enterprise/<uuid:pk>/purchase_order/', views.PurchaseOrderListView.as_view()),
+    path('enterprise/<uuid:pk>/purchase_order/crear/', views.PurchaseOrderCreateView.as_view()),
+
     path('consulta_pagos/', views.ConsultaPagosListView.as_view()),
     path('consulta_pagos/ver/<uuid:pk>/', views.ConsultaPagosTerceroListView.as_view()),
     path('consulta_pagos/ver/<uuid:pk>/dinamica/pagos/', views.ConsultaPagosTerceroDinamicaListView.as_view()),
