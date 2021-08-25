@@ -29,6 +29,9 @@ def upload_dinamic_dir_soporte_firma(instance, filename):
 def upload_dinamic_dir_soporte_file_banco(instance, filename):
     return '/'.join(['Reportes', str(instance.id), 'Archivo banco', filename])
 
+def upload_dinamic_dir_comprobante_egreso(instance, filename):
+    return '/'.join(['Reportes', str(instance.id), 'Comprobante egreso', filename])
+
 class Bancos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     codigo = models.IntegerField()
@@ -127,6 +130,7 @@ class Reportes(BaseModel):
     firma = models.FileField(upload_to=upload_dinamic_dir_soporte_firma, blank=True, null=True)
     file_banco = models.FileField(upload_to=upload_dinamic_dir_soporte_file_banco, blank=True, null=True)
 
+
     estado = models.CharField(max_length=100)
     activo=models.BooleanField(default=True)
     valor = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
@@ -136,8 +140,13 @@ class Reportes(BaseModel):
 
 
     numero_contrato = models.CharField(max_length=200,blank=True,null=True)
-    numero_documento_equivalente = models.CharField(max_length=200,blank=True,null=True)
 
+
+    cuenta_contable = models.CharField(max_length=200,blank=True,null=True)
+    numero_documento_equivalente = models.CharField(max_length=200,blank=True,null=True)
+    numero_comprobante_pago = models.CharField(max_length=200,blank=True,null=True)
+    fecha_pago = models.DateField(blank=True,null=True)
+    file_comprobante_egreso = models.FileField(upload_to=upload_dinamic_dir_comprobante_egreso, blank=True, null=True)
 
 
     def pretty_print_respaldo(self):
@@ -157,6 +166,14 @@ class Reportes(BaseModel):
             return '<a href="'+ url +'"> '+ str(self.firma.name) +'</a>'
 
     def pretty_print_file_banco(self):
+        try:
+            url = self.file_comprobante_egreso.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="'+ url +'"> '+ str(self.file_comprobante_egreso.name) +'</a>'
+
+    def pretty_print_file_comprobante_egreso(self):
         try:
             url = self.file_banco.url
         except:
@@ -196,6 +213,15 @@ class Reportes(BaseModel):
             pass
         return url
 
+
+    def url_file_comprobante_egreso(self):
+        url = None
+        try:
+            url = self.file_comprobante_egreso.url
+        except:
+            pass
+        return url
+
     def url_file(self):
         url = None
         try:
@@ -226,6 +252,9 @@ class Reportes(BaseModel):
 
     def reporte_fin_datetime(self):
         return self.fin.strftime('%d/%m/%Y')
+
+    def reporte_fecha_pago_datetime(self):
+        return self.fecha_pago.strftime('%d/%m/%Y')
 
     def pretty_print_valor(self):
         return str(self.valor).replace('COL','')
@@ -637,15 +666,17 @@ class Descuentos(models.Model):
 @receiver(post_save, sender=Reportes)
 def ReportesUpdate(sender, instance, **kwargs):
     if instance.firma.name != None and instance.firma.name != '':
-        if instance.file_banco.name != None and instance.file_banco.name != '':
+        if instance.file_banco.name != None and instance.file_banco.name != '' and instance.file_comprobante_egreso.name == '':
+            Reportes.objects.filter(id=instance.id).update(estado='Pagado')
+        elif instance.file_banco.name != None and instance.file_banco.name != '' and instance.file_comprobante_egreso.name != '':
             Reportes.objects.filter(id=instance.id).update(estado='Completo')
         #else:
         #    Reportes.objects.filter(id = instance.id).update(estado = 'Reportado')
         #    Pagos.objects.filter(reporte = instance).update(estado = 'Reportado')
 
-@receiver(post_save, sender=Reportes)
-def ReportesUpdate(sender, instance, **kwargs):
-    if instance.firma.name != None and instance.firma.name != '':
-        if instance.file_banco.name != None and instance.file_banco.name != '':
-            Reportes.objects.filter(id=instance.id).update(estado='Completo')
+#@receiver(post_save, sender=Reportes)
+#def ReportesUpdate(sender, instance, **kwargs):
+    #if instance.firma.name != None and instance.firma.name != '':
+        #if instance.file_banco.name != None and instance.file_banco.name != '':
+            #Reportes.objects.filter(id=instance.id).update(estado='Completo')
         #else:

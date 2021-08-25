@@ -753,7 +753,6 @@ class ReportesUpdateView(LoginRequiredMixin,
 
 
 
-
 class ReportesResultadoUpdateView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
                         UpdateView):
@@ -819,7 +818,6 @@ class ReportesResultadoUpdateView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = reporte.nombre
         kwargs['file_banco_url'] = reporte.pretty_print_file_banco()
         return super(ReportesResultadoUpdateView,self).get_context_data(**kwargs)
-
 
 class ReporteReportesView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
@@ -980,6 +978,45 @@ class ReportesDeleteView(LoginRequiredMixin,
             )
 
         return HttpResponseRedirect('../../')
+
+
+class ReportesRecordView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.contabilizar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/record/record.html'
+    form_class = forms.RecordForm
+    success_url = "../../"
+    model = models.Reportes
+    pk_url_kwarg = 'pk_reporte'
+
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.usuario_actualizacion = self.request.user
+        self.object.save()
+        return super(ReportesRecordView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        kwargs['breadcrum_1'] = enterprise.name
+        kwargs['breadcrum_2'] = reporte.nombre
+        kwargs['title'] = "RESULTADO REPORTE DE PAGO"
+        kwargs['breadcrum_active'] = reporte.nombre
+        kwargs['file_banco_url'] = reporte.pretty_print_file_banco()
+        return super(ReportesRecordView, self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_reporte': self.kwargs['pk_reporte']
+        }
 
 #----------------------------------------------------------------------------------
 

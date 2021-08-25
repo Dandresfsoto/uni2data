@@ -37,6 +37,7 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/reportes/editar/<uuid:pk_reporte>/reportar/', views.ReporteReportesView.as_view()),
     path('enterprise/<uuid:pk>/reportes/editar/<uuid:pk_reporte>/enviado/', views.ReporteEnvioView.as_view()),
     path('enterprise/<uuid:pk>/reportes/eliminar/<uuid:pk_reporte>/', views.ReportesDeleteView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/contabilizar/<uuid:pk_reporte>/', views.ReportesRecordView.as_view()),
 
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/', views.PagosListView.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/crear/', views.PagosCreateView.as_view()),

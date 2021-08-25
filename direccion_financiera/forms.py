@@ -519,7 +519,7 @@ class ResultadoReporteForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        reporte = Reportes.objects.get(id = self.pk)
+        reporte = Reportes.objects.get(id = self.pk_reporte)
         file_banco = cleaned_data.get("file_banco")
 
         if file_banco == None:
@@ -533,8 +533,8 @@ class ResultadoReporteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ResultadoReporteForm, self).__init__(*args, **kwargs)
 
-        pk = kwargs['initial'].get('pk_reporte')
-        self.pk = pk
+        pk_reporte = kwargs['initial'].get('pk_reporte')
+        self.pk_reporte = pk_reporte
         self.fields['file_banco'].widget = forms.FileInput()
 
         self.helper = FormHelper(self)
@@ -582,7 +582,7 @@ class ResultadoReporteForm(forms.ModelForm):
 
         i = 1
 
-        for pago in Pagos.objects.filter(reporte__id=pk):
+        for pago in Pagos.objects.filter(reporte__id=pk_reporte):
 
             self.fields[str(pago.id)] = forms.CharField(
                 max_length=100,
@@ -1232,6 +1232,90 @@ class ReportarReporteForm(forms.Form):
             )
         )
 
+class RecordForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        file_comprobante_egreso = cleaned_data.get("file_comprobante_egreso")
+
+        if file_comprobante_egreso == None:
+            self.add_error('file_comprobante_egreso', 'Campo requerido')
+
+
+    def __init__(self, *args, **kwargs):
+        super(RecordForm, self).__init__(*args, **kwargs)
+
+        self.fields['file_comprobante_egreso'].widget = forms.FileInput()
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Informacion Contable',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'cuenta_contable',
+                            css_class='s12 m12 l6'
+                        ),
+                        Column(
+                            'numero_documento_equivalente',
+                            css_class='s12 m12 l6'
+                        ),
+                        Column(
+                            'numero_comprobante_pago',
+                            css_class='s12 m12 l6'
+                        ),
+                    ),
+
+                    Row(
+                        Column(
+                            'fecha_pago',
+                            css_class='s12 m12'
+                        ),
+                    ),
+                ),
+            ),
+            Row(
+                Column(
+                    HTML(
+                        """
+                        <p style="font-size:1.2rem;"><b>Archivo de respuesta plataforma de pago</b></p>
+                        <p style="display:inline;"><b>Actualmente:</b>{{ file_comprobante_egreso_url | safe }}</p>
+                        """
+                    ),
+                    'file_comprobante_egreso',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Reportes
+        fields = ['file_comprobante_egreso','cuenta_contable','numero_documento_equivalente','numero_comprobante_pago','fecha_pago']
+        labels = {
+            'file_comprobante_egreso': 'Comprobante de egreso',
+            'numero_documento_equivalente': 'Numero del documento equivalente'
+        }
+
 class DesplazamientoFinancieraForm(forms.ModelForm):
 
     valor = forms.CharField()
@@ -1397,17 +1481,12 @@ class ProjectForm(forms.ModelForm):
             ),
             Row(
                 Column(
-                    Row(
-                        Column(
-                            'nombre',
-                            css_class='s12 m6 l6'
-                        ),
-                        Column(
-                            'cuenta',
-                            css_class='s12 m12 l6'
-                        ),
-                    ),
-                    css_class="s12"
+                    'nombre',
+                    css_class='s12 m6 l6'
+                ),
+                Column(
+                    'cuenta',
+                    css_class='s12 m12 l6'
                 ),
             ),
             Row(
