@@ -213,8 +213,11 @@ def build_listado_tercero_especifico(id, tercero_id):
     return "Archivo paquete ID: " + filename
 
 @app.task
-def build_reporte_pagos(id):
-    reporte = models_reportes.Reportes.objects.get(id = id)
+def build_reporte_pagos(reporte_id,enterprise_id):
+    reporte = models_reportes.Reportes.objects.get(id = reporte_id)
+    enterprise = models.Enterprise.objects.get(id=enterprise_id)
+
+
     proceso = "SION-REPORTE-PAGOS"
 
 
@@ -230,7 +233,7 @@ def build_reporte_pagos(id):
     contenidos = []
 
     i = 0
-    for pago in models.Pagos.objects.all().order_by('creation'):
+    for pago in models.Pagos.objects.filter(reporte__enterprise=enterprise, reporte__activo=True).order_by('creation'):
         i += 1
         contenidos.append([
             int(i),
@@ -261,6 +264,53 @@ def build_reporte_pagos(id):
 
     return "Archivo paquete ID: " + filename
 
+@app.task
+def build_finantial_reports(reporte_id,enterprise_id):
+    reporte = models_reportes.Reportes.objects.get(id = reporte_id)
+    enterprise = models.Enterprise.objects.get(id=enterprise_id)
+
+
+    proceso = "UNI2DATA-REPORTE-PAGOS"
+
+
+    titulos = ['Consecutivo', 'Línea presupuestal','Sub Línea presupuestal Nivel II','Sub Línea presupuestal Nivel III','Cuenta Contable', 'Contratista', 'Cedula','No. Contrato','Concepto del Pago',
+               'No. Factura o Equivalente','No. Comprobante de Pago','Fecha de Pago','Valor del Gasto' ,'Deducciones y/o Rentenciones Practicdas','Valor del Gasto']
+
+    formatos = ['0','General','General','General','General', '0', 'General', 'General', 'General', 'General', 'General','dd/mm/yy',
+                '"$"#,##0.00_);[Red]("$"#,##0.00)','"$"#,##0.00_);[Red]("$"#,##0.00)','"$"#,##0.00_);[Red]("$"#,##0.00)']
+
+    ancho_columnas = [20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
+
+    contenidos = []
+
+    i = 0
+    for pago in models.Pagos.objects.filter(reporte__enterprise=enterprise, reporte__activo=True).order_by('creation'):
+        i += 1
+        contenidos.append([
+            int(i),
+            pago.get_rubro(),
+            pago.get_rubro_lvl2(),
+            pago.get_rubro_lvl3(),
+            pago.reporte.cuenta_contable,
+            pago.tercero.get_full_name(),
+            pago.tercero.cedula,
+            pago.get_contrato(),
+            pago.reporte.nombre,
+            pago.reporte.numero_documento_equivalente,
+            pago.reporte.numero_comprobante_pago,
+            pago.reporte.fecha_pago,
+            pago.valor.amount,
+            pago.valor_solo_descuentos_amount(),
+            pago.valor_descuentos_amount(),
+        ])
+
+    output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
+
+    filename = str(reporte.id) + '.xlsx'
+    reporte.file.save(filename, File(output))
+
+
+    return "Archivo paquete ID: " + filename
 
 @app.task
 def build_listado_solicitudes(id):

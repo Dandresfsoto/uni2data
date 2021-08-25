@@ -323,6 +323,24 @@ class Pagos(models.Model):
             rubro = self.reporte.rubro.nombre
         return rubro
 
+    def get_rubro_lvl2(self):
+        rubro_level_2 = ''
+        if self.reporte.rubro_level_2 != None:
+            rubro_level_2 = self.reporte.rubro_level_2.nombre
+        return rubro_level_2
+
+    def get_rubro_lvl3(self):
+        rubro_level_3 = ''
+        if self.reporte.rubro_level_3 != None:
+            rubro_level_3 = self.reporte.rubro_level_3.nombre
+        return rubro_level_3
+
+    def get_contrato(self):
+        contrato = ''
+        if self.contrato != None:
+            contrato = self.contrato.nombre
+        return contrato
+
     def get_initial_amortizaciones(self):
         inicial = {}
         return inicial

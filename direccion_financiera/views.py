@@ -655,16 +655,47 @@ class InformePagosView(LoginRequiredMixin,
     login_url = settings.LOGIN_URL
 
     def dispatch(self, request, *args, **kwargs):
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+
         reporte = Reportes.objects.create(
             usuario = self.request.user,
             nombre = 'Informe acumulativo reportes de pago',
-            consecutive = Reportes.objects.filter(usuario = self.request.user).count()+1
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
         )
+        reporte_id = reporte.id
+        enterprise_id = enterprise.id
 
-        tasks.build_reporte_pagos.delay(reporte.id)
+
+        tasks.build_reporte_pagos.delay(reporte_id,enterprise_id)
 
         return HttpResponseRedirect('/reportes/')
 
+class FinantialReportView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.reportes.informe",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+
+        reporte = Reportes.objects.create(
+            usuario = self.request.user,
+            nombre = 'Informe financiero de ' + str(enterprise.name),
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
+        )
+        reporte_id = reporte.id
+        enterprise_id = enterprise.id
+
+
+        tasks.build_finantial_reports(reporte_id,enterprise_id)
+
+        return HttpResponseRedirect('/reportes/')
 
 class ReportesCreateView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,

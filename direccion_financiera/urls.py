@@ -29,7 +29,8 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/consulta_pagos/ver/<uuid:pk_contratista>/', views.ConsultaPagosEnterpriseTerceroListView.as_view()),
     path('enterprise/<uuid:pk>/consulta_pagos/ver/<uuid:pk_contratista>/dinamica/pagos/', views.ConsultaEnterprisePagosTerceroDinamicaListView.as_view()),
 
-    path('reportes/informe/', views.InformePagosView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/informe/', views.InformePagosView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/informe_financiero/', views.FinantialReportView.as_view()),
     path('enterprise/<uuid:pk>/reportes/', views.ReportesListView.as_view()),
     path('enterprise/<uuid:pk>/reportes/crear/', views.ReportesCreateView.as_view()),
     path('enterprise/<uuid:pk>/reportes/editar/<uuid:pk_reporte>/', views.ReportesUpdateView.as_view()),
