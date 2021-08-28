@@ -28,6 +28,9 @@ urlpatterns = [
 
     path('enterprise/<uuid:pk>/purchase_order/', rest_views.PurchaseOrderListApi.as_view()),
 
+    path('enterprise/<uuid:pk>/purchase_order/products/<uuid:pk_purchase>/', rest_views.EnterpriseProductsListApi.as_view()),
+
+
     path('terceros/pagos/<uuid:pk>/dinamica/pagos/', rest_views.PagosDinamicaAPI.as_view()),
 
     path('consulta_pagos/', rest_views.ConsultaPagosListApi.as_view()),
@@ -40,4 +43,5 @@ urlpatterns = [
     path('reportes/cargar-rubro/', rest_views.cargar_rubro),
     path('reportes/cargar-rubro_2/', rest_views.cargar_rubro_2),
     path('reportes/pagos/cargar-contrato/', rest_views.cargar_contrato),
+
 ]

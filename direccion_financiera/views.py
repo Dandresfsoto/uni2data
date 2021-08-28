@@ -7,7 +7,8 @@ from django.conf import settings
 from sequences import get_next_value
 
 from direccion_financiera import forms, models
-from direccion_financiera.models import Enterprise, RubroPresupuestalLevel2, RubroPresupuestal
+from direccion_financiera.forms import ProductForm
+from direccion_financiera.models import Enterprise, RubroPresupuestalLevel2, RubroPresupuestal, Products
 from recursos_humanos import models as rh_models
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
@@ -554,6 +555,17 @@ class EnterpriseProjectsCreateView(LoginRequiredMixin,
         enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
         kwargs['breadcrum_1'] = enterprice.name
         return super(EnterpriseProjectsCreateView,self).get_context_data(**kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        self.object.save()
+        return super(EnterpriseProjectsCreateView, self).form_valid(form)
+
+    def get_initial(self):
+        return {
+            'pk':self.kwargs['pk']
+        }
 
 
 class EnterpriseProjectsUpdateView(LoginRequiredMixin,
@@ -1701,6 +1713,196 @@ class PurchaseOrderCreateView(LoginRequiredMixin,
         enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
         kwargs['breadcrum_1'] = enterprice.name
         return super(PurchaseOrderCreateView,self).get_context_data(**kwargs)
+
+
+class PurchaseOrderUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.orden_compra.ver",
+            "usuarios.direccion_financiera.orden_compra.editar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/purchase_order/edit.html'
+    form_class = forms.PurchaseOrderForm
+    success_url = "../../"
+    model = models.PurchaseOrders
+    pk_url_kwarg = 'pk_purchase'
+
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.update_user = self.request.user
+        self.object.save()
+        return super(PurchaseOrderUpdateView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CREAR ORDEN DE COMPRA"
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        purchase = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        kwargs['breadcrum_1'] = enterprice.name
+        kwargs['file_quotation_url'] = purchase.pretty_print_file_quotation()
+        return super(PurchaseOrderUpdateView,self).get_context_data(**kwargs)
+
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_purchase': self.kwargs['pk_purchase']
+        }
+
+
+class PurchaseOrderDeleteView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.orden_compra.ver",
+            "usuarios.direccion_financiera.orden_compra.eliminar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+        purchase = models.PurchaseOrders.objects.get(id = self.kwargs['pk_purchase'])
+
+        purchase.delete()
+
+        return HttpResponseRedirect('../../')
+
+
+#----------------------------------------------------------------------------------
+
+#-------------------------------------- PRODUCTS -------------------------------------
+
+class ProductsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": ["usuarios.direccion_financiera.orden_compra.ver"]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/purchase_order/products/list.html'
+
+
+
+    def get_context_data(self, **kwargs):
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        purchase = models.PurchaseOrders.objects.get(id = self.kwargs['pk_purchase'])
+        kwargs['title'] = "Lista de productos"
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/purchase_order/products/{1}/'.format(enterprise.id,purchase.id)
+        kwargs['permiso_crear'] =  self.request.user.has_perm('usuarios.direccion_financiera.orden_compra.crear')
+        kwargs['product'] = Products.objects.filter(purchase_order=enterprise.id)
+        kwargs['breadcrum_active'] = purchase.consecutive
+        kwargs['product_form'] = ProductForm
+        kwargs['breadcrum_1'] = enterprise.name
+        return super(ProductsListView,self).get_context_data(**kwargs)
+
+
+class ProductsCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.orden_compra.ver",
+            "usuarios.direccion_financiera.orden_compra.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/purchase_order/products/create.html'
+    form_class = forms.ProductForm
+    success_url = "../"
+    model = Products
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CREAR PRODUCTO"
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        purchase = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        kwargs['breadcrum_1'] = enterprice.name
+        kwargs['breadcrum_2'] = purchase.consecutive
+        return super(ProductsCreateView,self).get_context_data(**kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.purchase_order = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        self.object.save()
+
+        price=self.object.price
+        stock=self.object.stock
+        Total_price= price*stock
+
+        self.object.total_price=Total_price
+        self.object.save()
+
+        return super(ProductsCreateView, self).form_valid(form)
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_purchase': self.kwargs['pk_purchase']
+        }
+
+
+class ProductsUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.orden_compra.ver",
+            "usuarios.direccion_financiera.orden_compra.editar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/purchase_order/products/edit.html'
+    success_url = "../../"
+    form_class = forms.ProductForm
+    model = models.Products
+    pk_url_kwarg = "pk_product"
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "EDITAR PRODUCTO"
+        enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        purchase = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        kwargs['breadcrum_1'] = enterprice.name
+        kwargs['breadcrum_2'] = purchase.consecutive
+        return super(ProductsUpdateView,self).get_context_data(**kwargs)
+
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_purchase': self.kwargs['pk_purchase'],
+            'pk_product': self.kwargs['pk_product'],
+        }
+
+
+class ProductsDeleteView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.orden_compra.ver",
+            "usuarios.direccion_financiera.orden_compra.eliminar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+        product = models.Products.objects.get(id = self.kwargs['pk_product'])
+
+        product.delete()
+
+        return HttpResponseRedirect('../../')
 
 #----------------------------------------------------------------------------------
 

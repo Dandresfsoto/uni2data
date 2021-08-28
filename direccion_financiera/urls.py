@@ -55,6 +55,13 @@ urlpatterns = [
 
     path('enterprise/<uuid:pk>/purchase_order/', views.PurchaseOrderListView.as_view()),
     path('enterprise/<uuid:pk>/purchase_order/crear/', views.PurchaseOrderCreateView.as_view()),
+    path('enterprise/<uuid:pk>/purchase_order/editar/<uuid:pk_purchase>/', views.PurchaseOrderUpdateView.as_view()),
+    path('enterprise/<uuid:pk>/purchase_order/eliminar/<uuid:pk_purchase>/', views.PurchaseOrderDeleteView.as_view()),
+
+    path('enterprise/<uuid:pk>/purchase_order/products/<uuid:pk_purchase>/', views.ProductsListView.as_view()),
+    path('enterprise/<uuid:pk>/purchase_order/products/<uuid:pk_purchase>/crear/', views.ProductsCreateView.as_view()),
+    path('enterprise/<uuid:pk>/purchase_order/products/<uuid:pk_purchase>/editar/<uuid:pk_product>/', views.ProductsUpdateView.as_view()),
+    path('enterprise/<uuid:pk>/purchase_order/products/<uuid:pk_purchase>/eliminar/<uuid:pk_product>/', views.ProductsDeleteView.as_view()),
 
     path('consulta_pagos/', views.ConsultaPagosListView.as_view()),
     path('consulta_pagos/ver/<uuid:pk>/', views.ConsultaPagosTerceroListView.as_view()),

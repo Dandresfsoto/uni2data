@@ -9,7 +9,7 @@ from django.shortcuts import render
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.forms.fields import Field, FileField
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, Enterprise, Servicios, \
-    Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2, PurchaseOrders
+    Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2, PurchaseOrders, Products
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
@@ -1474,6 +1474,8 @@ class ProjectForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
 
+        enterprise = Enterprise.objects.get(id=kwargs['initial']['pk'])
+
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
 
@@ -1511,7 +1513,6 @@ class ProjectForm(forms.ModelForm):
         model = Proyecto
         fields = ['cuenta','nombre']
 
-
 class PurchaseOrderForm(forms.ModelForm):
     third = forms.ModelChoiceField(label='Tercero*',queryset=Contratistas.objects.all(), required=False)
     department = forms.ModelChoiceField(label='Departamento*',queryset=Departamentos.objects.all(), required=False)
@@ -1521,8 +1522,24 @@ class PurchaseOrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(PurchaseOrderForm, self).__init__(*args, **kwargs)
         self.pk = kwargs['initial'].get('pk')
+        self.pk_purchase = kwargs['initial'].get('pk_purchase')
+        self.fields['file_quotation'].widget = forms.FileInput()
 
-        self.fields['third'].queryset = Contratistas.objects.all()
+        if self.pk_purchase != None:
+            purchase = PurchaseOrders.objects.get(id = self.pk_purchase)
+            self.PurchaseOrders = purchase.id
+            self.fields['third'].initial = purchase.third.id
+            self.fields['department'].initial = purchase.department.id
+            self.fields['municipality'].queryset = Municipios.objects.filter(departamento=purchase.department.id)
+            self.fields['municipality'].initial = purchase.municipality.id
+            self.fields['project'].initial = purchase.project.id
+            self.fields['beneficiary'].initial = purchase.beneficiary
+            self.fields['date'].initial = purchase.date
+            self.fields['observation'].initial = purchase.observation
+        else:
+            self.fields['third'].queryset = Contratistas.objects.all()
+
+
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -1583,6 +1600,24 @@ class PurchaseOrderForm(forms.ModelForm):
                         ),
                     ),
                 ),
+                Row(
+                    Fieldset(
+                        'Archivos',
+                    )
+                ),
+
+                Row(
+                    Column(
+                        HTML(
+                            """
+                            <p style="font-size:1.2rem;"><b>Cotizacion</b></p>
+                            <p style="display:inline;"><b>Actualmente:</b>{{ file_quotation_url | safe }}</p>
+                            """
+                        ),
+                        'file_quotation',
+                        css_class='s12'
+                    )
+                ),
             ),
             Row(
                 Column(
@@ -1598,9 +1633,10 @@ class PurchaseOrderForm(forms.ModelForm):
                 ),
             ),
         )
+
     class Meta:
         model = PurchaseOrders
-        fields = ['third','department','municipality','project','beneficiary','observation','date']
+        fields = ['third','department','municipality','project','beneficiary','observation','date','file_quotation']
         labels = {
             'department': 'Departamento',
             'municipality': 'Municipio',
@@ -1608,7 +1644,76 @@ class PurchaseOrderForm(forms.ModelForm):
             'beneficiary': 'Beneficiario',
             'observation': 'Observaciones',
             'date': 'fecha',
+            'file_quotation': 'Cotizacion',
         }
         widgets = {
             'observation': forms.Textarea(attrs={'class': 'materialize-textarea'}),
         }
+
+class ProductForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ProductForm, self).__init__(*args, **kwargs)
+        self.pk = kwargs['initial'].get('pk')
+        self.pk_purchase = kwargs['initial'].get('pk_purchase')
+        self.pk_product = kwargs['initial'].get('pk_product')
+
+        pk_product = kwargs['initial'].get('pk_product')
+        if pk_product != None:
+            product = Products.objects.get(id=pk_product)
+            self.fields['name'].initial = product.name
+            self.fields['price'].initial = product.price
+            self.fields['stock'].initial = product.stock
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información del banco',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'name',
+                            css_class='s12 m6 l4'
+                        ),
+                        Column(
+                            'price',
+                            css_class='s12 m6 l4'
+                        ),
+                        Column(
+                            'stock',
+                            css_class='s12 m6 l4'
+                        )
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Products
+        fields = ['name','price','stock']
+        labels = {
+            'name': 'Nombre del producto',
+            'price': 'Precio del producto',
+            'stock': 'Cantidad del producto',
+        }
+

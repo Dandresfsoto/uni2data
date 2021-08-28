@@ -666,6 +666,9 @@ class Descuentos(models.Model):
 def upload_dinamic_dir_purchase_order(instance, filename):
     return '/'.join(['Orden de compra', str(instance.id), 'Orden de compra', filename])
 
+def upload_dinamic_dir_quotation(instance, filename):
+    return '/'.join(['Orden de compra', str(instance.id), 'Cotizacion', filename])
+
 class PurchaseOrders(BaseModel):
     creation_user = models.ForeignKey(User, related_name="creation_user_purchase_order", on_delete=models.DO_NOTHING)
     update_user = models.ForeignKey(User, related_name="update_user_purchase_order",on_delete=models.DO_NOTHING,blank=True, null=True)
@@ -681,6 +684,7 @@ class PurchaseOrders(BaseModel):
     subtotal = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
     total = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
     file_purchase_order = models.FileField(upload_to=upload_dinamic_dir_purchase_order, blank=True, null=True)
+    file_quotation = models.FileField(upload_to=upload_dinamic_dir_quotation, blank=True, null=True)
 
     def pretty_date_datetime(self):
         return self.date.strftime('%d/%m/%Y')
@@ -689,7 +693,23 @@ class PurchaseOrders(BaseModel):
         valor_bruto = self.total
         return str(valor_bruto).replace('COL', '')
 
-    def url_file_purchase_order(self):
+    def pretty_print_file_purchase_order(self):
+        try:
+            url = self.file_purchase_order.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="'+ url +'"> '+ str(self.file_purchase_order.name) +'</a>'
+
+    def pretty_print_file_quotation(self):
+        try:
+            url = self.file_quotation.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="'+ url +'"> '+ str(self.file_quotation.name) +'</a>'
+
+    def url_file_purchase_orde(self):
         url = None
         try:
             url = self.file_purchase_order.url
@@ -697,17 +717,40 @@ class PurchaseOrders(BaseModel):
             pass
         return url
 
-
+    def url_file_quotation(self):
+        url = None
+        try:
+            url = self.file_quotation.url
+        except:
+            pass
+        return url
 
 class Products(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=150, verbose_name='Nombre')
-    purchase_order = models.ForeignKey(PurchaseOrders, on_delete=models.DO_NOTHING, verbose_name='Orden de compra')
-    price = models.DecimalField(default=0.00, max_digits=9, decimal_places=2, verbose_name='Precio de venta')
+    purchase_order = models.ForeignKey(PurchaseOrders, on_delete=models.DO_NOTHING, blank=True,null=True)
+    price = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
     stock = models.IntegerField(default=0, verbose_name='Cantidad')
+    total_price = MoneyField(max_digits=20, decimal_places=2, default_currency='COP',blank=True,null=True)
+
 
     def __str__(self):
         return self.name
+
+    def pretty_print_price(self):
+        price = self.price
+        return str(price).replace('COL','')
+
+    def pretty_print_total_price(self):
+
+        price = self.price
+        stock= self.stock
+
+        total_price = price * stock
+
+        return str(total_price).replace('COL','')
+
+
 
 
 

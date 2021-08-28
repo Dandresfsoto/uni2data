@@ -1,8 +1,12 @@
 from uuid import UUID
 
+import self as self
 from dal import autocomplete
+from django.core import serializers
 from django.shortcuts import render
 from django_datatables_view.base_datatable_view import BaseDatatableView
+from requests import request
+
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, RubroPresupuestalLevel2, \
     RubroPresupuestalLevel3, Proyecto, Enterprise, PurchaseOrders, Products
 from recursos_humanos.models import Contratistas, Contratos
@@ -1412,7 +1416,7 @@ class PurchaseOrderListApi(BaseDatatableView):
                 observation = '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0}"><i class="material-icons">announcement</i></a>'.format(
                     row.observation)
 
-            if self.request.user.has_perm('usuarios.direccion_financiera.reportes.editar'):
+            if self.request.user.has_perm('usuarios.direccion_financiera.orden_compra.editar'):
                 ret = '<div class="center-align">' \
                       '<a href="editar/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar orden de compra: {1}">' \
                       '<p style="font-weight:bold;">{2}-{3}</p>' \
@@ -1433,7 +1437,7 @@ class PurchaseOrderListApi(BaseDatatableView):
 
             if self.request.user.has_perm('usuarios.direccion_financiera.orden_compra.editar'):
                 ret = '<div class="center-align">' \
-                      '<a href="productos/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver {1} orden(es) de pago(s)">' \
+                      '<a href="products/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver {1} orden(es) de pago(s)">' \
                       '<i class="material-icons">remove_red_eye</i>' \
                       '</a>' \
                       '</div>'.format(row.id, cantidad)
@@ -1462,15 +1466,15 @@ class PurchaseOrderListApi(BaseDatatableView):
 
         elif column == 'file_purchase_order':
 
-            url_file_purchase_order = row.url_file_purchase_order()
+            url_file_purchase_order = row.url_file_quotation()
 
 
             ret = '<div class="center-align">'
 
             if url_file_purchase_order != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Archivo de respaldo: {1}">' \
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cotizacion">' \
                        '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
-                       '</a>'.format(url_file_purchase_order, row.nombre)
+                       '</a>'.format(url_file_purchase_order)
 
 
             ret += '</div>'
@@ -1495,6 +1499,69 @@ class PurchaseOrderListApi(BaseDatatableView):
 
         else:
             return super(PurchaseOrderListApi, self).render_column(row, column)
+
+
+class EnterpriseProductsListApi(BaseDatatableView):
+    model = Products
+    columns = ['id','name','price','stock','purchase_order','total_price']
+    order_columns = ['id','name','price','stock','purchase_order','total_price']
+
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+
+    def get_initial_queryset(self):
+        purchase = PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        return self.model.objects.filter(purchase_order = purchase)
+
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            if self.request.user.has_perm('usuarios.direccion_financiera.orden_compra.editar'):
+                ret = '<div class="center-align">' \
+                      '<a href="editar/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar producto: {1}">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.name)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</div>'.format(row.id, row.observacion)
+
+            return ret
+
+        elif column == 'price':
+            return row.pretty_print_price()
+
+        elif column == 'purchase_order':
+            return row.pretty_print_total_price()
+
+        elif column == 'total_price':
+            ret = ''
+            if self.request.user.has_perm('usuarios.direccion_financiera.orden_compra.eliminar'):
+                ret = '<div class="center-align">' \
+                           '<a href="eliminar/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar producto">' \
+                                '<i class="material-icons">delete</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">delete</i>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            return ret
+
+        else:
+            return super(EnterpriseProductsListApi, self).render_column(row, column)
 
 
 class ConsultaPagosListApi(BaseDatatableView):

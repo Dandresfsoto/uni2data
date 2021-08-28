@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -30,44 +30,73 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../../") Empresas asociadas
+                        a(href="/direccion_financiera/enterprise/") Empresas asociadas
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light ")
-                        a(href="../") {{ breadcrum_1 | truncatechars:25 }}
+                        a(href="../../../") {{ breadcrum_1 | truncatechars:25 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                        div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") Reportes de pago
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Ordenes de compra
+                        a(href="#") {{ breadcrum_active | truncatechars:25 }}
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
 
-    |{% if permiso_crear %}
 
+    |{% if show %}
     ul(class="collapsible",data-collapsible="accordion")
         li(class="bold waves-effect waves-light button-menu")
 
             div(class="collapsible-header active")
                 i(class="material-icons") call_to_action
-                | Acciones
+                | Formatos
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+                    |{% if file != None %}
+                    li(class="bold waves-effect waves-light")
+                        a(href="{{ file }}") Reporte interno
+                            i(class="material-icons icon-sican") attach_file
+
+                    div(class="divider divider-perfil")
+                    |{% endif %}
+
+                    | {% if plano != None %}
+                    li(class="bold waves-effect waves-light")
+                        a(href="{{ plano }}") Archivo plano
+                            i(class="material-icons icon-sican") attach_file
+
+                    div(class="divider divider-perfil")
+                    | {% endif %}
+    |{% endif %}
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") call_to_action
+                | Formatos
 
             div(class="collapsible-body collapsible-body-blue")
                 ul
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="crear/") Crear orden de compra
-                            i(class="material-icons icon-sican") account_balance
+                        a(href="{{ file }}") Generar Orden de compra
+                            i(class="material-icons icon-sican") attach_file
 
                     div(class="divider divider-perfil")
-
-    |{% endif %}
-
 
 block container_principal
     div(class="container-datatable")
@@ -75,30 +104,36 @@ block container_principal
             thead
                 tr
                     th Editar
-                    th Productos
-                    th Usuario
-                    th Tercero
-                    th Proyecto
-                    th Fecha
-                    th Valor
-                    th Documento
-                    th Eliminar
+                    th Nombre del producto
+                    th valor unitario
+                    th Cantidad
+                    th Valor total
+                    th Producto
             tbody
                 tr
                     td Editar
-                    td Productos
-                    td Usuario
-                    td Tercero
-                    td Proyecto
-                    td Fecha
-                    td Nombre
-                    td Documento
-                    td Eliminar
+                    td Nombre del producto
+                    td valor unitario
+                    td Cantidad
+                    td Valor total
+                    td Producto
+
+    | {% if permiso_crear %}
+
+
+    div(class="fixed-action-btn modal-trigger" )
+        a(class="btn-floating btn-large pink", href="crear/")
+            i(class="large material-icons") add_circle
+
+
+    | {% endif %}
+
+
+
 
 
 block body_script_auth
     script.
-
         $(document).ready(function () {
 
             var table = $('#table').DataTable({
@@ -108,7 +143,6 @@ block body_script_auth
                 processing: true,
                 serverSide: true,
                 ajax: "{{ url_datatable }}",
-                "order": [[ 0, "desc" ]],
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
                 },
