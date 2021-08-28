@@ -73,30 +73,8 @@ block side_nav_container
                     div(class="divider divider-perfil")
                     |{% endif %}
 
-                    | {% if plano != None %}
-                    li(class="bold waves-effect waves-light")
-                        a(href="{{ plano }}") Archivo plano
-                            i(class="material-icons icon-sican") attach_file
-
-                    div(class="divider divider-perfil")
-                    | {% endif %}
     |{% endif %}
-    ul(class="collapsible",data-collapsible="accordion")
-        li(class="bold waves-effect waves-light button-menu")
 
-            div(class="collapsible-header active")
-                i(class="material-icons") call_to_action
-                | Formatos
-
-            div(class="collapsible-body collapsible-body-blue")
-                ul
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="{{ file }}") Generar Orden de compra
-                            i(class="material-icons icon-sican") attach_file
-
-                    div(class="divider divider-perfil")
 
 block container_principal
     div(class="container-datatable")

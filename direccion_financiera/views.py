@@ -1802,6 +1802,8 @@ class ProductsListView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = purchase.consecutive
         kwargs['product_form'] = ProductForm
         kwargs['breadcrum_1'] = enterprise.name
+        kwargs['show'] = True if purchase.file_purchase_order.name != '' else False
+        kwargs['file'] = purchase.url_file_purchase_orde()
         return super(ProductsListView,self).get_context_data(**kwargs)
 
 
@@ -1842,6 +1844,20 @@ class ProductsCreateView(LoginRequiredMixin,
         self.object.total_price=Total_price
         self.object.save()
 
+        purchase = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        total = 0
+        for product_obj in models.Products.objects.filter(purchase_order=purchase):
+            total += product_obj.total_price
+
+
+        purchase.total = total
+        purchase.subtotal = total
+        purchase.save()
+
+        purchase.file_purchase_order.delete(save=True)
+
+        tasks.build_orden_compra(str(purchase.id), purchase.update_user.email)
+
         return super(ProductsCreateView, self).form_valid(form)
 
     def get_initial(self):
@@ -1876,6 +1892,35 @@ class ProductsUpdateView(LoginRequiredMixin,
         return super(ProductsUpdateView,self).get_context_data(**kwargs)
 
 
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.purchase_order = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        self.object.save()
+
+        price=self.object.price
+        stock=self.object.stock
+        Total_price= price*stock
+
+        self.object.total_price=Total_price
+        self.object.save()
+
+        purchase = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        total = 0
+        for product_obj in models.Products.objects.filter(purchase_order=purchase):
+            total += product_obj.total_price
+
+
+        purchase.total = total
+        purchase.subtotal = total
+        purchase.save()
+
+        purchase.file_purchase_order.delete(save=True)
+
+        tasks.build_orden_compra(str(purchase.id), purchase.update_user.email)
+
+        return super(ProductsUpdateView, self).form_valid(form)
+
+
     def get_initial(self):
         return {
             'pk': self.kwargs['pk'],
@@ -1901,6 +1946,18 @@ class ProductsDeleteView(LoginRequiredMixin,
         product = models.Products.objects.get(id = self.kwargs['pk_product'])
 
         product.delete()
+        purchase = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        total = 0
+        for product_obj in models.Products.objects.filter(purchase_order=purchase):
+            total += product_obj.price
+
+        purchase.total = total
+        purchase.subtotal = total
+        purchase.save()
+
+        purchase.file_purchase_order.delete(save=True)
+
+        tasks.build_orden_compra(str(purchase.id), purchase.update_user.email)
 
         return HttpResponseRedirect('../../')
 

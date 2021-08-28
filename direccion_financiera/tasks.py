@@ -14,6 +14,73 @@ from usuarios.models import Notifications
 from desplazamiento.models import Solicitudes, Desplazamiento
 
 @app.task
+def build_orden_compra(id,email):
+    purchase = models.PurchaseOrders.objects.get(id=id)
+    products = models.Products.objects.filter(purchase_order = purchase)
+
+
+    if products.count() > 0:
+
+        usuario = User.objects.get(email = email)
+        cantidad = models.Products.objects.filter(purchase_order = purchase).count()
+
+        output = BytesIO()
+        wb = openpyxl.load_workbook(filename=settings.STATICFILES_DIRS[0] + '/documentos/orden_compra.xlsx')
+        ws = wb.get_sheet_by_name('Orden de Compra')
+        logo_sican = Image(settings.STATICFILES_DIRS[0] + '/img/andes-logo.png')
+
+        logo_sican.width = 120
+        logo_sican.height = 80
+        logo_sican.drawing = 100
+
+
+
+
+
+        ws.add_image(logo_sican, 'C3')
+        ws['E2'] = str(purchase.enterprise.name)
+
+        ws['H6'] = str(purchase.enterprise.code) +'-'+ str(purchase.consecutive)
+        ws['H7'] = purchase.pretty_date_datetime()
+
+
+        ws['D6'] = purchase.third.get_full_name()
+        ws['D7'] = purchase.third.get_cedula()
+
+
+        ws['D10'] = purchase.department.nombre
+        ws['D11'] = purchase.municipality.nombre
+        ws['D12'] = purchase.beneficiary
+        ws['D13'] = purchase.project.nombre
+
+
+        ws['H11'] = purchase.third.get_full_name()
+
+
+        ws['I17'] = purchase.pretty_date_datetime()
+
+        i = 21
+
+        for product in products:
+            ws['B' + str(i)] = product.name.upper()
+            ws['F' + str(i)] = product.stock
+            ws['G' + str(i)] = product.pretty_print_price()
+            ws['I' + str(i)] = product.pretty_print_total_price()
+            i += 1
+
+        ws['I49'] = purchase.pretty_print_subtotal()
+        ws['I52'] = purchase.pretty_print_total()
+
+        ws['B54'] = purchase.observation
+
+        filename = str(purchase.id) + '.xlsx'
+        wb.save(output)
+
+        purchase.file_purchase_order.save(filename, File(output))
+
+    return "Reporte generado"
+
+@app.task
 def build_reporte_interno(id, email):
     reporte = models.Reportes.objects.get(id=id)
     pagos = models.Pagos.objects.filter(reporte = reporte)
@@ -86,6 +153,7 @@ def build_reporte_interno(id, email):
         reporte.file.save(filename, File(output))
 
     return "Reporte generado"
+
 
 @app.task
 def send_mail_templated_pago(id,template,dictionary,from_email,list_to_email):

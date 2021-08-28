@@ -725,6 +725,21 @@ class PurchaseOrders(BaseModel):
             pass
         return url
 
+    def pretty_update_datetime_datetime(self):
+        return self.updated_at.astimezone(settings_time_zone).strftime('%d/%m/%Y a las %I:%M:%S %p')
+
+    def reporte_update_datetime(self):
+        return self.updated_at.astimezone(settings_time_zone).strftime('%d/%m/%Y')
+
+    def pretty_print_total(self):
+        total = self.total
+        return str(total).replace('COL','')
+
+    def pretty_print_subtotal(self):
+        subtotal = self.subtotal
+        return str(subtotal).replace('COL','')
+
+
 class Products(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=150, verbose_name='Nombre')
@@ -740,6 +755,10 @@ class Products(models.Model):
     def pretty_print_price(self):
         price = self.price
         return str(price).replace('COL','')
+
+    def pretty_print_total_price(self):
+        total_price = self.total_price
+        return str(total_price).replace('COL','')
 
     def pretty_print_total_price(self):
 
