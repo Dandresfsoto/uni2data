@@ -1518,6 +1518,18 @@ class PurchaseOrderForm(forms.ModelForm):
     department = forms.ModelChoiceField(label='Departamento*',queryset=Departamentos.objects.all(), required=False)
     municipality = forms.ModelChoiceField(label='Municipio', queryset=Municipios.objects.all(), required=False)
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        departure = float(cleaned_data.get("departure"))
+        counterpart = float(cleaned_data.get("counterpart"))
+
+        percentage = departure + counterpart
+
+        if percentage != 100:
+            self.add_error('departure',"La suma de los valores de partida y contrapartida debe ser 100%")
+
+
 
     def __init__(self, *args, **kwargs):
         super(PurchaseOrderForm, self).__init__(*args, **kwargs)
@@ -1536,6 +1548,8 @@ class PurchaseOrderForm(forms.ModelForm):
             self.fields['beneficiary'].initial = purchase.beneficiary
             self.fields['date'].initial = purchase.date
             self.fields['observation'].initial = purchase.observation
+            self.fields['departure'].initial = purchase.departure
+            self.fields['counterpart'].initial = purchase.counterpart
         else:
             self.fields['third'].queryset = Contratistas.objects.all()
 
@@ -1600,6 +1614,21 @@ class PurchaseOrderForm(forms.ModelForm):
                         ),
                     ),
                 ),
+                Column(
+                    Row(
+                        Fieldset(
+                            'Partida y contrapartida',
+                        ),
+                        Column(
+                            'departure',
+                            css_class='s6'
+                        ),
+                        Column(
+                            'counterpart',
+                            css_class='s6'
+                        ),
+                    ),
+                ),
                 Row(
                     Fieldset(
                         'Archivos',
@@ -1636,7 +1665,7 @@ class PurchaseOrderForm(forms.ModelForm):
 
     class Meta:
         model = PurchaseOrders
-        fields = ['third','department','municipality','project','beneficiary','observation','date','file_quotation']
+        fields = ['third','department','municipality','project','beneficiary','observation','date','file_quotation','beneficiary','departure','counterpart']
         labels = {
             'department': 'Departamento',
             'municipality': 'Municipio',
@@ -1645,6 +1674,8 @@ class PurchaseOrderForm(forms.ModelForm):
             'observation': 'Observaciones',
             'date': 'fecha',
             'file_quotation': 'Cotizacion',
+            'departure': 'Partida',
+            'counterpart': 'Contrapartida',
         }
         widgets = {
             'observation': forms.Textarea(attrs={'class': 'materialize-textarea'}),

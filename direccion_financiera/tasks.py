@@ -73,6 +73,19 @@ def build_orden_compra(id,email):
 
         ws['B54'] = purchase.observation
 
+        ws['F54'] = purchase.enterprise.name
+        ws['F55'] = purchase.project.nombre
+
+
+        ws['G54'] = str(purchase.departure)+ ' %'
+        ws['G55'] = str(purchase.counterpart)+ ' %'
+
+
+        ws['I54'] = purchase.pretty_print_total_percentage_enterprise()
+        ws['I55'] = purchase.pretty_print_total_percentage_project()
+
+
+
         filename = str(purchase.id) + '.xlsx'
         wb.save(output)
 

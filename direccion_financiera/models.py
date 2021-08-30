@@ -685,12 +685,23 @@ class PurchaseOrders(BaseModel):
     total = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
     file_purchase_order = models.FileField(upload_to=upload_dinamic_dir_purchase_order, blank=True, null=True)
     file_quotation = models.FileField(upload_to=upload_dinamic_dir_quotation, blank=True, null=True)
+    meta = models.PositiveIntegerField(default=0)
+    departure = models.PositiveIntegerField(default=0)
+    counterpart = models.PositiveIntegerField(default=0)
 
     def pretty_date_datetime(self):
         return self.date.strftime('%d/%m/%Y')
 
     def pretty_print_total(self):
         valor_bruto = self.total
+        return str(valor_bruto).replace('COL', '')
+
+    def pretty_print_total_percentage_enterprise(self):
+        valor_bruto = self.total * (self.departure/100)
+        return str(valor_bruto).replace('COL', '')
+
+    def pretty_print_total_percentage_project(self):
+        valor_bruto = self.total * (self.counterpart/100)
         return str(valor_bruto).replace('COL', '')
 
     def pretty_print_file_purchase_order(self):
