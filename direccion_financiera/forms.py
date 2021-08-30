@@ -1739,11 +1739,18 @@ class ProductForm(forms.ModelForm):
         self.pk_product = kwargs['initial'].get('pk_product')
 
 
+        self.fields['price_char'] = forms.CharField(label="Valor ($)")
+        try:
+            price = kwargs['instance'].price
+        except:
+            pass
+
+
         pk_product = kwargs['initial'].get('pk_product')
         if pk_product != None:
             product = Products.objects.get(id=pk_product)
             self.fields['name'].initial = product.name
-            self.fields['price'].initial = product.price
+            self.fields['price_char'].initial = product.price
             self.fields['stock'].initial = product.stock
 
 
@@ -1763,7 +1770,7 @@ class ProductForm(forms.ModelForm):
                             css_class='s12 m6 l4'
                         ),
                         Column(
-                            'price',
+                            'price_char',
                             css_class='s12 m6 l4'
                         ),
                         Column(
@@ -1791,10 +1798,9 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Products
-        fields = ['name','price','stock']
+        fields = ['name','stock']
         labels = {
             'name': 'Nombre del producto',
-            'price': 'Precio del producto',
             'stock': 'Cantidad del producto',
         }
 

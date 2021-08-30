@@ -5,7 +5,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, FormView,
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
 from sequences import get_next_value
-
+from direccion_financiera import utils
 from direccion_financiera import forms, models
 from direccion_financiera.forms import ProductForm
 from direccion_financiera.models import Enterprise, RubroPresupuestalLevel2, RubroPresupuestal, Products
@@ -1837,6 +1837,7 @@ class ProductsCreateView(LoginRequiredMixin,
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.purchase_order = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        self.object.price = utils.autonumeric2float(form.cleaned_data['price_char'])
         self.object.save()
 
         price=self.object.price
