@@ -248,7 +248,7 @@ class ReporteForm(forms.ModelForm):
         self.fields['tipo_soporte'].queryset = TipoSoporte.objects.filter(enterprise=enterprise)
         self.fields['rubro'].queryset = RubroPresupuestal.objects.filter(enterprise=enterprise)
 
-
+        self.fields['file_purchase_order'].widget = forms.FileInput()
         self.fields['respaldo'].widget = forms.FileInput()
         self.fields['firma'].widget = forms.FileInput()
 
@@ -407,6 +407,7 @@ class ReporteUpdateForm(forms.ModelForm):
         enterprise = Enterprise.objects.get(id=pk)
         self.fields['rubro'].queryset = RubroPresupuestal.objects.filter(enterprise=enterprise)
 
+        self.fields['file_purchase_order'].widget = forms.FileInput()
         self.fields['respaldo'].widget = forms.FileInput()
         self.fields['firma'].widget = forms.FileInput()
 
@@ -483,6 +484,18 @@ class ReporteUpdateForm(forms.ModelForm):
                 Column(
                     HTML(
                         """
+                        <p style="font-size:1.2rem;"><b>Orden de compra</b></p>
+                        <p style="display:inline;"><b>Actualmente:</b>{{ file_purchase_order_url | safe }}</p>
+                        """
+                    ),
+                    'file_purchase_order',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    HTML(
+                        """
                         <p style="font-size:1.2rem;"><b>Respaldo del reporte</b></p>
                         <p style="display:inline;"><b>Actualmente:</b>{{ respaldo_url | safe }}</p>
                         """
@@ -520,11 +533,12 @@ class ReporteUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Reportes
-        fields = ['nombre','proyecto','tipo_soporte','inicio','fin','respaldo','firma', 'observacion', 'rubro', 'rubro_level_2','rubro_level_3']
+        fields = ['nombre','proyecto','tipo_soporte','inicio','fin','respaldo','firma', 'observacion', 'rubro', 'rubro_level_2','rubro_level_3','file_purchase_order']
         labels = {
             'tipo_soporte': 'Respaldo del reporte',
             'inicio': 'Fecha de pago',
-            'fin': 'Fecha de cargue'
+            'fin': 'Fecha de cargue',
+            'file_purchase_order': 'Orden de compra'
         }
         widgets = {
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'})
@@ -1712,11 +1726,18 @@ class PurchaseOrderForm(forms.ModelForm):
 
 class ProductForm(forms.ModelForm):
 
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+
+
     def __init__(self, *args, **kwargs):
         super(ProductForm, self).__init__(*args, **kwargs)
         self.pk = kwargs['initial'].get('pk')
         self.pk_purchase = kwargs['initial'].get('pk_purchase')
         self.pk_product = kwargs['initial'].get('pk_product')
+
 
         pk_product = kwargs['initial'].get('pk_product')
         if pk_product != None:
