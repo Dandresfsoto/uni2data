@@ -62,6 +62,9 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
         opacity: .9,
     });
 
+    $('#id_contrato').select2();
+    $("label[for='id_contrato']").addClass('active');
+
     $('#modal_pago_descontable').modal('open');
 
     $("#id_tercero").on('keydown', function () {
@@ -95,6 +98,20 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 
                         $("label[for='id_cedula']").addClass('active');
                         $("#id_cedula").val(cedula);
+
+                        var url_2 = '/rest/v1.0/direccion_financiera/reportes/pagos/cargar-contrato/'
+                        var contrato_cedula = cedula;
+
+                        $.ajax({
+                            url: url_2,
+                            data: {
+                                'contrato': contrato_cedula
+                            },
+                            success: function (data) {
+                                $("#id_contrato").html(data);
+                                $('#id_contrato').select2();
+                            }
+                        });
                     }
                 });
             }

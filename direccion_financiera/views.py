@@ -376,12 +376,12 @@ class EnterpriseListView(TemplateView):
     def get_items(self):
         items = []
 
-        for empresa in Enterprise.objects.all().order_by('code'):
+        for empresa in Enterprise.objects.all().order_by('tax_number'):
             if self.request.user.has_perm("usuarios.direccion_financiera.reportes.ver"):
                 items.append({
                     'sican_categoria': '{0}'.format(empresa.name),
                     'sican_color': empresa.color,
-                    'sican_order': empresa.code,
+                    'sican_order': empresa.tax_number,
                     'sican_url': '{0}/'.format(str(empresa.id)),
                     'sican_name': '{0}'.format(empresa.name),
                     'sican_icon': empresa.icon,
@@ -1703,7 +1703,7 @@ class PurchaseOrderCreateView(LoginRequiredMixin,
         self.object.valor = 0
         self.object.enterprise = enterprise
         self.object.third = form.cleaned_data['third']
-        self.object.consecutive = get_next_value(enterprise.tax_number)
+        self.object.consecutive = get_next_value(enterprise.tax_number + '_1')
         self.object.save()
         return super(PurchaseOrderCreateView, self).form_valid(form)
 
@@ -1769,6 +1769,8 @@ class PurchaseOrderDeleteView(LoginRequiredMixin,
 
     def dispatch(self, request, *args, **kwargs):
         purchase = models.PurchaseOrders.objects.get(id = self.kwargs['pk_purchase'])
+
+        products=models.Products.objects.filter(purchase_order=purchase).delete()
 
         purchase.delete()
 

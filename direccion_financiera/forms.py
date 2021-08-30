@@ -335,6 +335,18 @@ class ReporteForm(forms.ModelForm):
                 Column(
                     HTML(
                         """
+                        <p style="font-size:1.2rem;"><b>Orden de compra</b></p>
+                        <p style="display:inline;"><b>Actualmente:</b>{{ file_purchase_order_url | safe }}</p>
+                        """
+                    ),
+                    'file_purchase_order',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    HTML(
+                        """
                         <p style="font-size:1.2rem;"><b>Respaldo del reporte</b></p>
                         <p style="display:inline;"><b>Actualmente:</b>{{ respaldo_url | safe }}</p>
                         """
@@ -372,13 +384,14 @@ class ReporteForm(forms.ModelForm):
 
     class Meta:
         model = Reportes
-        fields = ['nombre','servicio','proyecto','tipo_soporte','inicio','fin','respaldo','firma','efectivo', 'rubro', 'rubro_level_2','rubro_level_3','observacion']
+        fields = ['nombre','servicio','proyecto','tipo_soporte','inicio','fin','respaldo','firma','efectivo', 'rubro', 'rubro_level_2','rubro_level_3','observacion','file_purchase_order']
         labels = {
             'servicio': 'Bien o servicio a gestionar',
             'tipo_soporte': 'Respaldo del reporte',
             'inicio': 'Fecha de pago',
             'fin': 'Fecha de cargue',
-            'efectivo': 'Tipo de reporte'
+            'efectivo': 'Tipo de reporte',
+            'file_purchase_order': 'Orden de compra'
         }
         widgets = {
             'efectivo': forms.Select(choices=[(False,'Bancarizado'),(True,'Efectivo')]),
@@ -1072,6 +1085,8 @@ class PagoDescontableForm(forms.Form):
     publico = forms.BooleanField(initial=True, required=False)
     cuotas = forms.IntegerField(initial=1)
 
+    contrato = forms.ModelChoiceField(label='Contrato', queryset=Contratos.objects.none(), required=False)
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -1109,6 +1124,8 @@ class PagoDescontableForm(forms.Form):
         self.pk_reporte = kwargs['initial'].get('pk_reporte')
         self.fields['publico'].widget.attrs['class'] = 'filled-in'
 
+        self.fields['contrato'].queryset = Contratos.objects.all()
+
         if self.pk_pago != None:
             pago = Pagos.objects.get(id = self.pk_pago)
             self.pk_reporte = pago.reporte.id
@@ -1118,6 +1135,9 @@ class PagoDescontableForm(forms.Form):
             self.fields['cedula'].initial = pago.tercero.cedula
             self.fields['publico'].initial = pago.publico
             self.fields['cuotas'].initial = pago.cuotas
+            self.fields['contrato'].queryset = Contratos.objects.filter(contratista__cedula=pago.tercero.cedula)
+            if pago.contrato != None:
+                self.fields['contrato'].initial = pago.contrato.id
 
 
         self.helper = FormHelper(self)
@@ -1145,6 +1165,15 @@ class PagoDescontableForm(forms.Form):
                                 <p><b>Número de cuenta:</b><span id="cuenta" style="margin-left:5px;">{{cuenta}}</span></p>
                                 """
                             ),
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Fieldset(
+                            'Información del contrato',
+                        ),
+                        Column(
+                            'contrato',
                             css_class='s12'
                         ),
                     ),

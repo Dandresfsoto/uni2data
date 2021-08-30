@@ -432,8 +432,14 @@ class ReportesListApi(BaseDatatableView):
             url_firma = row.url_firma()
             url_file_banco = row.url_file_banco()
             url_file_comprobante_egreso = row.url_file_comprobante_egreso()
+            url_file_purchase_order = row.url_file_purchase_order()
 
             ret = '<div class="center-align">'
+
+            if url_file_purchase_order != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Orden de compra: {1}">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file_purchase_order, row.nombre)
 
             if url_respaldo != None:
                 ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Archivo de respaldo: {1}">' \

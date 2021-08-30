@@ -144,6 +144,15 @@ block body_script_auth
                 closeOnSelect: false
             });
 
+            $('#id_file_purchase_order').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el archivo de respaldo del reporte',
+                    'replace': 'Arrastra y suelta el archivo de respaldo del reporte',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
             $('#id_respaldo').dropify({
                 messages: {
                     'default': 'Arrastra y suelta el archivo de respaldo del reporte',

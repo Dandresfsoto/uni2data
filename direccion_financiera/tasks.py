@@ -27,7 +27,7 @@ def build_orden_compra(id,email):
         output = BytesIO()
         wb = openpyxl.load_workbook(filename=settings.STATICFILES_DIRS[0] + '/documentos/orden_compra.xlsx')
         ws = wb.get_sheet_by_name('Orden de Compra')
-        logo_sican = Image(settings.STATICFILES_DIRS[0] + '/img/andes-logo.png')
+        logo_sican = Image(purchase.enterprise.logo)
 
         logo_sican.width = 120
         logo_sican.height = 80
@@ -116,7 +116,7 @@ def build_reporte_interno(id, email):
 
         ws.add_image(logo_sican, 'C2')
 
-        ws['F4'] = 'F-GAF-17-C' + str(reporte.consecutive)
+        ws['F4'] = str(reporte.enterprise.code) + ' - ' + str(reporte.consecutive)
         ws['I4'] = reporte.reporte_update_datetime()
         ws['O4'] = usuario.get_full_name_string()
 

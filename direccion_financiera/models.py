@@ -6,6 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from djmoney.models.fields import MoneyField
 from pytz import timezone
+from config.extrafields import ContentTypeRestrictedFileField
 
 from common.models import BaseModel
 from usuarios.models import User, Departamentos, Municipios
@@ -29,6 +30,9 @@ def upload_dinamic_dir_soporte_firma(instance, filename):
 def upload_dinamic_dir_soporte_file_banco(instance, filename):
     return '/'.join(['Reportes', str(instance.id), 'Archivo banco', filename])
 
+def upload_dinamic_dir_soporte_file_purchase_order(instance, filename):
+    return '/'.join(['Reportes', str(instance.id), 'Orden de compra', filename])
+
 def upload_dinamic_dir_comprobante_egreso(instance, filename):
     return '/'.join(['Reportes', str(instance.id), 'Comprobante egreso', filename])
 
@@ -41,6 +45,9 @@ class Bancos(models.Model):
     def __str__(self):
         return str(self.codigo) + " - " + self.nombre
 
+def upload_dinamic_logo(instance, filename):
+    return '/'.join(['Enterprise', str(instance.id), 'logo', filename])
+
 class Enterprise(BaseModel):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=200)
@@ -48,6 +55,27 @@ class Enterprise(BaseModel):
     color = models.CharField(max_length=100)
     icon = models.CharField(max_length=100)
     code = models.CharField(max_length=10, unique=True)
+
+    logo = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_logo,
+        content_types=[
+            'image/jpg',
+            'image/jpeg',
+            'image/png'
+        ],
+        max_upload_size=50485760,
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    def url_logo(self):
+        url = None
+        try:
+            url = self.logo.url
+        except:
+            pass
+        return url
 
     def __str__(self):
         return f"{self.name} - {self.tax_number}"
@@ -129,6 +157,7 @@ class Reportes(BaseModel):
     respaldo = models.FileField(upload_to=upload_dinamic_dir_soporte_respaldo, blank=True, null=True)
     firma = models.FileField(upload_to=upload_dinamic_dir_soporte_firma, blank=True, null=True)
     file_banco = models.FileField(upload_to=upload_dinamic_dir_soporte_file_banco, blank=True, null=True)
+    file_purchase_order = models.FileField(upload_to=upload_dinamic_dir_soporte_file_purchase_order, blank=True, null=True)
 
 
     estado = models.CharField(max_length=100)
@@ -167,19 +196,27 @@ class Reportes(BaseModel):
 
     def pretty_print_file_banco(self):
         try:
-            url = self.file_comprobante_egreso.url
-        except:
-            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
-        else:
-            return '<a href="'+ url +'"> '+ str(self.file_comprobante_egreso.name) +'</a>'
-
-    def pretty_print_file_comprobante_egreso(self):
-        try:
             url = self.file_banco.url
         except:
             return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
         else:
             return '<a href="'+ url +'"> '+ str(self.file_banco.name) +'</a>'
+
+    def pretty_print_file_purchase_order(self):
+        try:
+            url = self.file_purchase_order.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="'+ url +'"> '+ str(self.file_purchase_order.name) +'</a>'
+
+    def pretty_print_file_comprobante_egreso(self):
+        try:
+            url = self.file_comprobante_egreso.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="'+ url +'"> '+ str(self.file_comprobante_egreso.name) +'</a>'
 
     def url_respaldo(self):
         url = None
@@ -205,14 +242,13 @@ class Reportes(BaseModel):
             pass
         return url
 
-    def url_file_banco(self):
+    def url_file_purchase_order(self):
         url = None
         try:
-            url = self.file_banco.url
+            url = self.file_purchase_order.url
         except:
             pass
         return url
-
 
     def url_file_comprobante_egreso(self):
         url = None
