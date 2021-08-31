@@ -213,7 +213,7 @@ class TercerosReporteListadoView(LoginRequiredMixin,
         reporte = Reportes.objects.create(
             usuario = self.request.user,
             nombre = 'Listado de terceros e inforación general',
-            consecutive = Reportes.objects.filter(usuario = self.request.user).count()+1
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
         )
 
         tasks.build_listado_terceros.delay(reporte.id)
