@@ -1153,6 +1153,7 @@ class PagosCreateView(LoginRequiredMixin,
                 pago.banco = pago.tercero.banco.nombre
                 pago.cuenta = pago.tercero.cuenta
                 pago.cargo = pago.tercero.cargo.nombre
+                pago.save()
                 pago.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
                 pago.save()
             except:
@@ -1189,6 +1190,7 @@ class PagosCreateView(LoginRequiredMixin,
                 publico=form.cleaned_data['publico'],
                 descuentos_pendientes=form.cleaned_data['descuentos_pendientes'],
                 descuentos_pendientes_otro_valor=form.cleaned_data['descuentos_pendientes_otro_valor'],
+
             )
 
             try:
@@ -1196,6 +1198,7 @@ class PagosCreateView(LoginRequiredMixin,
                 pago_new.banco = pago_new.tercero.banco.nombre
                 pago_new.cuenta = pago_new.tercero.cuenta
                 pago_new.cargo = pago_new.tercero.cargo.nombre
+                pago_new.save()
                 pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
                 pago_new.save()
             except:
@@ -1306,6 +1309,7 @@ class PagosUpdateView(LoginRequiredMixin,
                 pago.banco = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).banco.nombre
                 pago.cuenta = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).cuenta
                 pago.cargo = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).cargo.nombre
+                pago.save()
                 pago.contrato = form.cleaned_data['contrato']
                 pago.save()
             except:
@@ -1353,6 +1357,7 @@ class PagosUpdateView(LoginRequiredMixin,
                 pago.banco = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).banco.nombre
                 pago.cuenta = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).cuenta
                 pago.cargo = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']).cargo.nombre
+                pago.save()
                 pago.contrato = form.cleaned_data['contrato']
                 pago.save()
             except:
