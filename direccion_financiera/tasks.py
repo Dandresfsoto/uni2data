@@ -116,7 +116,7 @@ def build_reporte_interno(id, email):
 
         ws.add_image(logo_sican, 'C2')
 
-        ws['F4'] = str(reporte.enterprise.code) + ' - ' + str(reporte.consecutive)
+        ws['F4'] = str(reporte.enterprise.report_code) + ' - ' + str(reporte.consecutive)
         ws['I4'] = reporte.reporte_update_datetime()
         ws['O4'] = usuario.get_full_name_string()
 

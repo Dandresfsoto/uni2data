@@ -55,6 +55,7 @@ class Enterprise(BaseModel):
     color = models.CharField(max_length=100)
     icon = models.CharField(max_length=100)
     code = models.CharField(max_length=10, unique=True)
+    report_code = models.CharField(max_length=20)
 
     logo = ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_logo,
