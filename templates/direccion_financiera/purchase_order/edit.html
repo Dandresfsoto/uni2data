@@ -58,8 +58,6 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
     $('#id_department').select2();
     $('#id_municipality').select2();
     $('#id_project').select2();
-    $('#id_third').select2();
-    $("label[for='id_third']").addClass('active');
 
     $("label[for='id_proyecto']").addClass('active');
 
@@ -99,5 +97,37 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
             'remove': 'Eliminar',
             'error': 'Ooops, algo malo paso.'
         }
+    });
+    $("#id_third").on('keydown', function () {
+
+        $("label[for='id_cedula']").removeClass('active');
+        $("#id_cedula").val(null);
+
+        $.ajax({
+            type: 'GET',
+            url: '/rest/v1.0/direccion_financiera/terceros/purchaseorder/list/?name=' + $("#id_third").val(),
+            success: function (response) {
+                var tercerosArray = response.lista;
+                var dataTerceros = {};
+                for (var i = 0; i < tercerosArray.length; i++) {
+                    dataTerceros[tercerosArray[i].name] = tercerosArray[i].flag;
+                }
+                $('input.autocomplete').autocomplete({
+                    data: dataTerceros,
+                    limit: 5,
+                    onAutocomplete: function (val) {
+
+                        var cedula = parseInt(val.split(' - ')[1]);
+                        var data = response.diccionario[cedula];
+
+
+                        $("label[for='id_cedula']").addClass('active');
+                        $("#id_cedula").val(cedula);
+                        console.log(data)
+                    }
+                });
+            }
+        });
+
     });
 });</script></body></html>

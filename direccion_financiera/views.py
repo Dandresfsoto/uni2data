@@ -16,7 +16,7 @@ from direccion_financiera.tasks import send_mail_templated_pago, send_mail_templ
 from direccion_financiera import tasks
 from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA, EMAIL_CONTABILIDAD, \
     EMAIL_GERENCIA
-from recursos_humanos.models import Contratos
+from recursos_humanos.models import Contratos, Contratistas
 from reportes.models import Reportes
 import json
 from desplazamiento.models import Desplazamiento, Solicitudes
@@ -1148,16 +1148,28 @@ class PagosCreateView(LoginRequiredMixin,
                 cuotas=form.cleaned_data['cuotas'],
             )
 
-            try:
-                pago.tipo_cuenta = pago.tercero.tipo_cuenta
-                pago.banco = pago.tercero.banco.nombre
-                pago.cuenta = pago.tercero.cuenta
-                pago.cargo = pago.tercero.cargo.nombre
-                pago.save()
-                pago.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
-                pago.save()
-            except:
-                pass
+            if pago.tercero.first_active_account == True:
+                try:
+                    pago.tipo_cuenta = pago.tercero.tipo_cuenta
+                    pago.banco = pago.tercero.banco.nombre
+                    pago.cuenta = pago.tercero.cuenta
+                    pago.cargo = pago.tercero.cargo.nombre
+                    pago.save()
+                    pago.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                    pago.save()
+                except:
+                    pass
+            elif pago.tercero.second_active_account == True:
+                try:
+                    pago.tipo_cuenta = pago.tercero.type
+                    pago.banco = pago.tercero.bank.nombre
+                    pago.cuenta = pago.tercero.account
+                    pago.cargo = pago.tercero.cargo.nombre
+                    pago.save()
+                    pago.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                    pago.save()
+                except:
+                    pass
 
             valor = 0
             for pago_obj in models.Pagos.objects.filter(reporte=pago.reporte):
@@ -1192,17 +1204,28 @@ class PagosCreateView(LoginRequiredMixin,
                 descuentos_pendientes_otro_valor=form.cleaned_data['descuentos_pendientes_otro_valor'],
 
             )
-
-            try:
-                pago_new.tipo_cuenta = pago_new.tercero.tipo_cuenta
-                pago_new.banco = pago_new.tercero.banco.nombre
-                pago_new.cuenta = pago_new.tercero.cuenta
-                pago_new.cargo = pago_new.tercero.cargo.nombre
-                pago_new.save()
-                pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
-                pago_new.save()
-            except:
-                pass
+            if pago_new.tercero.first_active_account == True:
+                try:
+                    pago_new.tipo_cuenta = pago_new.tercero.tipo_cuenta
+                    pago_new.banco = pago_new.tercero.banco.nombre
+                    pago_new.cuenta = pago_new.tercero.cuenta
+                    pago_new.cargo = pago_new.tercero.cargo.nombre
+                    pago_new.save()
+                    pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                    pago_new.save()
+                except:
+                    pass
+            elif pago_new.tercero.second_active_account == True:
+                try:
+                    pago_new.tipo_cuenta = pago_new.tercero.type
+                    pago_new.banco = pago_new.tercero.bank.nombre
+                    pago_new.cuenta = pago_new.tercero.account
+                    pago_new.cargo = pago_new.tercero.cargo.nombre
+                    pago_new.save()
+                    pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                    pago_new.save()
+                except:
+                    pass
 
             for i in range(1,6):
 
@@ -1702,12 +1725,13 @@ class PurchaseOrderCreateView(LoginRequiredMixin,
 
     def form_valid(self, form):
         enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        third = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula'])
         self.object = form.save(commit=False)
         self.object.creation_user = self.request.user
         self.object.update_user = self.request.user
         self.object.valor = 0
         self.object.enterprise = enterprise
-        self.object.third = form.cleaned_data['third']
+        self.object.third = third
         self.object.consecutive = get_next_value(enterprise.tax_number + '_1')
         self.object.save()
         return super(PurchaseOrderCreateView, self).form_valid(form)
@@ -1738,8 +1762,10 @@ class PurchaseOrderUpdateView(LoginRequiredMixin,
 
 
     def form_valid(self, form):
+        third = rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula'])
         self.object = form.save(commit=False)
         self.object.update_user = self.request.user
+        self.object.third = third
         self.object.save()
         return super(PurchaseOrderUpdateView, self).form_valid(form)
 
@@ -1806,7 +1832,7 @@ class ProductsListView(LoginRequiredMixin,
         kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/purchase_order/products/{1}/'.format(enterprise.id,purchase.id)
         kwargs['permiso_crear'] =  self.request.user.has_perm('usuarios.direccion_financiera.orden_compra.crear')
         kwargs['product'] = Products.objects.filter(purchase_order=enterprise.id)
-        kwargs['breadcrum_active'] = purchase.consecutive
+        kwargs['breadcrum_active'] = str(enterprise.code) +' - '+ str(purchase.consecutive)
         kwargs['product_form'] = ProductForm
         kwargs['breadcrum_1'] = enterprise.name
         kwargs['show'] = True if purchase.file_purchase_order.name != '' else False

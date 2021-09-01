@@ -79,6 +79,9 @@ class BancoForm(forms.ModelForm):
 
 class TerceroForm(forms.ModelForm):
 
+    first_active_account = forms.BooleanField(required=False, label="Seleccionar esta cuenta bancaria como principal")
+    second_active_account = forms.BooleanField(required=False, label="Seleccionar esta cuenta bancaria como principal")
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -86,6 +89,13 @@ class TerceroForm(forms.ModelForm):
         tipo_cuenta = cleaned_data.get("tipo_cuenta")
         cuenta = cleaned_data.get("cuenta")
         cargo = cleaned_data.get("cargo")
+
+        bank = cleaned_data.get("bank")
+        type = cleaned_data.get("type")
+        account = cleaned_data.get("account")
+
+        first_active_account = cleaned_data.get("first_active_account")
+        second_active_account = cleaned_data.get("second_active_account")
 
         if cargo == None:
             self.add_error('cargo', 'Campo requerido')
@@ -103,8 +113,32 @@ class TerceroForm(forms.ModelForm):
             if str(len(cuenta)) not in longitudes:
                 self.add_error('cuenta', 'La cuenta debe tener {0} digitos.'.format(banco.longitud))
 
+        if bank != None or type != None or account != None:
+            if bank == None:
+                self.add_error('bank', 'Campo requerido')
+            if type == None:
+                self.add_error('type', 'Campo requerido')
+            if account == None:
+                self.add_error('account', 'Campo requerido')
+
+        if bank != None and account != None:
+            longitudes = bank.longitud.split(',')
+            if str(len(account)) not in longitudes:
+                self.add_error('account', 'La cuenta debe tener {0} digitos.'.format(bank.longitud))
+
+        if first_active_account == True and second_active_account == True:
+            self.add_error('first_active_account', 'Solo debe seleccionar una opcion')
+            self.add_error('second_active_account', 'Solo debe seleccionar una opcion')
+
+
     def __init__(self, *args, **kwargs):
         super(TerceroForm, self).__init__(*args, **kwargs)
+
+        self.fields['type'].widget = forms.Select(choices=[
+            ('', '----------'),
+            ('Ahorros', 'Ahorros'),
+            ('Corriente', 'Corriente')
+        ])
 
         self.fields['tipo_cuenta'].widget = forms.Select(choices=[
             ('','----------'),
@@ -197,6 +231,12 @@ class TerceroForm(forms.ModelForm):
                 Column(
                     Row(
                         Column(
+                            'first_active_account',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
                             'cuenta',
                             css_class='s12'
                         ),
@@ -206,6 +246,31 @@ class TerceroForm(forms.ModelForm):
                         ),
                         Column(
                             'tipo_cuenta',
+                            css_class='s12 m6'
+                        )
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'second_active_account',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'account',
+                            css_class='s12'
+                        ),
+                        Column(
+                            'bank',
+                            css_class='s12 m6'
+                        ),
+                        Column(
+                            'type',
                             css_class='s12 m6'
                         )
                     ),
@@ -230,10 +295,16 @@ class TerceroForm(forms.ModelForm):
 
     class Meta:
         model = Contratistas
-        fields = ['nombres','apellidos','tipo_identificacion','cedula','celular','email','birthday','tipo_cuenta','banco','cuenta','cargo']
+        fields = ['nombres','apellidos','tipo_identificacion','cedula','celular','email','birthday','tipo_cuenta','banco','cuenta','cargo','type','bank','account','first_active_account','second_active_account']
         labels = {
             'birthday': 'Fecha de nacimiento',
-            'cedula': 'Cédula'
+            'cedula': 'Cédula',
+            'cuenta': 'Número de cuenta',
+            'first_active_account': 'Seleccionar esta cuenta bancaria como principal',
+            'second_active_account': 'Seleccionar esta cuenta bancaria como principal',
+            'account': 'Número de cuenta',
+            'type': 'Tipo de cuenta',
+            'bank': 'Banco',
         }
 
 class ReporteForm(forms.ModelForm):
@@ -1557,9 +1628,12 @@ class ProjectForm(forms.ModelForm):
         fields = ['cuenta','nombre']
 
 class PurchaseOrderForm(forms.ModelForm):
-    third = forms.ModelChoiceField(label='Tercero*',queryset=Contratistas.objects.all(), required=False)
+
     department = forms.ModelChoiceField(label='Departamento*',queryset=Departamentos.objects.all(), required=False)
     municipality = forms.ModelChoiceField(label='Municipio', queryset=Municipios.objects.all(), required=False)
+
+    third = forms.CharField(max_length=100,label='Contratista',widget=forms.TextInput(attrs={'class':'autocomplete','autocomplete':'off'}))
+    cedula = forms.IntegerField(label="Cédula",widget=forms.HiddenInput())
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1583,7 +1657,8 @@ class PurchaseOrderForm(forms.ModelForm):
         if self.pk_purchase != None:
             purchase = PurchaseOrders.objects.get(id = self.pk_purchase)
             self.PurchaseOrders = purchase.id
-            self.fields['third'].initial = purchase.third.id
+            self.fields['third'].initial = purchase.third.fullname() + ' - ' + str(purchase.third.cedula)
+            self.fields['cedula'].initial = purchase.third.cedula
             self.fields['department'].initial = purchase.department.id
             self.fields['municipality'].queryset = Municipios.objects.filter(departamento=purchase.department.id)
             self.fields['municipality'].initial = purchase.municipality.id
@@ -1593,8 +1668,7 @@ class PurchaseOrderForm(forms.ModelForm):
             self.fields['observation'].initial = purchase.observation
             self.fields['departure'].initial = purchase.departure
             self.fields['counterpart'].initial = purchase.counterpart
-        else:
-            self.fields['third'].queryset = Contratistas.objects.all()
+
 
 
 
@@ -1609,6 +1683,10 @@ class PurchaseOrderForm(forms.ModelForm):
                         ),
                         Column(
                             'third',
+                            css_class='s12'
+                        ),
+                        Column(
+                            'cedula',
                             css_class='s12'
                         ),
                     ),
@@ -1708,7 +1786,7 @@ class PurchaseOrderForm(forms.ModelForm):
 
     class Meta:
         model = PurchaseOrders
-        fields = ['third','department','municipality','project','beneficiary','observation','date','file_quotation','beneficiary','departure','counterpart']
+        fields = ['department','municipality','project','beneficiary','observation','date','file_quotation','beneficiary','departure','counterpart']
         labels = {
             'department': 'Departamento',
             'municipality': 'Municipio',
