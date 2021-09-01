@@ -751,14 +751,24 @@ class PagosCreateView(LoginRequiredMixin,
                 cuotas=form.cleaned_data['cuotas'],
             )
 
-            try:
-                pago.tipo_cuenta = pago.tercero.tipo_cuenta
-                pago.banco = pago.tercero.banco.nombre
-                pago.cuenta = pago.tercero.cuenta
-                pago.cargo = pago.tercero.cargo.nombre
-                pago.save()
-            except:
-                pass
+            if pago.tercero.first_active_account == True:
+                try:
+                    pago.tipo_cuenta = pago.tercero.tipo_cuenta
+                    pago.banco = pago.tercero.banco.nombre
+                    pago.cuenta = pago.tercero.cuenta
+                    pago.cargo = pago.tercero.cargo.nombre
+                    pago.save()
+                except:
+                    pass
+            elif pago.tercero.second_active_account == True:
+                try:
+                    pago.tipo_cuenta = pago.tercero.type
+                    pago.banco = pago.tercero.bank.nombre
+                    pago.cuenta = pago.tercero.account
+                    pago.cargo = pago.tercero.cargo.nombre
+                    pago.save()
+                except:
+                    pass
 
             valor = 0
             for pago_obj in models.Pagos.objects.filter(reporte=pago.reporte):
@@ -793,14 +803,24 @@ class PagosCreateView(LoginRequiredMixin,
                 descuentos_pendientes_otro_valor=form.cleaned_data['descuentos_pendientes_otro_valor'],
             )
 
-            try:
-                pago_new.tipo_cuenta = pago_new.tercero.tipo_cuenta
-                pago_new.banco = pago_new.tercero.banco.nombre
-                pago_new.cuenta = pago_new.tercero.cuenta
-                pago_new.cargo = pago_new.tercero.cargo.nombre
-                pago_new.save()
-            except:
-                pass
+            if pago_new.tercero.first_active_account == True:
+                try:
+                    pago_new.tipo_cuenta = pago_new.tercero.tipo_cuenta
+                    pago_new.banco = pago_new.tercero.banco.nombre
+                    pago_new.cuenta = pago_new.tercero.cuenta
+                    pago_new.cargo = pago_new.tercero.cargo.nombre
+                    pago_new.save()
+                except:
+                    pass
+            elif pago_new.tercero.second_active_account == True:
+                try:
+                    pago_new.tipo_cuenta = pago_new.tercero.type
+                    pago_new.banco = pago_new.tercero.bank.nombre
+                    pago_new.cuenta = pago_new.tercero.account
+                    pago_new.cargo = pago_new.tercero.cargo.nombre
+                    pago_new.save()
+                except:
+                    pass
 
             for i in range(1,6):
 

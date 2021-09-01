@@ -110,10 +110,16 @@ class TercerosListApi(BaseDatatableView):
         elif column == 'banco':
             render = ""
 
-            if row.cuenta != '' and row.cuenta != None and row.banco != None:
-                render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0} cuenta {1} # {2}">' \
-                          '<i class="material-icons">monetization_on</i>' \
-                          '</a>'.format(row.banco.nombre,row.tipo_cuenta,row.cuenta)
+            if row.first_active_account == True:
+                if row.cuenta != '' and row.cuenta != None and row.banco != None:
+                    render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0} cuenta {1} # {2}">' \
+                              '<i class="material-icons">monetization_on</i>' \
+                              '</a>'.format(row.banco.nombre, row.tipo_cuenta, row.cuenta)
+            elif row.second_active_account == True:
+                if row.account != '' and row.account != None and row.bank != None:
+                    render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0} cuenta {1} # {2}">' \
+                              '<i class="material-icons">monetization_on</i>' \
+                              '</a>'.format(row.bank.nombre, row.type, row.account)
 
             if row.celular != None and row.celular != '':
                 render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Celular: {0}">' \
@@ -181,10 +187,10 @@ class TerceroPagosListApi(BaseDatatableView):
         elif column == 'observacion':
             render = ""
 
-            if row.tercero.cuenta != '' and row.tercero.cuenta != None and row.tercero.banco != None:
+            if row.cuenta != '' and row.cuenta != None and row.banco != None:
                 render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0} cuenta {1} # {2}">' \
                           '<i class="material-icons">monetization_on</i>' \
-                          '</a>'.format(row.tercero.banco.nombre,row.tercero.tipo_cuenta,row.tercero.cuenta)
+                          '</a>'.format(row.banco,row.tipo_cuenta,row.cuenta)
 
             if row.usuario_creacion != None:
                 render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Usuario: {0}">' \
@@ -414,10 +420,10 @@ class PagosListApi(BaseDatatableView):
 
             if not self.reporte.efectivo:
 
-                if row.tercero.cuenta != '' and row.tercero.cuenta != None and row.tercero.banco != None:
+                if row.cuenta != '' and row.cuenta != None and row.banco != None:
                     render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0} cuenta {1} # {2}">' \
                               '<i class="material-icons">monetization_on</i>' \
-                              '</a>'.format(row.tercero.banco.nombre,row.tercero.tipo_cuenta,row.tercero.cuenta)
+                              '</a>'.format(row.banco,row.tipo_cuenta,row.cuenta)
 
             if row.notificado:
                 render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Pago notificado a {0}">' \
@@ -546,7 +552,7 @@ class TercerosListApiJson(APIView):
             if reporte.efectivo:
                 filtro = Contratistas.objects.all()
             else:
-                filtro = Contratistas.objects.exclude(banco=None)
+                filtro = Contratistas.objects.exclude(banco=None, bank=None)
 
 
             for contratista in filtro.filter(q).exclude(cargo = None):
@@ -554,13 +560,22 @@ class TercerosListApiJson(APIView):
                     'name': contratista.fullname() + " - " +str(contratista.cedula)
                 })
 
-                diccionario[str(contratista.cedula)] = {
-                    'id': str(contratista.id),
-                    'tipo_cuenta': contratista.tipo_cuenta,
-                    'banco': contratista.get_banco_name(),
-                    'cuenta': contratista.cuenta,
-                    'descuentos': {}
-                }
+                if contratista.first_active_account == True:
+                    diccionario[str(contratista.cedula)] = {
+                        'id': str(contratista.id),
+                        'tipo_cuenta': contratista.tipo_cuenta,
+                        'banco': contratista.get_banco_name(),
+                        'cuenta': contratista.cuenta,
+                        'descuentos': {}
+                    }
+                elif contratista.second_active_account == True:
+                    diccionario[str(contratista.cedula)] = {
+                        'id': str(contratista.id),
+                        'tipo_cuenta': contratista.type,
+                        'banco': contratista.get_bank_name(),
+                        'cuenta': contratista.account,
+                        'descuentos': {}
+                    }
 
                 for amortizacion in Amortizaciones.objects.filter(pago__tercero__cedula = contratista.cedula).order_by('consecutivo'):
 

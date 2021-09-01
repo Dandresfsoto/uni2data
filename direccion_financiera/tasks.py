@@ -73,9 +73,14 @@ def build_reporte_interno(id, email):
                 ws['I' + str(i)] = ''
                 ws['J' + str(i)] = ''
             else:
-                ws['H' + str(i)] = pago.tercero.banco.nombre.upper()
-                ws['I' + str(i)] = pago.tercero.tipo_cuenta.upper()
-                ws['J' + str(i)] = pago.tercero.cuenta
+                if pago.tercero.first_active_account == True:
+                    ws['H' + str(i)] = pago.tercero.banco.nombre.upper()
+                    ws['I' + str(i)] = pago.tercero.tipo_cuenta.upper()
+                    ws['J' + str(i)] = pago.tercero.cuenta
+                elif pago.tercero.second_active_account == True:
+                    ws['H' + str(i)] = pago.tercero.bank.nombre.upper()
+                    ws['I' + str(i)] = pago.tercero.type.upper()
+                    ws['J' + str(i)] = pago.tercero.account
             ws['L' + str(i)] = pago.valor_descuentos().amount
             ws['O' + str(i)] = pago.observacion_pretty().upper()
             i += 1

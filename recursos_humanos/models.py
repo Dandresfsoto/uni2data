@@ -17,6 +17,7 @@ from django.contrib.auth.models import Permission, Group
 from direccion_financiera.models import Proyecto
 from usuarios.models import Municipios
 
+
 settings_time_zone = timezone_pyzt(settings.TIME_ZONE)
 # Create your models here.
 
@@ -55,10 +56,16 @@ class Contratistas(models.Model):
     email = models.EmailField(blank=True,null=True)
     birthday = models.DateField(blank=True, null=True)
 
+    first_active_account = models.BooleanField(default=False)
     tipo_cuenta = models.CharField(max_length=50, blank=True, null=True)
     banco = models.ForeignKey(Bancos, blank=True, null=True, on_delete=models.DO_NOTHING)
     cuenta = models.CharField(max_length=100, blank=True, null=True)
     cargo = models.ForeignKey(Cargos, on_delete=models.DO_NOTHING, blank=True, null=True)
+
+    second_active_account = models.BooleanField(default=False)
+    type = models.CharField(max_length=50, blank=True, null=True)
+    bank = models.ForeignKey(Bancos, blank=True, null=True, on_delete=models.DO_NOTHING, related_name="contractor_bank")
+    account = models.CharField(max_length=100, blank=True, null=True)
 
     usuario_asociado = models.ForeignKey(User, related_name="usuario_asociado", on_delete=models.DO_NOTHING, blank=True, null=True)
 
@@ -142,6 +149,13 @@ class Contratistas(models.Model):
         except:
             pass
         return banco
+
+    def get_bank_name(self):
+        if self.bank == None:
+            nombre = None
+        else:
+            nombre = self.bank.nombre
+        return nombre
 
     def get_usuario_asociado(self):
         email = ''
