@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -30,17 +30,23 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../") Actas
+                        a(href="../../../") Actas
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") {{ breadcrum_1 | truncatechars:15 }}
+                        a(href="#") Hitos
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
+
 
     ul(class="collapsible",data-collapsible="accordion")
         li(class="bold waves-effect waves-light button-menu")
@@ -55,10 +61,12 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="create/") Nueva gestión
-                            i(class="material-icons icon-sican") file_upload
+                        a(href="nuevo/") Nuevo contacto
+                            i(class="material-icons icon-sican") perm_contact_calendar
 
                     div(class="divider divider-perfil")
+
+
 
 
 block container_principal
@@ -66,19 +74,30 @@ block container_principal
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
             thead
                 tr
-                    th Actas
-                    th Contactos
-                    th Departamento
-                    th Municipio
-                    th Usuario
-
+                    th Editar
+                    th Soportes
+                    th Nombres
+                    th Apellidos
+                    th Cargo
+                    th Celular
+                    th Email
+                    th Resguardo
+                    th Comunidad
+                    th Lenguas
+                    th Observaciones
             tbody
                 tr
-                    td Actas
-                    td Contactos
-                    td Departamento
-                    td Municipio
-                    td Usuario
+                    td Editar
+                    td Soportes
+                    td Nombres
+                    td Apellidos
+                    td Cargo
+                    td Celular
+                    td Email
+                    td Resguardo
+                    td Comunidad
+                    td Lenguas
+                    td Observaciones
 
 
 block body_script_auth

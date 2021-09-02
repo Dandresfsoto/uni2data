@@ -223,3 +223,245 @@ class CerticateCreateView(LoginRequiredMixin,
         kwargs['url_autocomplete_municipality'] = '/rest/v1.0/iraca_new/certificate/autocomplete/municipios/'
         return super(CerticateCreateView,self).get_context_data(**kwargs)
 
+
+#----------------------------------------------------------------------------------
+
+#------------------------------- MILTONES -------------------------------------
+
+
+
+class MiltoneslistView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+            "usuarios.iraca.actas.hitos.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/miltones/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        meeting = models.Meetings.objects.get(id=self.kwargs['pk_meeting'])
+        kwargs['title'] = "ACTAS DE {0} DE {1}".format(certificate.name,meeting.municipality.nombre)
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/milestones/{1}/'.format(certificate.id,meeting.id)
+        kwargs['breadcrum_1'] = certificate.name
+        return super(MiltoneslistView,self).get_context_data(**kwargs)
+
+class MiltonescreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+            "usuarios.iraca.actas.hitos.ver",
+            "usuarios.iraca.actas.hitos.crear",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/miltones/create.html'
+    form_class = forms.MiltonesForm
+    success_url = "../"
+
+    def form_valid(self, form):
+
+        type = form.cleaned_data['type']
+        date = form.cleaned_data['date']
+        file = form.cleaned_data['file']
+        file2 = form.cleaned_data['file2']
+        file3 = form.cleaned_data['file3']
+        foto_1 = form.cleaned_data['foto_1']
+        foto_2 = form.cleaned_data['foto_2']
+        foto_3 = form.cleaned_data['foto_3']
+        foto_4 = form.cleaned_data['foto_4']
+
+        miltone = models.Milestones.objects.create(
+            meeting=models.Meetings.objects.get(id=self.kwargs['pk_meeting']),
+            type = type,
+            file = file,
+            file2 = file2,
+            file3 = file3,
+            date = date,
+            foto_1 = foto_1,
+            foto_2 = foto_2,
+            foto_3 = foto_3,
+            foto_4 = foto_4,
+        )
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        meeting = models.Meetings.objects.get(id=self.kwargs['pk_meeting'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "AÑADIR ACTA"
+        kwargs['breadcrum_2'] = str(meeting.municipality)
+        kwargs['file_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        kwargs['file2_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        kwargs['file3_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        kwargs['breadcrum_1'] = str(certificate.name)
+        return super(MiltonescreateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk':self.kwargs['pk'],
+            'pk_meeting':self.kwargs['pk_meeting'],
+        }
+
+class MilestonesUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+            "usuarios.iraca.actas.hitos.ver",
+            "usuarios.iraca.actas.hitos.editar",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/miltones/edit.html'
+    form_class = forms.MiltonesForm
+    success_url = "../../"
+
+
+    def form_valid(self, form):
+
+        type = form.cleaned_data['type']
+        date = form.cleaned_data['date']
+        observation = form.cleaned_data['observation']
+        file = form.cleaned_data['file']
+        file2 = form.cleaned_data['file2']
+        file3 = form.cleaned_data['file3']
+        foto_1 = form.cleaned_data['foto_1']
+        foto_2 = form.cleaned_data['foto_2']
+        foto_3 = form.cleaned_data['foto_3']
+        foto_4 = form.cleaned_data['foto_4']
+
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        #registro = models.Registro.objects.filter(hito=hito)
+
+        milestone.type = type
+        milestone.date = date
+        milestone.observation = observation
+
+        if file != None:
+            milestone.file = file
+
+        if file2 != None:
+            milestone.file2 = file2
+
+        if file3 != None:
+            milestone.file3 = file3
+
+        if foto_1 != None:
+            milestone.foto_1 = foto_1
+
+        if foto_2 != None:
+            milestone.foto_2 = foto_2
+
+        if foto_3 != None:
+            milestone.foto_3 = foto_3
+
+        if foto_4 != None:
+            milestone.foto_4 = foto_4
+
+        milestone.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        meeting = models.Meetings.objects.get(id=self.kwargs['pk_meeting'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "EDITAR ACTA"
+        kwargs['breadcrum_2'] = str(meeting.municipality)
+        kwargs['breadcrum_1'] = str(certificate.name)
+        kwargs['file_url'] = milestone.pretty_print_url_file()
+        kwargs['file2_url'] = milestone.pretty_print_url_file2()
+        kwargs['file3_url'] = milestone.pretty_print_url_file3()
+        return super(MilestonesUpdateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_meeting': self.kwargs['pk_meeting'],
+            'pk_milestone': self.kwargs['pk_milestone'],
+        }
+
+class MilestonesView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+            "usuarios.iraca.actas.hitos.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/miltones/view.html'
+
+
+    def get_context_data(self, **kwargs):
+        meeting = models.Meetings.objects.get(id=self.kwargs['pk_meeting'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "VER ACTAS"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['breadcrum_2'] = meeting.municipality.nombre
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        return super(MilestonesView,self).get_context_data(**kwargs)
+
+
+class MilestonesDeleteView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+            "usuarios.iraca.actas.hitos.ver",
+            "usuarios.iraca.actas.hitos.eliminar",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+        milestone = models.Milestones.objects.get(id = self.kwargs['pk_milestone'])
+
+        if milestone.estate == 'Esperando aprobación':
+
+            milestone.delete()
+
+        return HttpResponseRedirect('../../')
+
+class ContactslistView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+            "usuarios.iraca.actas.contactos.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/contacts/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id = self.kwargs['pk'])
+        meeting = models.Meetings.objects.get(id = self.kwargs['pk_meeting'])
+        kwargs['title'] = "CONTACTOS"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/contacts/{1}/'.format(certificate.id,meeting.id)
+        kwargs['breadcrum_1'] = certificate.name
+        return super(ContactslistView,self).get_context_data(**kwargs)
