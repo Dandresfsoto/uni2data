@@ -63,8 +63,24 @@ class MeetingsListApi(BaseDatatableView):
         elif column == 'municipality':
             return str(row.municipality.nombre)
 
+        elif column == 'update_datetime':
+            return str(row.creation_user.get_full_name_string())
+
         else:
             return super(MeetingsListApi, self).render_column(row, column)
+
+
+class MunicipiosAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_queryset(self):
+
+        qs = Municipios.objects.all().filter(departamento__codigo=27)
+
+        if self.q:
+            q = Q(nombre__icontains = self.q) | Q(departamento__nombre__icontains = self.q)
+            qs = qs.filter(q)
+
+        return qs
 
 
 

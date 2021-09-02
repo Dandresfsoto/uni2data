@@ -130,7 +130,7 @@ class CerticateOptionsView(TemplateView):
 
         self.permissions = {
             "all": [
-                "usuarios.certificate.ver",
+                "usuarios.actas.ver",
             ]
         }
 
@@ -170,7 +170,7 @@ class CerticateListView(LoginRequiredMixin,
     """
     permissions = {
         "all": [
-            "usuarios.iraca.certificate.ver",
+            "usuarios.iraca.actas.ver",
         ]
     }
     login_url = settings.LOGIN_URL
@@ -183,4 +183,43 @@ class CerticateListView(LoginRequiredMixin,
         kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/'.format(certificate.id)
         kwargs['breadcrum_1'] = certificate.name
         return super(CerticateListView,self).get_context_data(**kwargs)
+
+
+class CerticateCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+            "usuarios.iraca.actas.crear",
+
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/create.html'
+    form_class = forms.CertificateForm
+    success_url = "../"
+
+    def form_valid(self, form):
+        certificate = Certificates.objects.get(id=self.kwargs['pk'])
+        municipality = Municipios.objects.get(id = str(form.cleaned_data['municipality']))
+
+        models.Meetings.objects.create(
+            creation_user = self.request.user,
+            user_update = self.request.user,
+            municipality = municipality,
+            certificate = certificate
+        )
+
+        #self.object = form.save(commit=False)
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        certificate = Certificates.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "NUEVA GESTIÓN"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['url_autocomplete_municipality'] = '/rest/v1.0/iraca_new/certificate/autocomplete/municipios/'
+        return super(CerticateCreateView,self).get_context_data(**kwargs)
 

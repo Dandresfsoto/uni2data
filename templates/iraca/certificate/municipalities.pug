@@ -55,26 +55,8 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="crear/") Nueva gestión
+                        a(href="create/") Nueva gestión
                             i(class="material-icons icon-sican") file_upload
-
-                    div(class="divider divider-perfil")
-
-
-    ul(class="collapsible",data-collapsible="accordion")
-        li(class="bold waves-effect waves-light button-menu")
-
-            div(class="collapsible-header active")
-                i(class="material-icons") assessment
-                | Reportes
-
-            div(class="collapsible-body collapsible-body-blue")
-                ul
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="reporte/") Estado de hitos
-                            i(class="material-icons icon-sican") view_list
 
                     div(class="divider divider-perfil")
 
@@ -88,6 +70,7 @@ block container_principal
                     th Contactos
                     th Departamento
                     th Municipio
+                    th Usuario
 
             tbody
                 tr
@@ -95,6 +78,7 @@ block container_principal
                     td Contactos
                     td Departamento
                     td Municipio
+                    td Usuario
 
 
 block body_script_auth

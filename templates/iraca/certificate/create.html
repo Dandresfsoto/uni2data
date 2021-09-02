@@ -56,5 +56,17 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 
     $("label[for='id_municipality']").addClass('active');
 
-    $('#id_municipality').select2();
+    $('#id_municipality').select2({
+        ajax: {
+            url: '{{ url_autocomplete_municipality }}',
+            dataType: 'json',
+            processResults: function (data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 1,
+    });
 })</script></body></html>
