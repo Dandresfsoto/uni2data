@@ -2,6 +2,9 @@ from django.urls import path, include
 from iraca import rest_views
 
 urlpatterns = [
+
+    path('bd/', rest_views.HogaresListApi.as_view()),
+
     path('certificate/<uuid:pk>/', rest_views.MeetingsListApi.as_view()),
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/', rest_views.MilestonesListApi.as_view()),
 

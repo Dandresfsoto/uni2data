@@ -4,6 +4,9 @@ from iraca import views
 urlpatterns = [
     path('', views.IracaOptionsView.as_view()),
 
+    path('bd/', views.HogaresListView.as_view()),
+    path('bd/crear/', views.HogaresCreateView.as_view()),
+    path('bd/edit/<uuid:pk>/', views.HogaresUpdateView.as_view()),
 
     path('certificate/', views.CerticateOptionsView.as_view()),
     path('certificate/<uuid:pk>/', views.CerticateListView.as_view()),

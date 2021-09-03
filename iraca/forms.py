@@ -1,7 +1,7 @@
 from django import forms
 
 from iraca import models
-from iraca.models import Types
+from iraca.models import Types, Households
 from usuarios.models import Municipios
 from django.forms.fields import Field, FileField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
@@ -412,3 +412,84 @@ class MiltonesEstateForm(forms.ModelForm):
     class Meta:
         model = models.Milestones
         fields = ['estate', 'observation']
+
+class HogarCreateForm(forms.ModelForm):
+
+
+    def __init__(self, *args, **kwargs):
+        super(HogarCreateForm, self).__init__(*args, **kwargs)
+
+        self.fields['routes'] = forms.ModelMultipleChoiceField(queryset=models.Routes.objects.all(),required=False)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Información del hogar',
+                )
+            ),
+            Row(
+                Column(
+                    'document',css_class="s12 m6 l4"
+                ),
+                Column(
+                    'first_name', css_class="s12 m6 l4"
+                ),
+                Column(
+                    'second_name', css_class="s12 m6 l4"
+                ),
+            ),
+            Row(
+                Column(
+                    'first_surname', css_class="s12 m6 l4"
+                ),
+                Column(
+                    'second_surname', css_class="s12 m6 l4"
+                ),
+                Column(
+                    'birth_date', css_class="s12 m6 l4"
+                )
+            ),
+            Row(
+                Column(
+                    'municipality_attention', css_class="s12 m6 "
+                ),
+                Column(
+                    'municipality_residence', css_class="s12 m6 "
+                ),
+            ),
+            Row(
+                Column(
+                    'routes', css_class="s12 m12 "
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = models.Households
+        fields = ['document','municipality_attention','first_name','second_name','first_surname','second_surname','birth_date','municipality_residence','routes']
+        labels = {
+            'document':'Documento',
+            'first_name':'Primer nombre',
+            'second_name':'Segundo nombre',
+            'first_surname':'Primer apellido',
+            'second_surname':'Segundo apellido',
+            'municipality_attention':'Municipio de atencion',
+            'municipality_residence':'Municipio de residencia',
+            'birth_date':'Fecha de nacimiento',
+            'routes':'Rutas',
+        }
+

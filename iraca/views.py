@@ -1,5 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.messages import get_messages
 
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
@@ -34,11 +36,33 @@ class IracaOptionsView(LoginRequiredMixin,
     def get_items(self):
         items = []
 
+        if self.request.user.has_perm('usuarios.iraca_2021.bd.ver'):
+            items.append({
+                'sican_categoria': 'Base de datos',
+                'sican_color': 'red darken-4',
+                'sican_order': 1,
+                'sican_url': 'bd/',
+                'sican_name': 'Base de datos',
+                'sican_icon': 'data_usage',
+                'sican_description': 'Información general de los hogares atendidos en la intervención.'
+            })
+
+        if self.request.user.has_perm('usuarios.iraca_2021.entregables.ver'):
+            items.append({
+                'sican_categoria': 'Entregables',
+                'sican_color': 'orange darken-4',
+                'sican_order': 2,
+                'sican_url': 'entregables/',
+                'sican_name': 'Entregables',
+                'sican_icon': 'view_list',
+                'sican_description': 'Estructura de entregables por cada uno de los componentes.'
+            })
+
         if self.request.user.has_perm('usuarios.iraca.actas.ver'):
             items.append({
                 'sican_categoria': 'Actas',
                 'sican_color': 'brown darken-4',
-                'sican_order': 1,
+                'sican_order': 3,
                 'sican_url': 'certificate/',
                 'sican_name': 'Actas',
                 'sican_icon': 'assignment',
@@ -49,7 +73,7 @@ class IracaOptionsView(LoginRequiredMixin,
             items.append({
                 'sican_categoria': 'Socializacion y concertacion',
                 'sican_color': 'green darken-4',
-                'sican_order': 2,
+                'sican_order': 4,
                 'sican_url': 'socialization/',
                 'sican_name': 'Socializacion',
                 'sican_icon': 'assignment_ind',
@@ -60,7 +84,7 @@ class IracaOptionsView(LoginRequiredMixin,
             items.append({
                 'sican_categoria': 'Vinculacion y caracterizacion',
                 'sican_color': 'blue darken-4',
-                'sican_order': 3,
+                'sican_order': 5,
                 'sican_url': 'bonding/',
                 'sican_name': 'Vinculacion',
                 'sican_icon': 'people',
@@ -71,7 +95,7 @@ class IracaOptionsView(LoginRequiredMixin,
             items.append({
                 'sican_categoria': 'Formulacion y convalidacion',
                 'sican_color': 'orange darken-4',
-                'sican_order': 4,
+                'sican_order': 6,
                 'sican_url': 'formulation/',
                 'sican_name': 'Formulacion',
                 'sican_icon': 'pie_chart',
@@ -82,12 +106,33 @@ class IracaOptionsView(LoginRequiredMixin,
             items.append({
                 'sican_categoria': 'Implementacion',
                 'sican_color': 'purple darken-4',
-                'sican_order': 5,
+                'sican_order': 7,
                 'sican_url': 'implementation/',
                 'sican_name': 'Implementacion',
                 'sican_icon': 'work',
                 'sican_description': 'Informacion de implementacion del proyecto Iraca 2021'
             })
+
+        if self.request.user.has_perm('usuarios.iraca.soportes.ver'):
+            items.append({
+                'sican_categoria': 'Soportes',
+                'sican_color': 'pink darken-4',
+                'sican_order': 8,
+                'sican_url': 'soportes/',
+                'sican_name': 'Soportes',
+                'sican_icon': 'apps',
+                'sican_description': 'Modulo de soportes'
+            })
+            if self.request.user.has_perm('usuarios.iraca.informes.ver'):
+                items.append({
+                    'sican_categoria': 'Informes',
+                    'sican_color': 'cyan darken-4',
+                    'sican_order': 9,
+                    'sican_url': 'informes/',
+                    'sican_name': 'Informes',
+                    'sican_icon': 'poll',
+                    'sican_description': 'Modulo de Informes'
+                })
 
         return items
 
@@ -95,6 +140,96 @@ class IracaOptionsView(LoginRequiredMixin,
         kwargs['title'] = "IRACA"
         kwargs['items'] = self.get_items()
         return super(IracaOptionsView,self).get_context_data(**kwargs)
+
+
+#----------------------------------------------------------------------------------
+
+#------------------------------- BD -----------------------------------------------
+
+
+class HogaresListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.db.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/bd/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "BASE DE DATOS HOGARES"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/bd/'
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.iraca.db.crear')
+        return super(HogaresListView,self).get_context_data(**kwargs)
+
+class HogaresCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/bd/create.html'
+    form_class = forms.HogarCreateForm
+    success_url = "../"
+    models = models.Households
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca_2021.ver",
+                "usuarios.iraca_2021.db.ver",
+                "usuarios.iraca_2021.db.crear"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+        self.object = form.save()
+        message = 'Se creó el hogar: {0}'.format(form.cleaned_data['document'])
+        messages.add_message(self.request, messages.INFO, message)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVO HOGAR"
+        return super(HogaresCreateView,self).get_context_data(**kwargs)
+
+class HogaresUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/bd/edit.html'
+    form_class = forms.HogarCreateForm
+    success_url = "../../"
+    model = models.Households
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.db.ver",
+                "usuarios.iraca.db.editar"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+    def form_valid(self, form):
+        self.object = form.save()
+        message = 'Se edito el hogar: {0}'.format(self.object.documento)
+        messages.add_message(self.request, messages.INFO, message)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "EDITAR HOGAR"
+        return super(HogaresUpdateView,self).get_context_data(**kwargs)
+
 
 
 
@@ -157,11 +292,9 @@ class CerticateOptionsView(TemplateView):
         return super(CerticateOptionsView,self).get_context_data(**kwargs)
 
 
-
-
 #----------------------------------------------------------------------------------
 
-#------------------------------- MEEETINGS -------------------------------------
+#------------------------------- MEEETINGS ----------------------------------------
 
 
 class CerticateListView(LoginRequiredMixin,

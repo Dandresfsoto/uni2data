@@ -197,5 +197,147 @@ class Contacts(models.Model):
 
 
 
+#----------------------------------------------------------------------------------
+
+#------------------------------- ROUTES  ------------------------------------------
+
+class Moments(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    name = models.CharField(max_length=100)
+    consecutive = models.IntegerField()
+    instruments = models.IntegerField()
+    type = models.CharField(max_length=100)
+    novelty = models.BooleanField(default=True)
+    progress = models.BooleanField(default=True)
+
+    def __str__(self):
+        return '{0}'.format(self.name)
+
+class Instruments(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    moment = models.ForeignKey(Moments,on_delete=models.DO_NOTHING,related_name='instrument_moment_iraca_2021')
+    name = models.CharField(max_length=100)
+    short_name = models.CharField(max_length=100)
+    consecutive = models.IntegerField()
+    model = models.CharField(max_length=100)
+    color = models.CharField(max_length=100)
+    icon = models.CharField(max_length=100)
+    level = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+    def get_consecutivo(self):
+        return '{0}.{1}'.format(self.moment.consecutive,self.consecutive)
+
+class Routes(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    creation = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(unique=True, max_length=100)
+
+    novelties = models.IntegerField(default=0)
+    progress = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
+    creation_user = models.ForeignKey(User, related_name="creation_user_route_iraca_2021", on_delete=models.DO_NOTHING)
+    update_datetime = models.DateTimeField(auto_now=True)
+    user_update = models.ForeignKey(User, related_name="user_update_route_iraca_2021",
+                                              on_delete=models.DO_NOTHING,
+                                              blank=True, null=True)
+
+    estate = models.CharField(max_length=100,blank=True)
+
+    regitered_household = models.IntegerField(default=0)
+
+    visible = models.BooleanField(default=True)
 
 
+    def __str__(self):
+        return self.name
+
+class Households(models.Model):
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+
+    document = models.BigIntegerField(unique=True)
+    municipality_attention = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, related_name='household_municipality_attention_iraca_2021')
+
+    first_surname = models.CharField(max_length=100)
+    second_surname = models.CharField(max_length=100,blank=True,null=True)
+    first_name = models.CharField(max_length=100)
+    second_name = models.CharField(max_length=100,blank=True,null=True)
+    birth_date = models.DateField()
+    phone = models.CharField(max_length=100,blank=True,null=True)
+    movil1 = models.CharField(max_length=100,blank=True,null=True)
+    movil2 = models.CharField(max_length=100,blank=True,null=True)
+    municipality_residence = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, related_name='household_municipality_residence_iraca_2021')
+
+    routes = models.ManyToManyField(Routes, related_name='routes_iraca_2021',blank=True)
+
+
+    def __str__(self):
+        return self.get_names() + ' ' + self.get_surnames() + ' - ' + str(self.document)
+
+    def get_names(self):
+        if self.second_name != None:
+            names = '{0} {1}'.format(self.first_name,self.second_name)
+        else:
+            names = self.first_name
+        return names
+
+    def get_surnames(self):
+        if self.second_surname != None:
+            surnames = '{0} {1}'.format(self.first_surname,self.second_surname)
+        else:
+            surnames = self.first_surname
+        return surnames
+
+    def get_full_name(self):
+        return '{0} {1}'.format(self.get_names(),self.get_surnames())
+
+    def get_routes(self):
+        routes = ''
+        for route in self.routes.all():
+            routes += route.name + ', '
+
+        if routes != '':
+            routes = routes[:-2]
+
+        return routes
+
+
+
+class ObjectRouteInstrument(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    creation = models.DateTimeField(auto_now_add=True)
+    creacion_user = models.ForeignKey(User, on_delete=models.DO_NOTHING,related_name='instrument_creation_user_iraca_2021',blank=True,null=True)
+
+    route = models.ForeignKey(Routes, on_delete=models.DO_NOTHING, related_name='instrument_route_iraca_2021')
+    moment = models.ForeignKey(Moments, on_delete=models.DO_NOTHING, related_name='instrument_route_moment_iraca_2021')
+    households = models.ManyToManyField(Households, related_name='instrument_household_iraca_2021', blank=True)
+    instrument = models.ForeignKey(Instruments, on_delete=models.DO_NOTHING, related_name='instrumentroute_instrument_iraca_2021',blank=True,null=True)
+
+    model = models.CharField(max_length=100)
+    support = models.UUIDField(blank=True,null=True)
+    observation = models.TextField(blank=True,null=True)
+    update_date = models.DateTimeField(blank=True,null=True)
+    update_user = models.ForeignKey(User, on_delete=models.DO_NOTHING,related_name='instrument_update_user_iraca_2021',blank=True,null=True)
+    estate = models.CharField(max_length=100,blank=True,null=True)
+    name = models.CharField(max_length=100,blank=True,null=True)
+    consecutive = models.IntegerField(blank=True,null=True)
+
+class ObservationsInstrumentRouteObject(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    instrument = models.ForeignKey(ObjectRouteInstrument, on_delete=models.DO_NOTHING)
+    creation = models.DateTimeField(auto_now_add=True)
+    user_creation = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='instrument_observation_creation_user_iraca_2021',blank=True, null=True)
+    observation = models.TextField(blank=True,null=True)
+
+
+    def pretty_creation_datetime(self):
+        return self.creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
+
+class InstrumentTraceabilityRouteObject(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    instrument = models.ForeignKey(ObjectRouteInstrument,on_delete=models.DO_NOTHING,related_name="traceability_instrument_iraca_2021")
+    creacion = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='traceability_instrument_user_iraca_2021')
+    observation = models.TextField()
