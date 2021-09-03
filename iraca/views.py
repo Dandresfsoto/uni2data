@@ -52,7 +52,7 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_categoria': 'Entregables',
                 'sican_color': 'orange darken-4',
                 'sican_order': 2,
-                'sican_url': 'entregables/',
+                'sican_url': 'deliverables/',
                 'sican_name': 'Entregables',
                 'sican_icon': 'view_list',
                 'sican_description': 'Estructura de entregables por cada uno de los componentes.'
@@ -147,7 +147,7 @@ class IracaOptionsView(LoginRequiredMixin,
 #------------------------------- BD -----------------------------------------------
 
 
-class HogaresListView(LoginRequiredMixin,
+class HouseholdListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
                       TemplateView):
 
@@ -165,9 +165,9 @@ class HogaresListView(LoginRequiredMixin,
         kwargs['title'] = "BASE DE DATOS HOGARES"
         kwargs['url_datatable'] = '/rest/v1.0/iraca_new/bd/'
         kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.iraca.db.crear')
-        return super(HogaresListView,self).get_context_data(**kwargs)
+        return super(HouseholdListView,self).get_context_data(**kwargs)
 
-class HogaresCreateView(LoginRequiredMixin,
+class HouseholdCreateView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
                         CreateView):
 
@@ -195,9 +195,9 @@ class HogaresCreateView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         kwargs['title'] = "NUEVO HOGAR"
-        return super(HogaresCreateView,self).get_context_data(**kwargs)
+        return super(HouseholdCreateView,self).get_context_data(**kwargs)
 
-class HogaresUpdateView(LoginRequiredMixin,
+class HouseholdUpdateView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
                         UpdateView):
 
@@ -228,8 +228,53 @@ class HogaresUpdateView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         kwargs['title'] = "EDITAR HOGAR"
-        return super(HogaresUpdateView,self).get_context_data(**kwargs)
+        return super(HouseholdUpdateView,self).get_context_data(**kwargs)
 
+
+#----------------------------------------------------------------------------------
+
+#------------------------------- deliverables -----------------------------------------
+
+
+class VisitsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.entregables.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/deliverables/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Entregables: Momentos"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/deliverables/'
+        return super(VisitsListView,self).get_context_data(**kwargs)
+
+class InstrumentListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.entregables.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/deliverables/instruments/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        moment = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        kwargs['title'] = "Entregables: Instrumentos"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/deliverables/{0}/instruments/'.format(moment.id)
+        kwargs['breadcrum_active'] = moment.name
+        return super(InstrumentListView,self).get_context_data(**kwargs)
 
 
 
@@ -362,9 +407,11 @@ class CerticateCreateView(LoginRequiredMixin,
             'pk': self.kwargs['pk'],
         }
 
+
+
 #----------------------------------------------------------------------------------
 
-#------------------------------- MILTONES -------------------------------------
+#------------------------------- MILTONES -----------------------------------------
 
 
 

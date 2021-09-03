@@ -30,34 +30,10 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Base de datos
+                        a(href="/iraca_2021/entregables/") Entregables
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
-
-
-    | {% if permiso_crear %}
-
-    ul(class="collapsible",data-collapsible="accordion")
-        li(class="bold waves-effect waves-light button-menu")
-
-            div(class="collapsible-header active")
-                i(class="material-icons") call_to_action
-                | Acciones
-
-            div(class="collapsible-body collapsible-body-blue")
-                ul
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="create/") Nuevo hogar
-                            i(class="material-icons icon-sican") map
-
-                    div(class="divider divider-perfil")
-
-    | {% endif %}
-
-
 
 
 
@@ -66,18 +42,16 @@ block container_principal
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
             thead
                 tr
-                    td Editar
-                    th Cédula
+                    th Entregables
                     th Nombre
-                    th Municipio
-                    th Ruta(s)
+                    th Consecutivo
+                    th Tipo de momento
             tbody
                 tr
-                    td Editar
-                    td Cédula
+                    td Entregables
                     td Nombre
-                    td Municipio
-                    td Ruta(s)
+                    td Consecutivo
+                    td Tipo de momento
 
 
 block body_script_auth
@@ -91,7 +65,7 @@ block body_script_auth
                 searching: true,
                 processing: true,
                 serverSide: true,
-                order: [[ 0, "asc" ]],
+                order: [[ 2, "asc" ]],
                 ajax: "{{ url_datatable }}",
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"

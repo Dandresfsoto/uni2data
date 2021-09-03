@@ -213,6 +213,12 @@ class Moments(models.Model):
     def __str__(self):
         return '{0}'.format(self.name)
 
+    def get_number_instruments(self):
+        return Instruments.objects.filter(moment=self).count()
+
+    def get_consecutive(self):
+        return '{0}'.format(self.consecutive)
+
 class Instruments(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     moment = models.ForeignKey(Moments,on_delete=models.DO_NOTHING,related_name='instrument_moment_iraca_2021')
@@ -227,7 +233,7 @@ class Instruments(models.Model):
     def __str__(self):
         return self.name
 
-    def get_consecutivo(self):
+    def get_consecutive(self):
         return '{0}.{1}'.format(self.moment.consecutive,self.consecutive)
 
 class Routes(models.Model):
@@ -302,8 +308,6 @@ class Households(models.Model):
             routes = routes[:-2]
 
         return routes
-
-
 
 class ObjectRouteInstrument(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
