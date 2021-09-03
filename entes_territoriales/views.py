@@ -430,7 +430,7 @@ class ReunionesHitosEstadoUpdateView(LoginRequiredMixin,
 
 
     def get_context_data(self, **kwargs):
-        reunion = models.Reuniones.objects.get(id=self.kwargs['pk'])
+        reunion = models.Reuniones.objects.get(id=self.kwargs['pk_meeting'])
         kwargs['title'] = "ACTAS"
         kwargs['breadcrum_active'] = str(reunion.municipio)
         kwargs['hito'] = models.Hito.objects.get(id = self.kwargs['pk_hito'])

@@ -174,7 +174,7 @@ class MilestonesListApi(BaseDatatableView):
             if self.request.user.has_perm('usuarios.iraca.actas.hitos.ver'):
 
                 ret = '<div class="center-align">' \
-                      '<a href="{0}/estado/" class="tooltipped" data-position="top" data-delay="50" data-tooltip="Actualizar estado">' \
+                      '<a href="estate/{0}/" class="tooltipped" data-position="top" data-delay="50" data-tooltip="Actualizar estado">' \
                       '<b>{1}</b>' \
                       '</a>' \
                       '</div>'.format(row.id, row.estate, row.observation)

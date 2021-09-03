@@ -43,14 +43,18 @@ class CertificateForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         municipality = cleaned_data.get("municipality")
+        certificate = models.Certificates.objects.get(id=self.pk)
 
-        municipality = models.Meetings.objects.filter(municipality = municipality)
+        municipality = models.Meetings.objects.filter(municipality = municipality,certificate=certificate )
 
         if municipality.count() > 0:
             self.add_error('municipality', 'Ya existe el ente territorial.')
 
     def __init__(self, *args, **kwargs):
         super(CertificateForm, self).__init__(*args, **kwargs)
+
+        pk = kwargs['initial'].get('pk')
+        self.pk = pk
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -346,3 +350,65 @@ class ContactForm(forms.ModelForm):
             'observation': 'Observaciones',
         }
 
+class MiltonesEstateForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+        estate = cleaned_data.get("estate")
+        observation = cleaned_data.get("observation")
+
+        if estate == 'Rechazado':
+            if observation == None or observation == '':
+                self.add_error('observation', 'Por favor agrega una observación al rechazo')
+
+    def __init__(self, *args, **kwargs):
+        super(MiltonesEstateForm, self).__init__(*args, **kwargs)
+
+        self.fields['observation'].widget = forms.Textarea(
+            attrs={'class': 'materialize-textarea', 'data-length': '500'})
+
+        self.fields['estate'].widget = forms.Select(choices=[
+            ('','----------'),
+            ('Aprobado', 'Aprobado'),
+            ('Esperando aprobación', 'Esperando aprobación'),
+            ('Rechazado', 'Rechazado')
+        ])
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Estado del hito',
+                )
+            ),
+            Row(
+                Column(
+                    'estate',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    'observation',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = models.Milestones
+        fields = ['estate', 'observation']
