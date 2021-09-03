@@ -149,7 +149,7 @@ class MilestonesListApi(BaseDatatableView):
                 return ''
 
         elif column == 'file2':
-            if row.url_file() != None:
+            if row.url_file2() != None:
                 return '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Listado de asistencia">' \
                            '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                         '</a></div>'.format(row.url_file2())
@@ -157,7 +157,7 @@ class MilestonesListApi(BaseDatatableView):
                 return ''
 
         elif column == 'file3':
-            if row.url_file() != None:
+            if row.url_file3() != None:
                 return '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Otro">' \
                            '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                         '</a></div>'.format(row.url_file3())
@@ -205,6 +205,63 @@ class MilestonesListApi(BaseDatatableView):
         else:
             return super(MilestonesListApi, self).render_column(row, column)
 
+class ContactsListApi(BaseDatatableView):
+    model = models.Contacts
+    columns = ['id','name','surname','charge','movil','email','reservation','community','languahe','observation']
+    order_columns = ['id','name','surname','charge','movil','email','reservation','community','languahe','observation']
+
+
+    def get_initial_queryset(self):
+        self.meeting = Meetings.objects.get(id=self.kwargs['pk_meeting'])
+
+        return self.model.objects.filter(meting__id = self.kwargs['pk_meeting'])
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(municipality__nombre__icontains=search) | Q(municipality__departamento__nombre__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            meeting = models.Meetings.objects.get(id = self.kwargs['pk_meeting'])
+            ret = ''
+            if self.request.user.has_perm('usuarios.iraca.actas.contactos.ver'):
+
+                ret = '<div class="center-align">' \
+                      '<a href="edit/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'observation':
+            ret = ''
+
+            if row.observation != '':
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0}">' \
+                      '<i class="material-icons">chat</i>' \
+                      '</a>' \
+                      '</div>'.format(row.observation)
+
+            return ret
+
+        elif column == 'movil':
+            return str(row.movil)
+
+
+        else:
+            return super(ContactsListApi, self).render_column(row, column)
 
 class MunicipiosAutocomplete(autocomplete.Select2QuerySetView):
 

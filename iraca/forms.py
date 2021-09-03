@@ -255,3 +255,94 @@ class MiltonesForm(forms.Form):
                 ),
             )
         )
+
+class ContactForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ContactForm, self).__init__(*args, **kwargs)
+
+        self.fields['observation'].widget = forms.Textarea(
+            attrs={'class': 'materialize-textarea', 'data-length': '500'})
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información del contacto',
+                )
+            ),
+            Row(
+                Column(
+                    'name',
+                    css_class='s12 m6 l4'
+                ),
+                Column(
+                    'surname',
+                    css_class='s12 m6 l4'
+                ),
+                Column(
+                    'charge',
+                    css_class='s12 m6 l4'
+                )
+            ),
+            Row(
+                Column(
+                    'movil',
+                    css_class='s12 m6'
+                ),
+                Column(
+                    'email',
+                    css_class='s12 m6'
+                )
+            ),
+            Row(
+                Column(
+                    'reservation',
+                    css_class='s12 m6 l4'
+                ),
+                Column(
+                    'community',
+                    css_class='s12 m6 l4'
+                ),
+                Column(
+                    'languahe',
+                    css_class='s12 m6 l4'
+                )
+            ),
+            Row(
+                Column(
+                    'observation',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = models.Contacts
+        fields = ['name', 'surname', 'charge', 'movil', 'email', 'reservation', 'community', 'languahe','observation']
+        labels = {
+            'name': 'Nombres',
+            'surname': 'Apellidos',
+            'charge': 'Cargo',
+            'movil': 'Celular',
+            'email': 'Correo electronico',
+            'reservation': 'Resguardo',
+            'community': 'Comunidad',
+            'languahe': 'Lengua',
+            'observation': 'Observaciones',
+        }
+

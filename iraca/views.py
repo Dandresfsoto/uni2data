@@ -443,6 +443,12 @@ class MilestonesDeleteView(LoginRequiredMixin,
 
         return HttpResponseRedirect('../../')
 
+
+#----------------------------------------------------------------------------------
+
+#------------------------------- CONTACTS -----------------------------------------
+
+
 class ContactslistView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
                       TemplateView):
@@ -464,4 +470,74 @@ class ContactslistView(LoginRequiredMixin,
         kwargs['title'] = "CONTACTOS"
         kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/contacts/{1}/'.format(certificate.id,meeting.id)
         kwargs['breadcrum_1'] = certificate.name
+        kwargs['breadcrum_active'] = meeting.municipality.nombre
         return super(ContactslistView,self).get_context_data(**kwargs)
+
+class ContactsCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+            "usuarios.iraca.actas.contactos.ver",
+            "usuarios.iraca.actas.contactos.crear",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/contacts/create.html'
+    form_class = forms.ContactForm
+    success_url = "../"
+    model = models.Contacts
+
+    def form_valid(self, form):
+
+        self.object = form.save(commit=False)
+        self.object.meting = models.Meetings.objects.get(id=self.kwargs['pk_meeting'])
+        self.object.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        meeting = models.Meetings.objects.get(id=self.kwargs['pk_meeting'])
+        kwargs['title'] = "NUEVO CONTACTO"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['breadcrum_2'] = meeting.municipality.nombre
+        return super(ContactsCreateView,self).get_context_data(**kwargs)
+
+class ContactsUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+            "usuarios.iraca.actas.contactos.ver",
+            "usuarios.iraca.actas.contactos.crear",
+            "usuarios.iraca.actas.contactos.editar",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/contacts/edit.html'
+    form_class = forms.ContactForm
+    success_url = "../../"
+    model = models.Contacts
+    pk_url_kwarg = 'pk_contact'
+
+
+    def form_valid(self, form):
+
+        self.object = form.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        meeting = models.Meetings.objects.get(id=self.kwargs['pk_meeting'])
+        kwargs['title'] = "EDITAR CONTACTO"
+        kwargs['breadcrum_2'] = meeting.municipality.nombre
+        kwargs['breadcrum_1'] = certificate.name
+        return super(ContactsUpdateView,self).get_context_data(**kwargs)

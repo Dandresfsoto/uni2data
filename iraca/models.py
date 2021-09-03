@@ -1,8 +1,8 @@
 import uuid
 from django.db import models
-from phonenumber_field.formfields import PhoneNumberField
 from pytz import timezone
 from django.conf import settings
+from phonenumber_field.modelfields import PhoneNumberField
 
 from usuarios.models import User, Municipios, Departamentos
 
@@ -178,6 +178,24 @@ class Milestones(models.Model):
 
     def pretty_creation_datetime(self):
         return self.creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
+
+class Contacts(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    meting = models.ForeignKey(Meetings,on_delete=models.DO_NOTHING)
+    name = models.CharField(max_length=100)
+    surname = models.CharField(max_length=100)
+    charge = models.CharField(max_length=200)
+    movil = PhoneNumberField()
+    email = models.EmailField(max_length=100,blank=True,null=True)
+    reservation = models.CharField(max_length=100,blank=True,null=True)
+    community = models.CharField(max_length=100,blank=True,null=True)
+    languahe = models.CharField(max_length=100, null=True, blank=True)
+    observation = models.TextField(max_length=500,blank=True,null=True)
+
+    def __str__(self):
+        return self.name
+
+
 
 
 

@@ -42,7 +42,7 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Hitos
+                        a(href="#") Contactos de {{ breadcrum_active | truncatechars:15 }}
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -61,7 +61,7 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="nuevo/") Nuevo contacto
+                        a(href="create/") Nuevo contacto
                             i(class="material-icons icon-sican") perm_contact_calendar
 
                     div(class="divider divider-perfil")
@@ -75,7 +75,6 @@ block container_principal
             thead
                 tr
                     th Editar
-                    th Soportes
                     th Nombres
                     th Apellidos
                     th Cargo
@@ -88,7 +87,6 @@ block container_principal
             tbody
                 tr
                     td Editar
-                    td Soportes
                     td Nombres
                     td Apellidos
                     td Cargo
@@ -111,7 +109,7 @@ block body_script_auth
                 searching: true,
                 processing: true,
                 serverSide: true,
-                order: [[ 2, "asc" ]],
+                order: [[ 1, "asc" ]],
                 ajax: "{{ url_datatable }}",
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
