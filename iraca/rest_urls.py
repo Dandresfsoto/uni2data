@@ -13,5 +13,7 @@ urlpatterns = [
 
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/', rest_views.ContactsListApi.as_view()),
 
+    path('implementation/', rest_views.ImplementationListApi.as_view()),
+
     path('certificate/autocomplete/municipios/', rest_views.MunicipiosAutocomplete.as_view()),
 ]

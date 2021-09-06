@@ -493,3 +493,87 @@ class HogarCreateForm(forms.ModelForm):
             'routes':'Rutas',
         }
 
+class implementationCreateForm(forms.Form):
+
+    name = forms.CharField(label='Nombre de la ruta', max_length=100)
+    visible = forms.BooleanField(required=False)
+
+    def _clean_fields(self):
+        for name, field in self.fields.items():
+            # value_from_datadict() gets the data from the data dictionaries.
+            # Each widget type knows how to retrieve its own data, because some
+            # widgets split data over several HTML fields.
+            if name not in ['name']:
+                if field.disabled:
+                    value = self.get_initial_for_field(field, name)
+                else:
+                    value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
+                try:
+                    if isinstance(field, FileField):
+                        initial = self.get_initial_for_field(field, name)
+                        value = field.clean(value, initial)
+                    else:
+                        value = field.clean(value)
+
+                        if name == 'nombre':
+                            try:
+                                models.Routes.objects.get(nombre = value)
+                            except:
+                                pass
+                            else:
+                                self.add_error(name, 'El nombre de la ruta ya existe')
+
+                    self.cleaned_data[name] = value
+                    if hasattr(self, 'clean_%s' % name):
+                        value = getattr(self, 'clean_%s' % name)()
+                        self.cleaned_data[name] = value
+                except ValidationError as e:
+                    self.add_error(name, e)
+            else:
+                value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
+                self.cleaned_data[name] = value
+
+
+    def __init__(self, *args, **kwargs):
+        super(implementationCreateForm, self).__init__(*args, **kwargs)
+        ruta = None
+
+        if 'pk' in kwargs['initial']:
+            ruta = models.Routes.objects.get(id = kwargs['initial']['pk'])
+            self.fields['name'].initial = ruta.name
+            self.fields['visible'].initial = ruta.visible
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información de la ruta:',
+                )
+            ),
+            Row(
+                Column(
+                    'name',
+                    css_class='s12 m12'
+                ),
+            ),
+            Row(
+                Column(
+                    'visible',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )

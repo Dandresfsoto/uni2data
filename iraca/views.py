@@ -1249,3 +1249,109 @@ class SocializationContactsUpdateView(LoginRequiredMixin,
         return super(SocializationContactsUpdateView,self).get_context_data(**kwargs)
 
 
+
+#----------------------------------------------------------------------------------
+
+#---------------------------------------- RUTAS -----------------------------------
+
+class ImplementationListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.implementacion.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/implementation/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Rutas"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/implementation/'
+        kwargs['permiso_crear'] = self.request.user.has_perm("usuarios.iraca.rutas.crear")
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(ImplementationListView ,self).get_context_data(**kwargs)
+
+
+class ImplementationCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/implementation/create.html'
+    form_class = forms.implementationCreateForm
+    success_url = "../"
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.implementacion.ver",
+                "usuarios.iraca.implementacion.crear"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+
+
+        self.object = models.Routes.objects.create(
+            name=form.cleaned_data['name'],
+            creation_user=self.request.user,
+            user_update=self.request.user,
+        )
+        message = 'Se creó la ruta: {0}'.format(form.cleaned_data['name'])
+        messages.add_message(self.request, messages.INFO, message)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVA RUTA"
+        return super(ImplementationCreateView,self).get_context_data(**kwargs)
+
+class ImplementationUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/implementation/edit.html'
+    form_class = forms.implementationCreateForm
+    success_url = "../../"
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.implementacion.ver",
+                "usuarios.iraca.implementacion.editar"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+
+        models.Routes.objects.filter(id = self.kwargs['pk']).update(
+            name=form.cleaned_data['name'],
+            visible=form.cleaned_data['visible']
+        )
+
+        message = 'Se actualizo la ruta: {0}'.format(form.cleaned_data['name'])
+        messages.add_message(self.request, messages.INFO, message)
+
+        models.Routes.objects.get(id=self.kwargs['pk']).update_novedades()
+        models.Routes.objects.get(id=self.kwargs['pk']).update_progreso()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        route = models.Routes.objects.get(id = self.kwargs['pk'])
+        kwargs['title'] = "EDITAR RUTA"
+        kwargs['route_name'] = route.name
+        return super(ImplementationUpdateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}

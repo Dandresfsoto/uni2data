@@ -44,4 +44,8 @@ urlpatterns = [
     path('socialization/<uuid:pk>/contacts/<uuid:pk_meeting>/create/', views.SocializationContactsCreateView.as_view()),
     path('socialization/<uuid:pk>/contacts/<uuid:pk_meeting>/edit/<uuid:pk_contact>/', views.SocializationContactsUpdateView.as_view()),
 
+
+    path('implementation/', views.ImplementationListView.as_view()),
+    path('implementation/create/', views.ImplementationCreateView.as_view()),
+    path('implementation/edit/<uuid:pk>/', views.ImplementationUpdateView.as_view()),
 ]

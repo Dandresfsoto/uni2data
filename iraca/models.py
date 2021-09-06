@@ -259,6 +259,29 @@ class Routes(models.Model):
     def __str__(self):
         return self.name
 
+    def update_progreso(self):
+
+        query = ObjectRouteInstrument.objects.filter(route=self)
+        moments = Moments.objects.all()
+
+        households__ids = query.filter(estate__in=['aprobado']).values_list('households__id', flat=True)
+
+        try:
+            progress = (households__ids.count()/(moments.count()))*100.0
+        except:
+            progress = 0
+
+        self.progress = progress
+        self.save()
+
+        return self.progress
+
+    def update_novedades(self):
+        self.novedades = ObjectRouteInstrument.objects.filter(route=self, estate='cargado').count()
+        self.save()
+        self.update_progreso()
+        return 'Ok'
+
 class Households(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)

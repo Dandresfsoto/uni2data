@@ -419,6 +419,124 @@ class ContactsListApi(BaseDatatableView):
         else:
             return super(ContactsListApi, self).render_column(row, column)
 
+class ImplementationListApi(BaseDatatableView):
+    model = models.Routes
+    columns = ['id','creation','name','novelties','progress','regitered_household','creation_user']
+    order_columns = ['id','creation','name','novelties','progress','regitered_household','creation_user']
+
+    def get_initial_queryset(self):
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.rutas.ver",
+            ],
+            "editar": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.rutas.ver",
+                "usuarios.iraca.rutas.editar"
+            ],
+            "ver_hogares": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.rutas.ver",
+                "usuarios.iraca.rutas.hogares.ver"
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(nombre__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            if self.request.user.has_perms(self.permissions.get('editar')):
+                ret = '<div class="center-align">' \
+                           '<a href="edit/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar ruta {1}">' \
+                                '<i class="material-icons">edit</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.name)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">edit</i>' \
+                       '</div>'.format(row.id,row.name)
+
+            return ret
+
+        elif column == 'creation':
+            ret = ''
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                           '<a href="activities/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver actividades de la ruta {1}">' \
+                                '<i class="material-icons">remove_red_eye</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.name)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'.format(row.id,row.name)
+
+            return ret
+
+
+        elif column == 'novelties':
+            if row.novelties > 0:
+                return '<span class="new badge" data-badge-caption="">{0}</span>'.format(row.novelties)
+            else:
+                return ''
+
+        elif column == 'progress':
+
+            return '<div class="center-align">' \
+                   '<a class="tooltipped" data-position="left" data-delay="50" ' \
+                   'data-tooltip="Progreso general de la ruta">' \
+                   '<b>{0}%</b>' \
+                   '</a>' \
+                   '</div>'.format(row.progress)
+
+        elif column == 'regitered_household':
+            ret = ''
+            if self.request.user.has_perms(self.permissions.get('ver_hogares')):
+                ret = '<div class="center-align">' \
+                           '<a href="household/{0}" class="tooltipped" data-position="left" data-delay="50" data-tooltip="{1} hogares inscritos">' \
+                                '<b>{1}</b>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.regitered_household)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<b>{1}</b>' \
+                       '</div>'.format(row.id,row.regitered_household)
+
+            return ret
+
+        elif column == 'creation_user':
+            ret = ''
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                           '<a href="charge_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Ver cuentas de cobro de la ruta {1}">' \
+                                '<i class="material-icons">account_balance_wallet</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.name)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">account_balance_wallet</i>' \
+                       '</div>'.format(row.id,row.name)
+
+            return ret
+
+
+        else:
+            return super(ImplementationListApi, self).render_column(row, column)
+
 class MunicipiosAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
