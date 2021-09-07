@@ -243,11 +243,11 @@ def build_reporte_hv(id):
     proceso = "LST-HV"
 
 
-    titulos = ['Consecutivo', 'Contratista', 'Cedula', 'Envio', 'Cargo', 'Estado', 'Observaciones', 'Hv']
+    titulos = ['Consecutivo', 'Contratista', 'Cedula', 'Envio', 'Cargo', 'Municipio', 'Estado', 'Observaciones', 'Hv']
 
-    formatos = ['0', 'General', 'General', 'General', 'General', 'General', 'General', 'General']
+    formatos = ['0', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General']
 
-    ancho_columnas = [20, 40, 30, 30, 30, 30, 30, 40]
+    ancho_columnas = [20, 40, 30, 30, 30, 30, 30, 30, 40]
 
     contenidos = []
 
@@ -262,6 +262,7 @@ def build_reporte_hv(id):
             hv.contratista.cedula,
             hv.envio,
             hv.cargo.name,
+            str(hv.municipio),
             hv.estado,
             hv.observacion,
             ('LINK','http://uni2data.com/'+hv.url_file())
