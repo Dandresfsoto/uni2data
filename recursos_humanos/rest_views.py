@@ -119,7 +119,7 @@ class HvListApi(BaseDatatableView):
         search = self.request.GET.get(u'search[value]', None)
         if search:
             q = Q(contratista__cedula__icontains=search) | Q(contratista__nombres__icontains=search) \
-                | Q(contratista__apellidos__icontains=search) | Q(cargo__icontains=search)
+                | Q(contratista__apellidos__icontains=search) | Q(cargo__name__icontains=search)
             qs = qs.filter(q)
         return qs
 

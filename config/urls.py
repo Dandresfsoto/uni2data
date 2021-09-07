@@ -55,6 +55,7 @@ urlpatterns = [
     path('iraca_2021/', include('fest_2020_.urls')),
 
     path('rest/v1.0/usuarios/', include('usuarios.rest_urls')),
+    path('rest/v1.0/mobile/', include('mobile.rest_urls')),
     path('rest/v1.0/recursos_humanos/', include('recursos_humanos.rest_urls')),
     path('rest/v1.0/direccion_financiera/', include('direccion_financiera.rest_urls')),
     path('rest/v1.0/reportes/', include('reportes.rest_urls')),
