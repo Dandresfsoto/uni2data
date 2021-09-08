@@ -497,6 +497,7 @@ class implementationCreateForm(forms.Form):
 
     name = forms.CharField(label='Nombre de la ruta', max_length=100)
     visible = forms.BooleanField(required=False)
+    goal = forms.IntegerField(label="Meta hogares")
 
     def _clean_fields(self):
         for name, field in self.fields.items():
@@ -542,6 +543,7 @@ class implementationCreateForm(forms.Form):
             ruta = models.Routes.objects.get(id = kwargs['initial']['pk'])
             self.fields['name'].initial = ruta.name
             self.fields['visible'].initial = ruta.visible
+            self.fields['goal'].initial = ruta.goal
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -555,6 +557,12 @@ class implementationCreateForm(forms.Form):
                 Column(
                     'name',
                     css_class='s12 m12'
+                ),
+            ),
+            Row(
+                Column(
+                    'goal',
+                    css_class='s12 m4'
                 ),
             ),
             Row(
@@ -577,3 +585,200 @@ class implementationCreateForm(forms.Form):
                 ),
             )
         )
+
+class InstrumentsRejectForm(forms.Form):
+
+    observation = forms.CharField(label="Observacion",widget=forms.Textarea(attrs={'class':'materialize-textarea'}))
+
+
+
+    def __init__(self, *args, **kwargs):
+        super(InstrumentsRejectForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Observación de rechazo',
+                )
+            ),
+            Row(
+                Column(
+                    'observation',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+#----------------------------------------------------------------------------------
+
+#---------------------------- FORMS OBJECTS  -------------------------------------
+
+
+class DocumentoForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+        file = cleaned_data.get("file")
+
+        if file.name.split('.')[-1] == 'pdf' or file.name.split('.')[-1] == 'PDF':
+            pass
+        else:
+            self.add_error('file', 'El archivo cargado no tiene un formato valido')
+
+
+    def __init__(self, *args, **kwargs):
+        super(DocumentoForm, self).__init__(*args, **kwargs)
+
+
+        instrument = models.Instruments.objects.get(id = kwargs['initial']['pk_instrument'])
+
+
+
+        if instrument.level == 'ruta':
+
+
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+                Row(
+                    Fieldset(
+                        kwargs['initial'].get('short_name'),
+                    )
+                ),
+                Row(
+                    Column(
+                        'file',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+        elif instrument.level == 'individual':
+            self.fields['households'] = forms.ModelChoiceField(label = "Hogar",queryset = models.Households.objects.filter(routes=kwargs['initial']['pk']))
+
+            if 'pk_instrument_object' in kwargs['initial']:
+
+                instrument_object = models.ObjectRouteInstrument.objects.get(id = kwargs['initial']['pk_instrument_object'])
+
+                try:
+                    self.fields['households'].initial = instrument_object.households.all()[0]
+                except:
+                    pass
+
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+                Row(
+                    Fieldset(
+                        kwargs['initial'].get('short_name'),
+                    )
+                ),
+                Row(
+                    Column(
+                        'file',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Column(
+                        'households',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+        else:
+            self.fields['households'] = forms.ModelMultipleChoiceField(queryset=models.Households.objects.filter(routes=kwargs['initial']['pk']))
+
+            if 'pk_instrument_object' in kwargs['initial']:
+                instrument_object = models.ObjectRouteInstrument.objects.get(id=kwargs['initial']['pk_instrument_object'])
+
+                self.fields['households'].initial = instrument_object.households.all()
+
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+                Row(
+                    Fieldset(
+                        kwargs['initial'].get('short_name'),
+                    )
+                ),
+                Row(
+                    Column(
+                        'file',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Column(
+                        'households',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+
+    class Meta:
+        model = models.Documento
+        fields = ['file']
+        widgets = {
+            'file': forms.ClearableFileInput(attrs={
+                'data-max-file-size': "10M",
+                'accept': 'application/pdf,application/x-pdf'}
+            ),
+        }
+

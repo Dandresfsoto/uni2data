@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -30,13 +30,20 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
 
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca_new/implementation/") Implementacion
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Implementacion
+                        a(href="#") Actividades: {{ breadcrum_active | truncatechars:15 }}
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
 
-    |{% if permiso_crear %}
+    | {% if permiso_crear %}
 
     ul(class="collapsible",data-collapsible="accordion")
         li(class="bold waves-effect waves-light button-menu")
@@ -50,13 +57,12 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="create/") Añadir ruta
+                        a(href="valores/") Definir valores
                             i(class="material-icons icon-sican") map
 
                     div(class="divider divider-perfil")
 
-    |{% endif %}
-
+    | {% endif %}
 
 
 
@@ -65,20 +71,18 @@ block container_principal
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
             thead
                 tr
-                    th Editar
                     th Actividades
-                    th Nombre
+                    th Consecutivo
+                    th Momento
                     th Novedades
                     th Progreso
-                    th Hogares
             tbody
                 tr
-                    td Editar
                     td Actividades
-                    td Nombre
+                    td Consecutivo
+                    td Momento
                     td Novedades
                     td Progreso
-                    td Hogares
 
 
 block body_script_auth
@@ -92,8 +96,8 @@ block body_script_auth
                 searching: true,
                 processing: true,
                 serverSide: true,
-                order: [[ 5, "desc" ]],
-                columnDefs: [{"orderable": false, "targets": [0,1,3]}],
+                order: [[ 1, "asc" ]],
+                columnDefs: [{"orderable": false}],
                 ajax: "{{ url_datatable }}",
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"

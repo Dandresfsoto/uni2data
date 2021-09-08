@@ -3,7 +3,12 @@ from django.db import models
 from pytz import timezone
 from django.conf import settings
 from phonenumber_field.modelfields import PhoneNumberField
+from django.contrib.postgres.fields import JSONField
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from self import self
 
+from config.extrafields import ContentTypeRestrictedFileField
 from usuarios.models import User, Municipios, Departamentos
 
 settings_time_zone = timezone(settings.TIME_ZONE)
@@ -219,6 +224,25 @@ class Moments(models.Model):
     def get_consecutive(self):
         return '{0}'.format(self.consecutive)
 
+    def get_novelty(self, route):
+        return ObjectRouteInstrument.objects.filter(route=route, moment=self, estate='cargado').distinct().count()
+
+    def get_progress_moment(self,route):
+
+        query = ObjectRouteInstrument.objects.filter(route=route, moment=self)
+
+        households__ids = query.filter(estate__in=['aprobado']).values_list('households__id',flat=True)
+
+        households = Households.objects.filter(id__in = households__ids)
+
+        try:
+            progress = (households.count() / route.goal) * 100.0
+        except:
+            progress = 0
+
+
+        return progress
+
 class Instruments(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     moment = models.ForeignKey(Moments,on_delete=models.DO_NOTHING,related_name='instrument_moment_iraca_2021')
@@ -254,7 +278,7 @@ class Routes(models.Model):
     regitered_household = models.IntegerField(default=0)
 
     visible = models.BooleanField(default=True)
-
+    goal = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -267,7 +291,7 @@ class Routes(models.Model):
         households__ids = query.filter(estate__in=['aprobado']).values_list('households__id', flat=True)
 
         try:
-            progress = (households__ids.count()/(moments.count()))*100.0
+            progress = (households__ids.count()/(self.goal * moments.count()))*100.0
         except:
             progress = 0
 
@@ -277,10 +301,32 @@ class Routes(models.Model):
         return self.progress
 
     def update_novedades(self):
-        self.novedades = ObjectRouteInstrument.objects.filter(route=self, estate='cargado').count()
+        self.novelties = ObjectRouteInstrument.objects.filter(route=self, estate='cargado').count()
         self.save()
         self.update_progreso()
         return 'Ok'
+
+    def get_instruments_list(self,moment):
+
+        instruments_return = []
+
+        for instrument in Instruments.objects.filter(moment = moment).order_by('consecutive'):
+            instruments_return.append({
+                'id': instrument.id,
+                'short_name': instrument.short_name,
+                'icon': instrument.icon,
+                'color': instrument.color
+            })
+
+        return instruments_return
+
+    def get_household_count(self):
+        count=0
+        try:
+            count=Households.objects.filter(routes=self.id).count()
+        except:
+            pass
+        return count
 
 class Households(models.Model):
 
@@ -332,6 +378,14 @@ class Households(models.Model):
 
         return routes
 
+class QuotasRouteObject(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    creation = models.DateTimeField(auto_now_add=True)
+    route = models.ForeignKey(Routes,on_delete=models.DO_NOTHING,related_name='quota_route_iraca_2021')
+    moment = models.ForeignKey(Moments,on_delete=models.DO_NOTHING,related_name='quota_moment_iraca_2021', blank=True, null=True)
+    estate = models.CharField(max_length=100)
+    data = JSONField(default=dict)
+
 class ObjectRouteInstrument(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     creation = models.DateTimeField(auto_now_add=True)
@@ -368,3 +422,42 @@ class InstrumentTraceabilityRouteObject(models.Model):
     creacion = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='traceability_instrument_user_iraca_2021')
     observation = models.TextField()
+
+
+#----------------------------------------------------------------------------------
+
+#---------------------------- MODELS OBJECTS  -------------------------------------
+
+def upload_dinamic_iraca_2021(instance, filename):
+    return '/'.join(['Iraca 2021', str(instance.route.name),str(instance.instrument.moment.name), instance.name, filename])
+
+
+class Documento(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    households = models.ManyToManyField(Households,related_name='households_document_iraca_2021',blank=True)
+    instrument = models.ForeignKey(Instruments,on_delete=models.DO_NOTHING,related_name='instrument_document_iraca_2021',blank=True,null=True)
+    route = models.ForeignKey(Routes,on_delete=models.DO_NOTHING,related_name='route_document_iraca_2021',blank=True,null=True)
+    name = models.CharField(max_length=100)
+
+    file = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_iraca_2021,
+        content_types=[
+            'application/pdf',
+        ],
+        max_upload_size=50485760,
+        max_length=255
+    )
+
+
+
+    def url_file(self):
+        url = None
+        try:
+            url = self.file.url
+        except:
+            pass
+        return url
+
+
+    def get_extension(self):
+        return self.file.name.split('.')[-1]

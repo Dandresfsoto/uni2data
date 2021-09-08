@@ -1,7 +1,7 @@
 from dal import autocomplete
 from django.db.models import Q
 from django_datatables_view.base_datatable_view import BaseDatatableView
-
+from django.utils import timezone
 from iraca import models
 from iraca.models import Milestones, Meetings, Certificates, Types
 from usuarios.models import Municipios
@@ -421,8 +421,8 @@ class ContactsListApi(BaseDatatableView):
 
 class ImplementationListApi(BaseDatatableView):
     model = models.Routes
-    columns = ['id','creation','name','novelties','progress','regitered_household','creation_user']
-    order_columns = ['id','creation','name','novelties','progress','regitered_household','creation_user']
+    columns = ['id','creation','name','novelties','progress','regitered_household']
+    order_columns = ['id','creation','name','novelties','progress','regitered_household']
 
     def get_initial_queryset(self):
 
@@ -508,7 +508,7 @@ class ImplementationListApi(BaseDatatableView):
                            '<a href="household/{0}" class="tooltipped" data-position="left" data-delay="50" data-tooltip="{1} hogares inscritos">' \
                                 '<b>{1}</b>' \
                            '</a>' \
-                       '</div>'.format(row.id,row.regitered_household)
+                       '</div>'.format(row.id,row.get_household_count())
 
             else:
                 ret = '<div class="center-align">' \
@@ -517,25 +517,362 @@ class ImplementationListApi(BaseDatatableView):
 
             return ret
 
-        elif column == 'creation_user':
+        else:
+            return super(ImplementationListApi, self).render_column(row, column)
+
+class ImplementationActivitiesListApi(BaseDatatableView):
+    model = models.Moments
+    columns = ['id', 'consecutive', 'name', 'novelty', 'progress']
+    order_columns = ['id', 'consecutive', 'name', 'novelty', 'progress']
+
+    def get_initial_queryset(self):
+        self.route = models.Routes.objects.get(id = self.kwargs['pk'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.implementacion.ver"
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search) | Q(consecutive__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
             ret = ''
             if self.request.user.has_perms(self.permissions.get('ver')):
                 ret = '<div class="center-align">' \
-                           '<a href="charge_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Ver cuentas de cobro de la ruta {1}">' \
-                                '<i class="material-icons">account_balance_wallet</i>' \
+                           '<a href="instruments/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver instrumentos">' \
+                                '<i class="material-icons">remove_red_eye</i>' \
                            '</a>' \
-                       '</div>'.format(row.id,row.name)
+                       '</div>'.format(row.id)
 
             else:
                 ret = '<div class="center-align">' \
-                           '<i class="material-icons">account_balance_wallet</i>' \
-                       '</div>'.format(row.id,row.name)
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'.format(row.id)
 
             return ret
 
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>{0}</b></div>'.format(row.consecutive)
+
+        elif column == 'novelty':
+            novelty = row.get_novelty(self.route)
+
+            if novelty > 0:
+                return '<span class="new badge" data-badge-caption="">{0}</span>'.format(novelty)
+            else:
+                return ''
+
+        elif column == 'progress':
+
+            progress = row.get_progress_moment(self.route)
+
+            progress = '{:20,.2f}%'.format(progress)
+
+
+            return '<div class="center-align">' \
+                   '<a class="" data-position="left" data-html="true" data-delay="50" ' \
+                   'data-tooltip="{1}">' \
+                   '<b>{0}</b>' \
+                   '</a>' \
+                   '</div>'.format(progress,progress)
+
+
+
+
 
         else:
-            return super(ImplementationListApi, self).render_column(row, column)
+            return super(ImplementationActivitiesListApi, self).render_column(row, column)
+
+class ImplementationHouseholdListApi(BaseDatatableView):
+    model = models.ObjectRouteInstrument
+    columns = ['creation', 'creacion_user', 'id', 'consecutive', 'name', 'estate', 'route',
+               'update_user']
+    order_columns = ['creacion', 'creacion_user', 'id', 'consecutivo', 'name', 'estate', 'route',
+                     'update_user']
+
+    def get_initial_queryset(self):
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca_.ver",
+                "usuarios.iraca.implementacion.ver"
+            ]
+        }
+        return self.model.objects.filter(route=self.route, moment=self.moment)
+
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(households__document__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'creation':
+            ret = ''
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                from iraca import utils
+                ret = '<div class="center-align">' \
+                      '<a href="view/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, utils.pretty_datetime(timezone.localtime(row.update_date)))
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'id':
+            ret = ''
+
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                      '<a href="traceability/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">class</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, 'Ver la trazabilidad')
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">class</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'consecutive':
+
+            ret = '<div class="center-align">' \
+                  '<a href="household/{0}" class="tooltipped" data-position="left" data-delay="50" data-tooltip="Hogares del soporte">' \
+                  '<b>{1}</b>' \
+                  '</a>' \
+                  '</div>'.format(row.id, row.households.all().count())
+
+            return ret
+
+        elif column == 'creacion_user':
+            ret = ''
+            if self.request.user.has_perms(self.permissions.get('ver')):
+
+                if row.estate in ['cargado', 'rechazado']:
+
+                    ret = '<div class="center-align">' \
+                          '<a href="edit/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Actualizar el soporte">' \
+                          '<i class="material-icons">cloud_upload</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id)
+
+
+                else:
+
+                    ret = '<div class="center-align">' \
+                          '<i class="material-icons">cloud_upload</i>' \
+                          '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">cloud_upload</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'name':
+            return row.name
+
+        elif column == 'estate':
+            ret = ''
+            if row.estate == 'cargado':
+                ret = ''
+            return row.estate
+
+        elif column == 'route':
+            ret = ''
+
+            if self.request.user.is_superuser:
+
+                if row.estate != 'aprobado':
+                    ret += '<a style="color:green;" href="approve/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+                if row.estate != 'rechazado':
+                    ret += '<a style="color:red;margin-left:10px;" href="reject/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+
+            else:
+                if self.request.user.has_perms(self.permissions.get('"usuarios.iraca.implementacion.aprobar"')):
+                    if row.estate != 'aprobado':
+                        ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                               '<i class="material-icons">{2}</i>' \
+                               '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+                    if row.estate != 'rechazado':
+                        ret += '<a style="color:red;margin-left:10px;" href="reject/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                               '<i class="material-icons">{2}</i>' \
+                               '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+
+            return '<div class="center-align">' + ret + '</div>'
+
+        elif column == 'update_user':
+            ret = ''
+
+            if self.request.user.is_superuser:
+                if row.estate in ['cargado']:
+
+                    ret = '<div class="center-align">' \
+                          '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar soporte">' \
+                          '<i class="material-icons">delete</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id)
+
+                elif row.estate in ['rechazado']:
+
+                    ret = '<div class="center-align">' \
+                          '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar soporte">' \
+                          '<i class="material-icons">delete</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id)
+                else:
+
+                    ret = '<div class="center-align">' \
+                          '<i class="material-icons">delete</i>' \
+                          '</div>'.format(row.id)
+
+                return ret
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">delete</i>' \
+                      '</div>'.format(row.id)
+
+                return ret
+
+        else:
+            return super(ImplementationHouseholdListApi, self).render_column(row, column)
+
+class ImplementationTraceabilityListApi(BaseDatatableView):
+    model = models.InstrumentTraceabilityRouteObject
+    columns = ['creacion','user','observation']
+    order_columns = ['creacion','user','observation']
+
+    def get_initial_queryset(self):
+        self.route = models.Routes.objects.get(id = self.kwargs['pk'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.implementation.ver"
+            ]
+        }
+
+        if self.request.user.is_superuser:
+            return self.model.objects.filter(instrument=self.instrument_object)
+        else:
+            return self.model.objects.filter(instrument=self.instrument_object)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(observacion__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+
+        if column == 'creacion':
+            return timezone.localtime(row.creacion).strftime('%d de %B del %Y a las %I:%M:%S %p')
+
+
+        elif column == 'user':
+            return row.user.get_full_name()
+
+
+        else:
+            return super(ImplementationTraceabilityListApi, self).render_column(row, column)
+
+class ImplementationHouseholdsListApi(BaseDatatableView):
+    model = models.Households
+    columns = ['id','document','first_name','municipality_attention']
+    order_columns = ['id','document','first_name','municipality_attention']
+
+    def get_initial_queryset(self):
+        self.route = models.Routes.objects.get(id = self.kwargs['pk'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.implementacion.ver",
+                "usuarios.iraca.implementacion.hogares.ver"
+            ]
+        }
+
+        return self.model.objects.filter(routes = self.route)
+
+
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(first_name__icontains=search) | Q(second_name__icontains=search) | \
+                Q(first_surname__icontains=search) | Q(second_surname__icontains=search) | \
+                Q(document__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                           '<a href="view/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver información del hogar">' \
+                                '<i class="material-icons">remove_red_eye</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'document':
+
+            return '<div class="center-align"><b>' + str(row.document) + '</b></div>'
+
+        elif column == 'first_name':
+            return row.get_full_name()
+
+        elif column == 'municipality_attention':
+            return '{0}, {1}'.format(row.municipality_attention.nombre,row.municipality_attention.departamento.nombre)
+
+
+
+        else:
+            return super(ImplementationHouseholdsListApi, self).render_column(row, column)
 
 class MunicipiosAutocomplete(autocomplete.Select2QuerySetView):
 

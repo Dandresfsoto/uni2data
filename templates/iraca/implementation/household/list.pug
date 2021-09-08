@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -30,34 +30,18 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
 
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca_new/implementation/") Rutas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Implementacion
+                        a(href="#") {{ breadcrum_active | truncatechars:15 }}
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
-
-    |{% if permiso_crear %}
-
-    ul(class="collapsible",data-collapsible="accordion")
-        li(class="bold waves-effect waves-light button-menu")
-
-            div(class="collapsible-header active")
-                i(class="material-icons") call_to_action
-                | Acciones
-
-            div(class="collapsible-body collapsible-body-blue")
-                ul
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="create/") Añadir ruta
-                            i(class="material-icons icon-sican") map
-
-                    div(class="divider divider-perfil")
-
-    |{% endif %}
-
-
 
 
 block container_principal
@@ -65,20 +49,17 @@ block container_principal
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
             thead
                 tr
-                    th Editar
-                    th Actividades
+                    th Ver
+                    th Cédula
                     th Nombre
-                    th Novedades
-                    th Progreso
-                    th Hogares
+                    th Municipio
             tbody
                 tr
-                    td Editar
-                    td Actividades
+                    td Ver
+                    td Cédula
                     td Nombre
-                    td Novedades
-                    td Progreso
-                    td Hogares
+                    td Municipio
+
 
 
 block body_script_auth
@@ -92,9 +73,9 @@ block body_script_auth
                 searching: true,
                 processing: true,
                 serverSide: true,
-                order: [[ 5, "desc" ]],
-                columnDefs: [{"orderable": false, "targets": [0,1,3]}],
+                order: [[ 1, "asc" ]],
                 ajax: "{{ url_datatable }}",
+                columnDefs: [{"orderable": false, "targets": [0,3]}],
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
                 },

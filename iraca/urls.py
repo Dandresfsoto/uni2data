@@ -48,4 +48,17 @@ urlpatterns = [
     path('implementation/', views.ImplementationListView.as_view()),
     path('implementation/create/', views.ImplementationCreateView.as_view()),
     path('implementation/edit/<uuid:pk>/', views.ImplementationUpdateView.as_view()),
+    path('implementation/activities/<uuid:pk>/', views.ImplementationActivitiesListView.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/', views.ImplementationHouseholdsListView.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/add/<uuid:pk_instrument>/', views.ImplementationInstrumentsListView.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/view/<uuid:pk_instrument_object>/', views.ImplementationInstrumentsObjectListView.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/household/<uuid:pk_instrument_object>/', views.ImplementationHouseholdsObjectListView.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/traceability/<uuid:pk_instrument_object>/', views.ImplementationTraceabilityObjectListView.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/edit/<uuid:pk_instrument_object>/', views.ImplementationUpdateObjectListView.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/approve/<uuid:pk_instrument_object>/', views.ApproveInstrumentHouseholdView.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/reject/<uuid:pk_instrument_object>/', views.RejectInstrumentHouseholdView.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/delete/<uuid:pk_instrument_object>/', views.DeleteInstrumentHouseholdView.as_view()),
+
+    path('implementation/household/<uuid:pk>/', views.ImplementationHouseholdListView.as_view()),
+    path('implementation/household/<uuid:pk>/view/<uuid:pk_household>', views.ImplementationHouseholdView.as_view()),
 ]

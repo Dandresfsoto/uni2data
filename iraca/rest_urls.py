@@ -14,6 +14,11 @@ urlpatterns = [
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/', rest_views.ContactsListApi.as_view()),
 
     path('implementation/', rest_views.ImplementationListApi.as_view()),
+    path('implementation/activities/<uuid:pk>/', rest_views.ImplementationActivitiesListApi.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/', rest_views.ImplementationHouseholdListApi.as_view()),
+    path('implementation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/traceability/<uuid:pk_instrument_object>/', rest_views.ImplementationTraceabilityListApi.as_view()),
+
+    path('implementation/household/<uuid:pk>/', rest_views.ImplementationHouseholdsListApi.as_view()),
 
     path('certificate/autocomplete/municipios/', rest_views.MunicipiosAutocomplete.as_view()),
 ]
