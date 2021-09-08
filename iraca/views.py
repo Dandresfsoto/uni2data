@@ -235,6 +235,56 @@ class HouseholdUpdateView(LoginRequiredMixin,
 
 #------------------------------- deliverables -----------------------------------------
 
+class DeliverablesOptionsView(LoginRequiredMixin,
+                          MultiplePermissionsRequiredMixin,
+                          TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/deliverables/option.html'
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver"
+            "usuarios.iraca_2021.entregables.ver",
+        ]
+    }
+
+    def dispatch(self, request, *args, **kwargs):
+        items = self.get_items()
+        if len(items) == 0:
+            return redirect(self.login_url)
+        return super(DeliverablesOptionsView, self).dispatch(request, *args, **kwargs)
+
+    def get_items(self):
+        items = []
+
+        if self.request.user.has_perm('usuarios.iraca_2021.entregables.ver'):
+            items.append({
+                'sican_categoria': 'Implementacion',
+                'sican_color': 'purple darken-4',
+                'sican_order': 1,
+                'sican_url': 'implementation/',
+                'sican_name': 'Implementacion',
+                'sican_icon': 'featured_play_list',
+                'sican_description': 'Entregables del modulo de implementacion'
+            })
+
+        if self.request.user.has_perm('usuarios.iraca_2021.entregables.ver'):
+            items.append({
+                'sican_categoria': 'Formulacion',
+                'sican_color': 'brown darken-4',
+                'sican_order': 2,
+                'sican_url': 'formulation/',
+                'sican_name': 'Formulacion',
+                'sican_icon': 'data_usage',
+                'sican_description': 'Entregables del modulo de formulacion'
+            })
+        return items
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "ENTREGABLES"
+        kwargs['items'] = self.get_items()
+        return super(DeliverablesOptionsView,self).get_context_data(**kwargs)
 
 class VisitsListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
@@ -252,7 +302,8 @@ class VisitsListView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         kwargs['title'] = "Entregables: Momentos"
-        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/deliverables/'
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/deliverables/implementation/'
+        kwargs['breadcrum_active'] = "Implementacion"
         return super(VisitsListView,self).get_context_data(**kwargs)
 
 class InstrumentListView(LoginRequiredMixin,
@@ -272,11 +323,52 @@ class InstrumentListView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         moment = models.Moments.objects.get(id=self.kwargs['pk_momento'])
         kwargs['title'] = "Entregables: Instrumentos"
-        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/deliverables/{0}/instruments/'.format(moment.id)
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/deliverables/implementation/{0}/instruments/'.format(moment.id)
         kwargs['breadcrum_active'] = moment.name
+        kwargs['breadcrum_1'] = "Formulacion"
         return super(InstrumentListView,self).get_context_data(**kwargs)
 
+class FormulationVisitsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
 
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.entregables.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/deliverables/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Entregables: Momentos"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/deliverables/formulation/'
+        kwargs['breadcrum_active'] = "Formulacion"
+        return super(FormulationVisitsListView,self).get_context_data(**kwargs)
+
+class FormulationInstrumentListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.entregables.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/deliverables/instruments/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        moment = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        kwargs['title'] = "Entregables: Instrumentos"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/deliverables/formulation/{0}/instruments/'.format(moment.id)
+        kwargs['breadcrum_active'] = moment.name
+        kwargs['breadcrum_1'] = "Formulacion"
+        return super(FormulationInstrumentListView,self).get_context_data(**kwargs)
 
 #----------------------------------------------------------------------------------
 

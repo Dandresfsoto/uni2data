@@ -80,7 +80,7 @@ class MomentsListApi(BaseDatatableView):
                 "usuarios.iraca.entregables.ver"
             ]
         }
-        return self.model.objects.all()
+        return self.model.objects.filter(type_moment="implementacion")
 
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
@@ -162,6 +162,101 @@ class InstrumentsListApi(BaseDatatableView):
 
         else:
             return super(InstrumentsListApi, self).render_column(row, column)
+
+class FormulationMomentsListApi(BaseDatatableView):
+    model = models.Moments
+    columns = ['id','name','consecutive','type']
+    order_columns = ['id','name','consecutive','type']
+
+    def get_initial_queryset(self):
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.entregables.ver"
+            ]
+        }
+        return self.model.objects.filter(type_moment="formulacion")
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                      '<a href="{0}/instruments/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver soportes de la visita: {1}">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.name)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'.format(row.id,row.name)
+
+            return ret
+
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>{0}</b></div>'.format(row.get_consecutive())
+
+        elif column == 'type':
+            return '<div class="center-align"><b>{0}</b></div>'.format(row.type)
+
+
+        else:
+            return super(FormulationMomentsListApi, self).render_column(row, column)
+
+class FormulationInstrumentsListApi(BaseDatatableView):
+    model = models.Instruments
+    columns = ['name','consecutive','model', 'id']
+    order_columns = ['name','consecutive','model', 'id']
+
+    def get_initial_queryset(self):
+        self.moment = models.Moments.objects.get(pk=self.kwargs['pk_moment'])
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.entregables.ver"
+            ]
+        }
+        return self.model.objects.filter(moment = self.moment)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                      '<a href="report/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Generar informe: {1}">' \
+                      '<i class="material-icons">email</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.name)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">email</i>' \
+                       '</div>'.format(row.id,row.name)
+
+            return ret
+
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>{0}</b></div>'.format(row.get_consecutive())
+
+
+        else:
+            return super(FormulationInstrumentsListApi, self).render_column(row, column)
 
 class MeetingsListApi(BaseDatatableView):
     model = Meetings

@@ -12,8 +12,14 @@ urlpatterns = [
     path('certificate/<uuid:pk>/', views.CerticateListView.as_view()),
     path('certificate/<uuid:pk>/create/', views.CerticateCreateView.as_view()),
 
-    path('deliverables/', views.VisitsListView.as_view()),
-    path('deliverables/<uuid:pk_momento>/instruments/',views.InstrumentListView.as_view()),
+    path('deliverables/', views.DeliverablesOptionsView.as_view()),
+
+    path('deliverables/implementation/', views.VisitsListView.as_view()),
+    path('deliverables/implementation/<uuid:pk_momento>/instruments/',views.InstrumentListView.as_view()),
+
+    path('deliverables/formulation/', views.FormulationVisitsListView.as_view()),
+    path('deliverables/formulation/<uuid:pk_momento>/instruments/',views.FormulationInstrumentListView.as_view()),
+
 
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/', views.MiltoneslistView.as_view()),
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/create/', views.MiltonescreateView.as_view()),
