@@ -52,7 +52,7 @@ def certificacion_laboral(contratista):
         })
 
     ret = {
-            'CPS':[
+            'ops':[
                 {
                     'attributes': {'bold':True},
                     'insert': 'LA ASOCIACIÓN COLOMBIANA DE INNOVACIÓN'

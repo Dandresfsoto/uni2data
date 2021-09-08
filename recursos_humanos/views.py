@@ -224,7 +224,7 @@ class CertificacionesCreateView(LoginRequiredMixin,
                                           0] + '/pdfkit/certificaciones/header/certificacion_direccion_financiera.html',
                                       'rb'), "html.parser")
 
-        elif form.cleaned_data['firma'] == 'Gerencia':
+        elif form.cleaned_data['firma'] == 'Representante legal':
 
             template_no_header = BeautifulSoup(
                 open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/certificaciones/no_header/certificacion_gerencia.html',
