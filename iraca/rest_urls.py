@@ -21,4 +21,12 @@ urlpatterns = [
     path('implementation/household/<uuid:pk>/', rest_views.ImplementationHouseholdsListApi.as_view()),
 
     path('certificate/autocomplete/municipios/', rest_views.MunicipiosAutocomplete.as_view()),
+
+    path('formulation/', rest_views.FormulationListApi.as_view()),
+    path('formulation/activities/<uuid:pk>/', rest_views.FormulationActivitiesListApi.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/',rest_views.FormulationHouseholdListApi.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/traceability/<uuid:pk_instrument_object>/',rest_views.FormulationTraceabilityListApi.as_view()),
+
+    path('formulation/household/<uuid:pk>/', rest_views.FormulationHouseholdsListApi.as_view()),
+
 ]

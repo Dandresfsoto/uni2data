@@ -214,9 +214,10 @@ class Moments(models.Model):
     type = models.CharField(max_length=100)
     novelty = models.BooleanField(default=True)
     progress = models.BooleanField(default=True)
+    type_moment = models.CharField(max_length=100)
 
     def __str__(self):
-        return '{0}'.format(self.name)
+        return '{0} - {1}' .format(self.name, self.type_moment)
 
     def get_number_instruments(self):
         return Instruments.objects.filter(moment=self).count()
@@ -279,6 +280,8 @@ class Routes(models.Model):
 
     visible = models.BooleanField(default=True)
     goal = models.PositiveIntegerField(default=0)
+    novelties_form =models.IntegerField(default=0)
+    progress_form = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
 
     def __str__(self):
         return self.name
@@ -286,9 +289,9 @@ class Routes(models.Model):
     def update_progreso(self):
 
         query = ObjectRouteInstrument.objects.filter(route=self)
-        moments = Moments.objects.all()
+        moments = Moments.objects.filter(type_moment="implementacion")
 
-        households__ids = query.filter(estate__in=['aprobado']).values_list('households__id', flat=True)
+        households__ids = query.filter(estate__in=['aprobado'],moment__type_moment__contains="implementacion").values_list('households__id', flat=True)
 
         try:
             progress = (households__ids.count()/(self.goal * moments.count()))*100.0
@@ -300,8 +303,31 @@ class Routes(models.Model):
 
         return self.progress
 
+    def update_progres_formulation(self):
+
+        query = ObjectRouteInstrument.objects.filter(route=self)
+        moments = Moments.objects.filter(type_moment="formulacion")
+
+        households__ids = query.filter(estate__in=['aprobado'],moment__type_moment__contains="formulacion").values_list('households__id', flat=True)
+
+        try:
+            progress_form = (households__ids.count()/(self.goal * moments.count()))*100.0
+        except:
+            progress_form = 0
+
+        self.progress_form = progress_form
+        self.save()
+
+        return self.progress_form
+
     def update_novedades(self):
-        self.novelties = ObjectRouteInstrument.objects.filter(route=self, estate='cargado').count()
+        self.novelties = ObjectRouteInstrument.objects.filter(route=self, estate='cargado',moment__type_moment__contains="implementacion").count()
+        self.save()
+        self.update_progreso()
+        return 'Ok'
+
+    def update_novelties_form(self):
+        self.novelties_form = ObjectRouteInstrument.objects.filter(route=self, estate='cargado',moment__type_moment__contains="formulacion").count()
         self.save()
         self.update_progreso()
         return 'Ok'
@@ -423,14 +449,12 @@ class InstrumentTraceabilityRouteObject(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='traceability_instrument_user_iraca_2021')
     observation = models.TextField()
 
-
 #----------------------------------------------------------------------------------
 
 #---------------------------- MODELS OBJECTS  -------------------------------------
 
 def upload_dinamic_iraca_2021(instance, filename):
     return '/'.join(['Iraca 2021', str(instance.route.name),str(instance.instrument.moment.name), instance.name, filename])
-
 
 class Documento(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)

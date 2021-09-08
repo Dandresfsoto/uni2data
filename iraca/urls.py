@@ -61,4 +61,20 @@ urlpatterns = [
 
     path('implementation/household/<uuid:pk>/', views.ImplementationHouseholdListView.as_view()),
     path('implementation/household/<uuid:pk>/view/<uuid:pk_household>', views.ImplementationHouseholdView.as_view()),
+
+
+    path('formulation/', views.FormulationListView.as_view()),
+    path('formulation/activities/<uuid:pk>/', views.FormulationActivitiesListView.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/',views.FormulationHouseholdsListView.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/add/<uuid:pk_instrument>/',views.FormulationInstrumentsListView.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/view/<uuid:pk_instrument_object>/',views.FormulationInstrumentsObjectListView.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/household/<uuid:pk_instrument_object>/',views.FormulationHouseholdsObjectListView.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/traceability/<uuid:pk_instrument_object>/', views.FormulationTraceabilityObjectListView.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/edit/<uuid:pk_instrument_object>/',views.FormulationUpdateObjectListView.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/approve/<uuid:pk_instrument_object>/',views.FormulationApproveInstrumentHouseholdView.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/reject/<uuid:pk_instrument_object>/',views.FormulationRejectInstrumentHouseholdView.as_view()),
+    path('formulation/activities/<uuid:pk>/instruments/<uuid:pk_moment>/delete/<uuid:pk_instrument_object>/',views.FormulationDeleteInstrumentHouseholdView.as_view()),
+
+    path('formulation/household/<uuid:pk>/', views.FormulationHouseholdListView.as_view()),
+    path('formulation/household/<uuid:pk>/view/<uuid:pk_household>', views.FormulationtionHouseholdView.as_view()),
 ]

@@ -1269,7 +1269,7 @@ class ImplementationListView(LoginRequiredMixin,
 
 
     def get_context_data(self, **kwargs):
-        kwargs['title'] = "Rutas"
+        kwargs['title'] = "Implementacion"
         kwargs['url_datatable'] = '/rest/v1.0/iraca_new/implementation/'
         kwargs['permiso_crear'] = self.request.user.has_perm("usuarios.iraca.rutas.crear")
         storage = get_messages(self.request)
@@ -1344,6 +1344,8 @@ class ImplementationUpdateView(LoginRequiredMixin,
 
         models.Routes.objects.get(id=self.kwargs['pk']).update_novedades()
         models.Routes.objects.get(id=self.kwargs['pk']).update_progreso()
+        models.Routes.objects.get(id=self.kwargs['pk']).update_progres_formulation()
+        models.Routes.objects.get(id=self.kwargs['pk']).update_novelties_form()
 
         return HttpResponseRedirect(self.get_success_url())
 
@@ -1401,7 +1403,7 @@ class ImplementationHouseholdsListView(TemplateView):
     def get_context_data(self, **kwargs):
         self.route = models.Routes.objects.get(id=self.kwargs['pk'])
         self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
-        kwargs['title'] = "Rutas"
+        kwargs['title'] = "ACTIVIDADES"
         kwargs['url_datatable'] = '/rest/v1.0/iraca_new/implementation/activities/{0}/instruments/{1}/'.format(
             kwargs['pk'],
             kwargs['pk_moment'],
@@ -1528,12 +1530,12 @@ class ImplementationInstrumentsListView(CreateView):
 
 
     def get_context_data(self, **kwargs):
-        kwargs['title'] = "Rutas"
+        kwargs['title'] = "AGREGAR"
         kwargs['breadcrum_1'] = self.route.name
         kwargs['breadcrum_2'] = self.moment.name
         kwargs['breadcrum_active'] = self.instrument.short_name
         kwargs['ruta_breadcrum_1'] = 'Rutas'
-        kwargs['url_ruta_breadcrum'] = '/iraca_new/rutas/'
+        kwargs['url'] = 'Implementacion'
         storage = get_messages(self.request)
         for message in storage:
             kwargs['success'] = message
@@ -1578,13 +1580,12 @@ class ImplementationInstrumentsObjectListView(TemplateView):
         return self.models.get('template_view')
 
     def get_context_data(self, **kwargs):
-        kwargs['title'] = "Rutas"
+        kwargs['title'] = "VER"
         kwargs['breadcrum_1'] = self.route.name
         kwargs['breadcrum_2'] = self.moment.name
         kwargs['breadcrum_active'] = self.instrument.short_name
         kwargs['objeto'] = self.object
-        kwargs['ruta_breadcrum'] = 'Rutas'
-        kwargs['url_ruta_breadcrum'] = '/iraca_new/implementacion/'
+        kwargs['ruta_breadcrum'] = 'Implementacion'
         storage = get_messages(self.request)
         for message in storage:
             kwargs['success'] = message
@@ -1614,7 +1615,7 @@ class ImplementationHouseholdsObjectListView(TemplateView):
         return super(ImplementationHouseholdsObjectListView, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        kwargs['title'] = "Rutas"
+        kwargs['title'] = "HOGARES"
         kwargs['breadcrum_1'] = self.route.name
         kwargs['breadcrum_2'] = self.moment.name
         kwargs['breadcrum_active'] = self.instrument.short_name
@@ -1659,7 +1660,7 @@ class ImplementationTraceabilityObjectListView(TemplateView):
             return handler(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        kwargs['title'] = "Rutas"
+        kwargs['title'] = "TRAZABILIDAD"
         kwargs['breadcrum_1'] = self.route.name
         kwargs['breadcrum_2'] = self.moment.name
         kwargs['breadcrum_active'] = self.instrument.short_name
@@ -1790,12 +1791,11 @@ class ImplementationUpdateObjectListView(UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
-        kwargs['title'] = "Rutas"
+        kwargs['title'] = "EDITAR"
         kwargs['breadcrum_1'] = self.route.name
         kwargs['breadcrum_2'] = self.moment.name
         kwargs['breadcrum_active'] = self.instrument.short_name
-        kwargs['ruta_breadcrum'] = 'Rutas'
-        kwargs['url_ruta_breadcrum'] = '/iraca_new/rutas/'
+        kwargs['url'] = 'Implementacion'
         storage = get_messages(self.request)
         for message in storage:
             kwargs['success'] = message
@@ -1965,7 +1965,6 @@ class ImplementationHouseholdListView(TemplateView):
     login_url = settings.LOGIN_URL
     template_name = 'iraca/implementation/household/list.html'
 
-
     def dispatch(self, request, *args, **kwargs):
 
         self.route = models.Routes.objects.get(id=self.kwargs['pk'])
@@ -1986,10 +1985,9 @@ class ImplementationHouseholdListView(TemplateView):
                 handler = self.http_method_not_allowed
             return handler(request, *args, **kwargs)
 
-
     def get_context_data(self, **kwargs):
         ruta = models.Routes.objects.get(id = kwargs['pk'])
-        kwargs['title'] = "Rutas"
+        kwargs['title'] = "HOGARES"
         kwargs['url_datatable'] = '/rest/v1.0/iraca_new/implementation/household/{0}/'.format(kwargs['pk'])
         kwargs['breadcrum_active'] = ruta.name
         storage = get_messages(self.request)
@@ -2024,12 +2022,703 @@ class ImplementationHouseholdView(TemplateView):
                 handler = self.http_method_not_allowed
             return handler(request, *args, **kwargs)
 
-
     def get_context_data(self, **kwargs):
         kwargs['hogar'] = self.household
-        kwargs['title'] = "Rutas"
+        kwargs['title'] = "HOGAR"
         kwargs['breadcrum_1'] = self.route.name
         kwargs['breadcrum_active'] = self.household.document
         return super(ImplementationHouseholdView,self).get_context_data(**kwargs)
 
+class FormulationListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
 
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.formulacion.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/formulation/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Formulacion"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/formulation/'
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationListView,self).get_context_data(**kwargs)
+
+class FormulationActivitiesListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/formulation/activities/list.html'
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver",
+            ]
+        }
+        return permissions
+
+    def get_context_data(self, **kwargs):
+        routes = models.Routes.objects.get(id = kwargs['pk'])
+        kwargs['title'] = "Actividades"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/formulation/activities/{0}/'.format(kwargs['pk'])
+        kwargs['breadcrum_active'] = routes.name
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationActivitiesListView,self).get_context_data(**kwargs)
+
+class FormulationHouseholdsListView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/formulation/activities/instruments/list.html'
+
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulation.ver",
+                "usuarios.iraca.formulation.crear",
+            ]
+        }
+        return permissions
+
+    def get_context_data(self, **kwargs):
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        kwargs['title'] = "ACTIVIDADES"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/formulation/activities/{0}/instruments/{1}/'.format(
+            kwargs['pk'],
+            kwargs['pk_moment'],
+        )
+        kwargs['breadcrum_1'] = self.route.name
+        kwargs['breadcrum_active'] = self.moment.name
+        kwargs['instruments'] = self.route.get_instruments_list(self.moment)
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationHouseholdsListView,self).get_context_data(**kwargs)
+
+class FormulationInstrumentsListView(CreateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        self.instrument = models.Instruments.objects.get(id=self.kwargs['pk_instrument'])
+
+        try:
+            self.models = models_instruments.get_model(self.instrument.model)
+        except:
+            pass
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver",
+                "usuarios.iraca.formulacion.crear",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def get_template_names(self):
+        return self.models.get('template')
+
+
+    def get_form_class(self):
+        self.model = self.models.get('model')
+        return self.models.get('form')
+
+
+    def update_objet_instrument(self,id,model,creation):
+
+        instrument = models.ObjectRouteInstrument.objects.get(id = id)
+
+        if creation:
+            models.ObjectRouteInstrument.objects.filter(id = id).update(
+                creacion_user=self.request.user
+            )
+
+            models.InstrumentTraceabilityRouteObject.objects.create(
+                instrument = instrument,
+                user = self.request.user,
+                observation = 'Creación del soporte'
+            )
+
+        else:
+            models.InstrumentTraceabilityRouteObject.objects.create(
+                instrument = instrument,
+                user=self.request.user,
+                observation='Actualización del soporte'
+            )
+
+        models.ObjectRouteInstrument.objects.filter(id=id).update(
+            model = self.instrument.name,
+            support = model.id,
+            update_date = timezone.now(),
+            update_user = self.request.user,
+            consecutive = self.instrument.consecutive,
+            name = self.instrument.short_name,
+            estate = 'cargado'
+        )
+
+        self.route.update_novelties_form()
+
+        return 'Ok'
+
+
+
+    def form_valid(self, form):
+
+        self.object = form.save(commit=False)
+        self.object.route = self.route
+        self.object.instrument = self.instrument
+        self.object.name = self.instrument.short_name
+        self.object.save()
+
+        self.object.households.clear()
+
+        if self.instrument.level == 'individual':
+            self.object.households.add(form.cleaned_data['households'])
+
+        elif self.instrument.level == 'route':
+            pass
+
+        else:
+            self.object.households.add(*form.cleaned_data['households'])
+
+
+        object = models.ObjectRouteInstrument.objects.create(route=self.route, moment=self.moment, instrument=self.instrument)
+        ids = self.object.households.all().values_list('id',flat = True)
+        object.households.add(*ids)
+        models.ObservationsInstrumentRouteObject.objects.create(instrument = object,user_creation = self.request.user,observation = "Creación del instrumento")
+
+        self.update_objet_instrument(object.id, self.object, True)
+        #objeto.clean_similares()
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "AGREGAR"
+        kwargs['breadcrum_1'] = self.route.name
+        kwargs['breadcrum_2'] = self.moment.name
+        kwargs['breadcrum_active'] = self.instrument.short_name
+        kwargs['ruta_breadcrum_1'] = 'Rutas'
+        kwargs['url'] = 'Formulacion'
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationInstrumentsListView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {'pk': self.route.id, 'short_name': self.instrument.short_name, 'pk_instrument': self.instrument.pk}
+
+class FormulationInstrumentsObjectListView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        self.instrument = self.instrument_object.instrument
+        self.models = models_instruments.get_model(self.instrument.model)
+        self.object = self.models.get('model').objects.get(id=self.instrument_object.support)
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def get_template_names(self):
+        return self.models.get('template_view')
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "VER"
+        kwargs['breadcrum_1'] = self.route.name
+        kwargs['breadcrum_2'] = self.moment.name
+        kwargs['breadcrum_active'] = self.instrument.short_name
+        kwargs['objeto'] = self.object
+        kwargs['ruta_breadcrum'] = 'Formulacion'
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationInstrumentsObjectListView,self).get_context_data(**kwargs)
+
+class FormulationHouseholdsObjectListView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+    template_name = 'iraca/formulation/activities/instruments/household/list.html'
+
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        self.instrument = self.instrument_object.instrument
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver",
+            ]
+        }
+
+        return super(FormulationHouseholdsObjectListView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "HOGARES"
+        kwargs['breadcrum_1'] = self.route.name
+        kwargs['breadcrum_2'] = self.moment.name
+        kwargs['breadcrum_active'] = self.instrument.short_name
+        kwargs['households'] = self.instrument_object.households.all()
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationHouseholdsObjectListView,self).get_context_data(**kwargs)
+
+class FormulationTraceabilityObjectListView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+    template_name = 'iraca/formulation/activities/instruments/traceability/traceability.html'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        self.instrument = self.instrument_object.instrument
+        self.models = models_instruments.get_model(self.instrument.model)
+        self.object = self.models.get('model').objects.get(id=self.instrument_object.support)
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "TRAZABILIDAD"
+        kwargs['breadcrum_1'] = self.route.name
+        kwargs['breadcrum_2'] = self.moment.name
+        kwargs['breadcrum_active'] = self.instrument.short_name
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/formulation/activities/{0}/instruments/{1}/traceability/{2}/'.format(
+            kwargs['pk'],
+            kwargs['pk_moment'],
+            kwargs['pk_instrument_object']
+        )
+
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationTraceabilityObjectListView,self).get_context_data(**kwargs)
+
+class FormulationUpdateObjectListView(UpdateView):
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+
+    def get_object(self, queryset=None):
+        self.model = self.models.get('model')
+        return self.model.objects.get(id=self.instrument_object.support)
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        self.instrument = self.instrument_object.instrument
+
+        try:
+            self.models = models_instruments.get_model(self.instrument.model)
+        except:
+            return HttpResponseRedirect('../../')
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver"
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if self.instrument_object.estate in ['cargado', 'rechazado']:
+
+                if request.method.lower() in self.http_method_names:
+                    handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                else:
+                    handler = self.http_method_not_allowed
+                return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def get_template_names(self):
+        return self.models.get('template')
+
+    def get_form_class(self):
+        self.model = self.models.get('model')
+        return self.models.get('form')
+
+    def update_objet_instrument(self, id, model, creation):
+
+        instrument = models.ObjectRouteInstrument.objects.get(id=id)
+
+        if creation:
+            models.ObjectRouteInstrument.objects.filter(id=id).update(
+                creacion_user=self.request.user
+            )
+
+            models.InstrumentTraceabilityRouteObject.objects.create(
+                instrument=instrument,
+                user=self.request.user,
+                observation='Creación del soporte'
+            )
+
+        else:
+            models.InstrumentTraceabilityRouteObject.objects.create(
+                instrument=instrument,
+                user=self.request.user,
+                observation='Actualización del soporte'
+            )
+
+        models.ObjectRouteInstrument.objects.filter(id=id).update(
+            model=self.instrument.name,
+            support=model.id,
+            update_date=timezone.now(),
+            update_user=self.request.user,
+            consecutive=self.instrument.consecutive,
+            name=self.instrument.short_name,
+            estate='cargado'
+        )
+
+        self.route.update_novelties_form()
+
+        return 'Ok'
+
+    def form_valid(self, form):
+
+        self.object = form.save(commit=False)
+        self.object.route = self.route
+        self.object.instrument = self.instrument
+        self.object.name = self.instrument.short_name
+        self.object.save()
+
+        self.object.households.clear()
+        if self.instrument.level == 'individual':
+            self.object.households.add(form.cleaned_data['households'])
+
+        elif self.instrument.level == 'ruta':
+            pass
+
+        else:
+            self.object.households.add(*form.cleaned_data['households'])
+
+        object = self.instrument_object
+
+        ids = self.object.households.all().values_list('id', flat=True)
+        object.households.clear()
+        object.households.add(*ids)
+
+        models.ObservationsInstrumentRouteObject.objects.create(instrument=object, user_creation=self.request.user,
+                                                                 observation="Actualización del instrumento")
+
+        self.update_objet_instrument(object.id, self.object, False)
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "EDITAR"
+        kwargs['breadcrum_1'] = self.route.name
+        kwargs['breadcrum_2'] = self.moment.name
+        kwargs['breadcrum_active'] = self.instrument.short_name
+        kwargs['url'] = 'Formulacion'
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationUpdateObjectListView, self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {'pk': self.route.id, 'short_name': self.instrument.short_name,
+                'pk_instrument': self.instrument.pk, 'pk_instrument_object': self.instrument_object.pk}
+
+class FormulationApproveInstrumentHouseholdView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.models = models_instruments.get_model(self.instrument_object.instrument.model)
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver",
+                "usuarios.iraca.formulacion.aprobar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.is_superuser:
+                self.instrument_object.estate = 'aprobado'
+                models.InstrumentTraceabilityRouteObject.objects.create(
+                    instrument=self.instrument_object,
+                    user=self.request.user,
+                    observation='Aprobación del soporte'
+                )
+                models.ObservationsInstrumentRouteObject.objects.create(
+                    user_creation=self.request.user,
+                    instrument=self.instrument_object,
+                    observation="Soporte aprobado"
+                )
+                self.instrument_object.save()
+
+                self.route.update_novelties_form()
+                self.route.update_progres_formulation()
+
+                return HttpResponseRedirect('../../')
+            elif request.user.has_perms(self.permissions.get('all')):
+                self.instrument_object.estate = 'aprobado'
+                models.InstrumentTraceabilityRouteObject.objects.create(
+                    instrument=self.instrument_object,
+                    user=self.request.user,
+                    observation='Aprobación del soporte'
+                )
+                models.ObservationsInstrumentRouteObject.objects.create(
+                    user_creation=self.request.user,
+                    instrument=self.instrument_object,
+                    observation="Soporte aprobado"
+                )
+                self.instrument_object.save()
+
+                self.route.update_novelties_form()
+                self.route.update_progres_formulation()
+
+                return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class FormulationRejectInstrumentHouseholdView(FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/formulation/activities/instruments/reject.html'
+    form_class = forms.InstrumentsRejectForm
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        self.instrument = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def form_valid(self, form):
+
+        if self.instrument != 'rechazado':
+            self.instrument.estate = 'rechazado'
+            models.InstrumentTraceabilityRouteObject.objects.create(
+                instrument=self.instrument,
+                user=self.request.user,
+                observation=form.cleaned_data['observation']
+            )
+            models.ObservationsInstrumentRouteObject.objects.create(
+                user_creation=self.request.user,
+                instrument=self.instrument,
+                observation=form.cleaned_data['observation']
+            )
+            self.instrument.save()
+            self.route.update_novelties_form()
+
+        return super(FormulationRejectInstrumentHouseholdView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Rutas"
+        kwargs['breadcrum_1'] = self.route.name
+        kwargs['breadcrum_2'] = self.moment.name
+        kwargs['breadcrum_active'] = self.instrument.instrument.short_name
+
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationRejectInstrumentHouseholdView, self).get_context_data(**kwargs)
+
+class FormulationDeleteInstrumentHouseholdView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.models = models_instruments.get_model(self.instrument_object.instrument.model)
+
+        self.permissions = {
+            "eliminar": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver",
+                "usuarios.iraca.formulacion.actividades.ver",
+                "usuarios.iraca.formulacion.actividades.eliminar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions['eliminar']):
+                if self.instrument_object.estate == 'cargado' or self.instrument_object.estate == 'rechazado':
+                    self.models.get('model').objects.get(id = self.instrument_object.support).delete()
+                    models.InstrumentTraceabilityRouteObject.objects.filter(instrument = self.instrument_object).delete()
+                    models.ObservationsInstrumentRouteObject.objects.filter(instrument = self.instrument_object).delete()
+                    self.instrument_object.delete()
+                    self.route.update_novedades()
+                    return HttpResponseRedirect('../../')
+                else:
+                    return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class FormulationHouseholdListView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/formulation/household/list.html'
+
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver",
+                "usuarios.iraca.formulacion.hogares.ver",
+            ],
+        }
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+
+    def get_context_data(self, **kwargs):
+        ruta = models.Routes.objects.get(id = kwargs['pk'])
+        kwargs['title'] = "HOGARES"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/formulation/household/{0}/'.format(kwargs['pk'])
+        kwargs['breadcrum_active'] = ruta.name
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationHouseholdListView,self).get_context_data(**kwargs)
+
+class FormulationtionHouseholdView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/formulation/household/view.html'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk'])
+        self.household = models.Households.objects.get(id=self.kwargs['pk_household'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.implementacion.ver",
+                "usuarios.iraca.implementacion.hogares.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['hogar'] = self.household
+        kwargs['title'] = "HOGAR"
+        kwargs['breadcrum_1'] = self.route.name
+        kwargs['breadcrum_active'] = self.household.document
+        return super(FormulationtionHouseholdView,self).get_context_data(**kwargs)

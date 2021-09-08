@@ -1,4 +1,4 @@
-extends ../../../../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -31,34 +31,17 @@ block side_nav_container
 
 
                     li(class="bold waves-effect waves-light")
-                        a(href="/iraca_new/implementation/") Implementacion
+                        a(href="/iraca_new/formulation/") Formulacion
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
-
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="../../../../") Actividades: {{ breadcrum_1 | truncatechars:15 }}
-                            i(class="material-icons icon-sican") keyboard_arrow_right
-
-                    div(class="divider divider-perfil")
-
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="../../") {{ breadcrum_2 | truncatechars:22 }}
-                            i(class="material-icons icon-sican") keyboard_arrow_right
-
-                    div(class="divider divider-perfil")
-
-
 
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Trazabilidad: {{ breadcrum_active | truncatechars:15 }}
+                        a(href="#") {{ breadcrum_active | truncatechars:15 }}
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
-
 
 
 block container_principal
@@ -66,14 +49,17 @@ block container_principal
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
             thead
                 tr
-                    th Fecha
-                    th Usuario
-                    th Observación
+                    th Ver
+                    th Cédula
+                    th Nombre
+                    th Municipio
             tbody
                 tr
-                    td Fecha
-                    td Usuario
-                    td Observación
+                    td Ver
+                    td Cédula
+                    td Nombre
+                    td Municipio
+
 
 
 block body_script_auth
@@ -87,9 +73,9 @@ block body_script_auth
                 searching: true,
                 processing: true,
                 serverSide: true,
-                order: [[ 0, "asc" ]],
-                columnDefs: [{"orderable": false, "targets": [1,2]}],
+                order: [[ 1, "asc" ]],
                 ajax: "{{ url_datatable }}",
+                columnDefs: [{"orderable": false, "targets": [0,3]}],
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
                 },
