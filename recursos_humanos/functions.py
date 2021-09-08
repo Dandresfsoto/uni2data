@@ -52,10 +52,10 @@ def certificacion_laboral(contratista):
         })
 
     ret = {
-            'ops':[
+            'CPS':[
                 {
                     'attributes': {'bold':True},
-                    'insert': 'LA ASOCIACIÓN NACIONAL PARA EL DESARROLLO SOCIAL ANDES'
+                    'insert': 'LA ASOCIACIÓN COLOMBIANA DE INNOVACIÓN'
                 },
                 {
                     'attributes': {'align': 'center','header':3},
@@ -66,7 +66,7 @@ def certificacion_laboral(contratista):
                 },
                 {
                     'attributes': {'bold': True},
-                    'insert': 'NIT. 800.228.885-3'
+                    'insert': 'NIT. 901.294.654-6'
                 },
                 {
                     'attributes': {'align': 'center', 'header': 3},
@@ -87,7 +87,7 @@ def certificacion_laboral(contratista):
                     'insert': '\n'
                 },
                 {
-                    'insert': 'Que en el sistema de información SICAN se encuentra registrada la siguiente información de '
+                    'insert': 'Que en el sistema de información UNI2DATA se encuentra registrada la siguiente información de '
                 },
                 {
                     'attributes': {'bold': True},
