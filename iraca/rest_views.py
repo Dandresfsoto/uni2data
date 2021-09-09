@@ -1406,6 +1406,274 @@ class FormulationHouseholdsListApi(BaseDatatableView):
         else:
             return super(FormulationHouseholdsListApi, self).render_column(row, column)
 
+class SupportsHouseholdsListApi(BaseDatatableView):
+    model = models.Households
+    columns = ['id','document','first_name','municipality_attention']
+    order_columns = ['id','document','first_name','municipality_attention']
+
+    def get_initial_queryset(self):
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.soportes.ver"
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(first_name__icontains=search) | Q(second_name__icontains=search) | \
+                Q(first_surname__icontains=search) | Q(second_surname__icontains=search) | Q(document__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = '<div class="center-align">' \
+                       '<a href="{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver componentes">' \
+                            '<i class="material-icons">remove_red_eye</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id)
+            return ret
+
+
+        elif column == 'document':
+
+            return '<div class="center-align"><b>' + str(row.document) + '</b></div>'
+
+        elif column == 'first_name':
+            return row.get_full_name()
+
+        elif column == 'municipality_attention':
+            return '{0}, {1}'.format(row.municipality_attention.nombre,row.municipality_attention.departamento.nombre)
+
+
+        else:
+            return super(SupportsHouseholdsListApi, self).render_column(row, column)
+
+class SupportsHouseholdsImplementationMomentsListApi(BaseDatatableView):
+    model = models.Moments
+    columns = ['id','name','consecutive','novelty']
+    order_columns = ['id','name','consecutive','novelty']
+
+    def get_initial_queryset(self):
+
+        self.household = models.Households.objects.get(id = self.kwargs['pk_household'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.support.ver"
+            ]
+        }
+        return self.model.objects.filter(type_moment = "implementacion")
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(nombre__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = '<div class="center-align">' \
+                       '<a href="instrument/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver instrumentos">' \
+                            '<i class="material-icons">remove_red_eye</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id)
+            return ret
+
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>' + str(row.get_consecutive()) + '</b></div>'
+
+        else:
+            return super(SupportsHouseholdsImplementationMomentsListApi, self).render_column(row, column)
+
+class SupportImplementationHouseholdMomentsListApi(BaseDatatableView):
+    model = models.ObjectRouteInstrument
+    columns = ['id','route','consecutive']
+    order_columns = ['id','route','consecutive']
+
+    def get_initial_queryset(self):
+
+        self.households = models.Households.objects.get(id = self.kwargs['pk_household'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.soportes.ver"
+            ]
+        }
+        return self.model.objects.filter(households = self.households,moment=self.moment)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = '<div class="center-align">' \
+                       '<a href="view/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver soporte">' \
+                            '<i class="material-icons">remove_red_eye</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id)
+            return ret
+
+
+        elif column == 'route':
+            return row.instrument.name
+
+
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>' + str(row.instrument.get_consecutive()) + '</b></div>'
+
+
+        else:
+            return super(SupportImplementationHouseholdMomentsListApi, self).render_column(row, column)
+
+class SupportsFormulationHouseholdsListApi(BaseDatatableView):
+    model = models.Households
+    columns = ['id','document','first_name','municipality_attention']
+    order_columns = ['id','document','first_name','municipality_attention']
+
+    def get_initial_queryset(self):
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.soportes.ver"
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(first_name__icontains=search) | Q(second_name__icontains=search) | \
+                Q(first_surname__icontains=search) | Q(second_surname__icontains=search) | Q(document__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = '<div class="center-align">' \
+                       '<a href="{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver componentes">' \
+                            '<i class="material-icons">remove_red_eye</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id)
+            return ret
+
+
+        elif column == 'document':
+
+            return '<div class="center-align"><b>' + str(row.document) + '</b></div>'
+
+        elif column == 'first_name':
+            return row.get_full_name()
+
+        elif column == 'municipality_attention':
+            return '{0}, {1}'.format(row.municipality_attention.nombre,row.municipality_attention.departamento.nombre)
+
+
+        else:
+            return super(SupportsFormulationHouseholdsListApi, self).render_column(row, column)
+
+class SupportsHouseholdsFormulationMomentsListApi(BaseDatatableView):
+    model = models.Moments
+    columns = ['id','name','consecutive','novelty']
+    order_columns = ['id','name','consecutive','novelty']
+
+    def get_initial_queryset(self):
+
+        self.household = models.Households.objects.get(id = self.kwargs['pk_household'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.support.ver"
+            ]
+        }
+        return self.model.objects.filter(type_moment = "formulacion")
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(nombre__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = '<div class="center-align">' \
+                       '<a href="instrument/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver instrumentos">' \
+                            '<i class="material-icons">remove_red_eye</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id)
+            return ret
+
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>' + str(row.get_consecutive()) + '</b></div>'
+
+        else:
+            return super(SupportsHouseholdsFormulationMomentsListApi, self).render_column(row, column)
+
+class SupportFormulationHouseholdMomentsListApi(BaseDatatableView):
+    model = models.ObjectRouteInstrument
+    columns = ['id','route','consecutive']
+    order_columns = ['id','route','consecutive']
+
+    def get_initial_queryset(self):
+
+        self.households = models.Households.objects.get(id = self.kwargs['pk_household'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.soportes.ver"
+            ]
+        }
+        return self.model.objects.filter(households = self.households,moment=self.moment)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = '<div class="center-align">' \
+                       '<a href="view/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver soporte">' \
+                            '<i class="material-icons">remove_red_eye</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id)
+            return ret
+
+
+        elif column == 'route':
+            return row.instrument.name
+
+
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>' + str(row.instrument.get_consecutive()) + '</b></div>'
+
+
+        else:
+            return super(SupportFormulationHouseholdMomentsListApi, self).render_column(row, column)
+
 class MunicipiosAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):

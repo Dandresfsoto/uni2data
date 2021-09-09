@@ -32,4 +32,13 @@ urlpatterns = [
 
     path('formulation/household/<uuid:pk>/', rest_views.FormulationHouseholdsListApi.as_view()),
 
+
+    path('supports/implementation/', rest_views.SupportsHouseholdsListApi.as_view()),
+    path('supports/implementation/<uuid:pk_household>/', rest_views.SupportsHouseholdsImplementationMomentsListApi.as_view()),
+    path('supports/implementation/<uuid:pk_household>/instrument/<uuid:pk_moment>/',rest_views.SupportImplementationHouseholdMomentsListApi.as_view()),
+
+    path('supports/formulation/', rest_views.SupportsFormulationHouseholdsListApi.as_view()),
+    path('supports/formulation/<uuid:pk_household>/', rest_views.SupportsHouseholdsFormulationMomentsListApi.as_view()),
+    path('supports/formulation/<uuid:pk_household>/instrument/<uuid:pk_moment>/',rest_views.SupportFormulationHouseholdMomentsListApi.as_view()),
+
 ]

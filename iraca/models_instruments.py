@@ -5,7 +5,8 @@ models = {
             'model':models.Documento,
             'form':forms.DocumentoForm,
             'template':'iraca/implementation/activities/instruments/templates/documento.html',
-            'template_view':'iraca/implementation/activities/instruments/templates/documento_ver.html'
+            'template_view':'iraca/implementation/activities/instruments/templates/documento_ver.html',
+            'template_support':'iraca/implementation/activities/instruments/templates/documento_support.html'
         },
 }
 

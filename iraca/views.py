@@ -118,7 +118,7 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_categoria': 'Soportes',
                 'sican_color': 'pink darken-4',
                 'sican_order': 8,
-                'sican_url': 'soportes/',
+                'sican_url': 'supports/',
                 'sican_name': 'Soportes',
                 'sican_icon': 'apps',
                 'sican_description': 'Modulo de soportes'
@@ -245,7 +245,7 @@ class DeliverablesOptionsView(LoginRequiredMixin,
     permissions = {
         "all": [
             "usuarios.iraca.ver"
-            "usuarios.iraca_2021.entregables.ver",
+            "usuarios.iraca.entregables.ver",
         ]
     }
 
@@ -1339,8 +1339,6 @@ class SocializationContactsUpdateView(LoginRequiredMixin,
         kwargs['breadcrum_2'] = meeting.municipality.nombre
         kwargs['breadcrum_1'] = certificate.name
         return super(SocializationContactsUpdateView,self).get_context_data(**kwargs)
-
-
 
 #----------------------------------------------------------------------------------
 
@@ -2814,3 +2812,296 @@ class FormulationtionHouseholdView(TemplateView):
         kwargs['breadcrum_1'] = self.route.name
         kwargs['breadcrum_active'] = self.household.document
         return super(FormulationtionHouseholdView,self).get_context_data(**kwargs)
+
+#----------------------------------------------------------------------------------
+
+#------------------------------------- SUPPORTS -----------------------------------
+
+class SupportsOptionsView(LoginRequiredMixin,
+                          MultiplePermissionsRequiredMixin,
+                          TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/support/options.html'
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver"
+            "usuarios.iraca.soportes.ver",
+        ]
+    }
+
+    def dispatch(self, request, *args, **kwargs):
+        items = self.get_items()
+        if len(items) == 0:
+            return redirect(self.login_url)
+        return super(SupportsOptionsView, self).dispatch(request, *args, **kwargs)
+
+    def get_items(self):
+        items = []
+
+        if self.request.user.has_perm('usuarios.iraca.soportes.ver'):
+            items.append({
+                'sican_categoria': 'Implementacion',
+                'sican_color': 'purple darken-4',
+                'sican_order': 1,
+                'sican_url': 'implementation/',
+                'sican_name': 'Implementacion',
+                'sican_icon': 'featured_play_list',
+                'sican_description': 'Soportes del modulo de implementacion'
+            })
+
+        if self.request.user.has_perm('usuarios.iraca.soportes.ver'):
+            items.append({
+                'sican_categoria': 'Formulacion',
+                'sican_color': 'brown darken-4',
+                'sican_order': 2,
+                'sican_url': 'formulation/',
+                'sican_name': 'Formulacion',
+                'sican_icon': 'data_usage',
+                'sican_description': 'Soportes del modulo de formulacion'
+            })
+        return items
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "SOPORTES"
+        kwargs['items'] = self.get_items()
+        return super(SupportsOptionsView,self).get_context_data(**kwargs)
+
+class SupportsHouseholdsImplementationListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.soportes.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/support/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "HOGARES"
+        kwargs['breadcrum_active'] = "Implementacion"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/supports/implementation/'
+        return super(SupportsHouseholdsImplementationListView,self).get_context_data(**kwargs)
+
+class SupportsHouseholdsImplementationMomentsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.soportes.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/support/moments/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "MOMENTOS"
+        kwargs['breadcrum_active'] = models.Households.objects.get(id = kwargs['pk_household']).document
+        kwargs['breadcrum_1'] = "Implementacion"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/supports/implementation/{0}/'.format(kwargs['pk_household'])
+        return super(SupportsHouseholdsImplementationMomentsListView,self).get_context_data(**kwargs)
+
+class SupportImplementationHouseholdMomentsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.soportes.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/support/moments/instruments/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "INSTRUMENTOS"
+        kwargs['breadcrum_2'] = models.Households.objects.get(id=kwargs['pk_household']).document
+        kwargs['breadcrum_active'] = models.Moments.objects.get(id = kwargs['pk_moment']).name
+        kwargs['breadcrum_1'] = "Implementacion"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/supports/implementation/{0}/instrument/{1}/'.format(
+            kwargs['pk_household'],
+            kwargs['pk_moment']
+        )
+        return super(SupportImplementationHouseholdMomentsListView,self).get_context_data(**kwargs)
+
+class SupportHouseholdInstrumentsView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.household = models.Households.objects.get(id=self.kwargs['pk_household'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+
+        self.models = models_instruments.get_model(self.instrument_object.instrument.model)
+        self.object = self.models.get('model').objects.get(id=self.instrument_object.support)
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.soportes.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.method.lower() in self.http_method_names:
+                    handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                else:
+                    handler = self.http_method_not_allowed
+                return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def get_template_names(self):
+        return self.models.get('template_support')
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Rutas"
+        kwargs['breadcrum_2'] = self.household.document
+        kwargs['breadcrum_1'] = "Implementacion"
+        kwargs['breadcrum_3'] = self.moment.name
+        kwargs['breadcrum_active'] = self.instrument_object.instrument.short_name
+        kwargs['objeto'] = self.object
+        kwargs['ruta_breadcrum'] = 'Soportes'
+        kwargs['url_ruta_breadcrum'] = '/iraca_new/supports/implementation/'
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(SupportHouseholdInstrumentsView,self).get_context_data(**kwargs)
+
+class SupportsHouseholdsFormulationListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.soportes.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/support/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "HOGARES"
+        kwargs['breadcrum_active'] = "Implementacion"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/supports/formulation/'
+        return super(SupportsHouseholdsFormulationListView,self).get_context_data(**kwargs)
+
+class SupportsHouseholdsFormulationMomentsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.soportes.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/support/moments/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "MOMENTOS"
+        kwargs['breadcrum_active'] = models.Households.objects.get(id = kwargs['pk_household']).document
+        kwargs['breadcrum_1'] = "Implementacion"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/supports/formulation/{0}/'.format(kwargs['pk_household'])
+        return super(SupportsHouseholdsFormulationMomentsListView,self).get_context_data(**kwargs)
+
+class SupportFormulationHouseholdMomentsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.soportes.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/support/moments/instruments/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "INSTRUMENTOS"
+        kwargs['breadcrum_2'] = models.Households.objects.get(id=kwargs['pk_household']).document
+        kwargs['breadcrum_active'] = models.Moments.objects.get(id = kwargs['pk_moment']).name
+        kwargs['breadcrum_1'] = "Implementacion"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/supports/formulation/{0}/instrument/{1}/'.format(
+            kwargs['pk_household'],
+            kwargs['pk_moment']
+        )
+        return super(SupportFormulationHouseholdMomentsListView,self).get_context_data(**kwargs)
+
+class FormulationSupportHouseholdInstrumentsView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.household = models.Households.objects.get(id=self.kwargs['pk_household'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+
+        self.models = models_instruments.get_model(self.instrument_object.instrument.model)
+        self.object = self.models.get('model').objects.get(id=self.instrument_object.support)
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.soportes.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.method.lower() in self.http_method_names:
+                    handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                else:
+                    handler = self.http_method_not_allowed
+                return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def get_template_names(self):
+        return self.models.get('template_support')
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Rutas"
+        kwargs['breadcrum_2'] = self.household.document
+        kwargs['breadcrum_1'] = "Implementacion"
+        kwargs['breadcrum_3'] = self.moment.name
+        kwargs['breadcrum_active'] = self.instrument_object.instrument.short_name
+        kwargs['objeto'] = self.object
+        kwargs['ruta_breadcrum'] = 'Soportes'
+        kwargs['url_ruta_breadcrum'] = '/iraca_new/supports/formulation/'
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(FormulationSupportHouseholdInstrumentsView,self).get_context_data(**kwargs)
+
+

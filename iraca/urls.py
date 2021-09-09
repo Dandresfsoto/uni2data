@@ -83,4 +83,16 @@ urlpatterns = [
 
     path('formulation/household/<uuid:pk>/', views.FormulationHouseholdListView.as_view()),
     path('formulation/household/<uuid:pk>/view/<uuid:pk_household>', views.FormulationtionHouseholdView.as_view()),
+
+    path('supports/', views.SupportsOptionsView.as_view()),
+    path('supports/implementation/', views.SupportsHouseholdsImplementationListView.as_view()),
+    path('supports/implementation/<uuid:pk_household>/', views.SupportsHouseholdsImplementationMomentsListView.as_view()),
+    path('supports/implementation/<uuid:pk_household>/instrument/<uuid:pk_moment>/',views.SupportImplementationHouseholdMomentsListView.as_view()),
+    path('supports/implementation/<uuid:pk_household>/instrument/<uuid:pk_moment>/view/<uuid:pk_instrument_object>/',views.SupportHouseholdInstrumentsView.as_view()),
+
+    path('supports/formulation/', views.SupportsHouseholdsFormulationListView.as_view()),
+    path('supports/formulation/<uuid:pk_household>/', views.SupportsHouseholdsFormulationMomentsListView.as_view()),
+    path('supports/formulation/<uuid:pk_household>/instrument/<uuid:pk_moment>/',views.SupportFormulationHouseholdMomentsListView.as_view()),
+    path('supports/formulation/<uuid:pk_household>/instrument/<uuid:pk_moment>/view/<uuid:pk_instrument_object>/',views.FormulationSupportHouseholdInstrumentsView.as_view()),
+
 ]
