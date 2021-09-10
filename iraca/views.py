@@ -36,7 +36,7 @@ class IracaOptionsView(LoginRequiredMixin,
     def get_items(self):
         items = []
 
-        if self.request.user.has_perm('usuarios.iraca_2021.bd.ver'):
+        if self.request.user.has_perm('usuarios.iraca.bd.ver'):
             items.append({
                 'sican_categoria': 'Base de datos',
                 'sican_color': 'red darken-4',
@@ -47,7 +47,7 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_description': 'Información general de los hogares atendidos en la intervención.'
             })
 
-        if self.request.user.has_perm('usuarios.iraca_2021.entregables.ver'):
+        if self.request.user.has_perm('usuarios.iraca.entregables.ver'):
             items.append({
                 'sican_categoria': 'Entregables',
                 'sican_color': 'orange darken-4',
@@ -123,16 +123,16 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_icon': 'apps',
                 'sican_description': 'Modulo de soportes'
             })
-            if self.request.user.has_perm('usuarios.iraca.informes.ver'):
-                items.append({
-                    'sican_categoria': 'Informes',
-                    'sican_color': 'cyan darken-4',
-                    'sican_order': 9,
-                    'sican_url': 'informes/',
-                    'sican_name': 'Informes',
-                    'sican_icon': 'poll',
-                    'sican_description': 'Modulo de Informes'
-                })
+        if self.request.user.has_perm('usuarios.iraca.informes.ver'):
+            items.append({
+                'sican_categoria': 'Informes',
+                'sican_color': 'cyan darken-4',
+                'sican_order': 9,
+                'sican_url': 'reports/',
+                'sican_name': 'Informes',
+                'sican_icon': 'poll',
+                'sican_description': 'Modulo de Informes'
+            })
 
         return items
 
@@ -180,9 +180,9 @@ class HouseholdCreateView(LoginRequiredMixin,
     def get_permission_required(self, request=None):
         permissions = {
             "all": [
-                "usuarios.iraca_2021.ver",
-                "usuarios.iraca_2021.db.ver",
-                "usuarios.iraca_2021.db.crear"
+                "usuarios.iraca.ver",
+                "usuarios.iraca.db.ver",
+                "usuarios.iraca.db.crear"
             ]
         }
         return permissions
@@ -258,7 +258,7 @@ class DeliverablesOptionsView(LoginRequiredMixin,
     def get_items(self):
         items = []
 
-        if self.request.user.has_perm('usuarios.iraca_2021.entregables.ver'):
+        if self.request.user.has_perm('usuarios.iraca.entregables.ver'):
             items.append({
                 'sican_categoria': 'Implementacion',
                 'sican_color': 'purple darken-4',
@@ -269,7 +269,7 @@ class DeliverablesOptionsView(LoginRequiredMixin,
                 'sican_description': 'Entregables del modulo de implementacion'
             })
 
-        if self.request.user.has_perm('usuarios.iraca_2021.entregables.ver'):
+        if self.request.user.has_perm('usuarios.iraca.entregables.ver'):
             items.append({
                 'sican_categoria': 'Formulacion',
                 'sican_color': 'brown darken-4',
