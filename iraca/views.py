@@ -11,9 +11,10 @@ from django.views.generic import TemplateView, CreateView, UpdateView, FormView,
 
 
 #------------------------------- SELECTION ----------------------------------------
-from iraca import forms, models, models_instruments
+from iraca import forms, models, models_instruments, tasks
 from iraca.models import Certificates
 from mobile.models import FormMobile
+from reportes.models import Reportes
 from usuarios.models import Municipios
 
 
@@ -321,6 +322,34 @@ class InstrumentListView(LoginRequiredMixin,
         kwargs['breadcrum_1'] = "Formulacion"
         return super(InstrumentListView,self).get_context_data(**kwargs)
 
+class ImplementationControlPanel(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.entregables.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+
+            if request.user.has_perms(self.permissions['ver']):
+                reporte = Reportes.objects.create(
+                    usuario=self.request.user,
+                    nombre=f'Tablero de Control de Implementacion Iraca 2021',
+                    consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
+                )
+                #colocar delay
+                tasks.build_control_panel_Implementation.delay(reporte.id)
+                return redirect('/reportes/')
+            else:
+                return HttpResponseRedirect('../../')
+
 class FormulationVisitsListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
                       TemplateView):
@@ -362,6 +391,34 @@ class FormulationInstrumentListView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = moment.name
         kwargs['breadcrum_1'] = "Formulacion"
         return super(FormulationInstrumentListView,self).get_context_data(**kwargs)
+
+class FormulationControlPanel(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.entregables.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+
+            if request.user.has_perms(self.permissions['ver']):
+                reporte = Reportes.objects.create(
+                    usuario=self.request.user,
+                    nombre=f'Tablero de Control de Formulacion Iraca 2021',
+                    consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
+                )
+                #colocar delay
+                tasks.build_control_panel_Formulation(reporte.id)
+                return redirect('/reportes/')
+            else:
+                return HttpResponseRedirect('../../')
 
 #----------------------------------------------------------------------------------
 

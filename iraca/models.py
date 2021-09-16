@@ -405,6 +405,17 @@ class Households(models.Model):
 
         return routes
 
+    def get_estate_moment(self, moment, route):
+
+        instruments = ObjectRouteInstrument.objects.filter(moment = moment, households=self, route=route).order_by('creation')
+
+        try:
+            estate = instruments[0].estate
+        except:
+            estate = ''
+
+        return estate
+
 
 class QuotasRouteObject(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
