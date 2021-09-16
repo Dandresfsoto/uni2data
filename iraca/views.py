@@ -1,3 +1,5 @@
+import json
+
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -11,6 +13,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, FormView,
 #------------------------------- SELECTION ----------------------------------------
 from iraca import forms, models, models_instruments
 from iraca.models import Certificates
+from mobile.models import FormMobile
 from usuarios.models import Municipios
 
 
@@ -122,16 +125,6 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_name': 'Soportes',
                 'sican_icon': 'apps',
                 'sican_description': 'Modulo de soportes'
-            })
-        if self.request.user.has_perm('usuarios.iraca.informes.ver'):
-            items.append({
-                'sican_categoria': 'Informes',
-                'sican_color': 'cyan darken-4',
-                'sican_order': 9,
-                'sican_url': 'reports/',
-                'sican_name': 'Informes',
-                'sican_icon': 'poll',
-                'sican_description': 'Modulo de Informes'
             })
 
         return items
@@ -3105,3 +3098,213 @@ class FormulationSupportHouseholdInstrumentsView(TemplateView):
         return super(FormulationSupportHouseholdInstrumentsView,self).get_context_data(**kwargs)
 
 
+
+class HouseholdsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.vinculacion.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/bonding/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "BASE DE DATOS HOGARES"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/bonding/'
+        return super(HouseholdsListView,self).get_context_data(**kwargs)
+
+class BondingListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.vinculacion.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/bonding/polls/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "BASE DE DATOS DE VINCULACION"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/bonding/{0}/'.format(kwargs['pk_household'])
+        kwargs['breadcrum_1'] = models.Households.objects.get(id=kwargs['pk_household']).document
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.iraca.vinculacion.crear')
+        return super(BondingListView,self).get_context_data(**kwargs)
+
+class BondingView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.vinculaciones.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/bonding/polls/view.html'
+
+    def estate(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["PP-22"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def products_add(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["PP-23"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def products_register(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["PP-24"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def products_quantity(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["PP-26"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def products_market(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["PP-30"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def products_market_medium(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["PP-31"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def products_support(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["PP-31"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def products_support_strengthen(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["PP-41"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def financial_instruments(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["IEF-2"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def self_consumption(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["AU-2"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def fertilizer(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["AU-8"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def surplus(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["AU-18"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def foodsafety(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["SA-1"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def affectations(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["MC-1"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+    def electricity(self):
+        mobile = FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+        json_code = mobile.data
+        data_disponibility = json_code["MC-2"]
+        diccionario = dict(enumerate(data_disponibility))
+        return diccionario
+
+
+    def get_context_data(self, **kwargs):
+        mobile = FormMobile.objects.get(id = kwargs['pk_mobile'])
+        kwargs['title'] = "VER CARACTERIZACION"
+        kwargs['breadcrum_1'] = models.Households.objects.get(id=kwargs['pk_household']).document
+        kwargs['objeto'] = mobile.data
+        kwargs['earth'] = mobile.json_read_earth()
+        kwargs['water'] = mobile.json_read_water()
+        kwargs['boss'] = mobile.json_read_members_boss()
+        kwargs['estate'] = self.estate()
+        kwargs['products_add'] = self.products_add()
+        kwargs['products_register'] = self.products_register()
+        kwargs['products_quantity'] = self.products_quantity()
+        kwargs['products_market'] = self.products_market()
+        kwargs['products_support'] = self.products_support()
+        kwargs['products_support_strengthen'] = self.products_support_strengthen()
+        kwargs['financial_instruments'] = self.financial_instruments()
+        kwargs['consumption'] = self.self_consumption()
+        kwargs['fertilizer'] = self.fertilizer()
+        kwargs['surplus'] = self.surplus()
+        kwargs['foodsafety'] = self.foodsafety()
+        kwargs['affectations'] = self.affectations()
+        kwargs['electricity'] = self.electricity()
+        return super(BondingView,self).get_context_data(**kwargs)
+
+
+class BondingDeleteView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.mobile = models.FormMobile.objects.get(id=self.kwargs['pk_mobile'])
+
+        self.permissions = {
+            "eliminar": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.vinculacion.ver",
+                "usuarios.iraca.vinculacion.editar",
+                "usuarios.iraca.vinculacion.eliminar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions['eliminar']):
+                self.mobile.delete()
+                return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')

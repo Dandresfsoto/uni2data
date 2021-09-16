@@ -3,7 +3,8 @@ from django.db.models import Q
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.utils import timezone
 from iraca import models
-from iraca.models import Milestones, Meetings, Certificates, Types
+from iraca.models import Milestones, Meetings, Certificates, Types, Households
+from mobile.models import FormMobile
 from usuarios.models import Municipios
 
 
@@ -56,7 +57,7 @@ class HogaresListApi(BaseDatatableView):
 
             return '<div class="center-align"><b>' + str(row.document) + '</b></div>'
 
-        elif column == 'first_name':
+        elif column == 'first_surname':
             return row.get_full_name()
 
         elif column == 'municipality_attention':
@@ -1674,6 +1675,140 @@ class SupportFormulationHouseholdMomentsListApi(BaseDatatableView):
         else:
             return super(SupportFormulationHouseholdMomentsListApi, self).render_column(row, column)
 
+class HouseholdListApi(BaseDatatableView):
+    model = models.Households
+    columns = ['id','document','first_surname','municipality_attention','routes']
+    order_columns = ['id','document','first_surname','municipality_attention','routes']
+
+    def get_initial_queryset(self):
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.vinculacion.ver"
+            ],
+            "editar": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.vinculacion.ver",
+                "usuarios.iraca.vinculacion.editar",
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(first_name__icontains=search) | Q(second_name__icontains=search) | \
+                Q(first_surname__icontains=search) | Q(second_surname__icontains=search) | Q(document__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                      '<a href="{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Editar hogar">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'document':
+
+            return '<div class="center-align"><b>' + str(row.document) + '</b></div>'
+
+        elif column == 'first_surname':
+            return row.get_full_name()
+
+        elif column == 'municipality_attention':
+            return '{0}, {1}'.format(row.municipality_attention.nombre,row.municipality_attention.departamento.nombre)
+
+        elif column == 'routes':
+            return row.get_routes()
+
+        else:
+            return super(HouseholdListApi, self).render_column(row, column)
+
+class BondingListApi(BaseDatatableView):
+    model = FormMobile
+    columns = ['id','document','data','created_at','updated_at']
+    order_columns = ['id','document','data','created_at','updated_at']
+
+    def get_initial_queryset(self):
+        household = Households.objects.get(id = self.kwargs['pk_household'])
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.vinculacion.ver"
+            ],
+            "editar": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.vinculacion.ver",
+                "usuarios.iraca.vinculacion.editar",
+            ]
+        }
+        return self.model.objects.filter(data__icontains=household.document)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+
+        if search:
+            q = Q(id__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                      '<a href="view/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Editar hogar">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'document':
+            return '<div class="center-align"><b>' + str(row.json_read_document()) + '</b></div>'
+
+        elif column == 'data':
+            return '<div class="center-align"><b>' + str(row.json_read_name()) + '</b></div>'
+
+        elif column == 'created_at':
+            return timezone.localtime(row.created_at).strftime('%d de %B del %Y a las %I:%M:%S %p')
+
+
+        elif column == 'updated_at':
+            ret = ''
+            if self.request.user.has_perm('usuarios.iraca.vinculacion.eliminar'):
+                ret = '<div class="center-align">' \
+                      '<a href="delete/{0}/" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar hito">' \
+                      '<i class="material-icons">delete</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">delete</i>' \
+                      '</div>'.format(row.id)
+            return ret
+        else:
+            return super(BondingListApi, self).render_column(row, column)
+
 class MunicipiosAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
@@ -1685,6 +1820,5 @@ class MunicipiosAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(q)
 
         return qs
-
 
 

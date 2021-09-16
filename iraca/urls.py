@@ -95,4 +95,8 @@ urlpatterns = [
     path('supports/formulation/<uuid:pk_household>/instrument/<uuid:pk_moment>/',views.SupportFormulationHouseholdMomentsListView.as_view()),
     path('supports/formulation/<uuid:pk_household>/instrument/<uuid:pk_moment>/view/<uuid:pk_instrument_object>/',views.FormulationSupportHouseholdInstrumentsView.as_view()),
 
+    path('bonding/', views.HouseholdsListView.as_view()),
+    path('bonding/<uuid:pk_household>/', views.BondingListView.as_view()),
+    path('bonding/<uuid:pk_household>/view/<uuid:pk_mobile>/', views.BondingView.as_view()),
+    path('bonding/<uuid:pk_household>/delete/<uuid:pk_mobile>/', views.BondingDeleteView.as_view()),
 ]

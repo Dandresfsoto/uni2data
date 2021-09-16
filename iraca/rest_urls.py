@@ -41,4 +41,6 @@ urlpatterns = [
     path('supports/formulation/<uuid:pk_household>/', rest_views.SupportsHouseholdsFormulationMomentsListApi.as_view()),
     path('supports/formulation/<uuid:pk_household>/instrument/<uuid:pk_moment>/',rest_views.SupportFormulationHouseholdMomentsListApi.as_view()),
 
+    path('bonding/', rest_views.HouseholdListApi.as_view()),
+    path('bonding/<uuid:pk_household>/', rest_views.BondingListApi.as_view()),
 ]
