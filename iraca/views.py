@@ -377,7 +377,7 @@ class ImplementationInstrumentReport(View):
                     consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
                 )
 
-                tasks.build_report_instrument(reporte.id, self.instrument.id)
+                tasks.build_report_instrument.delay(reporte.id, self.instrument.id)
                 return redirect('/reportes/')
             else:
                 return HttpResponseRedirect('../../')
@@ -479,7 +479,7 @@ class FormulationInstrumentReport(View):
                     consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
                 )
 
-                tasks.build_report_instrument(reporte.id, self.instrument.id)
+                tasks.build_report_instrument.delay(reporte.id, self.instrument.id)
                 return redirect('/reportes/')
             else:
                 return HttpResponseRedirect('../../')
