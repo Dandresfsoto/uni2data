@@ -15,13 +15,15 @@ urlpatterns = [
 
     path('deliverables/', views.DeliverablesOptionsView.as_view()),
     path('deliverables/implementation/', views.VisitsListView.as_view()),
-    path('deliverables/implementation/<uuid:pk_momento>/instruments/',views.InstrumentListView.as_view()),
+    path('deliverables/implementation/<uuid:pk_moment>/instruments/',views.InstrumentListView.as_view()),
     path('deliverables/implementation/report/', views.ImplementationControlPanel.as_view()),
+    path('deliverables/implementation/<uuid:pk_moment>/instruments/report/<uuid:pk_instrument>',views.ImplementationInstrumentReport.as_view()),
 
 
     path('deliverables/formulation/', views.FormulationVisitsListView.as_view()),
     path('deliverables/formulation/<uuid:pk_momento>/instruments/',views.FormulationInstrumentListView.as_view()),
     path('deliverables/formulation/report/', views.FormulationControlPanel.as_view()),
+    path('deliverables/formulation/<uuid:pk_moment>/instruments/report/<uuid:pk_instrument>',views.FormulationInstrumentReport.as_view()),
 
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/', views.MiltoneslistView.as_view()),
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/create/', views.MiltonescreateView.as_view()),

@@ -247,14 +247,14 @@ class Moments(models.Model):
 
 class Instruments(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    moment = models.ForeignKey(Moments,on_delete=models.DO_NOTHING,related_name='instrument_moment_iraca_2021')
-    name = models.CharField(max_length=100)
-    short_name = models.CharField(max_length=100)
-    consecutive = models.IntegerField()
-    model = models.CharField(max_length=100)
-    color = models.CharField(max_length=100)
-    icon = models.CharField(max_length=100)
-    level = models.CharField(max_length=100)
+    moment = models.ForeignKey(Moments,on_delete=models.DO_NOTHING,related_name='instrument_moment_iraca_2021', verbose_name="Momento")
+    name = models.CharField(max_length=100, verbose_name="Nombre")
+    short_name = models.CharField(max_length=100,  verbose_name="Nombre corto")
+    consecutive = models.IntegerField(verbose_name="Consecutivo")
+    model = models.CharField(max_length=100, verbose_name="Modelo")
+    color = models.CharField(max_length=100, verbose_name="Color")
+    icon = models.CharField(max_length=100,  verbose_name="Icono")
+    level = models.CharField(max_length=100, verbose_name="Nivel")
 
     def __str__(self):
         return self.name
@@ -471,10 +471,10 @@ def upload_dinamic_iraca_2021(instance, filename):
 
 class Documento(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    households = models.ManyToManyField(Households,related_name='households_document_iraca_2021',blank=True)
-    instrument = models.ForeignKey(Instruments,on_delete=models.DO_NOTHING,related_name='instrument_document_iraca_2021',blank=True,null=True)
-    route = models.ForeignKey(Routes,on_delete=models.DO_NOTHING,related_name='route_document_iraca_2021',blank=True,null=True)
-    name = models.CharField(max_length=100)
+    households = models.ManyToManyField(Households,related_name='households_document_iraca_2021',blank=True, verbose_name="Hogares")
+    instrument = models.ForeignKey(Instruments,on_delete=models.DO_NOTHING,related_name='instrument_document_iraca_2021',blank=True,null=True,  verbose_name="Instrumentos")
+    route = models.ForeignKey(Routes,on_delete=models.DO_NOTHING,related_name='route_document_iraca_2021',blank=True,null=True, verbose_name="Ruta")
+    name = models.CharField(max_length=100,  verbose_name="Nombre")
 
     file = ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_iraca_2021,

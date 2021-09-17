@@ -315,7 +315,7 @@ class InstrumentListView(LoginRequiredMixin,
 
 
     def get_context_data(self, **kwargs):
-        moment = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
         kwargs['title'] = "Entregables: Instrumentos"
         kwargs['url_datatable'] = '/rest/v1.0/iraca_new/deliverables/implementation/{0}/instruments/'.format(moment.id)
         kwargs['breadcrum_active'] = moment.name
@@ -346,6 +346,38 @@ class ImplementationControlPanel(View):
                 )
                 #colocar delay
                 tasks.build_control_panel_Implementation.delay(reporte.id)
+                return redirect('/reportes/')
+            else:
+                return HttpResponseRedirect('../../')
+
+class ImplementationInstrumentReport(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.instrument = models.Instruments.objects.get(id=self.kwargs['pk_instrument'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.entregables.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+
+            if request.user.has_perms(self.permissions['ver']):
+                reporte = Reportes.objects.create(
+                    usuario=self.request.user,
+                    nombre='Instrumento: {0} - Momento: {1} - Implementacion'.format(self.instrument.name,self.moment.name),
+                    consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
+                )
+
+                tasks.build_report_instrument(reporte.id, self.instrument.id)
                 return redirect('/reportes/')
             else:
                 return HttpResponseRedirect('../../')
@@ -415,7 +447,39 @@ class FormulationControlPanel(View):
                     consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
                 )
                 #colocar delay
-                tasks.build_control_panel_Formulation(reporte.id)
+                tasks.build_control_panel_Formulation.delay(reporte.id)
+                return redirect('/reportes/')
+            else:
+                return HttpResponseRedirect('../../')
+
+class FormulationInstrumentReport(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.instrument = models.Instruments.objects.get(id=self.kwargs['pk_instrument'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_moment'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.entregables.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+
+            if request.user.has_perms(self.permissions['ver']):
+                reporte = Reportes.objects.create(
+                    usuario=self.request.user,
+                    nombre='Instrumento: {0} - Momento: {1} - Formulacion'.format(self.instrument.name,self.moment.name),
+                    consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
+                )
+
+                tasks.build_report_instrument(reporte.id, self.instrument.id)
                 return redirect('/reportes/')
             else:
                 return HttpResponseRedirect('../../')

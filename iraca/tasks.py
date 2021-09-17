@@ -4,7 +4,8 @@ from config.functions import construir_reporte, construir_reporte_pagina
 from mail_templated import send_mail
 from django.core.files import File
 
-from iraca.models import Moments, Households
+from iraca.models import Moments, Households, Instruments
+from iraca.models_instruments import get_model
 from reportes import models as models_reportes
 
 
@@ -110,5 +111,48 @@ def build_control_panel_Formulation(id):
 
     filename = str(reporte.id) + '.xlsx'
     reporte.file.save(filename, File(output))
+
+    return "Reporte generado: " + filename
+
+@app.task
+def build_report_instrument(id, instrument_id):
+    reporte = models_reportes.Reportes.objects.get(id = id)
+    instrument = Instruments.objects.get(id = instrument_id)
+    model = get_model(instrument.model)['model']
+    proceso = "SICAN-IRACA 2021"
+    order = []
+    titulos = []
+    formatos = []
+    ancho_columnas = []
+    contenidos = []
+
+    for field in model._meta.get_fields():
+        order.append(field.name)
+        titulos.append(field.verbose_name)
+        formatos.append('General')
+        ancho_columnas.append(30)
+
+    for data in model.objects.filter(instrument = instrument):
+        lista = []
+        for name in order:
+            obj = getattr(data, name)
+
+            if name == 'households':
+                value = ''
+                for household in obj.all():
+                    value += str(household.document) + ', '
+
+                lista.append(value[:-2])
+            else:
+                lista.append(str(obj))
+        contenidos.append(lista)
+
+
+    output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
+
+
+    filename = str(reporte.id) + '.xlsx'
+    reporte.file.save(filename, File(output))
+
 
     return "Reporte generado: " + filename
