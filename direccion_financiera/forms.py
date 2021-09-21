@@ -1588,8 +1588,6 @@ class ProjectForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
 
-        enterprise = Enterprise.objects.get(id=kwargs['initial']['pk'])
-
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
 
