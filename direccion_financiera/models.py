@@ -178,6 +178,8 @@ class Reportes(BaseModel):
     fecha_pago = models.DateField(blank=True,null=True)
     file_comprobante_egreso = models.FileField(upload_to=upload_dinamic_dir_comprobante_egreso, blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.consecutive} - {self.nombre}"
 
     def pretty_print_respaldo(self):
         try:
