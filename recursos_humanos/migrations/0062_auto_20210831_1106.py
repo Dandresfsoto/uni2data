@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contratistas',
             name='second_active_account',
-            field=models.BooleanField(default=True),
+            field=models.BooleanField(default=False),
         ),
         migrations.AddField(
             model_name='contratistas',
