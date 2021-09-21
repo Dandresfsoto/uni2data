@@ -30,13 +30,25 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="/direccion_financiera/bancos/") Bancos
+                        a(href="../../../../") Empresas asociadas
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light ")
+                        a(href="../../../") {{ breadcrum_1 | truncatechars:25 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light ")
+                        a(href="../../") Proyectos
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") {{ breadcrum_active | truncatechars:25 }}
+                        a(href="#") Crear Projectos
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
