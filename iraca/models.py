@@ -6,7 +6,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from self import self
 
 from config.extrafields import ContentTypeRestrictedFileField
 from mobile.models import FormMobile
