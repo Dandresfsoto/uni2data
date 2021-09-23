@@ -1,0 +1,1718 @@
+extends ../../../base_auth
+
+block title
+    |{{title | upper}}
+
+
+block side_nav_container
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") local_activity
+                | Breadcrums
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/") Inicio
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca_new/") IRACA
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca_new/bonding/") Vinculaciones
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Ver Caracterizacion
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
+
+
+
+block container_principal
+
+    div(class="container",style="margin-top:20px;margin-bottom:50px")
+        ul(class="collapsible",data-collapsible="accordion")
+            li(class="bold waves-effect waves-light")
+                div(class="collapsible-header", style="background:#edf3fa")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                th(colspan="4",style="font-size:1.5rem;") UBICACION:
+                div(class="collapsible-body")
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-1' %}
+                                td(style="font-weight:bold") Departamento de ubicación
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-2' %}
+                                td(style="font-weight:bold") Municipio de ubicación
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-3' %}
+                                td(style="font-weight:bold") Zona
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-4' %}
+                                td(style="font-weight:bold") localidad o comuna
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-5' %}
+                                td(style="font-weight:bold") Corregimiento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-6' %}
+                                td(style="font-weight:bold") Vereda
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-7' %}
+                                td(style="font-weight:bold") Barrio
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-8' %}
+                                td(style="font-weight:bold") Centro poblado
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-9' %}
+                                td(style="font-weight:bold") Dirección
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'lon' %}
+                                td(style="font-weight:bold") Coordenada X
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'lat' %}
+                                td(style="font-weight:bold") Coordenada y
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-12' %}
+                                td(style="font-weight:bold") Número de teléfono
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-13' %}
+                                td(style="font-weight:bold") ¿Tiene a otro numero telefonico?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-14' %}
+                                td(style="font-weight:bold") Número de teléfono adicional 1
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-15' %}
+                                td(style="font-weight:bold") Número de teléfono adicional 2
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-16' %}
+                                td(style="font-weight:bold") Correo Electrónico
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-17' %}
+                                td(style="font-weight:bold") ¿El hogar tiene acceso a internet?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                td(style="font-weight:bold") El hogar tiene disponibilidad de tierra
+                                td {{ earth }}
+                                td(style="font-weight:bold") El hogar tiene disponibilidad de tierra
+                                td {{ water }}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-19' %}
+                                td(style="font-weight:bold") Código del departamento de atención
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-20' %}
+                                td(style="font-weight:bold") Nombre del departamento de atención
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-21' %}
+                                td(style="font-weight:bold") Código del municipio de atención
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-22' %}
+                                td(style="font-weight:bold") Nombre del municipio de atención
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-23' %}
+                                td(style="font-weight:bold") Código del proyecto
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-24' %}
+                                td(style="font-weight:bold") Código del registro presupuestal
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-25' %}
+                                td(style="font-weight:bold") Fecha del registro presupuestal
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'U-26' %}
+                                td(style="font-weight:bold") Estado del beneficiario
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+    div(class="container",style="margin-top:20px;margin-bottom:50px;")
+        ul(class="collapsible",data-collapsible="accordion")
+            li(class="bold waves-effect waves-light")
+                div(class="collapsible-header", style="background:#edf3fa")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                th(colspan="4",style="font-size:1.5rem;") CARACTERISTICAS GENERALES:
+                div(class="collapsible-body")
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-1' %}
+                                td(style="font-weight:bold") Tipo de documento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-2' %}
+                                td(style="font-weight:bold") Número de documento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-3' %}
+                                td(style="font-weight:bold") Primer nombre
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-4' %}
+                                td(style="font-weight:bold") Segundo nombre
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-5' %}
+                                td(style="font-weight:bold") Primer Apellido
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-6' %}
+                                td(style="font-weight:bold") Segundo Apellido
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-7' %}
+                                td(style="font-weight:bold") Sexo
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-8' %}
+                                td(style="font-weight:bold") Genero
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-9' %}
+                                td(style="font-weight:bold") ¿Cuál es su orientación sexual?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-10' %}
+                                td(style="font-weight:bold") Genero
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-11' %}
+                                td(style="font-weight:bold") Parentesco con el jefe del hogar
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-12' %}
+                                td(style="font-weight:bold") Estado civil
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-13' %}
+                                td(style="font-weight:bold") ¿Posee alguna discapacidad?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'CG-6' %}
+                                td(style="font-weight:bold") Indique el nombre de la lengua por la cual se comunica
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+    div(class="container",style="margin-top:20px;margin-bottom:50px;")
+        ul(class="collapsible",data-collapsible="accordion")
+            li(class="bold waves-effect waves-light")
+                div(class="collapsible-header", style="background:#edf3fa")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                th(colspan="4",style="font-size:1.5rem;") EDUCACION Y SALUD:
+                div(class="collapsible-body")
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'ES-1' %}
+                                td(style="font-weight:bold") ¿Sabe leer y escribir?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'ES-2' %}
+                                td(style="font-weight:bold") ¿Sabe sumar y restar?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'ES-3' %}
+                                td(style="font-weight:bold") ¿Cuál es su nivel educativo?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'ES-4' %}
+                                td(style="font-weight:bold") ¿Actualmente estudia?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'ES-5' %}
+                                td(style="font-weight:bold") ¿Recibe en el plantel educativo alimentos?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in boss.items %}
+                                | {% if key == 'ES-6' %}
+                                td(style="font-weight:bold") ¿¿Cuál de los siguientes regímenes de seguridad social en salud está afiliado?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+    div(class="container",style="margin-top:20px;margin-bottom:50px;")
+        ul(class="collapsible",data-collapsible="accordion")
+            li(class="bold waves-effect waves-light")
+                div(class="collapsible-header", style="background:#edf3fa")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                th(colspan="4",style="font-size:1.5rem;") PROYECTO PRODUCTIVO O NEGOCIO:
+                div(class="collapsible-body")
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-3' %}
+                                td(style="font-weight:bold") ¿Tiene actualmente un proyecto productivo o negocio?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-4' %}
+                                td(style="font-weight:bold") ¿Cuál es la razón de que no esté activo?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-5' %}
+                                td(style="font-weight:bold") La unidad productiva donde tiene su proyecto es
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-8' %}
+                                td(style="font-weight:bold") ¿Qué tipos de bienes o servicios produce y/o comercializa este proyecto productivo o negocio?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-10' %}
+                                td(style="font-weight:bold") Variedad bienes o servicios que produce su proyecto productivo o negocio
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-11' %}
+                                td(style="font-weight:bold") ¿Cuánto tiempo lleva funcionando su proyecto productivo o negocio?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-12' %}
+                                td(style="font-weight:bold") ¿El proyecto productivo o negocio tiene Registro Único Tributario (RUT)?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-13' %}
+                                td(style="font-weight:bold") ¿El proyecto productivo o negocio está registrado en alguna Cámara de Comercio?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-14' %}
+                                td(style="font-weight:bold") ¿Cuántos empleados reciben pago en el proyecto productivo o negocio?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-21' %}
+                                td(style="font-weight:bold") ¿Con qué servicios públicos, privados o comunales cuenta el lugar donde se ubica el proyecto productivo o negocio?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in estate.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") ¿Su proyecto productivo o negocio cuenta con parcela o predio?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in estate.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") ¿Su proyecto productivo o negocio cuenta con maquinaria?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in estate.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") ¿Su proyecto productivo o negocio cuenta con herramientas?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in estate.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") ¿Su proyecto productivo o negocio cuenta con infraestructura productiva o comercial?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in estate.items %}
+                                | {% if key == 4 %}
+                                td(style="font-weight:bold") ¿Su proyecto productivo o negocio cuenta con insumos?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in estate.items %}
+                                | {% if key == 5 %}
+                                td(style="font-weight:bold") ¿Su proyecto productivo o negocio cuenta con animales?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in estate.items %}
+                                | {% if key == 6 %}
+                                td(style="font-weight:bold") ¿Su proyecto productivo o negocio cuenta con establecimiento comercial o de servicios?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿Realiza alguno de los siguientes procesos de agregación de valor a su producto 1?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Seleccion
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Lavado
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Empaque o embalaje
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Almacenamiento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 4 %}
+                                td(style="font-weight:bold") Transformacion
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿Realiza alguno de los siguientes procesos de agregación de valor a su producto 2?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 5 %}
+                                td(style="font-weight:bold") Seleccion
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 6 %}
+                                td(style="font-weight:bold") Lavado
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 7 %}
+                                td(style="font-weight:bold") Empaque o embalaje
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 8 %}
+                                td(style="font-weight:bold") Almacenamiento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 9 %}
+                                td(style="font-weight:bold") Transformacion
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿Realiza alguno de los siguientes procesos de agregación de valor a su producto 3?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 10 %}
+                                td(style="font-weight:bold") Seleccion
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 11 %}
+                                td(style="font-weight:bold") Lavado
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 12 %}
+                                td(style="font-weight:bold") Empaque o embalaje
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 13 %}
+                                td(style="font-weight:bold") Almacenamiento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_add.items %}
+                                | {% if key == 14 %}
+                                td(style="font-weight:bold") Transformacion
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") Su proyecto productivo o negocio cuenta con
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in products_register.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Registros o permisos sanitarios (Invima)
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_register.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Certificados o sellos de calidad
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_register.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Certificaciones que agreguen valor
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_register.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Certificaciones en manipulación de alimentos
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_register.items %}
+                                | {% if key == 4 %}
+                                td(style="font-weight:bold") Cursos de formación para el desarrollo
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_register.items %}
+                                | {% if key == 5 %}
+                                td(style="font-weight:bold") Código de barra
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_register.items %}
+                                | {% if key == 6 %}
+                                td(style="font-weight:bold") Otro
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") En un mes típico, ¿cuánto volumen produce para la venta?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in products_quantity.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Producto 1
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_quantity.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Producto 2
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_quantity.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Producto 3
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-27' %}
+                                td(style="font-weight:bold") En los últimos seis meses, ¿cuál ha sido el valor promedio mensual de las ventas del proyecto productivo o negocio?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-29' %}
+                                td(style="font-weight:bold") En los últimos seis meses, ¿cuál ha sido el valor promedio de las ganancias mensuales del proyecto productivo o negocio?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿Qué mercado cubre actualmente con el proyecto productivo o negocio?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in products_market.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Veredal - Corregimiento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_market.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Municipal
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_market.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Departamental
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_market.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Regional
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_market.items %}
+                                | {% if key == 4 %}
+                                td(style="font-weight:bold") Nacional
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_market.items %}
+                                | {% if key == 5 %}
+                                td(style="font-weight:bold") Internacional
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") Comercializa el producto a través de:
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Intermediario particular
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Mayorista
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Plaza de mercado
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Mercado campesino
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 4 %}
+                                td(style="font-weight:bold") Consumidor final
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 5 %}
+                                td(style="font-weight:bold") Plataforma de comercio electrónico
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 6 %}
+                                td(style="font-weight:bold") Agroindustria
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 7 %}
+                                td(style="font-weight:bold") Almacén de cadena
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 8 %}
+                                td(style="font-weight:bold") Exportador
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 9 %}
+                                td(style="font-weight:bold") Compras públicas
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 10 %}
+                                td(style="font-weight:bold") Organización de productores
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 11 %}
+                                td(style="font-weight:bold") Trueque o intercambio
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_market_medium.items %}
+                                | {% if key == 12 %}
+                                td(style="font-weight:bold") Otro. ¿Cuál?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-32' %}
+                                td(style="font-weight:bold") ¿Cuenta con algún lugar para almacenar o guardar provisiones del producto que comercializa?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-34' %}
+                                td(style="font-weight:bold") Para realizar la venta del producto o la prestación del servicio, ¿requiere que este sea trasladado?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-35' %}
+                                td(style="font-weight:bold") ¿Utiliza redes sociales para vender su producto?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-36' %}
+                                td(style="font-weight:bold") ¿Lleva un registro de costos, ingresos y gastos de su actividad productiva?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-37' %}
+                                td(style="font-weight:bold") ¿Cuál es la razón principal para no llevar este registro?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'PP-38' %}
+                                td(style="font-weight:bold") ¿Cómo maneja los residuos sólidos y líquidos de su actividad productiva?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿Durante el último año, ha recibido apoyo en los siguientes aspectos para el desarrollo de su proyecto productivo o negocio?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in products_support.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Financiamiento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_support.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Capacitación
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_support.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Provisión de tierra  o lote
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_support.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Provisión de insumos
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿En qué aspectos requiere apoyo para fortalecer su proyecto productivo o negocio?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Financiamiento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Capacitación
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Acceso a tierra, lote o espacio
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Asistencia técnica
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 4 %}
+                                td(style="font-weight:bold") Insumos o materia prima
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 5 %}
+                                td(style="font-weight:bold") Compra de activos o maquinaria
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 6 %}
+                                td(style="font-weight:bold") Certificaciones sanitarias y de calidad, buenas practicas, etc
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 7 %}
+                                td(style="font-weight:bold") Apoyo para la comercialización
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 8 %}
+                                td(style="font-weight:bold") Formalización
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 9 %}
+                                td(style="font-weight:bold") Registro de marca o codigos de barra
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 10 %}
+                                td(style="font-weight:bold") Facturación
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 11 %}
+                                td(style="font-weight:bold") Transporte
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 12 %}
+                                td(style="font-weight:bold") Acceso a internet y herremientas digitale
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in products_support_strengthen.items %}
+                                | {% if key == 13 %}
+                                td(style="font-weight:bold") Otro, ¿Cuál?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+    div(class="container",style="margin-top:20px;margin-bottom:50px;")
+        ul(class="collapsible",data-collapsible="accordion")
+            li(class="bold waves-effect waves-light")
+                div(class="collapsible-header", style="background:#edf3fa")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                th(colspan="4",style="font-size:1.5rem;") ASOCIATIVIDAD:
+                div(class="collapsible-body")
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'A-1' %}
+                                td(style="font-weight:bold") ¿Usted pertenece a alguna organización productiva (asociación de productores, cooperativa, gremio, etc.)?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'A-2' %}
+                                td(style="font-weight:bold") ¿Le gustaría pertenecer a alguna organización productiva?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'A-3' %}
+                                td(style="font-weight:bold") ¿Cuál es la razón principal para no pertenecer?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'A-4' %}
+                                td(style="font-weight:bold") ¿Qué tipo de organización es?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'A-5' %}
+                                td(style="font-weight:bold") ¿Cuál es el nombre completo de la organización productiva a la que pertenece?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'A-6' %}
+                                td(style="font-weight:bold") ¿La organización productiva a la que pertenece está legalmente constituida?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'A-7' %}
+                                td(style="font-weight:bold") ¿Cuál es el NIT de la organización productiva?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'A-8' %}
+                                td(style="font-weight:bold") ¿Cuál es el nombre completo del representante legal de la organización?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'A-9' %}
+                                td(style="font-weight:bold") ¿Cuál es el número de celular de la organización (o su representante legal)?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+    div(class="container",style="margin-top:20px;margin-bottom:50px;")
+        ul(class="collapsible",data-collapsible="accordion")
+            li(class="bold waves-effect waves-light")
+                div(class="collapsible-header", style="background:#edf3fa")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                th(colspan="4",style="font-size:1.5rem;") INCLUSION Y EDUCACION FINANCIERA:
+                div(class="collapsible-body")
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'IEF-1' %}
+                                td(style="font-weight:bold") ¿El hogar lleva un presupuesto?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿Usted o algún integrante de su hogar tiene y utiliza alguno de los siguientes instrumentos financieros?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in financial_instruments.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Cuenta de ahorros o corriente
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in financial_instruments.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Dinero móvil
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in financial_instruments.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Tarjeta de crédito
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in financial_instruments.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Seguro de vida o accidentes
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in financial_instruments.items %}
+                                | {% if key == 4 %}
+                                td(style="font-weight:bold") Seguro agropecuario
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in financial_instruments.items %}
+                                | {% if key == 5 %}
+                                td(style="font-weight:bold") Seguro agropecuario
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'IEF-3' %}
+                                td(style="font-weight:bold") ¿En cuál de las siguientes entidades bancarias tiene su cuenta de ahorros o corriente?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+    div(class="container",style="margin-top:20px;margin-bottom:50px;")
+        ul(class="collapsible",data-collapsible="accordion")
+            li(class="bold waves-effect waves-light")
+                div(class="collapsible-header", style="background:#edf3fa")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                th(colspan="4",style="font-size:1.5rem;") AUTOCONSUMO:
+                div(class="collapsible-body")
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-1' %}
+                                td(style="font-weight:bold") ¿Usted o algún integrante de su hogar produce actualmente alimentos, en algún lugar dentro o fuera de la vivienda?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿Cuáles de los siguientes alimentos produce actualmente su hogar con destino al autoconsumo?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Hortalizas
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Aromáticas/ medicinales/condimento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Frutales de ciclo corto
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Musáceas
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 4 %}
+                                td(style="font-weight:bold") Leguminosas
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 5 %}
+                                td(style="font-weight:bold") Tubérculos/raíces
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 6 %}
+                                td(style="font-weight:bold") Frutales de tardío rendimiento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 7 %}
+                                td(style="font-weight:bold") Cereales
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 8 %}
+                                td(style="font-weight:bold") Carne de ave
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 9 %}
+                                td(style="font-weight:bold") Carne de chivo
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 10 %}
+                                td(style="font-weight:bold") Carne de cuy
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 11 %}
+                                td(style="font-weight:bold") Carne de cerdo
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 12 %}
+                                td(style="font-weight:bold") Leche o derivados lácteos
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 13 %}
+                                td(style="font-weight:bold") Huevos
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 14 %}
+                                td(style="font-weight:bold") Pesca o piscicultura
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in consumption.items %}
+                                | {% if key == 15 %}
+                                td(style="font-weight:bold") Recolección de alimentos silvestres para autoconsumo
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-3' %}
+                                td(style="font-weight:bold") ¿Cuáles son las principales razones para no hacerlo?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿Qué tipo de abono o fertilización usa para el terreno donde produce alimentos para el autoconsumo?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in fertilizer.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Abonos orgánicos comprados, regalados, donados, intercambiados o preparados directamente en la finca
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in fertilizer.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Usa abonos químicos comprados, regalados, donados o intercambiado
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in fertilizer.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Uso abonos de forma mixta (orgánicos y químicos)
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in fertilizer.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") No usa abonos
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-9' %}
+                                td(style="font-weight:bold") ¿Qué tipo de método utiliza para el manejo de plagas y enfermedades en los cultivos?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-10' %}
+                                td(style="font-weight:bold") ¿Qué tipo de método utiliza para el manejo de plagas y enfermedades en los animales?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-12' %}
+                                td(style="font-weight:bold") ¿Qué tipo de semilla usa principalmente?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-13' %}
+                                td(style="font-weight:bold") ¿Cuenta con tanque para el riego de la unidad productiva agropecuaria?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-14' %}
+                                td(style="font-weight:bold") ¿Qué utiliza para la alimentación de los animales?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-15' %}
+                                td(style="font-weight:bold") En general, ¿qué hace con los excedentes de su producción de autoconsumo?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-16' %}
+                                td(style="font-weight:bold") En un mes típico, ¿cuánto dinero recibe por los excedentes?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-17' %}
+                                td(style="font-weight:bold") ¿Dónde vende los excedentes?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿Realizó alguno de estos procesos a los excedentes que comercializa?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in surplus.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Lavado, secado
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in surplus.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Empacado
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in surplus.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Procesado
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in surplus.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Otro. ¿Cuál?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-19' %}
+                                td(style="font-weight:bold") Con los alimentos que usted produjo, consumió y no tuvo que comprar, ¿cuánto dinero estima que se ahorra en un mes?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'AU-20' %}
+                                td(style="font-weight:bold") ¿Cuántos metros cuadrados, aproximadamente, mide el espacio de terreno donde podría montar una unidad productiva agropecuaria?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+    div(class="container",style="margin-top:20px;margin-bottom:50px;")
+        ul(class="collapsible",data-collapsible="accordion")
+            li(class="bold waves-effect waves-light")
+                div(class="collapsible-header", style="background:#edf3fa")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                th(colspan="4",style="font-size:1.5rem;") SEGURIDAD ALIMENTARIA:
+                div(class="collapsible-body")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") Durante los últimos 3 meses, ha habido algún momento en que, por falta de dinero u otros recursos, usted o algún integrante del hogar:?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in foodsafety.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Se haya preocupado por no tener suficientes alimentos para comer
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in foodsafety.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") No haya podido comer alimentos sanos y nutritivos
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in foodsafety.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Haya comido poca variedad de alimentos
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in foodsafety.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Haya tenido que saltarse una comida (desayuno, almuerzo o cena)
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in foodsafety.items %}
+                                | {% if key == 4 %}
+                                td(style="font-weight:bold") Haya comido menos de lo que pensaba que debía comer
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in foodsafety.items %}
+                                | {% if key == 5 %}
+                                td(style="font-weight:bold") Su hogar se haya quedado sin alimentos
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in foodsafety.items %}
+                                | {% if key == 6 %}
+                                td(style="font-weight:bold") Haya sentido hambre pero no comió
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in foodsafety.items %}
+                                | {% if key == 7 %}
+                                td(style="font-weight:bold") Haya dejado de comer durante todo un día
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+    div(class="container",style="margin-top:20px;margin-bottom:50px;")
+        ul(class="collapsible",data-collapsible="accordion")
+            li(class="bold waves-effect waves-light")
+                div(class="collapsible-header", style="background:#edf3fa")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                th(colspan="4",style="font-size:1.5rem;") GRUPOS ETNICOS
+                div(class="collapsible-body")
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'GE-1' %}
+                                td(style="font-weight:bold") ¿Su hogar pertenece a alguno de los siguientes grupos étnicos?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'GE-2' %}
+                                td(style="font-weight:bold") ¿Usted habita en algunas de estas comunidades étnicas?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'GE-3' %}
+                                td(style="font-weight:bold") Código pueblo indígena / territorio colectivo / comunidad étnica
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == 'GE-4' %}
+                                td(style="font-weight:bold") Indique el nombre de la comunidad étnica
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+    div(class="container",style="margin-top:20px;margin-bottom:50px;")
+        ul(class="collapsible",data-collapsible="accordion")
+            li(class="bold waves-effect waves-light")
+                div(class="collapsible-header", style="background:#edf3fa")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                th(colspan="4",style="font-size:1.5rem;") COMUNITARIOS
+                div(class="collapsible-body")
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") En los últimos doce meses, el territorio colectivo ha sido afectado por...
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in affectations.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Inundaciones, crecientes, arroyos
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in affectations.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Avalanchas, derrumbes o deslizamiento
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in affectations.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Terremotos
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in affectations.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Incendios
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in affectations.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Vendavales, ventarrones, tormentas
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in affectations.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Hundimiento del terreno
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in affectations.items %}
+                                | {% if key == 4 %}
+                                td(style="font-weight:bold") Plagas
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        thead
+                            tr
+                                td(style="font-weight:bold;text-align:center",colspan="2") ¿Con cuáles servicios de energía eléctrica cuenta la comunidad?
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in electricity.items %}
+                                | {% if key == 0 %}
+                                td(style="font-weight:bold") Interconexión eléctrica
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in electricity.items %}
+                                | {% if key == 1 %}
+                                td(style="font-weight:bold") Energía solar
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in electricity.items %}
+                                | {% if key == 2 %}
+                                td(style="font-weight:bold") Planta eléctrica a gasolina
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                                | {% for key, value in electricity.items %}
+                                | {% if key == 3 %}
+                                td(style="font-weight:bold") Otro. ¿Cuál?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                    table(class="striped bordered",width="100%")
+                        tbody
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == "MC-3" %}
+                                td(style="font-weight:bold") ¿Con cuál servicio de alcantarillado cuenta la comunidad?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == "MC-4" %}
+                                td(style="font-weight:bold") Los hogares de la comunidad, ¿cómo eliminan principalmente la basura?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == "MC-5" %}
+                                td(style="font-weight:bold") El agua para el consumo o preparación de alimentos de los hogares de la comunidad la obtienen principalmente de:
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == "MC-6" %}
+                                td(style="font-weight:bold") ¿En el plantel educativo se brindan alimentos (refrigerios, desayunos, medias nueves, almuerzos, etc.) en forma gratuita o por un pago simbólico?
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+                            tr
+                                | {% for key, value in objeto.items %}
+                                | {% if key == "MC-7" %}
+                                td(style="font-weight:bold") ¿El plantel educativo imparte educación que respeta y desarrolla la identidad cultural de su pueblo? (Etnoeducación)
+                                td {{ value }}
+                                | {% endif %}
+                                | {% endfor %}
+
+
+
+block body_script_auth
+    script.
+
+        $(document).ready(function () {
+
+        });
