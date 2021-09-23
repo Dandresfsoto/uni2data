@@ -53,6 +53,7 @@ urlpatterns = [
     #path('cpe_2018/', include('cpe_2018.urls')),
     path('iraca/', include('fest_2019.urls')),
     path('iraca_2021/', include('fest_2020_.urls')),
+    path('iraca_new/', include('iraca.urls')),
 
     path('rest/v1.0/usuarios/', include('usuarios.rest_urls')),
     path('rest/v1.0/mobile/', include('mobile.rest_urls')),
@@ -64,6 +65,7 @@ urlpatterns = [
     path('rest/v1.0/cpe_2018/', include('cpe_2018.rest_urls')),
     path('rest/v1.0/fest_2019/', include('fest_2019.rest_urls')),
     path('rest/v1.0/iraca_2021/', include('fest_2020_.rest_urls')),
+    path('rest/v1.0/iraca_new/', include('iraca.rest_urls')),
     path('sentry-debug/', trigger_error),
 ]
 
