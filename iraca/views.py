@@ -3429,3 +3429,32 @@ class BondingDeleteView(View):
                 return HttpResponseRedirect('../../')
             else:
                 return HttpResponseRedirect('../../')
+
+
+class HouseholdsReportView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.vinculacion.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+
+            if request.user.has_perms(self.permissions['ver']):
+                reporte = Reportes.objects.create(
+                    usuario=self.request.user,
+                    nombre=f'Reportes de vinculacion Iraca 2021',
+                    consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
+                )
+                #colocar delay
+                tasks.build_bonding_report(reporte.id)
+                return redirect('/reportes/')
+            else:
+                return HttpResponseRedirect('../../')

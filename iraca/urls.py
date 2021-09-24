@@ -103,4 +103,5 @@ urlpatterns = [
     path('bonding/<uuid:pk_household>/', views.BondingListView.as_view()),
     path('bonding/<uuid:pk_household>/view/<uuid:pk_mobile>/', views.BondingView.as_view()),
     path('bonding/<uuid:pk_household>/delete/<uuid:pk_mobile>/', views.BondingDeleteView.as_view()),
+    path('bonding/report/', views.HouseholdsReportView.as_view()),
 ]
