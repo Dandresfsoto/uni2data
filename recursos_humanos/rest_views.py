@@ -78,10 +78,16 @@ class ContratistasListApi(BaseDatatableView):
         elif column == 'banco':
             render = ""
 
-            if row.cuenta != '' and row.cuenta != None and row.banco != None:
-                render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0} cuenta {1} # {2}">' \
-                          '<i class="material-icons">monetization_on</i>' \
-                          '</a>'.format(row.banco.nombre,row.tipo_cuenta,row.cuenta)
+            if row.first_active_account == True:
+                if row.cuenta != '' and row.cuenta != None and row.banco != None:
+                    render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0} cuenta {1} # {2}">' \
+                              '<i class="material-icons">monetization_on</i>' \
+                              '</a>'.format(row.banco.nombre,row.tipo_cuenta,row.cuenta)
+            elif row.second_active_account == True:
+                if row.account != '' and row.account != None and row.bank != None:
+                    render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0} cuenta {1} # {2}">' \
+                              '<i class="material-icons">monetization_on</i>' \
+                              '</a>'.format(row.bank.nombre,row.type,row.account)
 
             if row.celular != None and row.celular != '':
                 render += '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Celular: {0}">' \

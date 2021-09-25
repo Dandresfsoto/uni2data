@@ -58,11 +58,17 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
     $('#id_banco').select2();
     $('#id_tipo_cuenta').select2();
 
+    $('#id_bank').select2();
+    $('#id_type').select2();
+
     $('select').material_select();
     $("label[for='id_banco']").addClass('active');
     $("label[for='id_tipo_cuenta']").addClass('active');
     $("label[for='id_cargo']").addClass('active');
     $("label[for='id_tipo_identificacion']").addClass('active');
+
+    $("label[for='id_bank']").addClass('active');
+    $("label[for='id_type']").addClass('active');
 
     $('#id_birthday').pickadate({
         format: 'dd/mm/yyyy',

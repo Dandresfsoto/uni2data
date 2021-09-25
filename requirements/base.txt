@@ -1,4 +1,4 @@
-django==2.1.5
+django==2.2.24
 django-environ==0.4.5
 psycopg2-binary==2.7.7
 Twisted==19.7.0
@@ -42,3 +42,4 @@ whitenoise==4.1.2
 sentry-sdk==0.14.1
 py-moneyed==1.1
 cryptography==3.3.1
+django-sequences==2.6

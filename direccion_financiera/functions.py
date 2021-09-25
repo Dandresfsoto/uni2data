@@ -40,15 +40,22 @@ def build_archivo_plano(id, email):
 
 
         for pago in pagos:
-            ws.write('A'+str(i),pago.tercero.tipo_identificacion)
-            ws.write('B' + str(i),pago.tercero.cedula)
+            ws.write('A' + str(i), pago.tercero.tipo_identificacion)
+            ws.write('B' + str(i), pago.tercero.cedula)
             ws.write('C' + str(i), removeNonAscii(pago.tercero.nombres.upper()))
-            ws.write('D' + str(i),removeNonAscii(pago.tercero.apellidos.upper()))
-            ws.write('E' + str(i),pago.tercero.banco.codigo)
-            ws.write('F' + str(i),'CA' if pago.tercero.tipo_cuenta == 'Ahorros' else 'CC')
-            ws.write('G' + str(i),pago.tercero.cuenta)
-            ws.write('H' + str(i),pago.valor_descuentos().amount.__float__())
-            i += 1
+            ws.write('D' + str(i), removeNonAscii(pago.tercero.apellidos.upper()))
+            if pago.tercero.first_active_account == True:
+                ws.write('E' + str(i),pago.tercero.banco.codigo)
+                ws.write('F' + str(i),'CA' if pago.tercero.tipo_cuenta == 'Ahorros' else 'CC')
+                ws.write('G' + str(i),pago.tercero.cuenta)
+                ws.write('H' + str(i),pago.valor_descuentos().amount.__float__())
+                i += 1
+            elif pago.tercero.second_active_account == True:
+                ws.write('E' + str(i), pago.tercero.bank.codigo)
+                ws.write('F' + str(i), 'CA' if pago.tercero.type == 'Ahorros' else 'CC')
+                ws.write('G' + str(i), pago.tercero.account)
+                ws.write('H' + str(i), pago.valor_descuentos().amount.__float__())
+                i += 1
 
         ws.set_column('A:B', 28)
         ws.set_column('C:D', 25)

@@ -30,23 +30,34 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="/direccion_financiera/reportes/") Reportes de pago
+                        a(href="/direccion_financiera/enterprise/") Empresas asociadas
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../") Reporte: {{ breadcrum_active | truncatechars:20 }}
+                        a(href="../../../../") {{ breadcrum_1 | truncatechars:25 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../") Reportes de pago
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../") {{ breadcrum_2 | truncatechars:25 }}
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Reportar
+                        a(href="#") Editar reporte
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
-
 
 
 block container_principal

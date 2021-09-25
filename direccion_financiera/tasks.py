@@ -14,6 +14,86 @@ from usuarios.models import Notifications
 from desplazamiento.models import Solicitudes, Desplazamiento
 
 @app.task
+def build_orden_compra(id,email):
+    purchase = models.PurchaseOrders.objects.get(id=id)
+    products = models.Products.objects.filter(purchase_order = purchase)
+
+
+    if products.count() > 0:
+
+        usuario = User.objects.get(email = email)
+        cantidad = models.Products.objects.filter(purchase_order = purchase).count()
+
+        output = BytesIO()
+        wb = openpyxl.load_workbook(filename=settings.STATICFILES_DIRS[0] + '/documentos/orden_compra.xlsx')
+        ws = wb.get_sheet_by_name('Orden de Compra')
+        logo_sican = Image(purchase.enterprise.logo)
+
+        logo_sican.width = 120
+        logo_sican.height = 80
+        logo_sican.drawing = 100
+
+
+
+
+
+        ws.add_image(logo_sican, 'C3')
+        ws['E2'] = str(purchase.enterprise.name)
+
+        ws['H6'] = str(purchase.enterprise.code) +'-'+ str(purchase.consecutive)
+        ws['H7'] = purchase.pretty_date_datetime()
+
+
+        ws['D6'] = purchase.third.get_full_name()
+        ws['D7'] = purchase.third.get_cedula()
+
+
+        ws['D10'] = purchase.department.nombre
+        ws['D11'] = purchase.municipality.nombre
+        ws['D12'] = purchase.beneficiary
+        ws['D13'] = purchase.project.nombre
+
+
+        ws['H11'] = purchase.third.get_full_name()
+
+
+        ws['I17'] = purchase.pretty_date_datetime()
+
+        i = 21
+
+        for product in products:
+            ws['B' + str(i)] = product.name.upper()
+            ws['F' + str(i)] = product.stock
+            ws['G' + str(i)] = product.pretty_print_price()
+            ws['I' + str(i)] = product.pretty_print_total_price()
+            i += 1
+
+        ws['I49'] = purchase.pretty_print_subtotal()
+        ws['I52'] = purchase.pretty_print_total()
+
+        ws['B54'] = purchase.observation
+
+        ws['F54'] = purchase.enterprise.name
+        ws['F55'] = purchase.project.nombre
+
+
+        ws['G54'] = str(purchase.departure)+ ' %'
+        ws['G55'] = str(purchase.counterpart)+ ' %'
+
+
+        ws['I54'] = purchase.pretty_print_total_percentage_enterprise()
+        ws['I55'] = purchase.pretty_print_total_percentage_project()
+
+
+
+        filename = str(purchase.id) + '.xlsx'
+        wb.save(output)
+
+        purchase.file_purchase_order.save(filename, File(output))
+
+    return "Reporte generado"
+
+@app.task
 def build_reporte_interno(id, email):
     reporte = models.Reportes.objects.get(id=id)
     pagos = models.Pagos.objects.filter(reporte = reporte)
@@ -36,7 +116,7 @@ def build_reporte_interno(id, email):
 
         ws.add_image(logo_sican, 'C2')
 
-        ws['F4'] = 'F-GAF-17-C' + str(reporte.consecutivo.id)
+        ws['F4'] = str(reporte.enterprise.report_code) + ' - ' + str(reporte.consecutive)
         ws['I4'] = reporte.reporte_update_datetime()
         ws['O4'] = usuario.get_full_name_string()
 
@@ -73,9 +153,14 @@ def build_reporte_interno(id, email):
                 ws['I' + str(i)] = ''
                 ws['J' + str(i)] = ''
             else:
-                ws['H' + str(i)] = pago.tercero.banco.nombre.upper()
-                ws['I' + str(i)] = pago.tercero.tipo_cuenta.upper()
-                ws['J' + str(i)] = pago.tercero.cuenta
+                if pago.tercero.first_active_account == True:
+                    ws['H' + str(i)] = pago.tercero.banco.nombre.upper()
+                    ws['I' + str(i)] = pago.tercero.tipo_cuenta.upper()
+                    ws['J' + str(i)] = pago.tercero.cuenta
+                elif pago.tercero.second_active_account == True:
+                    ws['H' + str(i)] = pago.tercero.bank.nombre.upper()
+                    ws['I' + str(i)] = pago.tercero.type.upper()
+                    ws['J' + str(i)] = pago.tercero.account
             ws['L' + str(i)] = pago.valor_descuentos().amount
             ws['O' + str(i)] = pago.observacion_pretty().upper()
             i += 1
@@ -86,6 +171,7 @@ def build_reporte_interno(id, email):
         reporte.file.save(filename, File(output))
 
     return "Reporte generado"
+
 
 @app.task
 def send_mail_templated_pago(id,template,dictionary,from_email,list_to_email):
@@ -109,7 +195,7 @@ def build_listado_terceros(id):
     proceso = "SICAN-LST-TERCEROS"
 
 
-    titulos = ['Consecutivo', 'Nombres', 'Apellidos', 'Tipo identificación', '# Documento', 'Cargo', 'Usuario', 'Celular',
+    titulos = ['Consecutive', 'Nombres', 'Apellidos', 'Tipo identificación', '# Documento', 'Cargo', 'Usuario', 'Celular',
                'Correo', 'Fecha de nacimiento', '# Cuenta', 'Banco', 'Tipo de cuenta']
 
     formatos = ['0', 'General', 'General', 'General', '0', 'General', 'General', 'General',
@@ -188,7 +274,7 @@ def build_listado_tercero_especifico(id, tercero_id):
             int(i),
             pago.creation,
             pago.usuario_actualizacion.get_full_name_string(),
-            pago.reporte.consecutivo.id,
+            pago.reporte.consecutive,
             pago.observacion,
             pago.estado,
             pago.valor.amount.__float__()] + pago.get_list_descuentos() + [
@@ -213,8 +299,11 @@ def build_listado_tercero_especifico(id, tercero_id):
     return "Archivo paquete ID: " + filename
 
 @app.task
-def build_reporte_pagos(id):
-    reporte = models_reportes.Reportes.objects.get(id = id)
+def build_reporte_pagos(reporte_id,enterprise_id):
+    reporte = models_reportes.Reportes.objects.get(id = reporte_id)
+    enterprise = models.Enterprise.objects.get(id=enterprise_id)
+
+
     proceso = "SION-REPORTE-PAGOS"
 
 
@@ -230,12 +319,12 @@ def build_reporte_pagos(id):
     contenidos = []
 
     i = 0
-    for pago in models.Pagos.objects.all().order_by('creation'):
+    for pago in models.Pagos.objects.filter(reporte__enterprise=enterprise, reporte__activo=True).order_by('creation'):
         i += 1
         contenidos.append([
             int(i),
             pago.creation,
-            pago.reporte.consecutivo.id,
+            pago.reporte.consecutive,
             pago.get_rubro(),
             'Efectivo' if pago.reporte.efectivo else 'Bancarizado',
             pago.reporte.nombre,
@@ -261,6 +350,53 @@ def build_reporte_pagos(id):
 
     return "Archivo paquete ID: " + filename
 
+@app.task
+def build_finantial_reports(reporte_id,enterprise_id):
+    reporte = models_reportes.Reportes.objects.get(id = reporte_id)
+    enterprise = models.Enterprise.objects.get(id=enterprise_id)
+
+
+    proceso = "UNI2DATA-REPORTE-PAGOS"
+
+
+    titulos = ['Consecutivo', 'Línea presupuestal','Sub Línea presupuestal Nivel II','Sub Línea presupuestal Nivel III','Cuenta Contable', 'Contratista', 'Cedula','No. Contrato','Concepto del Pago',
+               'No. Factura o Equivalente','No. Comprobante de Pago','Fecha de Pago','Valor del Gasto' ,'Deducciones y/o Rentenciones Practicdas','Valor del Gasto']
+
+    formatos = ['0','General','General','General','General', '0', 'General', 'General', 'General', 'General', 'General','dd/mm/yy',
+                '"$"#,##0.00_);[Red]("$"#,##0.00)','"$"#,##0.00_);[Red]("$"#,##0.00)','"$"#,##0.00_);[Red]("$"#,##0.00)']
+
+    ancho_columnas = [20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
+
+    contenidos = []
+
+    i = 0
+    for pago in models.Pagos.objects.filter(reporte__enterprise=enterprise, reporte__activo=True).order_by('creation'):
+        i += 1
+        contenidos.append([
+            int(i),
+            pago.get_rubro(),
+            pago.get_rubro_lvl2(),
+            pago.get_rubro_lvl3(),
+            pago.reporte.cuenta_contable,
+            pago.tercero.get_full_name(),
+            pago.tercero.cedula,
+            pago.get_contrato(),
+            pago.reporte.nombre,
+            pago.reporte.numero_documento_equivalente,
+            pago.reporte.numero_comprobante_pago,
+            pago.reporte.fecha_pago,
+            pago.valor.amount,
+            pago.valor_solo_descuentos_amount(),
+            pago.valor_descuentos_amount(),
+        ])
+
+    output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
+
+    filename = str(reporte.id) + '.xlsx'
+    reporte.file.save(filename, File(output))
+
+
+    return "Archivo paquete ID: " + filename
 
 @app.task
 def build_listado_solicitudes(id):
@@ -294,7 +430,7 @@ def build_listado_solicitudes(id):
                 int(i),
                 solicitud.get_contratista(),
                 solicitud.get_contratista_cedula(),
-                solicitud.consecutivo,
+                solicitud.consecutive,
                 solicitud.nombre,
                 desplazamiento.fecha,
                 desplazamiento.origen,

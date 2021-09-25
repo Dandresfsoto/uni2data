@@ -2,6 +2,8 @@ from djmoney.models.fields import MoneyField
 from django.db import models
 import uuid
 from phonenumber_field.modelfields import PhoneNumberField
+
+from common.models import BaseModel
 from usuarios.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -38,6 +40,7 @@ class Cargos(models.Model):
     def __str__(self):
         return self.nombre
 
+
 class Contratistas(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -55,10 +58,17 @@ class Contratistas(models.Model):
     email = models.EmailField(blank=True,null=True)
     birthday = models.DateField(blank=True, null=True)
 
+    first_active_account = models.BooleanField(default=False)
     tipo_cuenta = models.CharField(max_length=50, blank=True, null=True)
     banco = models.ForeignKey(Bancos, blank=True, null=True, on_delete=models.DO_NOTHING)
     cuenta = models.CharField(max_length=100, blank=True, null=True)
     cargo = models.ForeignKey(Cargos, on_delete=models.DO_NOTHING, blank=True, null=True)
+
+    second_active_account = models.BooleanField(default=False)
+    type = models.CharField(max_length=50, blank=True, null=True)
+    bank = models.ForeignKey(Bancos, blank=True, null=True, on_delete=models.DO_NOTHING, related_name="contractor_bank")
+    account = models.CharField(max_length=100, blank=True, null=True)
+
 
     usuario_asociado = models.ForeignKey(User, related_name="usuario_asociado", on_delete=models.DO_NOTHING, blank=True, null=True)
 
@@ -199,6 +209,13 @@ class Contratistas(models.Model):
             nombre = None
         else:
             nombre = self.banco.nombre
+        return nombre
+
+    def get_bank_name(self):
+        if self.bank == None:
+            nombre = None
+        else:
+            nombre = self.bank.nombre
         return nombre
 
 def upload_dinamic_dir(instance, filename):
