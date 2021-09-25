@@ -1,16 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+from dal import autocomplete
 from django import forms
-from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones
+from django.shortcuts import render
+
+from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
+from django.forms.fields import Field, FileField
+from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, Enterprise, Servicios, \
+    Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2, PurchaseOrders, Products
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
-from recursos_humanos.models import Contratistas
+
+from recursos_humanos.models import Contratistas, Contratos
 from django.db.models import Q
 from django.conf import settings
 from desplazamiento.models import Desplazamiento
 import json
+
+from usuarios.models import Departamentos, Municipios
 
 
 class BancoForm(forms.ModelForm):
@@ -69,6 +79,9 @@ class BancoForm(forms.ModelForm):
 
 class TerceroForm(forms.ModelForm):
 
+    first_active_account = forms.BooleanField(required=False, label="Seleccionar esta cuenta bancaria como principal")
+    second_active_account = forms.BooleanField(required=False, label="Seleccionar esta cuenta bancaria como principal")
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -76,6 +89,13 @@ class TerceroForm(forms.ModelForm):
         tipo_cuenta = cleaned_data.get("tipo_cuenta")
         cuenta = cleaned_data.get("cuenta")
         cargo = cleaned_data.get("cargo")
+
+        bank = cleaned_data.get("bank")
+        type = cleaned_data.get("type")
+        account = cleaned_data.get("account")
+
+        first_active_account = cleaned_data.get("first_active_account")
+        second_active_account = cleaned_data.get("second_active_account")
 
         if cargo == None:
             self.add_error('cargo', 'Campo requerido')
@@ -93,8 +113,32 @@ class TerceroForm(forms.ModelForm):
             if str(len(cuenta)) not in longitudes:
                 self.add_error('cuenta', 'La cuenta debe tener {0} digitos.'.format(banco.longitud))
 
+        if bank != None or type != None or account != None:
+            if bank == None:
+                self.add_error('bank', 'Campo requerido')
+            if type == None:
+                self.add_error('type', 'Campo requerido')
+            if account == None:
+                self.add_error('account', 'Campo requerido')
+
+        if bank != None and account != None:
+            longitudes = bank.longitud.split(',')
+            if str(len(account)) not in longitudes:
+                self.add_error('account', 'La cuenta debe tener {0} digitos.'.format(bank.longitud))
+
+        if first_active_account == True and second_active_account == True:
+            self.add_error('first_active_account', 'Solo debe seleccionar una opcion')
+            self.add_error('second_active_account', 'Solo debe seleccionar una opcion')
+
+
     def __init__(self, *args, **kwargs):
         super(TerceroForm, self).__init__(*args, **kwargs)
+
+        self.fields['type'].widget = forms.Select(choices=[
+            ('', '----------'),
+            ('Ahorros', 'Ahorros'),
+            ('Corriente', 'Corriente')
+        ])
 
         self.fields['tipo_cuenta'].widget = forms.Select(choices=[
             ('','----------'),
@@ -187,6 +231,12 @@ class TerceroForm(forms.ModelForm):
                 Column(
                     Row(
                         Column(
+                            'first_active_account',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
                             'cuenta',
                             css_class='s12'
                         ),
@@ -196,6 +246,31 @@ class TerceroForm(forms.ModelForm):
                         ),
                         Column(
                             'tipo_cuenta',
+                            css_class='s12 m6'
+                        )
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'second_active_account',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'account',
+                            css_class='s12'
+                        ),
+                        Column(
+                            'bank',
+                            css_class='s12 m6'
+                        ),
+                        Column(
+                            'type',
                             css_class='s12 m6'
                         )
                     ),
@@ -220,25 +295,31 @@ class TerceroForm(forms.ModelForm):
 
     class Meta:
         model = Contratistas
-        fields = ['nombres','apellidos','tipo_identificacion','cedula','celular','email','birthday','tipo_cuenta','banco','cuenta','cargo']
+        fields = ['nombres','apellidos','tipo_identificacion','cedula','celular','email','birthday','tipo_cuenta','banco','cuenta','cargo','type','bank','account','first_active_account','second_active_account']
         labels = {
             'birthday': 'Fecha de nacimiento',
-            'cedula': 'Cédula'
+            'cedula': 'Cédula',
+            'cuenta': 'Número de cuenta',
+            'first_active_account': 'Seleccionar esta cuenta bancaria como principal',
+            'second_active_account': 'Seleccionar esta cuenta bancaria como principal',
+            'account': 'Número de cuenta',
+            'type': 'Tipo de cuenta',
+            'bank': 'Banco',
         }
 
 class ReporteForm(forms.ModelForm):
-
 
     def __init__(self, *args, **kwargs):
         super(ReporteForm, self).__init__(*args, **kwargs)
 
         pk = kwargs['initial'].get('pk')
+        enterprise = Enterprise.objects.get(id=pk)
+        self.fields['servicio'].queryset = Servicios.objects.filter(enterprise=enterprise)
+        self.fields['proyecto'].queryset = Proyecto.objects.filter(enterprise=enterprise)
+        self.fields['tipo_soporte'].queryset = TipoSoporte.objects.filter(enterprise=enterprise)
+        self.fields['rubro'].queryset = RubroPresupuestal.objects.filter(enterprise=enterprise)
 
-        if pk != None:
-            reporte = Reportes.objects.get(id = pk)
-            self.fields['servicio'].widget.attrs['disabled'] = 'disabled'
-            self.fields['servicio'].initial = reporte.servicio
-
+        self.fields['file_purchase_order'].widget = forms.FileInput()
         self.fields['respaldo'].widget = forms.FileInput()
         self.fields['firma'].widget = forms.FileInput()
 
@@ -277,9 +358,19 @@ class ReporteForm(forms.ModelForm):
                             'efectivo',
                             css_class='s12 m6 l4'
                         ),
+                    ),
+                    Row(
                         Column(
                             'rubro',
-                            css_class='s12 m6 l4'
+                            css_class='s12 m6 l4 '
+                        ),
+                        Column(
+                            'rubro_level_2',
+                            css_class='s12 m6 l4',
+                        ),
+                        Column(
+                            'rubro_level_3',
+                            css_class='s12 m6 l4',
                         ),
                     ),
 
@@ -293,17 +384,6 @@ class ReporteForm(forms.ModelForm):
                             css_class='s12 m6'
                         )
                     ),
-                    Row(
-                        Column(
-                            'numero_contrato',
-                            css_class='s12 m6'
-                        ),
-                        Column(
-                            'numero_documento_equivalente',
-                            css_class='s12 m6'
-                        )
-                    ),
-                    css_class="s12"
                 ),
             ),
             Row(
@@ -320,6 +400,18 @@ class ReporteForm(forms.ModelForm):
             Row(
                 Fieldset(
                     'Archivos',
+                )
+            ),
+            Row(
+                Column(
+                    HTML(
+                        """
+                        <p style="font-size:1.2rem;"><b>Orden de compra</b></p>
+                        <p style="display:inline;"><b>Actualmente:</b>{{ file_purchase_order_url | safe }}</p>
+                        """
+                    ),
+                    'file_purchase_order',
+                    css_class='s12'
                 )
             ),
             Row(
@@ -363,17 +455,18 @@ class ReporteForm(forms.ModelForm):
 
     class Meta:
         model = Reportes
-        fields = ['nombre','servicio','proyecto','tipo_soporte','inicio','fin','respaldo','firma','efectivo','numero_contrato','numero_documento_equivalente', 'rubro', 'observacion']
+        fields = ['nombre','servicio','proyecto','tipo_soporte','inicio','fin','respaldo','firma','efectivo', 'rubro', 'rubro_level_2','rubro_level_3','observacion','file_purchase_order']
         labels = {
             'servicio': 'Bien o servicio a gestionar',
             'tipo_soporte': 'Respaldo del reporte',
             'inicio': 'Fecha de pago',
             'fin': 'Fecha de cargue',
-            'efectivo': 'Tipo de reporte'
+            'efectivo': 'Tipo de reporte',
+            'file_purchase_order': 'Orden de compra'
         }
         widgets = {
             'efectivo': forms.Select(choices=[(False,'Bancarizado'),(True,'Efectivo')]),
-            'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'})
+            'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
         }
 
 class ReporteUpdateForm(forms.ModelForm):
@@ -381,8 +474,11 @@ class ReporteUpdateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ReporteUpdateForm, self).__init__(*args, **kwargs)
+        pk = kwargs['initial'].get('pk')
+        enterprise = Enterprise.objects.get(id=pk)
+        self.fields['rubro'].queryset = RubroPresupuestal.objects.filter(enterprise=enterprise)
 
-
+        self.fields['file_purchase_order'].widget = forms.FileInput()
         self.fields['respaldo'].widget = forms.FileInput()
         self.fields['firma'].widget = forms.FileInput()
 
@@ -415,7 +511,15 @@ class ReporteUpdateForm(forms.ModelForm):
                     Row(
                         Column(
                             'rubro',
-                            css_class='s12 m6 l4'
+                            css_class='s12 m6 l4 '
+                        ),
+                        Column(
+                            'rubro_level_2',
+                            css_class='s12 m6 l4',
+                        ),
+                        Column(
+                            'rubro_level_3',
+                            css_class='s12 m6 l4',
                         ),
                     ),
                     Row(
@@ -425,16 +529,6 @@ class ReporteUpdateForm(forms.ModelForm):
                         ),
                         Column(
                             'fin',
-                            css_class='s12 m6'
-                        )
-                    ),
-                    Row(
-                        Column(
-                            'numero_contrato',
-                            css_class='s12 m6'
-                        ),
-                        Column(
-                            'numero_documento_equivalente',
                             css_class='s12 m6'
                         )
                     ),
@@ -455,6 +549,18 @@ class ReporteUpdateForm(forms.ModelForm):
             Row(
                 Fieldset(
                     'Archivos',
+                )
+            ),
+            Row(
+                Column(
+                    HTML(
+                        """
+                        <p style="font-size:1.2rem;"><b>Orden de compra</b></p>
+                        <p style="display:inline;"><b>Actualmente:</b>{{ file_purchase_order_url | safe }}</p>
+                        """
+                    ),
+                    'file_purchase_order',
+                    css_class='s12'
                 )
             ),
             Row(
@@ -498,11 +604,12 @@ class ReporteUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Reportes
-        fields = ['nombre','proyecto','tipo_soporte','inicio','fin','respaldo','firma','numero_contrato','numero_documento_equivalente', 'observacion', 'rubro']
+        fields = ['nombre','proyecto','tipo_soporte','inicio','fin','respaldo','firma', 'observacion', 'rubro', 'rubro_level_2','rubro_level_3','file_purchase_order']
         labels = {
             'tipo_soporte': 'Respaldo del reporte',
             'inicio': 'Fecha de pago',
-            'fin': 'Fecha de cargue'
+            'fin': 'Fecha de cargue',
+            'file_purchase_order': 'Orden de compra'
         }
         widgets = {
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'})
@@ -513,7 +620,7 @@ class ResultadoReporteForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        reporte = Reportes.objects.get(id = self.pk)
+        reporte = Reportes.objects.get(id = self.pk_reporte)
         file_banco = cleaned_data.get("file_banco")
 
         if file_banco == None:
@@ -527,8 +634,8 @@ class ResultadoReporteForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ResultadoReporteForm, self).__init__(*args, **kwargs)
 
-        pk = kwargs['initial'].get('pk')
-        self.pk = pk
+        pk_reporte = kwargs['initial'].get('pk_reporte')
+        self.pk_reporte = pk_reporte
         self.fields['file_banco'].widget = forms.FileInput()
 
         self.helper = FormHelper(self)
@@ -576,7 +683,7 @@ class ResultadoReporteForm(forms.ModelForm):
 
         i = 1
 
-        for pago in Pagos.objects.filter(reporte__id=pk):
+        for pago in Pagos.objects.filter(reporte__id=pk_reporte):
 
             self.fields[str(pago.id)] = forms.CharField(
                 max_length=100,
@@ -647,6 +754,8 @@ class PagoForm(forms.Form):
     cedula = forms.IntegerField(label="Cédula",widget=forms.HiddenInput())
     publico = forms.BooleanField(initial=True, required=False)
 
+    contrato = forms.ModelChoiceField(label='Contrato', queryset=Contratos.objects.none(), required=False)
+
     uuid_descuento_1 = forms.UUIDField(required=False, widget=forms.HiddenInput())
     valor_descuento_1 = forms.CharField(label = "Valor ($)",required=False)
     concepto_descuento_1 = forms.CharField(label="Concepto",widget = forms.Select(choices=CHOICES),required=False)
@@ -711,7 +820,7 @@ class PagoForm(forms.Form):
 
 
 
-        q = Q(reporte__id = self.pk) & Q(tercero__cedula = cedula)
+        q = Q(reporte__id = self.pk_reporte) & Q(tercero__cedula = cedula)
 
         pagos = Pagos.objects.filter(q)
 
@@ -779,7 +888,7 @@ class PagoForm(forms.Form):
             if pagos.count() > 0:
                 self.add_error('tercero', 'Existe un pago registrado en el reporte para esta persona.')
 
-            if Pagos.objects.filter(reporte__id = self.pk).count() > 19:
+            if Pagos.objects.filter(reporte__id = self.pk_reporte).count() > 19:
                 self.add_error('tercero', 'Por reporte solo se permiten 20 pagos.')
 
 
@@ -847,19 +956,25 @@ class PagoForm(forms.Form):
         super(PagoForm, self).__init__(*args, **kwargs)
 
         self.pk = kwargs['initial'].get('pk')
+        self.pk_reporte = kwargs['initial'].get('pk_reporte')
         self.pk_pago = kwargs['initial'].get('pk_pago')
         self.fields['publico'].widget.attrs['class'] = 'filled-in'
 
+
         if self.pk_pago != None:
             pago = Pagos.objects.get(id = self.pk_pago)
-            self.pk = pago.reporte.id
+            self.pk_reporte = pago.reporte.id
             self.fields['tercero'].initial = pago.tercero.fullname() + ' - ' + str(pago.tercero.cedula)
+            self.fields['contrato'].queryset = Contratos.objects.filter(contratista__cedula=pago.tercero.cedula)
             self.fields['valor'].initial = pago.valor.amount
             self.fields['observacion'].initial = pago.observacion
             self.fields['cedula'].initial = pago.tercero.cedula
             self.fields['publico'].initial = pago.publico
             self.fields['descuentos_pendientes'].initial = pago.descuentos_pendientes
             self.fields['descuentos_pendientes_otro_valor'].initial = pago.descuentos_pendientes_otro_valor
+            if pago.contrato != None:
+                self.fields['contrato'].initial = pago.contrato.id
+
 
             descuentos = Descuentos.objects.filter(pago = pago).order_by('creation')
             i = 1
@@ -870,7 +985,8 @@ class PagoForm(forms.Form):
                 self.fields['concepto_descuento_' + str(i)].initial = descuento.concepto
                 self.fields['observacion_descuento_' + str(i)].initial = descuento.observacion
                 i += 1
-
+        else:
+            self.fields['contrato'].queryset = Contratos.objects.all()
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -897,6 +1013,15 @@ class PagoForm(forms.Form):
                                 <p><b>Número de cuenta:</b><span id="cuenta" style="margin-left:5px;">{{cuenta}}</span></p>
                                 """
                             ),
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Fieldset(
+                            'Información del contrato',
+                        ),
+                        Column(
+                            'contrato',
                             css_class='s12'
                         ),
                     ),
@@ -1045,6 +1170,8 @@ class PagoDescontableForm(forms.Form):
     publico = forms.BooleanField(initial=True, required=False)
     cuotas = forms.IntegerField(initial=1)
 
+    contrato = forms.ModelChoiceField(label='Contrato', queryset=Contratos.objects.none(), required=False)
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -1052,7 +1179,7 @@ class PagoDescontableForm(forms.Form):
         cuotas = cleaned_data.get("cuotas")
 
 
-        q = Q(reporte__id = self.pk) & Q(tercero__cedula = cedula)
+        q = Q(reporte__id = self.pk_reporte) & Q(tercero__cedula = cedula)
 
         pagos = Pagos.objects.filter(q)
 
@@ -1066,7 +1193,7 @@ class PagoDescontableForm(forms.Form):
             if pagos.count() > 0:
                 self.add_error('tercero', 'Existe un pago registrado en el reporte para esta persona.')
 
-            if Pagos.objects.filter(reporte__id = self.pk).count() > 19:
+            if Pagos.objects.filter(reporte__id = self.pk_reporte).count() > 19:
                 self.add_error('tercero', 'Por reporte solo se permiten 20 pagos.')
 
         if cuotas < 1:
@@ -1079,17 +1206,23 @@ class PagoDescontableForm(forms.Form):
 
         self.pk = kwargs['initial'].get('pk')
         self.pk_pago = kwargs['initial'].get('pk_pago')
+        self.pk_reporte = kwargs['initial'].get('pk_reporte')
         self.fields['publico'].widget.attrs['class'] = 'filled-in'
+
+        self.fields['contrato'].queryset = Contratos.objects.all()
 
         if self.pk_pago != None:
             pago = Pagos.objects.get(id = self.pk_pago)
-            self.pk = pago.reporte.id
+            self.pk_reporte = pago.reporte.id
             self.fields['tercero'].initial = pago.tercero.fullname() + ' - ' + str(pago.tercero.cedula)
             self.fields['valor'].initial = pago.valor.amount
             self.fields['observacion'].initial = pago.observacion
             self.fields['cedula'].initial = pago.tercero.cedula
             self.fields['publico'].initial = pago.publico
             self.fields['cuotas'].initial = pago.cuotas
+            self.fields['contrato'].queryset = Contratos.objects.filter(contratista__cedula=pago.tercero.cedula)
+            if pago.contrato != None:
+                self.fields['contrato'].initial = pago.contrato.id
 
 
         self.helper = FormHelper(self)
@@ -1117,6 +1250,15 @@ class PagoDescontableForm(forms.Form):
                                 <p><b>Número de cuenta:</b><span id="cuenta" style="margin-left:5px;">{{cuenta}}</span></p>
                                 """
                             ),
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Fieldset(
+                            'Información del contrato',
+                        ),
+                        Column(
+                            'contrato',
                             css_class='s12'
                         ),
                     ),
@@ -1206,6 +1348,90 @@ class ReportarReporteForm(forms.Form):
                 ),
             )
         )
+
+class RecordForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        file_comprobante_egreso = cleaned_data.get("file_comprobante_egreso")
+
+        if file_comprobante_egreso == None:
+            self.add_error('file_comprobante_egreso', 'Campo requerido')
+
+
+    def __init__(self, *args, **kwargs):
+        super(RecordForm, self).__init__(*args, **kwargs)
+
+        self.fields['file_comprobante_egreso'].widget = forms.FileInput()
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Informacion Contable',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'cuenta_contable',
+                            css_class='s12 m12 l6'
+                        ),
+                        Column(
+                            'numero_documento_equivalente',
+                            css_class='s12 m12 l6'
+                        ),
+                        Column(
+                            'numero_comprobante_pago',
+                            css_class='s12 m12 l6'
+                        ),
+                    ),
+
+                    Row(
+                        Column(
+                            'fecha_pago',
+                            css_class='s12 m12'
+                        ),
+                    ),
+                ),
+            ),
+            Row(
+                Column(
+                    HTML(
+                        """
+                        <p style="font-size:1.2rem;"><b>Archivo de respuesta plataforma de pago</b></p>
+                        <p style="display:inline;"><b>Actualmente:</b>{{ file_comprobante_egreso_url | safe }}</p>
+                        """
+                    ),
+                    'file_comprobante_egreso',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Reportes
+        fields = ['file_comprobante_egreso','cuenta_contable','numero_documento_equivalente','numero_comprobante_pago','fecha_pago']
+        labels = {
+            'file_comprobante_egreso': 'Comprobante de egreso',
+            'numero_documento_equivalente': 'Numero del documento equivalente'
+        }
 
 class DesplazamientoFinancieraForm(forms.ModelForm):
 
@@ -1356,3 +1582,301 @@ class AmortizacionesUpdate(forms.Form):
                 ),
             )
         )
+
+class ProjectForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ProjectForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información del proyecto',
+                )
+            ),
+            Row(
+                Column(
+                    'nombre',
+                    css_class='s12 m6 l6'
+                ),
+                Column(
+                    'cuenta',
+                    css_class='s12 m12 l6'
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Proyecto
+        fields = ['cuenta','nombre']
+
+class PurchaseOrderForm(forms.ModelForm):
+
+    department = forms.ModelChoiceField(label='Departamento*',queryset=Departamentos.objects.all(), required=False)
+    municipality = forms.ModelChoiceField(label='Municipio', queryset=Municipios.objects.all(), required=False)
+
+    third = forms.CharField(max_length=100,label='Contratista',widget=forms.TextInput(attrs={'class':'autocomplete','autocomplete':'off'}))
+    cedula = forms.IntegerField(label="Cédula",widget=forms.HiddenInput())
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        departure = float(cleaned_data.get("departure"))
+        counterpart = float(cleaned_data.get("counterpart"))
+
+        percentage = departure + counterpart
+
+        if percentage != 100:
+            self.add_error('departure',"La suma de los valores de partida y contrapartida debe ser 100%")
+
+
+
+    def __init__(self, *args, **kwargs):
+        super(PurchaseOrderForm, self).__init__(*args, **kwargs)
+        self.pk = kwargs['initial'].get('pk')
+        self.pk_purchase = kwargs['initial'].get('pk_purchase')
+        self.fields['file_quotation'].widget = forms.FileInput()
+
+        if self.pk_purchase != None:
+            purchase = PurchaseOrders.objects.get(id = self.pk_purchase)
+            self.PurchaseOrders = purchase.id
+            self.fields['third'].initial = purchase.third.fullname() + ' - ' + str(purchase.third.cedula)
+            self.fields['cedula'].initial = purchase.third.cedula
+            self.fields['department'].initial = purchase.department.id
+            self.fields['municipality'].queryset = Municipios.objects.filter(departamento=purchase.department.id)
+            self.fields['municipality'].initial = purchase.municipality.id
+            self.fields['project'].initial = purchase.project.id
+            self.fields['beneficiary'].initial = purchase.beneficiary
+            self.fields['date'].initial = purchase.date
+            self.fields['observation'].initial = purchase.observation
+            self.fields['departure'].initial = purchase.departure
+            self.fields['counterpart'].initial = purchase.counterpart
+
+
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Column(
+                    Row(
+                        Fieldset(
+                            'Información del tercero',
+                        ),
+                        Column(
+                            'third',
+                            css_class='s12'
+                        ),
+                        Column(
+                            'cedula',
+                            css_class='s12'
+                        ),
+                    ),
+                ),
+                Column(
+                    Row(
+                        Fieldset(
+                            'ubicaccion de compra',
+                        ),
+                        Column(
+                            'department',
+                            css_class='s6'
+                        ),
+                        Column(
+                            'municipality',
+                            css_class='s6'
+                        ),
+                    ),
+                ),
+                Column(
+                    Row(
+                        Fieldset(
+                            'Informacion de la orden de compra',
+                        ),
+                        Column(
+                            'project',
+                            css_class='s6'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'beneficiary',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'date',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'observation',
+                            css_class='s12'
+                        ),
+                    ),
+                ),
+                Column(
+                    Row(
+                        Fieldset(
+                            'Partida y contrapartida',
+                        ),
+                        Column(
+                            'departure',
+                            css_class='s6'
+                        ),
+                        Column(
+                            'counterpart',
+                            css_class='s6'
+                        ),
+                    ),
+                ),
+                Row(
+                    Fieldset(
+                        'Archivos',
+                    )
+                ),
+
+                Row(
+                    Column(
+                        HTML(
+                            """
+                            <p style="font-size:1.2rem;"><b>Cotizacion</b></p>
+                            <p style="display:inline;"><b>Actualmente:</b>{{ file_quotation_url | safe }}</p>
+                            """
+                        ),
+                        'file_quotation',
+                        css_class='s12'
+                    )
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            ),
+        )
+
+    class Meta:
+        model = PurchaseOrders
+        fields = ['department','municipality','project','beneficiary','observation','date','file_quotation','beneficiary','departure','counterpart']
+        labels = {
+            'department': 'Departamento',
+            'municipality': 'Municipio',
+            'project': 'Projectos',
+            'beneficiary': 'Beneficiario',
+            'observation': 'Observaciones',
+            'date': 'fecha',
+            'file_quotation': 'Cotizacion',
+            'departure': 'Partida',
+            'counterpart': 'Contrapartida',
+        }
+        widgets = {
+            'observation': forms.Textarea(attrs={'class': 'materialize-textarea'}),
+        }
+
+class ProductForm(forms.ModelForm):
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+
+
+    def __init__(self, *args, **kwargs):
+        super(ProductForm, self).__init__(*args, **kwargs)
+        self.pk = kwargs['initial'].get('pk')
+        self.pk_purchase = kwargs['initial'].get('pk_purchase')
+        self.pk_product = kwargs['initial'].get('pk_product')
+
+
+        self.fields['price_char'] = forms.CharField(label="Valor ($)")
+        try:
+            price = kwargs['instance'].price
+        except:
+            pass
+
+
+        pk_product = kwargs['initial'].get('pk_product')
+        if pk_product != None:
+            product = Products.objects.get(id=pk_product)
+            self.fields['name'].initial = product.name
+            self.fields['price_char'].initial = product.price
+            self.fields['stock'].initial = product.stock
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información del banco',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'name',
+                            css_class='s12 m6 l4'
+                        ),
+                        Column(
+                            'price_char',
+                            css_class='s12 m6 l4'
+                        ),
+                        Column(
+                            'stock',
+                            css_class='s12 m6 l4'
+                        )
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Products
+        fields = ['name','stock']
+        labels = {
+            'name': 'Nombre del producto',
+            'stock': 'Cantidad del producto',
+        }
+
