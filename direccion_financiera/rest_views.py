@@ -1,6 +1,5 @@
 from uuid import UUID
 
-import self as self
 from dal import autocomplete
 from django.core import serializers
 from django.shortcuts import render
