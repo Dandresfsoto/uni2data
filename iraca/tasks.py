@@ -157,9 +157,9 @@ def build_bonding_report(id):
     reporte = models_reportes.Reportes.objects.get(id=id)
     proceso = "IRACA 2021"
 
-    titulos = ['ID hogar', 'Fecha inscripción', 'Departamento de atención', 'Municipio de atención',
+    titulos = ['ID persona','ID hogar', 'Fecha inscripción', 'Departamento de atención', 'Municipio de atención',
                'Codigo municipio de atención', 'Departamento de ubicación', 'Municipio de ubicación', 'Codigo DANE',
-               'Zona', 'Codigo zona', 'Corregimiento', 'Vereda/Barrio', 'Localidad/Comuna', 'Barrio', 'Centro poblado',
+               'Zona', 'Codigo zona', 'Corregimiento', 'Vereda/Barrio','ID Vereda/Barrio','Otras veredas', 'Localidad/Comuna', 'Barrio', 'Centro poblado',
                'Direccion', 'Ubicacion', 'Numero de telefono', 'Coordenada X', 'Coordenada Y',
                '¿Tiene acceso a otro telefono?', 'Numero adicional 1', 'Numero adicional 2', 'Correo electronico',
                'Acceso a internet', '¿Tiene disponibilidad de tierra?', '¿Tiene disponibilidad de agua?',
@@ -177,7 +177,7 @@ def build_bonding_report(id):
                'servicio publico de energia electrica', 'Servicio publico de Alcantarillado',
                'Servicio publico de gas natural domiciliario', 'Servicio publico de recolección de basuras',
                'Servicio publico de acueducto']
-    formatos = ['0', 'dd/mm/yyyy', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
+    formatos = ['0','0', 'dd/mm/yyyy', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
@@ -186,17 +186,17 @@ def build_bonding_report(id):
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
-                'General']
-    ancho_columnas = [20, 30, 30, 30, 20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+                'General','General','General']
+    ancho_columnas = [20,20, 30, 30, 30, 20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
                       30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
                       30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
-                      30, 30, 30, 30, 30, 30, 30, 30, 30]
+                      30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
     contenidos = []
     order = []
 
     mobiles = FormMobile.objects.filter().distinct()
     i = 0
-
+    j = 0
     for mobil in mobiles:
         i += 1
         json_code = mobil.data
@@ -206,6 +206,7 @@ def build_bonding_report(id):
         number = 1
         h = 0
         while number <= cant:
+            j += 1
             attention_department = json_code["U-20"]
             attention_municipally = json_code["U-21"]
             location_department = json_code["U-1"]
@@ -213,6 +214,8 @@ def build_bonding_report(id):
             zone = json_code["U-3"]
             township = json_code["U-5"]
             sidewalk = json_code["U-6"]
+            id_sidewalk = ""
+            other_sidewalk = ""
             location = json_code["U-4"]
             neighborhood = json_code["U-7"]
             populated_center = json_code["U-8"]
@@ -279,6 +282,7 @@ def build_bonding_report(id):
             gas = "Si"
             trash = json_code["MC-3"]
             aqueduct = json_code["MC-5"]
+
 
             if type_document == "Cédula de Ciudadanía (CC)":
                 id_type = "153"
@@ -405,26 +409,26 @@ def build_bonding_report(id):
                 id_ethnicity = "9"
 
             count_disabilitys = len(disabilitys)
-            if count_disabilitys > 1:
-                disabilitys = disabilitys[-1]
+            if count_disabilitys == 0:
+                disabilitys_end = "Ninguna de las anteriores"
             else:
-                disabilitys = disabilitys[0]
+                disabilitys_end = disabilitys[0]
 
-            if disabilitys == "Ver":
+            if disabilitys_end == "Ver":
                 id_disabilitys = "1400"
-            elif disabilitys == "Oír":
+            elif disabilitys_end == "Oír":
                 id_disabilitys = "1401"
-            elif disabilitys == "Hablar":
+            elif disabilitys_end == "Hablar":
                 id_disabilitys = "1402"
-            elif disabilitys == "Moverse o caminar por sí mismo":
+            elif disabilitys_end == "Moverse o caminar por sí mismo":
                 id_disabilitys = "1406"
-            elif disabilitys == "Bañarse, vestirse o alimentarse por sí mismo":
+            elif disabilitys_end == "Bañarse, vestirse o alimentarse por sí mismo":
                 id_disabilitys = "1406"
-            elif disabilitys == "Dificultad para salir a la calle sin ayuda o compañía":
+            elif disabilitys_end == "Dificultad para salir a la calle sin ayuda o compañía":
                 id_disabilitys = "1406"
-            elif disabilitys == "Entender o aprender":
+            elif disabilitys_end == "Entender o aprender":
                 id_disabilitys = "1404"
-            elif disabilitys == "Ninguna de las anteriores":
+            elif disabilitys_end == "Ninguna de las anteriores":
                 id_disabilitys = "0"
 
             if education_level == "Ninguno":
@@ -542,6 +546,7 @@ def build_bonding_report(id):
             h += 1
             number += 1
             list = [
+                j,
                 i,
                 mobil.pretty_creation_datetime(),
                 attention_department,
@@ -554,6 +559,8 @@ def build_bonding_report(id):
                 mobil.json_zone_cod(),
                 township,
                 sidewalk,
+                id_sidewalk,
+                other_sidewalk,
                 location,
                 neighborhood,
                 populated_center,
@@ -590,7 +597,7 @@ def build_bonding_report(id):
                 id_marital_status,
                 ethnicity,
                 id_ethnicity,
-                disabilitys,
+                disabilitys_end,
                 id_disabilitys,
                 read,
                 sum,
