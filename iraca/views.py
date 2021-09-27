@@ -1515,6 +1515,7 @@ class ImplementationCreateView(LoginRequiredMixin,
 
 
         self.object = models.Routes.objects.create(
+            resguard=form.cleaned_data['resguard'],
             name=form.cleaned_data['name'],
             creation_user=self.request.user,
             user_update=self.request.user,
@@ -1525,6 +1526,7 @@ class ImplementationCreateView(LoginRequiredMixin,
 
     def get_context_data(self, **kwargs):
         kwargs['title'] = "NUEVA RUTA"
+        kwargs['url_resguard'] = '/rest/v1.0/iraca_new/implementation/autocomplete/resguard/'
         return super(ImplementationCreateView,self).get_context_data(**kwargs)
 
 class ImplementationUpdateView(LoginRequiredMixin,
@@ -1549,6 +1551,7 @@ class ImplementationUpdateView(LoginRequiredMixin,
     def form_valid(self, form):
 
         models.Routes.objects.filter(id = self.kwargs['pk']).update(
+            resguard=form.cleaned_data['resguard'],
             name=form.cleaned_data['name'],
             visible=form.cleaned_data['visible'],
             goal=form.cleaned_data['goal']
@@ -1568,6 +1571,7 @@ class ImplementationUpdateView(LoginRequiredMixin,
         route = models.Routes.objects.get(id = self.kwargs['pk'])
         kwargs['title'] = "EDITAR RUTA"
         kwargs['route_name'] = route.name
+        kwargs['url_resguard'] = '/rest/v1.0/iraca_new/implementation/autocomplete/resguard/'
         return super(ImplementationUpdateView,self).get_context_data(**kwargs)
 
     def get_initial(self):

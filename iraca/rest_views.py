@@ -517,8 +517,8 @@ class ContactsListApi(BaseDatatableView):
 
 class ImplementationListApi(BaseDatatableView):
     model = models.Routes
-    columns = ['id','creation','name','novelties','progress','regitered_household']
-    order_columns = ['id','creation','name','novelties','progress','regitered_household']
+    columns = ['id','creation','name','resguard','novelties','progress','regitered_household']
+    order_columns = ['id','creation','name','resguard','novelties','progress','regitered_household']
 
     def get_initial_queryset(self):
 
@@ -581,6 +581,8 @@ class ImplementationListApi(BaseDatatableView):
 
             return ret
 
+        elif column == 'resguard':
+            return row.get_resguard_name()
 
         elif column == 'novelties':
             if row.novelties > 0:
@@ -972,8 +974,8 @@ class ImplementationHouseholdsListApi(BaseDatatableView):
 
 class FormulationListApi(BaseDatatableView):
     model = models.Routes
-    columns = ['creation','name','novelties','progress_form','regitered_household']
-    order_columns = ['creation','name','novelties','progress_form','regitered_household']
+    columns = ['creation','name','resguard','novelties','progress_form','regitered_household']
+    order_columns = ['creation','name','resguard','novelties','progress_form','regitered_household']
 
     def get_initial_queryset(self):
 
@@ -1026,6 +1028,9 @@ class FormulationListApi(BaseDatatableView):
                 return '<span class="new badge" data-badge-caption="">{0}</span>'.format(row.novelties_form)
             else:
                 return ''
+
+        elif column == 'resguard':
+            return row.get_resguard_name()
 
         elif column == 'progress_form':
 
@@ -1873,5 +1878,4 @@ class ResguardListApi(BaseDatatableView):
 
         else:
             return super(ResguardListApi, self).render_column(row, column)
-
 

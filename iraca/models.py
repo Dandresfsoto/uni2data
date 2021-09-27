@@ -262,10 +262,23 @@ class Instruments(models.Model):
     def get_consecutive(self):
         return '{0}.{1}'.format(self.moment.consecutive,self.consecutive)
 
+class Resguards(models.Model):
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+
+    municipality = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, related_name='resguard_municipality_iraca_2021')
+
+    name = models.CharField(max_length=100,blank=True,null=True)
+
+
+    def __str__(self):
+        return self.name
+
 class Routes(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     creation = models.DateTimeField(auto_now_add=True)
-    name = models.CharField(unique=True, max_length=100)
+    name = models.CharField(unique=True, max_length=100,blank=True, null=True)
+    resguard = models.ForeignKey(Resguards, related_name="resguard_route_iraca_2021", on_delete=models.DO_NOTHING,blank=True, null=True)
 
     novelties = models.IntegerField(default=0)
     progress = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
@@ -286,6 +299,11 @@ class Routes(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_resguard_name(self):
+        resguard = self.resguard.name
+        return resguard
+
 
     def update_progreso(self):
 
@@ -460,19 +478,6 @@ class InstrumentTraceabilityRouteObject(models.Model):
     creacion = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='traceability_instrument_user_iraca_2021')
     observation = models.TextField()
-
-class Resguards(models.Model):
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-
-    municipality = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, related_name='resguard_municipality_iraca_2021')
-
-    name = models.CharField(max_length=100,blank=True,null=True)
-
-
-    def __str__(self):
-        return self.name
-
 
 
 #----------------------------------------------------------------------------------
