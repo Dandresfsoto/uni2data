@@ -491,7 +491,7 @@ class ReportesListApi(BaseDatatableView):
                            '</a>' \
                        '</div>'.format(row.id,row.nombre)
 
-            elif self.request.user.has_perm('usuarios.direccion_financiera.contabilizar') and row.estado == "Carga de pagos":
+            elif self.request.user.has_perm('usuarios.direccion_financiera.contabilizar') and row.estado == "Completo":
                 ret = '<div class="center-align">' \
                            '<a href="eliminar/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar reporte: {1}">' \
                                 '<i class="material-icons">delete</i>' \
