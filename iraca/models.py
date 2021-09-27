@@ -416,7 +416,6 @@ class Households(models.Model):
 
         return estate
 
-
 class QuotasRouteObject(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     creation = models.DateTimeField(auto_now_add=True)
@@ -461,6 +460,20 @@ class InstrumentTraceabilityRouteObject(models.Model):
     creacion = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='traceability_instrument_user_iraca_2021')
     observation = models.TextField()
+
+class Resguards(models.Model):
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+
+    municipality = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, related_name='resguard_municipality_iraca_2021')
+
+    name = models.CharField(max_length=100,blank=True,null=True)
+
+
+    def __str__(self):
+        return self.name
+
+
 
 #----------------------------------------------------------------------------------
 

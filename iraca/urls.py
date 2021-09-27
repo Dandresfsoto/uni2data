@@ -104,4 +104,8 @@ urlpatterns = [
     path('bonding/<uuid:pk_household>/view/<uuid:pk_mobile>/', views.BondingView.as_view()),
     path('bonding/<uuid:pk_household>/delete/<uuid:pk_mobile>/', views.BondingDeleteView.as_view()),
     path('bonding/report/', views.HouseholdsReportView.as_view()),
+
+    path('resguard/', views.ResguardListView.as_view()),
+    path('resguard/create/', views.ResguardCreateView.as_view()),
+    path('resguard/edit/<uuid:pk>/', views.ResguardUpdateView.as_view()),
 ]

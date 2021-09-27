@@ -128,6 +128,17 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_description': 'Modulo de soportes'
             })
 
+        if self.request.user.has_perm('usuarios.iraca.resguardos.ver'):
+            items.append({
+                'sican_categoria': 'Resguardos',
+                'sican_color': 'teal darken-4',
+                'sican_order': 8,
+                'sican_url': 'resguard/',
+                'sican_name': 'Resguardo',
+                'sican_icon': 'people_outline',
+                'sican_description': 'Modulo de Resguardos indigenas'
+            })
+
         return items
 
     def get_context_data(self, **kwargs):
@@ -3458,3 +3469,87 @@ class HouseholdsReportView(View):
                 return redirect('/reportes/')
             else:
                 return HttpResponseRedirect('../../')
+
+
+class ResguardListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.resguardos.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/resguard/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "RESGUARDOS"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/resguard/'
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.iraca.resguardo.crear')
+        return super(ResguardListView,self).get_context_data(**kwargs)
+
+class ResguardCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/resguard/create.html'
+    form_class = forms.ResguardCreateForm
+    success_url = "../"
+    models = models.Resguards
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.resguardo.ver",
+                "usuarios.iraca.resguardo.crear"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+        self.object = form.save()
+        message = 'Se creó la comunidad: {0}'.format(form.cleaned_data['name'])
+        messages.add_message(self.request, messages.INFO, message)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVA COMUNIDAD"
+        return super(ResguardCreateView,self).get_context_data(**kwargs)
+
+class ResguardUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/resguard/edit.html'
+    form_class = forms.ResguardCreateForm
+    success_url = "../../"
+    model = models.Resguards
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.db.ver",
+                "usuarios.iraca.db.editar"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+    def form_valid(self, form):
+        self.object = form.save()
+        message = 'Se edito la comunidad: {0}'.format(form.cleaned_data['name'])
+        messages.add_message(self.request, messages.INFO, message)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "EDITAR COMUNIDAD"
+        return super(ResguardUpdateView,self).get_context_data(**kwargs)

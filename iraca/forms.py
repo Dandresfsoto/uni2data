@@ -624,6 +624,53 @@ class InstrumentsRejectForm(forms.Form):
             )
         )
 
+class ResguardCreateForm(forms.ModelForm):
+
+
+    def __init__(self, *args, **kwargs):
+        super(ResguardCreateForm, self).__init__(*args, **kwargs)
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Información del resguardo',
+                )
+            ),
+            Row(
+                Column(
+                    'name',css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    'municipality', css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = models.Resguards
+        fields = ['name','municipality']
+        labels = {
+            'name':'Nombre',
+            'municipality':'Municipio',
+        }
+
 #----------------------------------------------------------------------------------
 
 #---------------------------- FORMS OBJECTS  -------------------------------------

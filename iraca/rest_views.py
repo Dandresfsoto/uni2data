@@ -1821,4 +1821,57 @@ class MunicipiosAutocomplete(autocomplete.Select2QuerySetView):
 
         return qs
 
+class ResguardListApi(BaseDatatableView):
+    model = models.Resguards
+    columns = ['id','name','municipality']
+    order_columns = ['id','name','municipality']
+
+    def get_initial_queryset(self):
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.resguardo.ver"
+            ],
+            "editar": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.resguardo.ver",
+                "usuarios.iraca.resguardo.editar",
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search) | Q(municipality__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('editar')):
+                ret = '<div class="center-align">' \
+                      '<a href="edit/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Editar hogar">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'name':
+            return row.name
+
+        elif column == 'municipality':
+            return '{0}, {1}'.format(row.municipality.nombre,row.municipality.departamento.nombre)
+
+        else:
+            return super(ResguardListApi, self).render_column(row, column)
+
 
