@@ -3,11 +3,16 @@ from config.celery import app
 from config.functions import construir_reporte, construir_reporte_pagina
 from mail_templated import send_mail
 from django.core.files import File
+from django.conf import settings
+from pytz import timezone
+from datetime import timedelta, datetime
 
 from iraca.models import Moments, Households, Instruments
 from iraca.models_instruments import get_model
 from mobile.models import FormMobile
 from reportes import models as models_reportes
+
+settings_time_zone = timezone(settings.TIME_ZONE)
 
 
 @app.task
@@ -153,7 +158,7 @@ def build_report_instrument(id, instrument_id):
 
 
 @app.task
-def build_bonding_report(id):
+def id_indigenous_people(id):
     reporte = models_reportes.Reportes.objects.get(id=id)
     proceso = "IRACA 2021"
 
@@ -163,7 +168,7 @@ def build_bonding_report(id):
                'Direccion', 'Ubicacion', 'Numero de telefono', 'Coordenada X', 'Coordenada Y',
                '¿Tiene acceso a otro telefono?', 'Numero adicional 1', 'Numero adicional 2', 'Correo electronico',
                'Acceso a internet', '¿Tiene disponibilidad de tierra?', '¿Tiene disponibilidad de agua?',
-               'Tipo de documento', 'ID tipo de documento', 'Parentesco', 'ID Parentesco', '¿Es participante?',
+               'Tipo de documento', 'ID tipo de documento','Numero de documento', 'Parentesco', 'ID Parentesco', '¿Es participante?',
                'Primer nombre', 'Segundo nombre', 'Primer apellido', 'Segundo apellido', 'Sexo', 'Id Sexo', 'Genero',
                'Id Genero', 'Condicion sexual', 'ID Condicion sexual', 'Fecha nacimiento', 'Fecha expedicion documento',
                'Estado Civil', 'ID Estado Civil', 'Etnia', 'ID Etnia', 'Tipos de discapacidad', 'ID Discapacidad',
@@ -182,15 +187,15 @@ def build_bonding_report(id):
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'dd/mm/yyyy', 'dd/mm/yyyy',
+                'General', 'dd/mm/yyyy', 'dd/mm/yyyy', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
-                'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
-                'General','General','General']
+                'General','General','General','General']
     ancho_columnas = [20,20, 30, 30, 30, 20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
                       30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
                       30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
-                      30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
+                      30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
     contenidos = []
     order = []
 
@@ -231,6 +236,7 @@ def build_bonding_report(id):
             household = datas[h]
             type_document = household["CG-1"]
             id_type = ""
+            number_document = household["CG-2"]
             relationship = household["CG-11"]
             id_relationship = ""
             partaker = ""
@@ -273,7 +279,7 @@ def build_bonding_report(id):
             comunity_other = "0"
             guard = ""
             tip = ""
-            social_security = household["GE-5"]
+            social_security = household["ES-6"]
             tongue = household["GE-6"]
             id_tongue = ""
 
@@ -282,6 +288,14 @@ def build_bonding_report(id):
             gas = "Si"
             trash = json_code["MC-3"]
             aqueduct = json_code["MC-5"]
+
+            date_init = datetime.strptime(date_init,'%Y/%m/%d')
+
+            if date_exp == "":
+                date_exp = date_init + timedelta((365*18)+(365/12))
+            else:
+                date_exp = datetime.strptime(date_exp, '%Y/%m/%d')
+
 
 
             if type_document == "Cédula de Ciudadanía (CC)":
@@ -479,13 +493,15 @@ def build_bonding_report(id):
             else:
                 indigenous_people = "0"
 
+
+
             if ethnic_comunity == "Pueblo indígena":
-                id_comunity = id_comunity
+                id_indigenous_people = id_comunity
             else:
-                id_comunity = "0"
+                id_indigenous_people = "0"
 
             if ethnic_comunity == "Kumpanía":
-                kumpania = id_comunity
+                kumpania = comunity
             else:
                 kumpania = "0"
 
@@ -494,8 +510,8 @@ def build_bonding_report(id):
             else:
                 id_kumpania = "0"
 
-            if ethnic_comunity == " Resguardo":
-                guard = id_comunity
+            if ethnic_comunity == "Resguardo":
+                guard = comunity
             else:
                 guard = "0"
 
@@ -504,8 +520,8 @@ def build_bonding_report(id):
             else:
                 id_guard = "0"
 
-            if ethnic_comunity == " Consejo comunitario":
-                tip = id_comunity
+            if ethnic_comunity == "Consejo comunitario":
+                tip = comunity
             else:
                 tip = "0"
 
@@ -578,6 +594,7 @@ def build_bonding_report(id):
                 water[1],
                 type_document,
                 id_type,
+                number_document,
                 relationship,
                 id_relationship,
                 partaker,
@@ -612,10 +629,10 @@ def build_bonding_report(id):
                 id_social_security,
                 ethnic_group,
                 id_ethnic_group,
-                ethnic_comunity,
+                ethnic_comunity, #Comunidad etnica
                 comunity_other,
                 indigenous_people,
-                id_comunity,
+                id_indigenous_people,
                 kumpania,
                 id_kumpania,
                 guard,
