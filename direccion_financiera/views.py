@@ -376,7 +376,7 @@ class EnterpriseListView(TemplateView):
     def get_items(self):
         items = []
 
-        for empresa in Enterprise.objects.all().order_by('tax_number'):
+        for empresa in Enterprise.objects.filter(visible=True).order_by('tax_number'):
             if self.request.user.has_perm("usuarios.direccion_financiera.reportes.ver"):
                 items.append({
                     'sican_categoria': '{0}'.format(empresa.name),

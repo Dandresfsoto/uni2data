@@ -9,7 +9,7 @@ from django.shortcuts import render
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.forms.fields import Field, FileField
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, Enterprise, Servicios, \
-    Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2, PurchaseOrders, Products
+    Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2, PurchaseOrders, Products, Projects_order
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
@@ -1628,9 +1628,10 @@ class ProjectForm(forms.ModelForm):
 class PurchaseOrderForm(forms.ModelForm):
 
     department = forms.ModelChoiceField(label='Departamento*',queryset=Departamentos.objects.all(), required=False)
-    municipality = forms.ModelChoiceField(label='Municipio', queryset=Municipios.objects.all(), required=False)
+    municipality = forms.ModelChoiceField(label='Municipio*', queryset=Municipios.objects.all(), required=False)
+    project_order = forms.ModelChoiceField(label='Proyecto*', queryset=Projects_order.objects.all(), required=False)
 
-    third = forms.CharField(max_length=100,label='Contratista',widget=forms.TextInput(attrs={'class':'autocomplete','autocomplete':'off'}))
+    third = forms.CharField(max_length=100,label='Cliente',widget=forms.TextInput(attrs={'class':'autocomplete','autocomplete':'off'}))
     cedula = forms.IntegerField(label="Cédula",widget=forms.HiddenInput())
 
     def clean(self):
@@ -1651,6 +1652,10 @@ class PurchaseOrderForm(forms.ModelForm):
         self.pk = kwargs['initial'].get('pk')
         self.pk_purchase = kwargs['initial'].get('pk_purchase')
         self.fields['file_quotation'].widget = forms.FileInput()
+
+        pk = kwargs['initial'].get('pk')
+        self.fields['project_order'].queryset = Projects_order.objects.filter(enterprise=pk)
+
 
         if self.pk_purchase != None:
             purchase = PurchaseOrders.objects.get(id = self.pk_purchase)
@@ -1677,7 +1682,7 @@ class PurchaseOrderForm(forms.ModelForm):
                 Column(
                     Row(
                         Fieldset(
-                            'Información del tercero',
+                            'Información del cliente',
                         ),
                         Column(
                             'third',
@@ -1692,7 +1697,7 @@ class PurchaseOrderForm(forms.ModelForm):
                 Column(
                     Row(
                         Fieldset(
-                            'ubicaccion de compra',
+                            'Identificacion de la ficha',
                         ),
                         Column(
                             'department',
@@ -1706,11 +1711,8 @@ class PurchaseOrderForm(forms.ModelForm):
                 ),
                 Column(
                     Row(
-                        Fieldset(
-                            'Informacion de la orden de compra',
-                        ),
                         Column(
-                            'project',
+                            'project_order',
                             css_class='s6'
                         ),
                     ),
@@ -1784,11 +1786,11 @@ class PurchaseOrderForm(forms.ModelForm):
 
     class Meta:
         model = PurchaseOrders
-        fields = ['department','municipality','project','beneficiary','observation','date','file_quotation','beneficiary','departure','counterpart']
+        fields = ['department','municipality','project_order','beneficiary','observation','date','file_quotation','beneficiary','departure','counterpart']
         labels = {
             'department': 'Departamento',
             'municipality': 'Municipio',
-            'project': 'Projectos',
+            'project_order': 'Projectos',
             'beneficiary': 'Beneficiario',
             'observation': 'Observaciones',
             'date': 'fecha',

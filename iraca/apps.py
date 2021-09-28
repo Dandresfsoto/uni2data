@@ -5,7 +5,7 @@ class IracaConfig(AppConfig):
     name = 'iraca'
 
     def ready(self):
-        self.sican_name = "IRACA"
+        self.sican_name = "IRACA 236"
         self.sican_icon = "group"
         self.sican_description = "Proyecto IRACA"
         self.sican_color = "#673ab7 deep-purple"

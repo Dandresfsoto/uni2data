@@ -52,5 +52,6 @@ block container_principal
 block body_script_auth
     script.
         $(document).ready(function () {
-
+            $('select').material_select();
+            $("label[for='id_resguard']").addClass('active');
         });

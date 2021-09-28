@@ -31,13 +31,13 @@ block side_nav_container
 
 
                     li(class="bold waves-effect waves-light")
-                        a(href="/iraca_new/implementation/") implementacion
+                        a(href="/iraca_new/resguard/") Comunidades
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Añadir ruta
+                        a(href="#") Editar comunidad
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -52,6 +52,9 @@ block container_principal
 block body_script_auth
     script.
         $(document).ready(function () {
-            $('select').material_select();
-            $("label[for='id_resguard']").addClass('active');
+            $("label[for='id_municipality']").addClass('active')
+
+            $('#id_municipality').select2();
+
+
         });

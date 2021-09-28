@@ -43,4 +43,6 @@ urlpatterns = [
 
     path('bonding/', rest_views.HouseholdListApi.as_view()),
     path('bonding/<uuid:pk_household>/', rest_views.BondingListApi.as_view()),
+
+    path('resguard/', rest_views.ResguardListApi.as_view()),
 ]
