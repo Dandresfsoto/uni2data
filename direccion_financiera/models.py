@@ -56,6 +56,7 @@ class Enterprise(BaseModel):
     icon = models.CharField(max_length=100)
     code = models.CharField(max_length=10, unique=True)
     report_code = models.CharField(max_length=20)
+    visible = models.BooleanField(default=True)
 
     logo = ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_logo,
@@ -118,7 +119,7 @@ class ConsecutivoReportes(models.Model):
 
 class RubroPresupuestal(models.Model):
     nombre = models.CharField(max_length=500)
-    enterprise = models.ForeignKey(Enterprise, on_delete=models.DO_NOTHING, null=True, blank=True)
+    enterprise = models.ManyToManyField(Enterprise, blank=True)
 
     def __str__(self):
         return self.nombre
