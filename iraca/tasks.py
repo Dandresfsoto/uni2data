@@ -158,7 +158,7 @@ def build_report_instrument(id, instrument_id):
 
 
 @app.task
-def id_indigenous_people(id):
+def build_bonding_report(id):
     reporte = models_reportes.Reportes.objects.get(id=id)
     proceso = "IRACA 2021"
 
@@ -181,7 +181,7 @@ def id_indigenous_people(id):
                'Indique el nombre de la lengua por la cual se comunica', 'ID lengua',
                'servicio publico de energia electrica', 'Servicio publico de Alcantarillado',
                'Servicio publico de gas natural domiciliario', 'Servicio publico de recolección de basuras',
-               'Servicio publico de acueducto']
+               'Servicio publico de acueducto','Gestor profesional']
     formatos = ['0','0', 'dd/mm/yyyy', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
@@ -191,11 +191,11 @@ def id_indigenous_people(id):
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
                 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General', 'General',
-                'General','General','General','General']
+                'General','General','General','General','General']
     ancho_columnas = [20,20, 30, 30, 30, 20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
                       30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
                       30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
-                      30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
+                      30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
     contenidos = []
     order = []
 
@@ -208,6 +208,7 @@ def id_indigenous_people(id):
         data_members = json_code["members"]
         datas = data_members
         cant = mobil.json_count_document()
+        professional = mobil.document
         number = 1
         h = 0
         while number <= cant:
@@ -647,6 +648,7 @@ def id_indigenous_people(id):
                 gas,
                 public_trash,
                 public_aqueduct,
+                professional,
             ]
             contenidos.append(list)
 
