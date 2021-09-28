@@ -57,9 +57,13 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 
     $('#id_department').select2();
     $('#id_municipality').select2();
-    $('#id_project').select2();
+    $('#id_project_order').select2();
 
-    $("label[for='id_proyecto']").addClass('active');
+
+    $("label[for='id_project_order']").addClass('active');
+    $("label[for='id_department']").addClass('active');
+    $("label[for='id_municipality']").addClass('active');
+
 
     $("#id_department").change(function () {
         var url = '/rest/v1.0/fest_2019/misrutas/cargar-municipios/'

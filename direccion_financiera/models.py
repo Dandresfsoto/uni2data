@@ -107,6 +107,9 @@ class Proyecto(models.Model):
     def __str__(self):
         return self.nombre
 
+    class Meta:
+        verbose_name_plural = "Cuentas bancarias"
+
 class ConsecutivoReportes(models.Model):
     id = models.AutoField(primary_key=True)
 
@@ -708,6 +711,17 @@ def upload_dinamic_dir_purchase_order(instance, filename):
 def upload_dinamic_dir_quotation(instance, filename):
     return '/'.join(['Orden de compra', str(instance.id), 'Cotizacion', filename])
 
+class Projects_order(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    name = models.CharField(max_length=100, verbose_name="Nombre")
+    enterprise = models.ManyToManyField(Enterprise, blank=True, verbose_name="Empresas")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = "Proyectos"
+
 class PurchaseOrders(BaseModel):
     creation_user = models.ForeignKey(User, related_name="creation_user_purchase_order", on_delete=models.DO_NOTHING)
     update_user = models.ForeignKey(User, related_name="update_user_purchase_order",on_delete=models.DO_NOTHING,blank=True, null=True)
@@ -718,7 +732,8 @@ class PurchaseOrders(BaseModel):
     beneficiary = models.CharField(max_length=100)
     department = models.ForeignKey(Departamentos, on_delete=models.DO_NOTHING,related_name='department_purchase_order',blank=True,null=True)
     municipality = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING,related_name='municipality_purchase_order',blank=True,null=True)
-    project = models.ForeignKey(Proyecto, on_delete=models.DO_NOTHING)
+    project = models.ForeignKey(Proyecto, on_delete=models.DO_NOTHING,blank=True, null=True)
+    project_order = models.ForeignKey(Projects_order, on_delete=models.DO_NOTHING,blank=True, null=True)
     observation = models.TextField(blank=True, null=True)
     subtotal = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
     total = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
@@ -727,6 +742,9 @@ class PurchaseOrders(BaseModel):
     meta = models.PositiveIntegerField(default=0)
     departure = models.PositiveIntegerField(default=0)
     counterpart = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name_plural = "Ordenes de compra"
 
     def pretty_date_datetime(self):
         return self.date.strftime('%d/%m/%Y')
