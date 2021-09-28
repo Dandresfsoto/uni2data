@@ -495,6 +495,7 @@ class HogarCreateForm(forms.ModelForm):
 
 class implementationCreateForm(forms.Form):
 
+    resguard = forms.ModelChoiceField(label='Comunidad', queryset=models.Resguards.objects.all())
     name = forms.CharField(label='Nombre de la ruta', max_length=100)
     visible = forms.BooleanField(required=False)
     goal = forms.IntegerField(label="Meta hogares")
@@ -541,6 +542,7 @@ class implementationCreateForm(forms.Form):
 
         if 'pk' in kwargs['initial']:
             ruta = models.Routes.objects.get(id = kwargs['initial']['pk'])
+            self.fields['resguard'].initial = ruta.resguard
             self.fields['name'].initial = ruta.name
             self.fields['visible'].initial = ruta.visible
             self.fields['goal'].initial = ruta.goal
@@ -555,11 +557,15 @@ class implementationCreateForm(forms.Form):
             ),
             Row(
                 Column(
-                    'name',
+                    'resguard',
                     css_class='s12 m12'
                 ),
             ),
             Row(
+                Column(
+                    'name',
+                    css_class='s12 m4'
+                ),
                 Column(
                     'goal',
                     css_class='s12 m4'
@@ -623,6 +629,53 @@ class InstrumentsRejectForm(forms.Form):
                 ),
             )
         )
+
+class ResguardCreateForm(forms.ModelForm):
+
+
+    def __init__(self, *args, **kwargs):
+        super(ResguardCreateForm, self).__init__(*args, **kwargs)
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Información del resguardo',
+                )
+            ),
+            Row(
+                Column(
+                    'name',css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    'municipality', css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = models.Resguards
+        fields = ['name','municipality']
+        labels = {
+            'name':'Nombre',
+            'municipality':'Municipio',
+        }
 
 #----------------------------------------------------------------------------------
 

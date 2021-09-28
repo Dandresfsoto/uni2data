@@ -9,6 +9,6 @@ class Fest2020_Config(AppConfig):
         self.sican_description = "Proyecto IRACA"
         self.sican_color = "blue darken-4"
         self.sican_url = '/iraca_2021/'
-        self.sican_categoria = 'IRACA'
+        self.sican_categoria = 'Iraca'
         self.sican_order = 10
         self.sican_permiso = 'usuarios.iraca_2021.ver'
