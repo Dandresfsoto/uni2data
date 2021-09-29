@@ -923,7 +923,7 @@ class ReporteReportesView(LoginRequiredMixin,
 
             if reporte.efectivo:
                 adjuntos = [
-                    ('PAGO ' + str(reporte.consecutive.id) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
+                    ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
                      mimetypes.guess_type(reporte.firma.name)[0])
                 ]
 
