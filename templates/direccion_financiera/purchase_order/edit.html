@@ -55,6 +55,14 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 
 });</script><script>$(document).ready(function () {
 
+    $('#id_departure').change(function () {
+        $('#id_counterpart').val(100 - $('#id_departure').val());
+    });
+
+    $('#id_counterpart').change(function () {
+        $('#id_departure').val(100 - $('#id_counterpart').val());
+    });
+
     $('#id_department').select2();
     $('#id_municipality').select2();
     $('#id_project_order').select2();

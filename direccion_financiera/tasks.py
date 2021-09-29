@@ -1,4 +1,7 @@
 from __future__ import absolute_import, unicode_literals
+
+import math
+
 from config.celery import app
 import openpyxl
 from io import BytesIO
@@ -17,10 +20,10 @@ from desplazamiento.models import Solicitudes, Desplazamiento
 def build_orden_compra(id,email):
     purchase = models.PurchaseOrders.objects.get(id=id)
     products = models.Products.objects.filter(purchase_order = purchase)
+    counts = math.ceil(products.count() / 37)
 
 
-    if products.count() > 0:
-
+    if counts == 1:
         usuario = User.objects.get(email = email)
         cantidad = models.Products.objects.filter(purchase_order = purchase).count()
 
@@ -51,15 +54,14 @@ def build_orden_compra(id,email):
         ws['D10'] = purchase.department.nombre
         ws['D11'] = purchase.municipality.nombre
         ws['D12'] = purchase.beneficiary
-        ws['D13'] = purchase.project.nombre
+        ws['D13'] = purchase.project_order.name
 
 
-        ws['H11'] = purchase.third.get_full_name()
 
 
-        ws['I17'] = purchase.pretty_date_datetime()
+        ws['I63'] = purchase.pretty_date_datetime()
 
-        i = 21
+        i = 15
 
         for product in products:
             ws['B' + str(i)] = product.name.upper()
@@ -68,28 +70,306 @@ def build_orden_compra(id,email):
             ws['I' + str(i)] = product.pretty_print_total_price()
             i += 1
 
-        ws['I49'] = purchase.pretty_print_subtotal()
-        ws['I52'] = purchase.pretty_print_total()
+        ws['I53'] = purchase.pretty_print_subtotal()
+        ws['I56'] = purchase.pretty_print_total()
 
-        ws['B54'] = purchase.observation
-
-        ws['F54'] = purchase.enterprise.name
-        ws['F55'] = purchase.project.nombre
+        ws['B58'] = purchase.observation
 
 
-        ws['G54'] = str(purchase.departure)+ ' %'
-        ws['G55'] = str(purchase.counterpart)+ ' %'
+        ws['G58'] = str(purchase.departure)+ ' %'
+        ws['G59'] = str(purchase.counterpart)+ ' %'
 
 
-        ws['I54'] = purchase.pretty_print_total_percentage_enterprise()
-        ws['I55'] = purchase.pretty_print_total_percentage_project()
-
-
-
+        ws['I58'] = purchase.pretty_print_total_percentage_enterprise()
+        ws['I59'] = purchase.pretty_print_total_percentage_project()
         filename = str(purchase.id) + '.xlsx'
         wb.save(output)
-
         purchase.file_purchase_order.save(filename, File(output))
+    if counts == 2:
+        usuario = User.objects.get(email=email)
+        cantidad = models.Products.objects.filter(purchase_order=purchase).count()
+
+        output = BytesIO()
+        wb = openpyxl.load_workbook(filename=settings.STATICFILES_DIRS[0] + '/documentos/orden_compra_2.xlsx')
+        ws = wb.get_sheet_by_name('Orden de Compra')
+        logo_sican = Image(purchase.enterprise.logo)
+        logo_sican_2 = Image(purchase.enterprise.logo)
+
+        logo_sican.width = 120
+        logo_sican.height = 80
+        logo_sican.drawing = 100
+
+        logo_sican_2.width = 120
+        logo_sican_2.height = 80
+        logo_sican_2.drawing = 100
+
+        ws.add_image(logo_sican, 'C3')
+        ws.add_image(logo_sican_2, 'C67')
+
+        ws['E2'] = str(purchase.enterprise.name)
+        ws['E67'] = str(purchase.enterprise.name)
+
+        ws['H6'] = str(purchase.enterprise.code) + '-' + str(purchase.consecutive)
+        ws['H71'] = str(purchase.enterprise.code) + '-' + str(purchase.consecutive)
+        ws['H7'] = purchase.pretty_date_datetime()
+        ws['H72'] = purchase.pretty_date_datetime()
+
+        ws['D6'] = purchase.third.get_full_name()
+        ws['D71'] = purchase.third.get_full_name()
+
+        ws['D7'] = purchase.third.get_cedula()
+        ws['D72'] = purchase.third.get_cedula()
+
+        ws['D10'] = purchase.department.nombre
+        ws['D75'] = purchase.department.nombre
+        ws['D11'] = purchase.municipality.nombre
+        ws['D76'] = purchase.municipality.nombre
+        ws['D12'] = purchase.beneficiary
+        ws['D77'] = purchase.beneficiary
+        ws['D13'] = purchase.project_order.name
+        ws['D78'] = purchase.project_order.name
+
+        ws['I128'] = purchase.pretty_date_datetime()
+
+        i = 15
+
+        for product in products:
+            ws['B' + str(i)] = product.name.upper()
+            ws['F' + str(i)] = product.stock
+            ws['G' + str(i)] = product.pretty_print_price()
+            ws['I' + str(i)] = product.pretty_print_total_price()
+            if i <51 or i>79:
+                i += 1
+            else:
+                i=80
+
+        ws['I118'] = purchase.pretty_print_subtotal()
+        ws['I121'] = purchase.pretty_print_total()
+
+        ws['B123'] = purchase.observation
+
+        ws['G123'] = str(purchase.departure) + ' %'
+        ws['G124'] = str(purchase.counterpart) + ' %'
+
+        ws['I123'] = purchase.pretty_print_total_percentage_enterprise()
+        ws['I124'] = purchase.pretty_print_total_percentage_project()
+        filename = str(purchase.id) + '.xlsx'
+        wb.save(output)
+        purchase.file_purchase_order.save(filename, File(output))
+    if counts == 3:
+        usuario = User.objects.get(email=email)
+        cantidad = models.Products.objects.filter(purchase_order=purchase).count()
+
+        output = BytesIO()
+        wb = openpyxl.load_workbook(filename=settings.STATICFILES_DIRS[0] + '/documentos/orden_compra_3.xlsx')
+        ws = wb.get_sheet_by_name('Orden de Compra')
+        logo_sican = Image(purchase.enterprise.logo)
+        logo_sican_2 = Image(purchase.enterprise.logo)
+        logo_sican_3 = Image(purchase.enterprise.logo)
+
+        logo_sican.width = 120
+        logo_sican.height = 80
+        logo_sican.drawing = 100
+
+        logo_sican_2.width = 120
+        logo_sican_2.height = 80
+        logo_sican_2.drawing = 100
+
+        logo_sican_3.width = 120
+        logo_sican_3.height = 80
+        logo_sican_3.drawing = 100
+
+        ws.add_image(logo_sican, 'C3')
+        ws.add_image(logo_sican_2, 'C67')
+        ws.add_image(logo_sican_3, 'C132')
+
+
+        ws['E2'] = str(purchase.enterprise.name)
+        ws['E67'] = str(purchase.enterprise.name)
+        ws['E132'] = str(purchase.enterprise.name)
+
+        ws['H6'] = str(purchase.enterprise.code) + '-' + str(purchase.consecutive)
+        ws['H71'] = str(purchase.enterprise.code) + '-' + str(purchase.consecutive)
+        ws['H136'] = str(purchase.enterprise.code) + '-' + str(purchase.consecutive)
+
+        ws['H7'] = purchase.pretty_date_datetime()
+        ws['H72'] = purchase.pretty_date_datetime()
+        ws['H137'] = purchase.pretty_date_datetime()
+
+        ws['D6'] = purchase.third.get_full_name()
+        ws['D71'] = purchase.third.get_full_name()
+        ws['D136'] = purchase.third.get_full_name()
+
+        ws['D7'] = purchase.third.get_cedula()
+        ws['D72'] = purchase.third.get_cedula()
+        ws['D137'] = purchase.third.get_cedula()
+
+        ws['D10'] = purchase.department.nombre
+        ws['D75'] = purchase.department.nombre
+        ws['D140'] = purchase.department.nombre
+
+        ws['D11'] = purchase.municipality.nombre
+        ws['D76'] = purchase.municipality.nombre
+        ws['D141'] = purchase.municipality.nombre
+
+        ws['D12'] = purchase.beneficiary
+        ws['D77'] = purchase.beneficiary
+        ws['D142'] = purchase.beneficiary
+
+        ws['D13'] = purchase.project_order.name
+        ws['D78'] = purchase.project_order.name
+        ws['D143'] = purchase.project_order.name
+
+        ws['I193'] = purchase.pretty_date_datetime()
+
+        i = 15
+
+        for product in products:
+            ws['B' + str(i)] = product.name.upper()
+            ws['F' + str(i)] = product.stock
+            ws['G' + str(i)] = product.pretty_print_price()
+            ws['I' + str(i)] = product.pretty_print_total_price()
+            if i <51:
+                i += 1
+            elif i == 51:
+                i=80
+            elif i > 79 and i < 115:
+                i += 1
+            elif i == 115:
+                i=145
+            elif i > 144:
+                i += 1
+
+        ws['I183'] = purchase.pretty_print_subtotal()
+        ws['I186'] = purchase.pretty_print_total()
+
+        ws['B188'] = purchase.observation
+
+        ws['G188'] = str(purchase.departure) + ' %'
+        ws['G189'] = str(purchase.counterpart) + ' %'
+
+        ws['I188'] = purchase.pretty_print_total_percentage_enterprise()
+        ws['I189'] = purchase.pretty_print_total_percentage_project()
+        filename = str(purchase.id) + '.xlsx'
+        wb.save(output)
+        purchase.file_purchase_order.save(filename, File(output))
+    if counts == 4:
+        usuario = User.objects.get(email=email)
+        cantidad = models.Products.objects.filter(purchase_order=purchase).count()
+
+        output = BytesIO()
+        wb = openpyxl.load_workbook(filename=settings.STATICFILES_DIRS[0] + '/documentos/orden_compra_4.xlsx')
+        ws = wb.get_sheet_by_name('Orden de Compra')
+        logo_sican = Image(purchase.enterprise.logo)
+        logo_sican_2 = Image(purchase.enterprise.logo)
+        logo_sican_3 = Image(purchase.enterprise.logo)
+        logo_sican_4 = Image(purchase.enterprise.logo)
+
+        logo_sican.width = 120
+        logo_sican.height = 80
+        logo_sican.drawing = 100
+
+        logo_sican_2.width = 120
+        logo_sican_2.height = 80
+        logo_sican_2.drawing = 100
+
+        logo_sican_3.width = 120
+        logo_sican_3.height = 80
+        logo_sican_3.drawing = 100
+
+        logo_sican_4.width = 120
+        logo_sican_4.height = 80
+        logo_sican_4.drawing = 100
+
+        ws.add_image(logo_sican, 'C3')
+        ws.add_image(logo_sican_2, 'C67')
+        ws.add_image(logo_sican_3, 'C132')
+        ws.add_image(logo_sican_4, 'C198')
+
+        ws['E2'] = str(purchase.enterprise.name)
+        ws['E67'] = str(purchase.enterprise.name)
+        ws['E133'] = str(purchase.enterprise.name)
+        ws['E198'] = str(purchase.enterprise.name)
+
+        ws['H6'] = str(purchase.enterprise.code) + '-' + str(purchase.consecutive)
+        ws['H71'] = str(purchase.enterprise.code) + '-' + str(purchase.consecutive)
+        ws['H136'] = str(purchase.enterprise.code) + '-' + str(purchase.consecutive)
+        ws['H202'] = str(purchase.enterprise.code) + '-' + str(purchase.consecutive)
+
+        ws['H7'] = purchase.pretty_date_datetime()
+        ws['H72'] = purchase.pretty_date_datetime()
+        ws['H137'] = purchase.pretty_date_datetime()
+        ws['H203'] = purchase.pretty_date_datetime()
+
+        ws['D6'] = purchase.third.get_full_name()
+        ws['D71'] = purchase.third.get_full_name()
+        ws['D136'] = purchase.third.get_full_name()
+        ws['D202'] = purchase.third.get_full_name()
+
+        ws['D7'] = purchase.third.get_cedula()
+        ws['D72'] = purchase.third.get_cedula()
+        ws['D137'] = purchase.third.get_cedula()
+        ws['D203'] = purchase.third.get_cedula()
+
+        ws['D10'] = purchase.department.nombre
+        ws['D75'] = purchase.department.nombre
+        ws['D140'] = purchase.department.nombre
+        ws['D206'] = purchase.department.nombre
+
+        ws['D11'] = purchase.municipality.nombre
+        ws['D76'] = purchase.municipality.nombre
+        ws['D141'] = purchase.municipality.nombre
+        ws['D207'] = purchase.municipality.nombre
+
+        ws['D12'] = purchase.beneficiary
+        ws['D77'] = purchase.beneficiary
+        ws['D142'] = purchase.beneficiary
+        ws['D208'] = purchase.beneficiary
+
+        ws['D13'] = purchase.project_order.name
+        ws['D78'] = purchase.project_order.name
+        ws['D143'] = purchase.project_order.name
+        ws['D209'] = purchase.project_order.name
+
+        ws['I259'] = purchase.pretty_date_datetime()
+
+        i = 15
+
+        for product in products:
+            ws['B' + str(i)] = product.name.upper()
+            ws['F' + str(i)] = product.stock
+            ws['G' + str(i)] = product.pretty_print_price()
+            ws['I' + str(i)] = product.pretty_print_total_price()
+            if i < 51:
+                i += 1
+            elif i == 51:
+                i = 80
+            elif i > 79 and i < 115:
+                i += 1
+            elif i == 115:
+                i = 145
+            elif i > 144 and i < 183:
+                i += 1
+            elif i == 183:
+                i = 211
+            if i < 210:
+                i += 1
+
+        ws['I249'] = purchase.pretty_print_subtotal()
+        ws['I252'] = purchase.pretty_print_total()
+
+        ws['B254'] = purchase.observation
+
+        ws['G254'] = str(purchase.departure) + ' %'
+        ws['G255'] = str(purchase.counterpart) + ' %'
+
+        ws['I254'] = purchase.pretty_print_total_percentage_enterprise()
+        ws['I255'] = purchase.pretty_print_total_percentage_project()
+        filename = str(purchase.id) + '.xlsx'
+        wb.save(output)
+        purchase.file_purchase_order.save(filename, File(output))
+
+
 
     return "Reporte generado"
 
