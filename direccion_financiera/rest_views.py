@@ -1476,7 +1476,7 @@ class PurchaseOrderListApi(BaseDatatableView):
             return row.third.fullname()
 
         elif column == 'project':
-            return row.project.nombre
+            return row.project_order.name
 
         elif column == 'date':
             return row.pretty_date_datetime()
