@@ -3469,7 +3469,7 @@ class HouseholdsReportView(View):
                     consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
                 )
                 #colocar delay
-                tasks.build_bonding_report(reporte.id)
+                tasks.build_bonding_report.delay(reporte.id)
                 return redirect('/reportes/')
             else:
                 return HttpResponseRedirect('../../')
