@@ -483,14 +483,7 @@ class ReportesListApi(BaseDatatableView):
                            '</a>' \
                        '</div>'.format(row.id,row.nombre)
 
-            elif self.request.user.has_perm('usuarios.direccion_financiera.reportes.eliminar') and row.estado == "Pagado":
-                ret = '<div class="center-align">' \
-                           '<a href="contabilizar/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Contabilizar reporte: {1}">' \
-                                '<i class="material-icons" style="color:blue">account_balance</i>' \
-                           '</a>' \
-                       '</div>'.format(row.id,row.nombre)
-
-            elif self.request.user.has_perm('usuarios.direccion_financiera.contabilizar') and row.estado == "Completo":
+            elif self.request.user.has_perm('usuarios.direccion_financiera.contabilizar') and row.estado == "Pagado":
                 ret = '<div class="center-align">' \
                            '<a href="eliminar/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar reporte: {1}">' \
                                 '<i class="material-icons">delete</i>' \
