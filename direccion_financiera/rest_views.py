@@ -483,7 +483,19 @@ class ReportesListApi(BaseDatatableView):
                            '</a>' \
                        '</div>'.format(row.id,row.nombre)
 
+            elif self.request.user.is_superuser and (row.estado == "Pagado" or row.estado == "Completo"):
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">delete</i>' \
+                      '</div>'.format(row.id, row.nombre)
+
             elif self.request.user.has_perm('usuarios.direccion_financiera.contabilizar') and row.estado == "Pagado":
+                ret = '<div class="center-align">' \
+                           '<a href="contabilizar/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar reporte: {1}">' \
+                                '<i class="material-icons"style="color:blue">account_balance</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            elif row.estado == "Carga de pagos":
                 ret = '<div class="center-align">' \
                            '<a href="eliminar/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar reporte: {1}">' \
                                 '<i class="material-icons">delete</i>' \
