@@ -9,6 +9,7 @@ from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, H
 from recursos_humanos import functions
 import json
 from recursos_humanos import models
+from django.utils import timezone
 from dal import autocomplete
 from django.forms.fields import Field, FileField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
@@ -1447,7 +1448,6 @@ class HvForm(forms.ModelForm):
         model = models.Hv
         fields = ["envio", "contratista", "cargo", "file", "municipio"]
 
-
 class HvEstado(forms.ModelForm):
 
     def clean(self):
@@ -1510,3 +1510,169 @@ class HvEstado(forms.ModelForm):
             'estado': 'Aprobar o rechazar hoja de vida',
             'observacion': 'Observación'
         }
+
+class CutsCreateForm(forms.Form):
+
+    name = forms.CharField(max_length = 200)
+
+    def __init__(self, *args, **kwargs):
+        super(CutsCreateForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Crear corte de pago',
+                )
+            ),
+            Row(
+                Column(
+                    'name',
+                    css_class = 's12'
+                )
+            ),
+            Row(
+
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+        contracts_ids = models.Contratos.objects.exclude(liquidado = True).filter(ejecucion = True, suscrito=True).values_list('id',flat=True).distinct()
+
+        for contract_id in contracts_ids:
+            contract = models.Contratos.objects.get(id = contract_id)
+            self.fields['contrato_' + str(contract.id)] = forms.BooleanField(
+                label = '{0} Ruta: {1} - {2}'.format(contract.valor,contract.nombre,contract.contratista.get_full_name_cedula()),
+                required = False
+             )
+            self.fields['contrato_' + str(contract.id)].widget.attrs['class'] = 'filled-in'
+
+            description = '<ul style="margin-top:30px;">'
+            mid = ''
+
+            description += '{0}</ul>'.format(mid)
+
+            self.helper.layout.fields[2].fields.append(
+                Div(
+                    Div(
+                        Column(
+                            'contrato_' + str(contract.id),
+                            css_class='s12'
+                        ),
+                        Column(
+                            HTML(description)
+                        )
+                    )
+                )
+            )
+
+class CollectsAccountForm(forms.Form):
+    mes = forms.MultipleChoiceField(choices=[
+        ('Enero','Enero'),
+        ('Febrero', 'Febrero'),
+        ('Marzo', 'Marzo'),
+        ('Abril', 'Abril'),
+        ('Mayo', 'Mayo'),
+        ('Junio', 'Junio'),
+        ('Julio', 'Julio'),
+        ('Agosto', 'Agosto'),
+        ('Septiembre', 'Septiembre'),
+        ('Octubre', 'Octubre'),
+        ('Noviembre', 'Noviembre'),
+        ('Diciembre', 'Diciembre')
+    ])
+    year = forms.ChoiceField(label='Año')
+
+
+    def __init__(self, *args, **kwargs):
+        super(CollectsAccountForm, self).__init__(*args, **kwargs)
+
+        collect_account = models.Collects_Account.objects.get(id=kwargs['initial']['pk_collect_account'])
+        date = timezone.now()
+        year = date.strftime('%Y')
+        year_1 = str(int(year)-1)
+        mes = date.strftime('%B').capitalize()
+
+
+        self.fields['year'].choices = [(year_1,year_1),(year,year)]
+        self.fields['year'].initial = year
+
+        if collect_account.data_json == '' or collect_account.data_json == None:
+            self.fields['mes'].initial = mes
+        else:
+            self.fields['mes'].initial = json.loads(collect_account.data_json)['mes']
+            self.fields['year'].initial = json.loads(collect_account.data_json)['year']
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Cuenta de cobro',
+                )
+            ),
+            Row(
+                HTML(
+                    """
+                    <div class="col s12">{{ cuentas| safe }}</div>
+                    """
+                )
+            ),
+            Row(
+                HTML(
+                    """
+                    <div class="col s12 m6"><p><b>Valor:</b> {{valor}}</p></div>
+                    <div class="col s12 m6"><p><b>Corte:</b> {{corte}}</p></div>
+                    <div class="col s12 m6"><p><b>Contratista:</b> {{contratista}}</p></div>
+                    <div class="col s12 m6"><p><b>Contrato:</b> {{contrato}}</p></div>
+                    <div class="col s12 m6"><p><b>Inicio:</b> {{inicio}}</p></div>
+                    <div class="col s12 m6"><p><b>Fin:</b> {{fin}}</p></div>
+                    """
+                )
+            ),
+            Row(),
+            Row(
+                Column(
+                    'mes',
+                    css_class="s12 m6"
+                ),
+                Column(
+                    'year',
+                    css_class="s12 m6"
+                ),
+                Column(
+                    HTML(
+                        """
+                        <div id="container_meses"></div>
+                        """
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )

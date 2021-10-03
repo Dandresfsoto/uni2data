@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django.views.generic import TemplateView, CreateView, UpdateView, View, FormView
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
@@ -10,6 +11,8 @@ from delta import html
 import json
 from bs4 import BeautifulSoup
 import os
+
+from recursos_humanos.models import Collects_Account, Contratos
 from recursos_humanos.tasks import send_mail_templated_certificacion
 from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA
 import mimetypes
@@ -109,6 +112,17 @@ class RhoptionsView(LoginRequiredMixin,
                 'sican_name': 'Contratos',
                 'sican_icon': 'add_to_photos',
                 'sican_description': 'Listado de contratos suscritos por la asociación'
+            })
+
+        if self.request.user.has_perm('usuarios.recursos_humanos.cortes.ver'):
+            items.append({
+                'sican_categoria': 'Cortes de pago',
+                'sican_color': 'blue darken-4',
+                'sican_order': 7,
+                'sican_url': 'cuts/',
+                'sican_name': 'Cortes de pago',
+                'sican_icon': 'attach_money',
+                'sican_description': 'Listado de cortes de pago'
             })
 
         return items
@@ -1184,4 +1198,301 @@ class HvReporteView(LoginRequiredMixin,
         tasks.build_reporte_hv.delay(reporte.id)
 
         return HttpResponseRedirect('/reportes/')
+
 #----------------------------------------------------------------------------------
+
+#--------------------------------Cortes--------------------------------------------
+
+
+class CutsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.recurso_humano.ver",
+            "usuarios.recurso_humano.cortes.ver"
+        ],
+        "crear": [
+            "usuarios.recurso_humano.ver",
+            "usuarios.recurso_humano.cortes.ver",
+            "usuarios.recurso_humano.cortes.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/cuts/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CORTES"
+        kwargs['url_datatable'] = '/rest/v1.0/recursos_humanos/cuts/'
+        kwargs['permiso_crear'] = self.request.user.has_perms(self.permissions['crear'])
+        return super(CutsListView,self).get_context_data(**kwargs)
+
+class CutsCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/cuts/add.html'
+    form_class = forms.CutsCreateForm
+    success_url = "../"
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.recurso_humano.ver",
+                "usuarios.recurso_humano.cortes.ver",
+                "usuarios.recurso_humano.cortes.crear"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+
+        cut = models.Cuts.objects.create(
+            consecutive = models.Cuts.objects.all().count() + 1,
+            user_creation = self.request.user,
+            name = form.cleaned_data['name']
+        )
+
+        contracts_ids = models.Contratos.objects.exclude(liquidado = True).filter(ejecucion = True, suscrito=True).values_list('id',flat=True).distinct()
+        user = self.request.user
+
+        for contract_id in contracts_ids:
+            contract = models.Contratos.objects.get(id=contract_id)
+            if form.cleaned_data['contrato_{0}'.format(contract.id)]:
+                models.Collects_Account.objects.create(
+                    contract=contract,
+                    cut=cut,
+                    user_creation=user,
+                    estate='Creado',
+                    value=0
+                )
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVO CORTE DE PAGO"
+        return super(CutsCreateView,self).get_context_data(**kwargs)
+
+class CutsCollectsAccountView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.cortes.ver",
+            "usuarios.recursos_humanos.cuentas_cobro.ver"
+        ],
+        "crear_cuenta_cobro": [
+            "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.cortes.ver",
+            "usuarios.recursos_humanos.cuentas_cobro.ver",
+            "usuarios.recursos_humanos.cuentas_cobro.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/cuts/collects/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        kwargs['title'] = "CORTE {0}".format(cut.consecutive)
+        kwargs['url_datatable'] = '/rest/v1.0/recursos_humanos/cuts/view/{0}/'.format(cut.id)
+        kwargs['breadcrum_active'] = cut.consecutive
+        kwargs['permiso_crear'] = self.request.user.has_perms(self.permissions.get('crear_cuenta_cobro'))
+        return super(CutsCollectsAccountView,self).get_context_data(**kwargs)
+
+
+class CollectAccountUpdateView(FormView):
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/cuts/collects/update.html'
+    form_class = forms.CollectsAccountForm
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        self.collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        self.permissions = {
+            "cargar_cuentas_cobro": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.editar"
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('cargar_cuentas_cobro')):
+                if self.collect_account.estate == 'Reportado':
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+
+        cuenta_cobro = models.CuentasCobro.objects.get(id=self.kwargs['pk_cuenta_cobro'])
+        cuenta_cobro.data_json = json.dumps({'mes': form.cleaned_data['mes'], 'year': form.cleaned_data['year']})
+        cuenta_cobro.valores_json = form.cleaned_data['valores']
+        cuenta_cobro.save()
+
+        cuenta_cobro.file.delete()
+        cuenta_cobro.html.delete()
+
+        cuenta_cobro.create_delta()
+
+        delta_valores = json.loads(cuenta_cobro.valores_json)
+
+        renders = ''
+
+        if len(delta_valores) > 1:
+
+            for cuenta in delta_valores:
+                valor = float(cuenta.get('valor').replace('$ ', '').replace(',', ''))
+                mes = cuenta.get('mes')
+                year = cuenta.get('year')
+                renders += '<div class="hoja">' + html.render(
+                    functions.delta_cuenta_cobro_parcial(cuenta_cobro, valor, mes, year)['ops']) + '</div>'
+
+        else:
+            renders = '<div class="hoja">' + html.render(
+                functions.delta_cuenta_cobro_parcial(cuenta_cobro, float(cuenta_cobro.valor.amount),
+                                                     form.cleaned_data['mes'][0], form.cleaned_data['year'])[
+                    'ops']) + '</div>'
+
+        html_render = BeautifulSoup(renders, "html.parser", from_encoding='utf-8')
+
+        template_no_header = BeautifulSoup(
+            open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/certificaciones/no_header/cuenta_cobro.html',
+                 'rb'), "html.parser")
+
+        template_no_header_tag = template_no_header.find(class_='inserts')
+        template_no_header_tag.insert(1, html_render)
+
+        cuenta_cobro.html.save('cuenta_cobro.html', File(io.BytesIO(template_no_header.prettify(encoding='utf-8'))))
+
+        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+
+        cuenta_cobro.file.save('cuenta_cobro.pdf',
+                               File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+        options = {
+            'page-size': 'A4',
+            'encoding': 'utf-8',
+            'margin-top': '2cm',
+            'margin-bottom': '2cm',
+            'margin-left': '2cm',
+            'margin-right': '2cm',
+            'dpi': 400
+        }
+
+        pdfkit.from_file(cuenta_cobro.html.path, cuenta_cobro.file.path, options, configuration=config)
+
+        if cuenta_cobro.estado != 'Cargado':
+            cuenta_cobro.estado = 'Generado'
+        cuenta_cobro.save()
+
+        usuario = cuenta_cobro.ruta.contrato.get_user_or_none()
+
+        if usuario != None:
+            tasks.send_mail_templated_cuenta_cobro(
+                'mail/cpe_2018/cuenta_cobro.tpl',
+                {
+                    'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                    'ruta': cuenta_cobro.ruta.nombre,
+                    'nombre': cuenta_cobro.ruta.contrato.contratista.nombres,
+                    'nombre_completo': cuenta_cobro.ruta.contrato.contratista.get_full_name(),
+                    'valor': '$ {:20,.2f}'.format(cuenta_cobro.valor.amount),
+                },
+                DEFAULT_FROM_EMAIL,
+                [usuario.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
+            )
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_cuentas_meses(self):
+
+        accounts = models.Collects_Account.objects.filter(contract=self.collect_account.contract).exclude(id=self.collect_account.id)
+        data = {}
+        for account in accounts:
+            delta_valores = json.loads(collect_account.valores_json)
+            if len(delta_valores) > 1:
+                for account in delta_valores:
+                    value = float(account.get('valor').replace('$ ', '').replace(',', ''))
+                    mes = account.get('mes')
+                    year = account.get('year')
+
+                    if year not in data.keys():
+                        data[year] = {}
+
+                    if mes not in data[year].keys():
+                        data[year][mes] = {'valor': 0}
+
+                    data[year][mes]['valor'] += value
+
+
+            else:
+                if account.data_json != None:
+                    data_json = json.loads(account.data_json)
+                    value = float(account.valor.amount)
+                    mes = data_json['mes'][0]
+                    year = data_json['year']
+
+                    if year not in data.keys():
+                        data[year] = {}
+
+                    if mes not in data[year].keys():
+                        data[year][mes] = {'valor': 0}
+
+                    data[year][mes]['valor'] += value
+
+        html = ''
+
+        for year in data.keys():
+            html_parte = ''
+            for mes in data[year].keys():
+                value = '$ {:20,.2f}'.format(data[year][mes]['valor'])
+                html_parte += '<li style="list-style-type:initial;"><p><b>{0}: </b>{1}</p></li>'.format(mes, value)
+
+            html += '<div class="row"><div class="col s12"><p><b>Año: </b>{0}</p><div style="margin-left:15px;"><ul>{1}</ul></div></div></div>'.format(
+                year, html_parte)
+
+        return html
+
+    def get_context_data(self, **kwargs):
+
+        cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        kwargs['title'] = "CUENTA DE COBRO CONTRATO {0}".format(collect_account.contract.nombre)
+        kwargs['breadcrum_1'] = cut.consecutive
+        kwargs['breadcrum_active'] = collect_account.contract.nombre
+        kwargs['valor'] = '$ {:20,.2f}'.format(collect_account.value.amount)
+        kwargs['corte'] = '{0}'.format(cut.consecutive)
+        kwargs['contratista'] = collect_account.contract.contratista.get_full_name()
+        kwargs['contrato'] = collect_account.contract.nombre
+        kwargs['cuentas'] = self.get_cuentas_meses()
+        kwargs['inicio'] = collect_account.contract.inicio
+        kwargs['fin'] = collect_account.contract.fin
+
+        return super(CollectAccountUpdateView, self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk_cut': self.kwargs['pk_cut'],
+            'pk_collect_account': self.kwargs['pk_collect_account']
+        }

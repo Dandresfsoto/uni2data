@@ -1,3 +1,6 @@
+import json
+
+from django.db.models import Sum
 from djmoney.models.fields import MoneyField
 from django.db import models
 import uuid
@@ -344,6 +347,7 @@ class Contratos(models.Model):
             self.pretty_print_valor()
         )
 
+
     def get_autocomplete_text(self):
         return '{0} - {1} - {2}'.format(
             self.contratista.get_full_name_cedula(),
@@ -545,11 +549,148 @@ class Contratos(models.Model):
         else:
             return '<a href="'+ url +'"> '+ str(self.otrosi_3.name) +'</a>'
 
+class Cuts(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    consecutive = models.IntegerField(verbose_name="Consecutivo")
+    name = models.CharField(max_length=30, unique=True,verbose_name="Nombre")
+    date_creation = models.DateTimeField(auto_now_add=True,verbose_name="Fecha creacion")
+    user_creation = models.ForeignKey(User, related_name="user_creation_certificacion", on_delete=models.DO_NOTHING,verbose_name="Usuario creacion")
+    date_update = models.DateTimeField(auto_now=True, blank=True, null=True,verbose_name="Fecha actualizacion")
+    user_update = models.ForeignKey(User, related_name="user_update_certificacion", on_delete=models.DO_NOTHING, blank=True, null=True,verbose_name="usuario actualizacion")
+    value = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor")
 
+    def __str__(self):
+        return "{0} - {1}".format(self.consecutive, self.name)
+
+    class Meta:
+        verbose_name_plural = "Cortes"
+
+    def pretty_creation_datetime(self):
+        return self.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
+
+    def get_cantidad_cuentas_cobro(self):
+        return Collects_Account.objects.filter(cut = self).count()
+
+    def get_novedades(self):
+        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate__in = ['Creado', 'Cargado'])
+        return cuentas_cobro.count()
+
+    def get_valor(self):
+        value = Collects_Account.objects.filter(cut = self).aggregate(Sum('value'))['value__sum']
+        return value if value != None else 0
+
+def upload_dinamic_collects_account(instance, filename):
+    return '/'.join(['Recurso humano', 'Cuentas de Cobro', str(instance.id), filename])
+
+class Collects_Account(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    contract = models.ForeignKey(Contratos, on_delete=models.DO_NOTHING, verbose_name="Contrato")
+    date_creation = models.DateTimeField(auto_now_add=True, verbose_name="Fecha creacion")
+    user_creation = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True,
+                                         related_name='collects_account_creation_user_rh',verbose_name="usuario creacion")
+
+    date_update = models.DateTimeField(blank=True, null=True,verbose_name="Fecha actualizacion")
+    user_update = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True,
+                                              related_name='collects_account_update_user_rh',verbose_name="usuario actualizacion")
+
+    cut = models.ForeignKey(Cuts, on_delete=models.DO_NOTHING, blank=True, null=True,verbose_name="Corte")
+    estate = models.CharField(max_length=100, blank=True, null=True,verbose_name="Estado")
+    value = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor")
+
+    def __str__(self):
+        return "{0} - {1} - {2}".format(self.cut.consecutive, self.contract.nombre, self.contract.contratista.get_full_name_cedula())
+
+    class Meta:
+        verbose_name_plural = "Cuentas de cobro"
+
+    file = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    file2 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    html = models.FileField(upload_to=upload_dinamic_collects_account, blank=True, null=True)
+    delta = models.TextField(blank=True, null=True)
+    data_json = models.TextField(blank=True, null=True)
+    valores_json = models.TextField(default='[]', blank=True, null=True)
+    observaciones = models.TextField(default='', blank=True, null=True)
+    liquidacion = models.BooleanField(default=False)
+
+    def pretty_creation_datetime(self):
+        return self.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
+
+    def get_valor(self):
+        return str(self.value).replace('COL$', '')
+
+    def get_consecutivo_corte(self):
+        consecutivo = ''
+        try:
+            consecutivo = self.cut.consecutivo
+        except:
+            consecutivo = 'Liquidacion'
+        return consecutivo
+
+    def get_descripcion_corte(self):
+        descripcion = ''
+        try:
+            descripcion = self.cut.name
+        except:
+            pass
+        return descripcion
+
+    def get_fecha_corte(self):
+        fecha = ''
+        try:
+            fecha = self.cut.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
+        except:
+            pass
+        return fecha
+
+
+    def url_file(self):
+        url = None
+        try:
+            url = self.file.url
+        except:
+            pass
+        return url
+
+    def url_file2(self):
+        url = None
+        try:
+            url = self.file2.url
+        except:
+            pass
+        return url
+
+    def pretty_print_url_file(self):
+        try:
+            url = self.file.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file.name) + '</a>'
+
+    def pretty_print_url_file2(self):
+        try:
+            url = self.file2.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file2.name) + '</a>'
 
 def upload_dinamic_dir_soporte_contrato(instance, filename):
     return '/'.join(['Contratos', 'Soportes', str(instance.contrato.id), str(instance.soporte.id), filename])
-
 
 class SoportesContratos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)

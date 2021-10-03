@@ -1,5 +1,6 @@
 from django_datatables_view.base_datatable_view import BaseDatatableView
-from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, Certificaciones, Hv, TrazabilidadHv
+from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, \
+    Certificaciones, Hv, TrazabilidadHv, Cuts, Collects_Account
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -708,6 +709,228 @@ class CertificacionesCedulaApi(APIView):
             return Response({'certificaciones':certificaciones_list,'contratista':contratista_name,'cedula':cedula},status=status.HTTP_200_OK)
         else:
             return Response({'certificaciones': certificaciones_list,'contratista':contratista_name,'cedula':cedula}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CutsListApi(BaseDatatableView):
+    model = Cuts
+    columns = ['id','consecutive','date_creation','name','cut','user_update','value']
+    order_columns = ['id','consecutive','date_creation','name','cut','user_update','value']
+
+    def get_initial_queryset(self):
+
+        self.permissions = {
+            "ver": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cuentas_cobro.ver",
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search) | Q(consecutive=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                           '<a href="view/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver cuentas de cobro corte {1}">' \
+                                '<i class="material-icons">remove_red_eye</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.consecutive)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'
+
+            return ret
+
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>' + str(row.consecutive) + '</b></div>'
+
+        elif column == 'date_creation':
+            return row.pretty_creation_datetime()
+
+        elif column == 'cut':
+            return '<div class="center-align"><b>' + str(row.get_cantidad_cuentas_cobro()) + '</b></div>'
+
+        elif column == 'user_update':
+            novedad = row.get_novedades()
+            if novedad > 0:
+                return '<span class="new badge" data-badge-caption="">{0}</span>'.format(novedad)
+            else:
+                return ''
+
+        elif column == 'value':
+            return '<b>${:20,.2f}</b>'.format(row.get_valor())
+
+        else:
+            return super(CutsListApi, self).render_column(row, column)
+
+class CutsCollectAccountListApi(BaseDatatableView):
+    model = Collects_Account
+    columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file2']
+    order_columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file2']
+
+    def get_initial_queryset(self):
+        self.cut = Cuts.objects.get(id=self.kwargs['pk_cut'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver"
+            ],
+            "cuentas_cobro_editar": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.editar"
+            ],
+            "cuentas_cobro_cargar": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.cargar"
+            ],
+            "cuentas_cobro_estado": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.estado"
+            ]
+        }
+        return self.model.objects.filter(cut__id = self.kwargs['pk_cut'])
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(contract__nombre__icontains=search) | Q(contract__cargo__icontains=search) | \
+                Q(contract__contratista__nombres__icontains=search) | Q(contract__contratista__apellidos__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('cuentas_cobro_editar')) and row.estate != 'Reportado' and row.estate != 'Pagado':
+                ret = '<div class="center-align">' \
+                           '<a href="edit/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Generar cuenta de cobro {1}">' \
+                                '<i class="material-icons">build</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.contract.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">build</i>' \
+                       '</div>'
+
+            return ret
+
+        elif column == 'html':
+            if self.request.user.has_perms(self.permissions.get('cuentas_cobro_cargar')) and row.estate != 'Creado' and row.estate != 'Reportado' and row.estate != 'Pagado':
+                ret = '<div class="center-align">' \
+                           '<a href="upload/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                                '<i class="material-icons">cloud_upload</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.contract.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">cloud_upload</i>' \
+                       '</div>'
+
+            return ret
+
+        elif column == 'contract':
+            return '<div class="center-align"><b>' + str(row.contract.nombre) + '</b></div>'
+
+        elif column == 'date_creation':
+            return '{0} - {1}'.format(row.contract.nombre,row.contract.contratista)
+
+        elif column == 'estate':
+
+            if self.request.user.is_superuser and row.estate == 'Reportado':
+
+                ret = '<div class="center-align">' \
+                            '<a href="estate/{0}/">' \
+                                '<span><b>Reportado para Pago</b></span>' \
+                            '</a>' \
+                      '</div>'.format(row.id, row.estate)
+
+            elif self.request.user.is_superuser and row.estate != 'Reportado':
+
+                ret = '<div class="center-align">' \
+                            '<a href="estate/{0}/">' \
+                                '<span><b>{1}</b></span>' \
+                            '</a>' \
+                      '</div>'.format(row.id, row.estate)
+
+            elif self.request.user.has_perms(self.permissions.get('cuentas_cobro_estado')) and row.estate != 'Generado' and row.estate != 'Creado' and row.estate != 'Reportado':
+                ret = '<div class="center-align">' \
+                      '<a href="estate/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estate)
+
+            else:
+                ret = '<div class="center-align">' \
+                            '<span>{1}</span>' \
+                      '</div>'.format(row.id, row.estate)
+
+            return ret
+
+        elif column == 'delta':
+            if row.estate == 'Cargado':
+                return '<span class="new badge" data-badge-caption="">1</span>'
+            elif row.estate =="Reportado" or row.estate =="Pagado":
+                return '<div class="center-align">' \
+                            '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Reportado por: {0}">' \
+                                '<i class="material-icons">verified_user</i>' \
+                            '</a>' \
+                      '</div>'.format(row.user_update.get_full_name_string())
+            else:
+                return ''
+
+        elif column == 'user_creation':
+            return '<b>${:20,.2f}</b>'.format(row.value.amount)
+
+        elif column == 'data_json':
+            return row.contract.inicio
+
+        elif column == 'valores_json':
+            return row.contract.fin
+
+        elif column == 'file':
+            if row.url_file() != None:
+                ret = '<div class="center-align">' \
+                            '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                                '<i class="material-icons">insert_drive_file</i>' \
+                            '</a>' \
+                      '</div>'.format(row.url_file(),'Descargar archivo')
+            else:
+                ret = ''
+
+            return ret
+
+        elif column == 'file2':
+            if row.url_file2() != None:
+                ret = '<div class="center-align">' \
+                            '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                                '<i class="material-icons">insert_drive_file</i>' \
+                            '</a>' \
+                      '</div>'.format(row.url_file2(),'Descargar archivo')
+            else:
+                ret = ''
+
+            return ret
+
+        else:
+            return super(CutsCollectAccountListApi, self).render_column(row, column)
 
 class ContratistaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
