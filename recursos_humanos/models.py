@@ -576,7 +576,9 @@ class Cuts(models.Model):
         return cuentas_cobro.count()
 
     def get_valor(self):
-        value = Collects_Account.objects.filter(cut = self).aggregate(Sum('value'))['value__sum']
+        value_transport = Collects_Account.objects.filter(cut = self).aggregate(Sum('value_transport'))['value_transport__sum']
+        value_fees = Collects_Account.objects.filter(cut = self).aggregate(Sum('value_fees'))['value_fees__sum']
+        value=value_transport+value_fees
         return value if value != None else 0
 
 def upload_dinamic_collects_account(instance, filename):
@@ -595,13 +597,11 @@ class Collects_Account(models.Model):
 
     cut = models.ForeignKey(Cuts, on_delete=models.DO_NOTHING, blank=True, null=True,verbose_name="Corte")
     estate = models.CharField(max_length=100, blank=True, null=True,verbose_name="Estado")
-    value = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor")
+    value_fees = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor honoriarios profesionales")
+    value_transport = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor transporte")
+    month = models.CharField(max_length=100, blank=True, null=True,verbose_name="Mes")
+    year = models.CharField(max_length=100, blank=True, null=True,verbose_name="Año")
 
-    def __str__(self):
-        return "{0} - {1} - {2}".format(self.cut.consecutive, self.contract.nombre, self.contract.contratista.get_full_name_cedula())
-
-    class Meta:
-        verbose_name_plural = "Cuentas de cobro"
 
     file = ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_collects_account,
@@ -626,19 +626,27 @@ class Collects_Account(models.Model):
     observaciones = models.TextField(default='', blank=True, null=True)
     liquidacion = models.BooleanField(default=False)
 
+    def __str__(self):
+        return "{0} - {1} - {2}".format(self.cut.consecutive, self.contract.nombre, self.contract.contratista.get_full_name_cedula())
+
+    class Meta:
+        verbose_name_plural = "Cuentas de cobro"
+
     def pretty_creation_datetime(self):
         return self.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
 
-    def get_valor(self):
-        return str(self.value).replace('COL$', '')
+    def get_value_fees(self):
+        value = str(self.value_fees).replace('COL$', '')
+        return value
 
-    def get_consecutivo_corte(self):
-        consecutivo = ''
-        try:
-            consecutivo = self.cut.consecutivo
-        except:
-            consecutivo = 'Liquidacion'
-        return consecutivo
+    def get_value_transport(self):
+        return str(self.value_transport).replace('COL$', '')
+
+    def pretty_print_value_fees(self):
+        return str(self.value_fees).replace('COL','')
+
+    def pretty_print_value_transport(self):
+        return str(self.value_transport).replace('COL','')
 
     def get_descripcion_corte(self):
         descripcion = ''

@@ -897,7 +897,7 @@ class CutsCollectAccountListApi(BaseDatatableView):
                 return ''
 
         elif column == 'user_creation':
-            return '<b>${:20,.2f}</b>'.format(row.value.amount)
+            return row.pretty_print_value_fees()
 
         elif column == 'data_json':
             return row.contract.inicio

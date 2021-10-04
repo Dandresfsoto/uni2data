@@ -1580,7 +1580,7 @@ class CutsCreateForm(forms.Form):
             )
 
 class CollectsAccountForm(forms.Form):
-    mes = forms.MultipleChoiceField(choices=[
+    month = forms.ChoiceField(choices=[
         ('Enero','Enero'),
         ('Febrero', 'Febrero'),
         ('Marzo', 'Marzo'),
@@ -1606,15 +1606,21 @@ class CollectsAccountForm(forms.Form):
         year_1 = str(int(year)-1)
         mes = date.strftime('%B').capitalize()
 
-
         self.fields['year'].choices = [(year_1,year_1),(year,year)]
         self.fields['year'].initial = year
 
-        if collect_account.data_json == '' or collect_account.data_json == None:
-            self.fields['mes'].initial = mes
-        else:
-            self.fields['mes'].initial = json.loads(collect_account.data_json)['mes']
-            self.fields['year'].initial = json.loads(collect_account.data_json)['year']
+
+        self.fields['value_fees_char'] = forms.CharField(label="Valor cuenta de cobro por honorarios ($)")
+        try:
+            value_fees = kwargs['instance'].value_fees
+        except:
+            pass
+
+        self.fields['value_transport_char'] = forms.CharField(label="Valor cuenta por transporte ($)")
+        try:
+            value_transport = kwargs['instance'].value_transport
+        except:
+            pass
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -1634,7 +1640,6 @@ class CollectsAccountForm(forms.Form):
             Row(
                 HTML(
                     """
-                    <div class="col s12 m6"><p><b>Valor:</b> {{valor}}</p></div>
                     <div class="col s12 m6"><p><b>Corte:</b> {{corte}}</p></div>
                     <div class="col s12 m6"><p><b>Contratista:</b> {{contratista}}</p></div>
                     <div class="col s12 m6"><p><b>Contrato:</b> {{contrato}}</p></div>
@@ -1643,23 +1648,24 @@ class CollectsAccountForm(forms.Form):
                     """
                 )
             ),
-            Row(),
             Row(
                 Column(
-                    'mes',
+                    'value_fees_char',
+                    css_class="s12 s6"
+                ),
+                Column(
+                    'value_transport_char',
+                    css_class="s12 s6"
+                ),
+            ),
+            Row(
+                Column(
+                    'month',
                     css_class="s12 m6"
                 ),
                 Column(
                     'year',
                     css_class="s12 m6"
-                ),
-                Column(
-                    HTML(
-                        """
-                        <div id="container_meses"></div>
-                        """
-                    ),
-                    css_class="s12"
                 ),
             ),
             Row(

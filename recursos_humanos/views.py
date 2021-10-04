@@ -2,7 +2,7 @@ from django.db.models import Sum
 from django.views.generic import TemplateView, CreateView, UpdateView, View, FormView
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
-from recursos_humanos import forms, models
+from recursos_humanos import forms, models, functions
 from django.shortcuts import redirect
 import io
 import pdfkit
@@ -11,7 +11,7 @@ from delta import html
 import json
 from bs4 import BeautifulSoup
 import os
-
+from django.utils import timezone
 from recursos_humanos.models import Collects_Account, Contratos
 from recursos_humanos.tasks import send_mail_templated_certificacion
 from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA
@@ -21,6 +21,9 @@ from recursos_humanos import tasks
 from reportes.models import Reportes
 from django.core.exceptions import ImproperlyConfigured
 from django.forms import models as model_forms
+from recursos_humanos import utils
+
+
 # Create your views here.
 
 #------------------------------- SELECCIÓN ----------------------------------------
@@ -1267,7 +1270,8 @@ class CutsCreateView(LoginRequiredMixin,
                     cut=cut,
                     user_creation=user,
                     estate='Creado',
-                    value=0
+                    value_fees=0,
+                    value_transport=0,
                 )
 
 
@@ -1309,7 +1313,7 @@ class CutsCollectsAccountView(LoginRequiredMixin,
 
 class CollectAccountUpdateView(FormView):
     login_url = settings.LOGIN_URL
-    template_name = 'recursos_humanos/cuts/collects/update.html'
+    template_name = 'recursos_humanos/cuts/collects/create.html'
     form_class = forms.CollectsAccountForm
     success_url = "../../"
 
@@ -1342,94 +1346,12 @@ class CollectAccountUpdateView(FormView):
             else:
                 return HttpResponseRedirect('../../')
 
-    def form_valid(self, form):
-
-        cuenta_cobro = models.CuentasCobro.objects.get(id=self.kwargs['pk_cuenta_cobro'])
-        cuenta_cobro.data_json = json.dumps({'mes': form.cleaned_data['mes'], 'year': form.cleaned_data['year']})
-        cuenta_cobro.valores_json = form.cleaned_data['valores']
-        cuenta_cobro.save()
-
-        cuenta_cobro.file.delete()
-        cuenta_cobro.html.delete()
-
-        cuenta_cobro.create_delta()
-
-        delta_valores = json.loads(cuenta_cobro.valores_json)
-
-        renders = ''
-
-        if len(delta_valores) > 1:
-
-            for cuenta in delta_valores:
-                valor = float(cuenta.get('valor').replace('$ ', '').replace(',', ''))
-                mes = cuenta.get('mes')
-                year = cuenta.get('year')
-                renders += '<div class="hoja">' + html.render(
-                    functions.delta_cuenta_cobro_parcial(cuenta_cobro, valor, mes, year)['ops']) + '</div>'
-
-        else:
-            renders = '<div class="hoja">' + html.render(
-                functions.delta_cuenta_cobro_parcial(cuenta_cobro, float(cuenta_cobro.valor.amount),
-                                                     form.cleaned_data['mes'][0], form.cleaned_data['year'])[
-                    'ops']) + '</div>'
-
-        html_render = BeautifulSoup(renders, "html.parser", from_encoding='utf-8')
-
-        template_no_header = BeautifulSoup(
-            open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/certificaciones/no_header/cuenta_cobro.html',
-                 'rb'), "html.parser")
-
-        template_no_header_tag = template_no_header.find(class_='inserts')
-        template_no_header_tag.insert(1, html_render)
-
-        cuenta_cobro.html.save('cuenta_cobro.html', File(io.BytesIO(template_no_header.prettify(encoding='utf-8'))))
-
-        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
-
-        cuenta_cobro.file.save('cuenta_cobro.pdf',
-                               File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
-
-        options = {
-            'page-size': 'A4',
-            'encoding': 'utf-8',
-            'margin-top': '2cm',
-            'margin-bottom': '2cm',
-            'margin-left': '2cm',
-            'margin-right': '2cm',
-            'dpi': 400
-        }
-
-        pdfkit.from_file(cuenta_cobro.html.path, cuenta_cobro.file.path, options, configuration=config)
-
-        if cuenta_cobro.estado != 'Cargado':
-            cuenta_cobro.estado = 'Generado'
-        cuenta_cobro.save()
-
-        usuario = cuenta_cobro.ruta.contrato.get_user_or_none()
-
-        if usuario != None:
-            tasks.send_mail_templated_cuenta_cobro(
-                'mail/cpe_2018/cuenta_cobro.tpl',
-                {
-                    'url_base': 'https://' + self.request.META['HTTP_HOST'],
-                    'ruta': cuenta_cobro.ruta.nombre,
-                    'nombre': cuenta_cobro.ruta.contrato.contratista.nombres,
-                    'nombre_completo': cuenta_cobro.ruta.contrato.contratista.get_full_name(),
-                    'valor': '$ {:20,.2f}'.format(cuenta_cobro.valor.amount),
-                },
-                DEFAULT_FROM_EMAIL,
-                [usuario.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
-            )
-
-        return HttpResponseRedirect(self.get_success_url())
-
     def get_cuentas_meses(self):
 
         accounts = models.Collects_Account.objects.filter(contract=self.collect_account.contract).exclude(id=self.collect_account.id)
         data = {}
         for account in accounts:
-            delta_valores = json.loads(collect_account.valores_json)
+            delta_valores = json.loads(account.valores_json)
             if len(delta_valores) > 1:
                 for account in delta_valores:
                     value = float(account.get('valor').replace('$ ', '').replace(',', ''))
@@ -1473,6 +1395,98 @@ class CollectAccountUpdateView(FormView):
 
         return html
 
+    def form_valid(self, form):
+        collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        fecha = timezone.now()
+
+
+        collect_account.value_fees = utils.autonumeric2float(form.cleaned_data['value_fees_char'])
+        collect_account.value_transport = utils.autonumeric2float(form.cleaned_data['value_transport_char'])
+        collect_account.month = form.cleaned_data['month']
+        collect_account.year = form.cleaned_data['year']
+        collect_account.estate = "Generado"
+        collect_account.save()
+
+        fee_account_value = collect_account.get_value_fees()
+        fee_value = fee_account_value.replace('$','').replace(',','')
+
+        transport_account_value = collect_account.get_value_transport()
+        transport_value = transport_account_value.replace('$', '').replace(',', '')
+
+        collect_account.file.delete()
+        collect_account.html.delete()
+
+        renders = ''
+
+        renders += '<div class="hoja">' + html.render(functions.cuenta_cobro(collect_account)['CPS']) + '</div>'
+        renders += '<div class="hoja">' + html.render(functions.cuenta_transporte(collect_account)['CPS']) + '</div>'
+
+        html_render = BeautifulSoup(renders, "html.parser", from_encoding='utf-8')
+
+        template_no_header = BeautifulSoup(
+            open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/certificaciones/no_header/cuenta_cobro.html',
+                 'rb'), "html.parser")
+
+        template_no_header_tag = template_no_header.find(class_='inserts')
+        template_no_header_tag.insert(1, html_render)
+
+        collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_no_header.prettify(encoding='utf-8'))))
+
+        if collect_account.estate != 'Cargado':
+            collect_account.estate = 'Generado'
+        collect_account.save()
+
+
+        template_header = BeautifulSoup(open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/cuentas_cobro/cuenta.html','rb'), "html.parser")
+
+
+        collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+
+        collect_account.file.save('cuenta_cobro.pdf',
+                              File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+        options = {
+            'page-size': 'A4',
+            'encoding': 'utf-8',
+            'margin-top': '2cm',
+            'margin-bottom': '2cm',
+            'margin-left': '2cm',
+            'margin-right': '2cm',
+            'dpi': 400
+        }
+
+        pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
+            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
+            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+            'page-size': 'A4',
+            'encoding': 'utf-8',
+            'margin-top': '4cm',
+            'margin-bottom': '3cm',
+            'margin-left': '2cm',
+            'margin-right': '2cm',
+            'dpi': 400
+        }, configuration=config)
+
+        collect_account.file.save('cuenta_cobro.pdf',
+                               File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+        pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
+            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
+            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+            'page-size': 'A4',
+            'encoding': 'utf-8',
+            'margin-top': '4cm',
+            'margin-bottom': '3cm',
+            'margin-left': '2cm',
+            'margin-right': '2cm',
+            'dpi': 400
+        }, configuration=config)
+
+        return super(CollectAccountUpdateView, self).form_valid(form)
+
     def get_context_data(self, **kwargs):
 
         cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
@@ -1481,7 +1495,8 @@ class CollectAccountUpdateView(FormView):
         kwargs['title'] = "CUENTA DE COBRO CONTRATO {0}".format(collect_account.contract.nombre)
         kwargs['breadcrum_1'] = cut.consecutive
         kwargs['breadcrum_active'] = collect_account.contract.nombre
-        kwargs['valor'] = '$ {:20,.2f}'.format(collect_account.value.amount)
+        kwargs['value_fees'] = '$ {:20,.2f}'.format(collect_account.value_fees.amount)
+        kwargs['value_transport'] = '$ {:20,.2f}'.format(collect_account.value_transport.amount)
         kwargs['corte'] = '{0}'.format(cut.consecutive)
         kwargs['contratista'] = collect_account.contract.contratista.get_full_name()
         kwargs['contrato'] = collect_account.contract.nombre
