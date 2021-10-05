@@ -92,7 +92,6 @@ class Contratistas(models.Model):
 
         return celular
 
-
     def get_lugar_expedicion(self):
         expedicion = ''
 
@@ -106,8 +105,6 @@ class Contratistas(models.Model):
             pass
 
         return expedicion
-
-
 
     def get_lugar_residencia(self):
         residencia = ''
@@ -125,8 +122,6 @@ class Contratistas(models.Model):
             pass
 
         return residencia
-
-
 
 
     def get_full_name(self):

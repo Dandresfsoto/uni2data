@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="css/header.css">
+    <script>
+        function substitutePdfVariables() {
+
+            function getParameterByName(name) {
+                var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+                return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+            }
+
+            function substitute(name) {
+                var value = getParameterByName(name);
+                var elements = document.getElementsByClassName(name);
+
+                for (var i = 0; elements && i < elements.length; i++) {
+                    elements[i].textContent = value;
+                }
+            }
+
+            ['frompage', 'topage', 'page', 'webpage', 'section', 'subsection', 'subsubsection']
+                .forEach(function (param) {
+                    substitute(param);
+                });
+        }
+    </script>
+</head>
+<body onload="substitutePdfVariables()">
+
+<table width="800" high="400" cellpadding="7" cellspacing="1" style="padding-top: 0px;">
+    <tr>
+        <th colspan="4" width="727" valign="top" bgcolor="#ffffff"
+            style="border: 3.00pt double #00000a; padding-top: 0in; padding-bottom: 0in; padding-left: 0.1in; padding-right: 0.08in">
+            <p class="title" style="padding: 3px">ACTA DE LIQUIDACIÓN DE CONTRATO DE PRESTACIÓN DE SERVICIOS</p>
+        </th>
+    </tr>
+    <tr>
+        <th class="center-th" width="15%" style="border: 3.00pt double #00000a; padding-top: 0in; padding-bottom: 0in; padding-left: 0.1in; padding-right: 0.08in">
+            <img src="img/asocoinn.png">
+        </th>
+        <th width="60%" style="border: 3.00pt double #00000a; padding-top: 0in; padding-bottom: 0in; padding-left: 0.1in; padding-right: 0.08in">
+            <p>Codigo</p>
+            <p class="title">RGC 02-2021</p>
+        </th>
+        </th>
+        <th width="60%" style="border: 3.00pt double #00000a; padding-top: 0in; padding-bottom: 0in; padding-left: 0.1in; padding-right: 0.08in">
+            <p>Titulo</p>
+            <p class="title">CUENTA DE COBRO</p>
+        </th>
+        <th width="25%"class="th-no-padding" style="border: 3.00pt double #00000a; padding-top: 0in; padding-bottom: 0in; padding-left: 0.1in; padding-right: 0.08in">
+            <table class="table-items">
+                <tr>
+
+                    <th style="border-bottom: 2px solid #ccc;">
+                        Fecha: 01-02-2021
+                    </th>
+                </tr>
+                <tr>
+                    <th style="border-bottom: 2px solid #ccc;">
+                        Versión: V3
+                    </th>
+                </tr>
+            </table>
+        </th>
+    </tr>
+</table>
+</body>
+</html>

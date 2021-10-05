@@ -5,6 +5,8 @@ from django.conf import settings
 from recursos_humanos import forms, models, functions
 from django.shortcuts import redirect
 import io
+from decimal import Decimal
+from re import sub
 import pdfkit
 from django.core.files import File
 from delta import html
@@ -12,6 +14,8 @@ import json
 from bs4 import BeautifulSoup
 import os
 from django.utils import timezone
+
+from recursos_humanos.functions import numero_to_letras
 from recursos_humanos.models import Collects_Account, Contratos
 from recursos_humanos.tasks import send_mail_templated_certificacion
 from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA
@@ -1399,6 +1403,9 @@ class CollectAccountUpdateView(FormView):
         collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
         fecha = timezone.now()
 
+        contract = collect_account.contract
+
+        collect_count = models.Collects_Account.objects.filter(contract=contract).count()
 
         collect_account.value_fees = utils.autonumeric2float(form.cleaned_data['value_fees_char'])
         collect_account.value_transport = utils.autonumeric2float(form.cleaned_data['value_transport_char'])
@@ -1415,6 +1422,10 @@ class CollectAccountUpdateView(FormView):
 
         collect_account.file.delete()
         collect_account.html.delete()
+
+        value_money= float(collect_account.value_fees)
+        value_letter_num = value_money
+        value_letter = numero_to_letras(int(value_letter_num))
 
         renders = ''
 
@@ -1439,15 +1450,45 @@ class CollectAccountUpdateView(FormView):
 
         template_header = BeautifulSoup(open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/cuentas_cobro/cuenta.html','rb'), "html.parser")
 
+        template_header_tag = template_header.find(class_='codigo_span')
+        template_header_tag.insert(1, str(collect_account.id))
+
+        template_header_tag = template_header.find(class_='fecha_span')
+        template_header_tag.insert(1, collect_account.pretty_creation_datetime())
+
+        template_header_tag = template_header.find(class_='number_span')
+        template_header_tag.insert(1, str(collect_count))
+
+        template_header_tag = template_header.find(class_='contract_span')
+        template_header_tag.insert(1, collect_account.contract.nombre)
+
+        template_header_tag = template_header.find(class_='contractor_name_span')
+        template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+        template_header_tag = template_header.find(class_='contractor_document_span')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+        template_header_tag = template_header.find(class_='contractor_name_firm')
+        template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+        template_header_tag = template_header.find(class_='contractor_document_firm')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+        template_header_tag = template_header.find(class_='value_letter_span')
+        template_header_tag.insert(1, value_letter)
+
+        template_header_tag = template_header.find(class_='value_letter_num_span')
+        template_header_tag.insert(1, str(value_letter_num))
+
+        template_header_tag = template_header.find(class_='position_span')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
 
         collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
         path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
         config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
 
-        collect_account.file.save('cuenta_cobro.pdf',
-                              File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
-
+        collect_account.file.save('cuenta_cobro.pdf',File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
         options = {
             'page-size': 'A4',
             'encoding': 'utf-8',
@@ -1470,20 +1511,20 @@ class CollectAccountUpdateView(FormView):
             'dpi': 400
         }, configuration=config)
 
-        collect_account.file.save('cuenta_cobro.pdf',
-                               File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
 
-        pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
-            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
-            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+        collect_account.file.save('cuenta_cobro.pdf',
+                                  File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+        options = {
             'page-size': 'A4',
             'encoding': 'utf-8',
-            'margin-top': '4cm',
-            'margin-bottom': '3cm',
+            'margin-top': '2cm',
+            'margin-bottom': '2cm',
             'margin-left': '2cm',
             'margin-right': '2cm',
             'dpi': 400
-        }, configuration=config)
+        }
 
         return super(CollectAccountUpdateView, self).form_valid(form)
 
