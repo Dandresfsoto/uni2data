@@ -639,13 +639,13 @@ def build_finantial_reports(reporte_id,enterprise_id):
     proceso = "UNI2DATA-REPORTE-PAGOS"
 
 
-    titulos = ['Consecutivo', 'Línea presupuestal','Sub Línea presupuestal Nivel II','Sub Línea presupuestal Nivel III','Cuenta Contable', 'Contratista', 'Cedula','No. Contrato','Concepto del Pago',
+    titulos = ['Consecutivo','Consecutivo del reporte', 'Línea presupuestal','Sub Línea presupuestal Nivel II','Sub Línea presupuestal Nivel III','Cuenta Contable', 'Contratista', 'Cedula','No. Contrato','Concepto del Pago',
                'No. Factura o Equivalente','No. Comprobante de Pago','Fecha de Pago','Valor del Gasto' ,'Deducciones y/o Rentenciones Practicdas','Valor del Gasto']
 
-    formatos = ['0','General','General','General','General', '0', 'General', 'General', 'General', 'General', 'General','dd/mm/yy',
+    formatos = ['0','General','General','General','General','General', '0', 'General', 'General', 'General', 'General', 'General','dd/mm/yy',
                 '"$"#,##0.00_);[Red]("$"#,##0.00)','"$"#,##0.00_);[Red]("$"#,##0.00)','"$"#,##0.00_);[Red]("$"#,##0.00)']
 
-    ancho_columnas = [20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
+    ancho_columnas = [20,20, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30]
 
     contenidos = []
 
@@ -654,6 +654,7 @@ def build_finantial_reports(reporte_id,enterprise_id):
         i += 1
         contenidos.append([
             int(i),
+            pago.reporte.get_cod_consecutive(),
             pago.get_rubro(),
             pago.get_rubro_lvl2(),
             pago.get_rubro_lvl3(),

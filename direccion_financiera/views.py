@@ -716,7 +716,7 @@ class FinantialReportView(LoginRequiredMixin,
         enterprise_id = enterprise.id
 
 
-        tasks.build_finantial_reports(reporte_id,enterprise_id)
+        tasks.build_finantial_reports.delay(reporte_id,enterprise_id)
 
         return HttpResponseRedirect('/reportes/')
 
