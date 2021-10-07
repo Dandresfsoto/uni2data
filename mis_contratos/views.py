@@ -90,3 +90,103 @@ class ContratosSoportesUpdateView(LoginRequiredMixin,
         }
 
 #----------------------------------------------------------------------------------
+
+#--------------------------------CUENTAS DE COBRO----------------------------------
+
+
+class ContractsAccountsListView(LoginRequiredMixin,
+                          TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'mis_contratos/accounts/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        contract = rh_models.Contratos.objects.get(id = self.kwargs['pk'])
+        kwargs['title'] = "CUENTAS DE COBRO DEL CONTRATO {0}".format(contract.nombre)
+        kwargs['url_datatable'] = '/rest/v1.0/mis_contratos/accounts/{0}/'.format(str(self.kwargs['pk']))
+        kwargs['breadcrum_active'] = contract.nombre
+        return super(ContractsAccountsListView,self).get_context_data(**kwargs)
+
+class ContractsAccountsSegurityUploadView(UpdateView):
+
+    login_url = settings.LOGIN_URL
+    model = rh_models.Collects_Account
+    template_name = 'mis_contratos/accounts/upload.html'
+    form_class = forms.SegurityUploadForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_accounts'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        contrato = rh_models.Contratos.objects.get(id=self.kwargs['pk'])
+
+        if contrato.contratista.usuario_asociado == self.request.user:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.save()
+        return super(ContractsAccountsSegurityUploadView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+        kwargs['title'] = "CARGAR SEGURIDAD SOCIAL"
+        kwargs['breadcrum_1'] = collec_account.cut.consecutive
+        kwargs['breadcrum_active'] = collec_account.contract.nombre
+        kwargs['file5_url'] = collec_account.pretty_print_url_file5()
+        return super(ContractsAccountsSegurityUploadView,self).get_context_data(**kwargs)
+
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk'],
+                'pk_accounts':self.kwargs['pk_accounts']}
+
+class ContractsAccountsAccountUploadView(UpdateView):
+
+    login_url = settings.LOGIN_URL
+    model = rh_models.Collects_Account
+    template_name = 'mis_contratos/accounts/upload.html'
+    form_class = forms.AccountUploadForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_accounts'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        contrato = rh_models.Contratos.objects.get(id=self.kwargs['pk'])
+
+        if contrato.contratista.usuario_asociado == self.request.user:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.estate = 'Cargado'
+        self.object.save()
+        return super(ContractsAccountsAccountUploadView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+        kwargs['title'] = "CARGAR CUENTA DE COBRO"
+        kwargs['breadcrum_1'] = collec_account.cut.consecutive
+        kwargs['breadcrum_active'] = collec_account.contract.nombre
+        kwargs['file3_url'] = collec_account.pretty_print_url_file3()
+        kwargs['file4_url'] = collec_account.pretty_print_url_file4()
+        return super(ContractsAccountsAccountUploadView,self).get_context_data(**kwargs)
+
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk'],
+                'pk_accounts':self.kwargs['pk_accounts']}

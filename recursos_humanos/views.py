@@ -1314,7 +1314,6 @@ class CutsCollectsAccountView(LoginRequiredMixin,
         kwargs['permiso_crear'] = self.request.user.has_perms(self.permissions.get('crear_cuenta_cobro'))
         return super(CutsCollectsAccountView,self).get_context_data(**kwargs)
 
-
 class CollectAccountUpdateView(FormView):
     login_url = settings.LOGIN_URL
     template_name = 'recursos_humanos/cuts/collects/create.html'
@@ -1327,18 +1326,18 @@ class CollectAccountUpdateView(FormView):
         self.collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
 
         self.permissions = {
-            "cargar_cuentas_cobro": [
+            "crear_cuenta_cobro": [
                 "usuarios.recursos_humanos.ver",
                 "usuarios.recursos_humanos.cortes.ver",
-                "usuarios.recursos_humanos.cortes.cuentas_cobro.ver",
-                "usuarios.recursos_humanos.cortes.cuentas_cobro.editar"
+                "usuarios.recursos_humanos.cuentas_cobro.ver",
+                "usuarios.recursos_humanos.cuentas_cobro.crear"
             ]
         }
 
         if not request.user.is_authenticated:
             return HttpResponseRedirect(self.login_url)
         else:
-            if request.user.has_perms(self.permissions.get('cargar_cuentas_cobro')):
+            if request.user.has_perms(self.permissions.get('crear_cuenta_cobro')):
                 if self.collect_account.estate == 'Reportado':
                     return HttpResponseRedirect('../../')
                 else:
@@ -1665,3 +1664,77 @@ class CollectAccountUploadView(UpdateView):
     def get_initial(self):
         return {'pk_cut':self.kwargs['pk_cut'],
                 'pk_collect_account':self.kwargs['pk_collect_account'],}
+
+class CollectAccountestateView(UpdateView):
+
+    login_url = settings.LOGIN_URL
+    model = models.Collects_Account
+    template_name = 'recursos_humanos/cuts/collects/estate.html'
+    form_class = forms.CollectsAccountEstateForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_collect_account'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        self.collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        self.permissions = {
+            "estado_cuentas_cobro": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.estado"
+            ]
+        }
+
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('estado_cuentas_cobro')):
+                if self.collect_account.estate == 'Generado' and self.collect_account.estate == 'Creado' and self.collect_account.estate == 'Reportado':
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.date_update = timezone.now()
+        self.object.user_update = self.request.user
+        self.object.save()
+
+        if self.object.estate == 'Pendiente':
+
+            user = self.collect_account.contract.get_user_or_none()
+
+
+            if user != None:
+                tasks.send_mail_templated_collect_account(
+                    'mail/cpe_2018/cuenta_cobro_observacion.tpl',
+                    {
+                        'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                        'Contrato': self.collect_account.contract.nombre,
+                        'Nombre': self.collect_account.contract.contratista.nombres,
+                        'Nombre_completo': self.collect_account.contract.contratista.get_full_name(),
+                        'Valor honorarios': '$ {:20,.2f}'.format(self.collect_account.value_fees.amount),
+                        'observaciones': form.cleaned_data['observaciones']
+                    },
+                    DEFAULT_FROM_EMAIL,
+                    [user.email,EMAIL_HOST_USER,settings.EMAIL_DIRECCION_FINANCIERA,settings.EMAIL_GERENCIA]
+                )
+
+        return super(CollectAccountestateView, self).form_valid(form)
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "ESTADO CUENTA DE COBRO"
+        kwargs['breadcrum_1'] = self.cut.consecutive
+        kwargs['breadcrum_active'] = self.collect_account.contract.nombre
+        return super(CollectAccountestateView,self).get_context_data(**kwargs)

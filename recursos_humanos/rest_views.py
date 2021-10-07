@@ -804,7 +804,7 @@ class CutsCollectAccountListApi(BaseDatatableView):
                 "usuarios.recursos_humanos.cortes.cuentas_cobro.estado"
             ]
         }
-        return self.model.objects.filter(cut__id = self.kwargs['pk_cut'])
+        return self.model.objects.filter(cut__id = self.kwargs['pk_cut']).order_by('-creation')
 
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
@@ -854,27 +854,20 @@ class CutsCollectAccountListApi(BaseDatatableView):
 
         elif column == 'estate':
 
-            if self.request.user.is_superuser and row.estate == 'Reportado':
+            if row.estate == 'Cargado':
 
                 ret = '<div class="center-align">' \
                             '<a href="estate/{0}/">' \
-                                '<span><b>Reportado para Pago</b></span>' \
+                                '<span><b>Cargado</b></span>' \
                             '</a>' \
                       '</div>'.format(row.id, row.estate)
 
-            elif self.request.user.is_superuser and row.estate != 'Reportado':
+            elif row.estate == 'Reportado':
 
                 ret = '<div class="center-align">' \
                             '<a href="estate/{0}/">' \
-                                '<span><b>{1}</b></span>' \
+                                '<span><b>Reportado</b></span>' \
                             '</a>' \
-                      '</div>'.format(row.id, row.estate)
-
-            elif self.request.user.has_perms(self.permissions.get('cuentas_cobro_estado')) and row.estate != 'Generado' and row.estate != 'Creado' and row.estate != 'Reportado':
-                ret = '<div class="center-align">' \
-                      '<a href="estate/{0}/">' \
-                      '<span><b>{1}</b></span>' \
-                      '</a>' \
                       '</div>'.format(row.id, row.estate)
 
             else:

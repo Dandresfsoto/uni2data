@@ -9,8 +9,8 @@ from rest_framework import status
 
 class ContratosListApi(BaseDatatableView):
     model = models.Contratos
-    columns = ['id','nombre','inicio','fin','valor','estado','file','soporte_liquidacion','fecha_legalizacion']
-    order_columns = ['id','nombre','inicio','fin','valor','estado','file','soporte_liquidacion','fecha_legalizacion']
+    columns = ['id','suscrito','nombre','inicio','fin','valor','estado','file','soporte_liquidacion','fecha_legalizacion']
+    order_columns = ['id','suscrito','nombre','inicio','fin','valor','estado','file','soporte_liquidacion','fecha_legalizacion']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(contratista__usuario_asociado = self.request.user, visible = True)
@@ -21,7 +21,6 @@ class ContratosListApi(BaseDatatableView):
             q = Q(nombre__icontains=search)
             qs = qs.filter(q)
         return qs
-
 
     def render_column(self, row, column):
         if column == 'id':
@@ -37,6 +36,15 @@ class ContratosListApi(BaseDatatableView):
                 ret = '<div class="center-align">' \
                            '<i class="material-icons">remove_red_eye</i>' \
                        '</div>'.format(row.id,row.nombre)
+
+            return ret
+
+        if column == 'suscrito':
+            ret = '<div class="center-align">' \
+                       '<a href="accounts/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Soportes del contrato: {1}">' \
+                            '<i class="material-icons" >assignment</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id,row.nombre)
 
             return ret
 
@@ -196,3 +204,139 @@ class SoportesContratoListApi(BaseDatatableView):
 
         else:
             return super(SoportesContratoListApi, self).render_column(row, column)
+
+class AccountContractListApi(BaseDatatableView):
+    model = models.Collects_Account
+    columns = ['id','html','delta','date_creation','estate','user_creation','data_json','file5','file','file2']
+    order_columns = ['id','html','delta','date_creation','estate','user_creation','data_json','file5','file','file2']
+
+    def get_initial_queryset(self):
+        return self.model.objects.filter(contract = self.kwargs['pk']).exclude(value_fees=0).order_by('-cut__consecutive')
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(consecutive__icontains=search) | Q(cut_consecutive__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            return row.cut.consecutive
+
+        elif column == 'html':
+            url_file5 = row.url_file5()
+            if row.estate == "Generado" and url_file5 == None:
+                ret = '<div class="center-align">' \
+                      '<a href="upload_ss/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                      '<i class="material-icons">cloud_upload</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.contract.nombre)
+            elif row.estate == "Rechazado":
+                ret = '<div class="center-align">' \
+                      '<a href="upload_ss/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                      '<i class="material-icons">cloud_upload</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.contract.nombre)
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">cloud_upload</i>' \
+                      '</div>'
+
+            return ret
+
+        elif column == 'delta':
+            url_file5 = row.url_file5()
+            if row.estate == "Generado" and url_file5 != None:
+                ret = '<div class="center-align">' \
+                      '<a href="upload_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                      '<i class="material-icons">cloud_upload</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.contract.nombre)
+
+            elif row.estate == "Rechazado":
+                ret = '<div class="center-align">' \
+                      '<a href="upload_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                      '<i class="material-icons">cloud_upload</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.contract.nombre)
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">cloud_upload</i>' \
+                      '</div>'
+
+            return ret
+
+        elif column == 'date_creation':
+            return row.pretty_creation_datetime()
+
+        elif column == 'estate':
+            return row.estate
+
+        elif column == 'user_creation':
+            return row.pretty_print_value_fees()
+
+        elif column == 'data_json':
+            return row.pretty_print_value_transport()
+
+        elif column == 'file':
+            url_file5 = row.url_file5()
+            ret = '<div class="center-align">'
+            if url_file5 != None:
+                url_file = row.url_file()
+                url_file2 = row.url_file2()
+
+                ret = '<div class="center-align">'
+
+                if url_file != None:
+                    ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                           '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                           '</a>'.format(url_file)
+
+                if url_file2 != None:
+                    ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
+                           '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                           '</a>'.format(url_file2)
+
+                ret += '</div>'
+
+            return ret
+
+        elif column == 'file5':
+
+            url_file5 = row.url_file5()
+
+            ret = '<div class="center-align">'
+
+            if url_file5 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file5)
+
+            ret += '</div>'
+
+            return ret
+
+        elif column == 'file2':
+            url_file3 = row.url_file3()
+            url_file4 = row.url_file4()
+
+            ret = '<div class="center-align">'
+
+            if url_file3 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file3)
+
+            if url_file4 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file4)
+
+            ret += '</div>'
+
+            return ret
+
+        else:
+            return super(AccountContractListApi, self).render_column(row, column)

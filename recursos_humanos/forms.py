@@ -1622,6 +1622,12 @@ class CollectsAccountForm(forms.Form):
             self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
             self.add_error('value_transport_char', 'El valor total de cuentas de cobro supera el valor del contrato')
 
+        value_total_total = value_total + total
+
+        if value_total_total > value_contract:
+            self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+            self.add_error('value_transport_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+
     def __init__(self, *args, **kwargs):
         super(CollectsAccountForm, self).__init__(*args, **kwargs)
 
@@ -1869,3 +1875,65 @@ class ColletcAcountUploadForm(forms.ModelForm):
             'file5': forms.FileInput(attrs={'data - max - file - size': "50M",'accept': 'application / pdf'}),
         }
 
+class CollectsAccountEstateForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        estate = cleaned_data.get("estate")
+        observaciones = cleaned_data.get("observaciones")
+
+        if estate == 'Rechazado':
+            if observaciones == None or observaciones == '':
+                self.add_error('observaciones', 'Por favor escriba una observación')
+
+
+    def __init__(self, *args, **kwargs):
+        super(CollectsAccountEstateForm, self).__init__(*args, **kwargs)
+
+        self.fields['estate'].widget = forms.Select(choices = [
+            ('','----------'),
+            ('Reportado', 'Reportado'),
+            ('Rechazado', 'Rechazado'),
+            ('Pagado', 'Pagado')
+        ])
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Revision documental',
+                )
+            ),
+            Row(
+                Column(
+                    'estate',
+                    css_class="s12"
+                ),
+                Column(
+                    'observaciones',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = models.Collects_Account
+        fields = ['estate','observaciones']
+        widgets = {
+            'observaciones': forms.Textarea(attrs={'class': 'materialize-textarea'})
+        }

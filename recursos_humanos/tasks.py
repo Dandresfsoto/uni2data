@@ -275,3 +275,8 @@ def build_reporte_hv(id):
 
 
     return "Archivo paquete ID: " + filename
+
+@app.task
+def send_mail_templated_collect_account(template,dictionary,from_email,list_to_email):
+    send_mail(template, dictionary, from_email, list_to_email)
+    return 'Email enviado'
