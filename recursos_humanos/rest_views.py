@@ -774,8 +774,8 @@ class CutsListApi(BaseDatatableView):
 
 class CutsCollectAccountListApi(BaseDatatableView):
     model = Collects_Account
-    columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file2']
-    order_columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file2']
+    columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file2']
+    order_columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file2']
 
     def get_initial_queryset(self):
         self.cut = Cuts.objects.get(id=self.kwargs['pk_cut'])
@@ -850,7 +850,7 @@ class CutsCollectAccountListApi(BaseDatatableView):
             return '<div class="center-align"><b>' + str(row.contract.nombre) + '</b></div>'
 
         elif column == 'date_creation':
-            return '{0} - {1}'.format(row.contract.nombre,row.contract.contratista)
+            return '{0}'.format(row.contract.contratista)
 
         elif column == 'estate':
 
@@ -906,26 +906,60 @@ class CutsCollectAccountListApi(BaseDatatableView):
             return row.contract.fin
 
         elif column == 'file':
-            if row.url_file() != None:
-                ret = '<div class="center-align">' \
-                            '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                                '<i class="material-icons">insert_drive_file</i>' \
-                            '</a>' \
-                      '</div>'.format(row.url_file(),'Descargar archivo')
-            else:
-                ret = ''
+
+            url_file = row.url_file()
+            url_file2 = row.url_file2()
+
+            ret = '<div class="center-align">'
+
+            if url_file != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file)
+
+            if url_file2 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file2)
+
+            ret += '</div>'
+
+            return ret
+
+        elif column == 'file5':
+
+            url_file5 = row.url_file5()
+
+
+            ret = '<div class="center-align">'
+
+            if url_file5 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file5)
+
+            ret += '</div>'
 
             return ret
 
         elif column == 'file2':
-            if row.url_file2() != None:
-                ret = '<div class="center-align">' \
-                            '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                                '<i class="material-icons">insert_drive_file</i>' \
-                            '</a>' \
-                      '</div>'.format(row.url_file2(),'Descargar archivo')
-            else:
-                ret = ''
+            url_file3 = row.url_file3()
+            url_file4 = row.url_file4()
+
+            ret = '<div class="center-align">'
+
+            if url_file3 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file3)
+
+            if url_file4 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file4)
+
+
+            ret += '</div>'
 
             return ret
 

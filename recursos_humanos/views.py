@@ -1350,54 +1350,40 @@ class CollectAccountUpdateView(FormView):
             else:
                 return HttpResponseRedirect('../../')
 
-    def get_cuentas_meses(self):
+    def get_cuentas_fees(self,collect_account):
 
-        accounts = models.Collects_Account.objects.filter(contract=self.collect_account.contract).exclude(id=self.collect_account.id)
-        data = {}
+        accounts = models.Collects_Account.objects.filter(contract=self.collect_account.contract).exclude(value_fees=0)
+        list= ''
+        count= accounts.count()
+
+
+
         for account in accounts:
-            delta_valores = json.loads(account.valores_json)
-            if len(delta_valores) > 1:
-                for account in delta_valores:
-                    value = float(account.get('valor').replace('$ ', '').replace(',', ''))
-                    mes = account.get('mes')
-                    year = account.get('year')
-
-                    if year not in data.keys():
-                        data[year] = {}
-
-                    if mes not in data[year].keys():
-                        data[year][mes] = {'valor': 0}
-
-                    data[year][mes]['valor'] += value
+            month = account.month
+            year = account.year
+            value = account.value_fees
+            cut = account.cut.consecutive
 
 
-            else:
-                if account.data_json != None:
-                    data_json = json.loads(account.data_json)
-                    value = float(account.valor.amount)
-                    mes = data_json['mes'][0]
-                    year = data_json['year']
+            list += '<p><b>Corte: </b>{0}</p><p><b>Fecha: </b>{1} - {2}</p><ul>{3}</ul>'.format(cut,month,year,value)
 
-                    if year not in data.keys():
-                        data[year] = {}
+        return list
 
-                    if mes not in data[year].keys():
-                        data[year][mes] = {'valor': 0}
+    def get_cuentas_transport(self, collect_account):
 
-                    data[year][mes]['valor'] += value
+        accounts = models.Collects_Account.objects.filter(contract=self.collect_account.contract).exclude(value_transport=0).order_by()
+        list_2 = ''
+        count = accounts.count()
 
-        html = ''
+        for account in accounts:
+            month = account.month
+            year = account.year
+            value = account.value_transport
+            cut = account.cut.consecutive
 
-        for year in data.keys():
-            html_parte = ''
-            for mes in data[year].keys():
-                value = '$ {:20,.2f}'.format(data[year][mes]['valor'])
-                html_parte += '<li style="list-style-type:initial;"><p><b>{0}: </b>{1}</p></li>'.format(mes, value)
+            list_2 += '<p><b>Corte: </b>{0}</p><p><b>Fecha: </b>{1} - {2}</p><ul>{3}</ul>'.format(cut, month, year, value)
 
-            html += '<div class="row"><div class="col s12"><p><b>Año: </b>{0}</p><div style="margin-left:15px;"><ul>{1}</ul></div></div></div>'.format(
-                year, html_parte)
-
-        return html
+        return list_2
 
     def form_valid(self, form):
         collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
@@ -1422,31 +1408,16 @@ class CollectAccountUpdateView(FormView):
 
         collect_account.file.delete()
         collect_account.html.delete()
+        collect_account.file2.delete()
+        collect_account.html_2.delete()
 
         value_money= float(collect_account.value_fees)
         value_letter_num = value_money
         value_letter = numero_to_letras(int(value_letter_num))
 
-        renders = ''
-
-        renders += '<div class="hoja">' + html.render(functions.cuenta_cobro(collect_account)['CPS']) + '</div>'
-        renders += '<div class="hoja">' + html.render(functions.cuenta_transporte(collect_account)['CPS']) + '</div>'
-
-        html_render = BeautifulSoup(renders, "html.parser", from_encoding='utf-8')
-
-        template_no_header = BeautifulSoup(
-            open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/certificaciones/no_header/cuenta_cobro.html',
-                 'rb'), "html.parser")
-
-        template_no_header_tag = template_no_header.find(class_='inserts')
-        template_no_header_tag.insert(1, html_render)
-
-        collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_no_header.prettify(encoding='utf-8'))))
-
         if collect_account.estate != 'Cargado':
             collect_account.estate = 'Generado'
         collect_account.save()
-
 
         template_header = BeautifulSoup(open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/cuentas_cobro/cuenta.html','rb'), "html.parser")
 
@@ -1483,12 +1454,23 @@ class CollectAccountUpdateView(FormView):
         template_header_tag = template_header.find(class_='position_span')
         template_header_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
 
+        template_header_tag = template_header.find(class_='position_span')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
+
+        template_header_tag = template_header.find(class_='month_span')
+        template_header_tag.insert(1, str(collect_account.month))
+
+        template_header_tag = template_header.find(class_='year_span')
+        template_header_tag.insert(1, str(collect_account.year))
+
         collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
         path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
         config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
 
-        collect_account.file.save('cuenta_cobro.pdf',File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+        collect_account.file.save('cuenta_cobro.pdf',
+                              File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
         options = {
             'page-size': 'A4',
             'encoding': 'utf-8',
@@ -1498,6 +1480,7 @@ class CollectAccountUpdateView(FormView):
             'margin-right': '2cm',
             'dpi': 400
         }
+
 
         pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
             '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
@@ -1511,20 +1494,87 @@ class CollectAccountUpdateView(FormView):
             'dpi': 400
         }, configuration=config)
 
-        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+        if float(collect_account.value_transport) > 0:
+            value_money_2 = float(collect_account.value_transport)
+            value_letter_num_2 = value_money_2
+            value_letter_2 = numero_to_letras(int(value_letter_num_2))
 
-        collect_account.file.save('cuenta_cobro.pdf',
-                                  File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
-        options = {
-            'page-size': 'A4',
-            'encoding': 'utf-8',
-            'margin-top': '2cm',
-            'margin-bottom': '2cm',
-            'margin-left': '2cm',
-            'margin-right': '2cm',
-            'dpi': 400
-        }
+
+            template_header_2 = BeautifulSoup(
+                open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/cuentas_transporte/cuenta.html', 'rb'), "html.parser")
+
+            template_header_2_tag = template_header_2.find(class_='codigo_span')
+            template_header_2_tag.insert(1, str(collect_account.id))
+
+            template_header_2_tag = template_header_2.find(class_='fecha_span')
+            template_header_2_tag.insert(1, collect_account.pretty_creation_datetime())
+
+            template_header_2_tag = template_header_2.find(class_='number_span')
+            template_header_2_tag.insert(1, str(collect_count))
+
+            template_header_2_tag = template_header_2.find(class_='contract_span')
+            template_header_2_tag.insert(1, collect_account.contract.nombre)
+
+            template_header_2_tag = template_header_2.find(class_='contractor_name_span')
+            template_header_2_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+            template_header_2_tag = template_header_2.find(class_='contractor_document_span')
+            template_header_2_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+            template_header_2_tag = template_header_2.find(class_='contractor_name_firm')
+            template_header_2_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+            template_header_2_tag = template_header_2.find(class_='contractor_document_firm')
+            template_header_2_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+            template_header_2_tag = template_header_2.find(class_='value_letter_span')
+            template_header_2_tag.insert(1, value_letter_2)
+
+            template_header_2_tag = template_header_2.find(class_='value_letter_num_span')
+            template_header_2_tag.insert(1, str(value_letter_num_2))
+
+            template_header_2_tag = template_header_2.find(class_='position_span')
+            template_header_2_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
+
+            template_header_2_tag = template_header_2.find(class_='position_span')
+            template_header_2_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
+
+            template_header_2_tag = template_header_2.find(class_='month_span')
+            template_header_2_tag.insert(1, str(collect_account.month))
+
+            template_header_2_tag = template_header_2.find(class_='year_span')
+            template_header_2_tag.insert(1, str(collect_account.year))
+
+            collect_account.html_2.save('cuenta_transporte.html', File(io.BytesIO(template_header_2.prettify(encoding='utf-8'))))
+
+            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+
+            collect_account.file2.save('cuenta_transporte.pdf',
+                                      File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+            options = {
+                'page-size': 'A4',
+                'encoding': 'utf-8',
+                'margin-top': '2cm',
+                'margin-bottom': '2cm',
+                'margin-left': '2cm',
+                'margin-right': '2cm',
+                'dpi': 400
+            }
+
+            pdfkit.from_file([collect_account.html_2.path], collect_account.file2.path, {
+                '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_transporte\\header\\header.html',
+                '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_transporte\\footer\\footer.html',
+                'page-size': 'A4',
+                'encoding': 'utf-8',
+                'margin-top': '4cm',
+                'margin-bottom': '3cm',
+                'margin-left': '2cm',
+                'margin-right': '2cm',
+                'dpi': 400
+            }, configuration=config)
+
 
         return super(CollectAccountUpdateView, self).form_valid(form)
 
@@ -1532,6 +1582,8 @@ class CollectAccountUpdateView(FormView):
 
         cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
         collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+
 
         kwargs['title'] = "CUENTA DE COBRO CONTRATO {0}".format(collect_account.contract.nombre)
         kwargs['breadcrum_1'] = cut.consecutive
@@ -1541,9 +1593,11 @@ class CollectAccountUpdateView(FormView):
         kwargs['corte'] = '{0}'.format(cut.consecutive)
         kwargs['contratista'] = collect_account.contract.contratista.get_full_name()
         kwargs['contrato'] = collect_account.contract.nombre
-        kwargs['cuentas'] = self.get_cuentas_meses()
+        kwargs['cuentas_fees'] = self.get_cuentas_fees(collect_account)
+        kwargs['cuentas_transport'] = self.get_cuentas_transport(collect_account)
         kwargs['inicio'] = collect_account.contract.inicio
         kwargs['fin'] = collect_account.contract.fin
+        kwargs['valor'] = collect_account.contract.valor
 
         return super(CollectAccountUpdateView, self).get_context_data(**kwargs)
 
@@ -1552,3 +1606,62 @@ class CollectAccountUpdateView(FormView):
             'pk_cut': self.kwargs['pk_cut'],
             'pk_collect_account': self.kwargs['pk_collect_account']
         }
+
+class CollectAccountUploadView(UpdateView):
+
+    login_url = settings.LOGIN_URL
+    model = models.Collects_Account
+    template_name = 'recursos_humanos/cuts/collects/upload.html'
+    form_class = forms.ColletcAcountUploadForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_collect_account'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        self.collec_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        self.permissions = {
+            "cargar_cuentas_cobro": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.cargar"
+            ]
+        }
+
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('cargar_cuentas_cobro')):
+                if self.collec_account.estate == 'Creado' or self.collec_account.estate == 'Reportado':
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.estado = 'Cargado'
+        self.object.save()
+        return super(CollectAccountUploadView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CUENTA DE COBRO CONTRATO {0}".format(self.collec_account.contract.nombre)
+        kwargs['breadcrum_1'] = self.cut.consecutive
+        kwargs['breadcrum_active'] = self.collec_account.contract.nombre
+        kwargs['file3_url'] = self.collec_account.pretty_print_url_file3()
+        kwargs['file4_url'] = self.collec_account.pretty_print_url_file4()
+        kwargs['file5_url'] = self.collec_account.pretty_print_url_file5()
+        return super(CollectAccountUploadView,self).get_context_data(**kwargs)
+
+
+    def get_initial(self):
+        return {'pk_cut':self.kwargs['pk_cut'],
+                'pk_collect_account':self.kwargs['pk_collect_account'],}

@@ -49,4 +49,5 @@ urlpatterns = [
     path('cuts/create/', views.CutsCreateView.as_view()),
     path('cuts/view/<uuid:pk_cut>/', views.CutsCollectsAccountView.as_view()),
     path('cuts/view/<uuid:pk_cut>/edit/<uuid:pk_collect_account>/', views.CollectAccountUpdateView.as_view()),
+    path('cuts/view/<uuid:pk_cut>/upload/<uuid:pk_collect_account>/', views.CollectAccountUploadView.as_view()),
 ]

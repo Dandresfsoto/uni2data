@@ -614,7 +614,33 @@ class Collects_Account(models.Model):
         blank=True,
         null=True
     )
+    file3 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    file4 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    file5= ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Seguridad social"
+    )
     html = models.FileField(upload_to=upload_dinamic_collects_account, blank=True, null=True)
+    html_2 = models.FileField(upload_to=upload_dinamic_collects_account, blank=True, null=True)
     delta = models.TextField(blank=True, null=True)
     data_json = models.TextField(blank=True, null=True)
     valores_json = models.TextField(default='[]', blank=True, null=True)
@@ -676,6 +702,30 @@ class Collects_Account(models.Model):
             pass
         return url
 
+    def url_file3(self):
+        url = None
+        try:
+            url = self.file3.url
+        except:
+            pass
+        return url
+
+    def url_file4(self):
+        url = None
+        try:
+            url = self.file4.url
+        except:
+            pass
+        return url
+
+    def url_file5(self):
+        url = None
+        try:
+            url = self.file5.url
+        except:
+            pass
+        return url
+
     def pretty_print_url_file(self):
         try:
             url = self.file.url
@@ -691,6 +741,30 @@ class Collects_Account(models.Model):
             return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
         else:
             return '<a href="' + url + '"> ' + str(self.file2.name) + '</a>'
+
+    def pretty_print_url_file3(self):
+        try:
+            url = self.file3.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file3.name) + '</a>'
+
+    def pretty_print_url_file4(self):
+        try:
+            url = self.file4.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file4.name) + '</a>'
+
+    def pretty_print_url_file5(self):
+        try:
+            url = self.file5.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file5.name) + '</a>'
 
 def upload_dinamic_dir_soporte_contrato(instance, filename):
     return '/'.join(['Contratos', 'Soportes', str(instance.contrato.id), str(instance.soporte.id), filename])

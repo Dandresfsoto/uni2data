@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django import forms
+from django.db.models import Sum
+
 from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, Certificaciones
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
@@ -1596,6 +1598,29 @@ class CollectsAccountForm(forms.Form):
     ])
     year = forms.ChoiceField(label='Año')
 
+    def clean(self):
+        cleaned_data = super().clean()
+        collect_account = models.Collects_Account.objects.get(id = self.initial['pk_collect_account'])
+        collects_accounts = models.Collects_Account.objects.filter(contract=collect_account.contract)
+        total_value_fees = collects_accounts.aggregate(Sum('value_fees'))['value_fees__sum']
+        total_value_transport = collects_accounts.aggregate(Sum('value_transport'))['value_transport__sum']
+
+        total = float(total_value_fees + total_value_transport)
+
+        value_contract = float(collect_account.contract.valor)
+
+        if total > value_contract:
+            self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+            self.add_error('value_transport_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+
+        value_f = float(cleaned_data.get('value_fees_char').replace('$ ', '').replace(',', ''))
+        value_t = float(cleaned_data.get('value_transport_char').replace('$ ', '').replace(',', ''))
+
+        value_total = value_f + value_t
+
+        if value_total > value_contract:
+            self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+            self.add_error('value_transport_char', 'El valor total de cuentas de cobro supera el valor del contrato')
 
     def __init__(self, *args, **kwargs):
         super(CollectsAccountForm, self).__init__(*args, **kwargs)
@@ -1603,7 +1628,7 @@ class CollectsAccountForm(forms.Form):
         collect_account = models.Collects_Account.objects.get(id=kwargs['initial']['pk_collect_account'])
         date = timezone.now()
         year = date.strftime('%Y')
-        year_1 = str(int(year)-1)
+        year_1 = str(int(year)+1)
         mes = date.strftime('%B').capitalize()
 
         self.fields['year'].choices = [(year_1,year_1),(year,year)]
@@ -1611,31 +1636,48 @@ class CollectsAccountForm(forms.Form):
 
 
         self.fields['value_fees_char'] = forms.CharField(label="Valor cuenta de cobro por honorarios ($)")
-        try:
-            value_fees = kwargs['instance'].value_fees
-        except:
-            pass
+        self.fields['value_transport_char'] = forms.CharField(label="Valor cuenta de cobro por honorarios ($)")
 
-        self.fields['value_transport_char'] = forms.CharField(label="Valor cuenta por transporte ($)")
-        try:
-            value_transport = kwargs['instance'].value_transport
-        except:
-            pass
+        if collect_account.value_fees != 0:
+            self.fields['value_fees_char'].initial = collect_account.get_value_fees()
+            self.fields['value_transport_char'].initial = collect_account.get_value_transport()
+            self.fields['month'].initial = collect_account.month
+            self.fields['year'].initial = collect_account.year
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
 
             Row(
-                Fieldset(
-                    'Cuenta de cobro',
-                )
+                Column(
+                    Fieldset(
+                        'Honorarios pagados',
+                    ),
+                    css_class="s12 m6"
+                ),
+                Column(
+                    Fieldset(
+                        'Transporte pagado',
+                    ),
+                    css_class="s12 m6"
+                ),
             ),
             Row(
-                HTML(
-                    """
-                    <div class="col s12">{{ cuentas| safe }}</div>
-                    """
-                )
+                Column(
+                    HTML(
+                        """
+                        <div class="col s6">{{ cuentas_fees| safe }}</div>
+                        """
+                    ),
+                    css_class="s12 m6"
+                ),
+                Column(
+                    HTML(
+                        """
+                        <div class="col s6">{{ cuentas_transport| safe }}</div>
+                        """
+                    ),
+                     css_class = "s12 m6"
+                ),
             ),
             Row(
                 HTML(
@@ -1645,6 +1687,7 @@ class CollectsAccountForm(forms.Form):
                     <div class="col s12 m6"><p><b>Contrato:</b> {{contrato}}</p></div>
                     <div class="col s12 m6"><p><b>Inicio:</b> {{inicio}}</p></div>
                     <div class="col s12 m6"><p><b>Fin:</b> {{fin}}</p></div>
+                    <div class="col s12 m6"><p><b>Valor contrato:</b> {{valor}}</p></div>
                     """
                 )
             ),
@@ -1682,3 +1725,147 @@ class CollectsAccountForm(forms.Form):
                 ),
             )
         )
+
+class ColletcAcountUploadForm(forms.ModelForm):
+
+
+    def __init__(self, *args, **kwargs):
+        super(ColletcAcountUploadForm, self).__init__(*args, **kwargs)
+        collect_account = models.Collects_Account.objects.get(id=kwargs['initial']['pk_collect_account'])
+
+        if collect_account.file2 != None:
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+                Row(
+                    Fieldset(
+                        'Cargar seguridad social',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file3_url | safe }}</p>
+                        """
+                    )
+                ),
+                Row(
+                    Column(
+                        'file5',
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Fieldset(
+                        'Cargar cuenta de cobro de honorarios profesionales',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file3_url | safe }}</p>
+                        """
+                    )
+                ),
+                Row(
+                    Column(
+                        'file3',
+                        css_class="s12"
+                    ),
+                ),
+
+                Row(
+                    Fieldset(
+                        'Cargar cuenta de cobro de transporte',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file4_url | safe }}</p>
+                        """
+                    )
+                ),
+                Row(
+                    Column(
+                        'file4',
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+        else:
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+                Row(
+                    Fieldset(
+                        'Cargar seguridad social',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file3_url | safe }}</p>
+                        """
+                    )
+                ),
+                Row(
+                    Column(
+                        'file5',
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Fieldset(
+                        'Cargar cuenta de cobro de honorarios profesionales',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file3_url | safe }}</p>
+                        """
+                    )
+                ),
+                Row(
+                    Column(
+                        'file3',
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+
+    class Meta:
+        model = models.Collects_Account
+        fields = ['file3','file4','file5']
+        widgets = {
+            'file3': forms.FileInput(attrs={'data-max-file-size': "50M",'accept': 'application/pdf'}),
+            'file4': forms.FileInput(attrs={'data - max - file - size': "50M",'accept': 'application / pdf'}),
+            'file5': forms.FileInput(attrs={'data - max - file - size': "50M",'accept': 'application / pdf'}),
+        }
+
