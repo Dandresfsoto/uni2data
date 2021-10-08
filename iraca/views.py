@@ -3469,11 +3469,38 @@ class HouseholdsReportView(View):
                     consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
                 )
                 #colocar delay
-                tasks.build_bonding_report(reporte.id)
+                tasks.build_bonding_report.delay(reporte.id)
                 return redirect('/reportes/')
             else:
                 return HttpResponseRedirect('../../')
 
+class HouseholdsReportTotalView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.vinculacion.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+
+            if request.user.has_perms(self.permissions['ver']):
+                reporte = Reportes.objects.create(
+                    usuario=self.request.user,
+                    nombre=f'Reportes de vinculaciones aplicacion uni2data',
+                    consecutivo=Reportes.objects.filter(usuario=self.request.user).count() + 1
+                )
+                #colocar delay
+                tasks.build_bonding_total_report(reporte.id)
+                return redirect('/reportes/')
+            else:
+                return HttpResponseRedirect('../../')
 
 class ResguardListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
