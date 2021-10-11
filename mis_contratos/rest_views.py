@@ -207,8 +207,8 @@ class SoportesContratoListApi(BaseDatatableView):
 
 class AccountContractListApi(BaseDatatableView):
     model = models.Collects_Account
-    columns = ['id','html','delta','date_creation','estate','user_creation','data_json','file5','file','file2']
-    order_columns = ['id','html','delta','date_creation','estate','user_creation','data_json','file5','file','file2']
+    columns = ['id','html','delta','html_2','date_creation','estate','user_creation','data_json','file5','file','file2']
+    order_columns = ['id','html','delta','html_2','date_creation','estate','user_creation','data_json','file5','file','file2']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(contract = self.kwargs['pk']).exclude(value_fees=0).order_by('-cut__consecutive')
@@ -268,6 +268,28 @@ class AccountContractListApi(BaseDatatableView):
 
             return ret
 
+        elif column == 'html_2':
+            url_file5 = row.url_file5()
+            if row.estate == "Generado" and url_file5 != None:
+                ret = '<div class="center-align">' \
+                      '<a href="upload_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                      '<i class="material-icons">assignment_turned_in</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.contract.nombre)
+
+            elif row.estate == "Rechazado":
+                ret = '<div class="center-align">' \
+                      '<a href="upload_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                      '<i class="material-icons">assignment_turned_in</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.contract.nombre)
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">assignment_turned_in</i>' \
+                      '</div>'
+
+            return ret
+
         elif column == 'date_creation':
             return row.pretty_creation_datetime()
 
@@ -321,6 +343,7 @@ class AccountContractListApi(BaseDatatableView):
         elif column == 'file2':
             url_file3 = row.url_file3()
             url_file4 = row.url_file4()
+            url_file6 = row.url_file6()
 
             ret = '<div class="center-align">'
 
@@ -333,6 +356,11 @@ class AccountContractListApi(BaseDatatableView):
                 ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
                        '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                        '</a>'.format(url_file4)
+
+            if url_file6 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file6)
 
             ret += '</div>'
 

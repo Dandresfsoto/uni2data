@@ -9,6 +9,8 @@ from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Hidden
 from recursos_humanos import functions
 import json
+from bs4 import BeautifulSoup
+from delta import html
 
 class SoportesContratosForm(forms.ModelForm):
 
@@ -203,3 +205,69 @@ class AccountUploadForm(forms.ModelForm):
     class Meta:
         model = Collects_Account
         fields = ['file3','file4']
+
+class AccountActivityForm(forms.ModelForm):
+    delta = forms.CharField(widget=forms.HiddenInput())
+    inicial = forms.CharField(widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(AccountActivityForm, self).__init__(*args, **kwargs)
+
+        account = Collects_Account.objects.get(id=kwargs['initial']['pk_accounts'])
+
+        self.fields['inicial'].initial = account.delta
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Actividades realizadas durante el mes',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        HTML(
+                            """
+                            <div id="delta" style="min-height:300px;"></div>
+                            """
+                        ),
+                        css_class='s12'
+                    )
+                ),
+                Column(
+                    Row(
+                        Column(
+                            'delta',
+                            css_class='s12'
+                        ),
+                        Column(
+                            'inicial',
+                            css_class='s12'
+                        ),
+                    ),
+                    css_class="s12"
+                ),
+            ),
+
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Collects_Account
+        fields = ['delta']
+
+

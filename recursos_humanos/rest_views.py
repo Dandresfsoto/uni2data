@@ -938,6 +938,7 @@ class CutsCollectAccountListApi(BaseDatatableView):
         elif column == 'file2':
             url_file3 = row.url_file3()
             url_file4 = row.url_file4()
+            url_file6 = row.url_file6()
 
             ret = '<div class="center-align">'
 
@@ -950,6 +951,11 @@ class CutsCollectAccountListApi(BaseDatatableView):
                 ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
                        '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                        '</a>'.format(url_file4)
+
+            if url_file6 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file6)
 
 
             ret += '</div>'

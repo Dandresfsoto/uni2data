@@ -9,4 +9,5 @@ urlpatterns = [
     path('accounts/<uuid:pk>/', views.ContractsAccountsListView.as_view()),
     path('accounts/<uuid:pk>/upload_ss/<uuid:pk_accounts>/', views.ContractsAccountsSegurityUploadView.as_view()),
     path('accounts/<uuid:pk>/upload_account/<uuid:pk_accounts>/', views.ContractsAccountsAccountUploadView.as_view()),
+    path('accounts/<uuid:pk>/upload_activity/<uuid:pk_accounts>/', views.ContractsAccountsActivityUploadView.as_view()),
 ]

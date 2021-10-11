@@ -1,12 +1,17 @@
+from delta import html
+import json
 import mimetypes
-
+from bs4 import BeautifulSoup
 from django.views.generic import TemplateView, CreateView, UpdateView, FormView, View
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
 from recursos_humanos import models as rh_models
 from mis_contratos import forms
 from django.http import HttpResponseRedirect
-# Create your views here.
+from django.utils import timezone
+import io
+from django.core.files import File
+import pdfkit
 
 #------------------------------- SELECCIÓN ----------------------------------------
 
@@ -173,7 +178,6 @@ class ContractsAccountsAccountUploadView(UpdateView):
 
     def form_valid(self, form):
         self.object = form.save()
-        self.object.estate = 'Cargado'
         self.object.save()
         return super(ContractsAccountsAccountUploadView, self).form_valid(form)
 
@@ -190,3 +194,127 @@ class ContractsAccountsAccountUploadView(UpdateView):
     def get_initial(self):
         return {'pk':self.kwargs['pk'],
                 'pk_accounts':self.kwargs['pk_accounts']}
+
+class ContractsAccountsActivityUploadView(UpdateView):
+
+    login_url = settings.LOGIN_URL
+    model = rh_models.Collects_Account
+    template_name = 'mis_contratos/accounts/activity.html'
+    form_class = forms.AccountActivityForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_accounts'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        contrato = rh_models.Contratos.objects.get(id=self.kwargs['pk'])
+
+        if contrato.contratista.usuario_asociado == self.request.user:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
+
+    def form_valid(self, form):
+
+
+
+        day = timezone.now()
+        date = day.strftime("%Y/%m/%d")
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+
+        delta = json.loads(form.cleaned_data['delta'])
+        collect_account.delta= form.cleaned_data['delta']
+        collect_account.save()
+
+        delta_2 =  BeautifulSoup(html.render(delta['ops']),"html.parser",from_encoding='utf-8')
+
+
+
+        collect_account.file6.delete()
+
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+
+        template_header = BeautifulSoup(
+            open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/informe_actividades/inform.html', 'rb'), "html.parser")
+
+        template_header_tag = template_header.find(class_='codigo_span')
+        template_header_tag.insert(1, str(collect_account.id))
+
+        template_header_tag = template_header.find(class_='date_span')
+        template_header_tag.insert(1, str(date))
+
+        template_header_tag = template_header.find(class_='charge_span')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.cargo))
+
+        template_header_tag = template_header.find(class_='name_span')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
+
+        template_header_tag = template_header.find(class_='document_span')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_cedula()))
+
+        template_header_tag = template_header.find(class_='month_span')
+        template_header_tag.insert(1, str(collect_account.month))
+
+        template_header_tag = template_header.find(class_='name_span_1')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
+
+        template_header_tag = template_header.find(class_='content_span_1')
+        template_header_tag.insert(1, delta_2)
+
+        template_header_tag = template_header.find(class_='name_span_2')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
+
+        template_header_tag = template_header.find(class_='document_span_2')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_cedula()))
+
+        collect_account.html_3.save('informe_actividades.html',
+                                    File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+
+        collect_account.file6.save('informe_actividades.pdf',
+                                   File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+        options = {
+            'page-size': 'A4',
+            'encoding': 'utf-8',
+            'margin-top': '2cm',
+            'margin-bottom': '2cm',
+            'margin-left': '2cm',
+            'margin-right': '2cm',
+            'dpi': 400
+        }
+
+        pdfkit.from_file([collect_account.html_3.path], collect_account.file6.path, {
+            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\informe_actividades\\header\\header.html',
+            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\informe_actividades\\footer\\footer.html',
+            'page-size': 'A4',
+            'encoding': 'utf-8',
+            'margin-top': '4cm',
+            'margin-bottom': '3cm',
+            'margin-left': '2cm',
+            'margin-right': '2cm',
+            'dpi': 400
+        }, configuration=config)
+
+
+        return super(ContractsAccountsActivityUploadView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+        kwargs['title'] = "CREAR INFORME DE ACTIVIDADES"
+        kwargs['breadcrum_1'] = collec_account.cut.consecutive
+        kwargs['breadcrum_active'] = collec_account.contract.nombre
+        return super(ContractsAccountsActivityUploadView,self).get_context_data(**kwargs)
+
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk'],
+                'pk_accounts':self.kwargs['pk_accounts']}
+
+
+
