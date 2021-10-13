@@ -269,17 +269,26 @@ class AccountContractListApi(BaseDatatableView):
             return ret
 
         elif column == 'html_2':
+            ret=''
             url_file5 = row.url_file5()
-            if row.estate == "Generado" and url_file5 != None:
+            url_file6 = row.url_file6()
+            if row.estate == "Generado" and url_file5 != None and url_file6 == None:
                 ret = '<div class="center-align">' \
                       '<a href="upload_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                       '<i class="material-icons">assignment_turned_in</i>' \
                       '</a>' \
                       '</div>'.format(row.id, row.contract.nombre)
 
+            elif row.estate == "Generado" and url_file5 != None and url_file6 != None:
+                ret = '<div class="center-align">' \
+                      '<a href="update_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                      '<i class="material-icons">assignment_turned_in</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.contract.nombre)
+
             elif row.estate == "Rechazado":
                 ret = '<div class="center-align">' \
-                      '<a href="upload_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                      '<a href="update_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                       '<i class="material-icons">assignment_turned_in</i>' \
                       '</a>' \
                       '</div>'.format(row.id, row.contract.nombre)

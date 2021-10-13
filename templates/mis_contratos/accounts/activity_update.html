@@ -79,6 +79,10 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
     });
 
 
+    var initial = JSON.parse($("#id_inicial").val());
+    quill.setContents(initial);
+
+
     $('form').submit(function () {
         var delta_json = JSON.stringify(quill.getContents());
         $("#id_contenido").val(delta_json);

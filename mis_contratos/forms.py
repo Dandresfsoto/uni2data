@@ -137,56 +137,153 @@ class AccountUploadForm(forms.ModelForm):
         super(AccountUploadForm, self).__init__(*args, **kwargs)
 
         collec_account = Collects_Account.objects.get(id = kwargs['initial']['pk_accounts'])
+        values = float(collec_account.value_transport)
 
         self.fields['file3'].widget = forms.FileInput()
         self.fields['file4'].widget = forms.FileInput()
 
+        if values > 0:
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+                Row(
+                    Fieldset(
+                        'Cargar cuentas de honorarios',
+                    )
+                ),
+                Row(
+                    Column(
+                        Row(
+                            Column(
+                                HTML(
+                                    """
+                                    <p style="display:inline;"><b>Actualmente:</b> {{ file3_url | safe }} </p>
+                                    """
+                                ),
+                                'file3',
+                                css_class='s12'
+                            )
+                        ),
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Fieldset(
+                        'Cargar cuentas de transporte',
+                    )
+                ),
+                Row(
+                    Column(
+                        Row(
+                            Column(
+                                HTML(
+                                    """
+                                    <p style="display:inline;"><b>Actualmente:</b> {{ file4_url | safe }} </p>
+                                    """
+                                ),
+                                'file4',
+                                css_class='s12'
+                            )
+                        ),
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+        else:
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+                Row(
+                    Fieldset(
+                        'Cargar cuentas de honorarios',
+                    )
+                ),
+                Row(
+                    Column(
+                        Row(
+                            Column(
+                                HTML(
+                                    """
+                                    <p style="display:inline;"><b>Actualmente:</b> {{ file3_url | safe }} </p>
+                                    """
+                                ),
+                                'file3',
+                                css_class='s12'
+                            )
+                        ),
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+    class Meta:
+        model = Collects_Account
+        fields = ['file3','file4']
+
+class AccountActivityForm(forms.Form):
+    contenido = forms.CharField(widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(AccountActivityForm, self).__init__(*args, **kwargs)
+
+        account = Collects_Account.objects.get(id=kwargs['initial']['pk_accounts'])
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
 
             Row(
                 Fieldset(
-                    'Cargar cuentas de honorarios',
+                    'Actividades realizadas durante el mes',
                 )
             ),
             Row(
                 Column(
                     Row(
-                        Column(
-                            HTML(
-                                """
-                                <p style="display:inline;"><b>Actualmente:</b> {{ file3_url | safe }} </p>
-                                """
-                            ),
-                            'file3',
-                            css_class='s12'
-                        )
-                    ),
-                    css_class="s12"
+                        HTML(
+                            """
+                            <div id="contenido" style="min-height:300px;"></div>
+                            """
+                        ),
+                        css_class='s12'
+                    )
                 ),
-            ),
-            Row(
-                Fieldset(
-                    'Cargar cuentas de transporte',
-                )
-            ),
-            Row(
                 Column(
                     Row(
                         Column(
-                            HTML(
-                                """
-                                <p style="display:inline;"><b>Actualmente:</b> {{ file4_url | safe }} </p>
-                                """
-                            ),
-                            'file4',
+                            'contenido',
                             css_class='s12'
-                        )
+                        ),
                     ),
                     css_class="s12"
                 ),
             ),
+
             Row(
                 Column(
                     Div(
@@ -202,16 +299,12 @@ class AccountUploadForm(forms.ModelForm):
             )
         )
 
-    class Meta:
-        model = Collects_Account
-        fields = ['file3','file4']
-
-class AccountActivityForm(forms.ModelForm):
-    delta = forms.CharField(widget=forms.HiddenInput())
+class AccountUpdateActivityForm(forms.Form):
+    contenido = forms.CharField(widget=forms.HiddenInput())
     inicial = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
-        super(AccountActivityForm, self).__init__(*args, **kwargs)
+        super(AccountUpdateActivityForm, self).__init__(*args, **kwargs)
 
         account = Collects_Account.objects.get(id=kwargs['initial']['pk_accounts'])
 
@@ -230,7 +323,7 @@ class AccountActivityForm(forms.ModelForm):
                     Row(
                         HTML(
                             """
-                            <div id="delta" style="min-height:300px;"></div>
+                            <div id="contenido" style="min-height:300px;"></div>
                             """
                         ),
                         css_class='s12'
@@ -239,7 +332,7 @@ class AccountActivityForm(forms.ModelForm):
                 Column(
                     Row(
                         Column(
-                            'delta',
+                            'contenido',
                             css_class='s12'
                         ),
                         Column(
@@ -266,8 +359,5 @@ class AccountActivityForm(forms.ModelForm):
             )
         )
 
-    class Meta:
-        model = Collects_Account
-        fields = ['delta']
 
 

@@ -604,7 +604,8 @@ class Collects_Account(models.Model):
         max_upload_size=5242880,
         max_length=255,
         blank=True,
-        null=True
+        null=True,
+        verbose_name="Cuenta de cobro honorarios sin firmar"
     )
     file2 = ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_collects_account,
@@ -612,7 +613,8 @@ class Collects_Account(models.Model):
         max_upload_size=5242880,
         max_length=255,
         blank=True,
-        null=True
+        null=True,
+        verbose_name="Cuenta de cobro transporte sin firmar"
     )
     file3 = ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_collects_account,
@@ -620,7 +622,8 @@ class Collects_Account(models.Model):
         max_upload_size=5242880,
         max_length=255,
         blank=True,
-        null=True
+        null=True,
+        verbose_name="Cuenta de cobro honorarios firmada"
     )
     file4 = ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_collects_account,
@@ -628,7 +631,8 @@ class Collects_Account(models.Model):
         max_upload_size=5242880,
         max_length=255,
         blank=True,
-        null=True
+        null=True,
+        verbose_name="Cuenta de cobro transporte firmada"
     )
     file5= ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_collects_account,
@@ -946,3 +950,10 @@ def SoportesUpdate(sender, instance, **kwargs):
     else:
         contrato.fecha_legalizacion = None
         contrato.save()
+
+
+@receiver(post_save, sender=Collects_Account)
+def CollectsAccountUpdate(sender, instance, **kwargs):
+    if instance.file6.name != None and instance.file6.name != '':
+        if instance.file3.name != None and instance.file3.name != '' and instance.estate == "Generado":
+            Collects_Account.objects.filter(id=instance.id).update(estate='Cargado')
