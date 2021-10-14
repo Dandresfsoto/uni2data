@@ -956,9 +956,3 @@ def SoportesUpdate(sender, instance, **kwargs):
         contrato.fecha_legalizacion = None
         contrato.save()
 
-
-@receiver(post_save, sender=Collects_Account)
-def CollectsAccountUpdate(sender, instance, **kwargs):
-    if instance.file6.name != None and instance.file6.name != '':
-        if instance.file3.name != None and instance.file3.name != '' and instance.estate == "Generado":
-            Collects_Account.objects.filter(id=instance.id).update(estate='Cargado')
