@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -29,20 +29,26 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
+
                     li(class="bold waves-effect waves-light")
                         a(href="/recursos_humanos/cuts/") Cortes
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
-                    li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Agregar cuenta de cobro
-                            i(class="material-icons icon-sican") check_circle
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") Corte: {{ breadcrum_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
 
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") Rechazar Seguridad social
+                            i(class="material-icons icon-sican") check_circle
 
+                    div(class="divider divider-perfil")
 
 
 
@@ -51,10 +57,12 @@ block container_principal
         |{% crispy form %}
 
 
+
+
+
 block body_script_auth
     script.
+
         $(document).ready(function () {
-            $('select').material_select();
-            $("label[for='id_month']").addClass('active');
-            $("label[for='id_year']").addClass('active');
+            $("label[for='id_observaciones']").addClass('active');
         });

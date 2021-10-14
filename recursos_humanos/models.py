@@ -553,6 +553,8 @@ class Cuts(models.Model):
     date_update = models.DateTimeField(auto_now=True, blank=True, null=True,verbose_name="Fecha actualizacion")
     user_update = models.ForeignKey(User, related_name="user_update_certificacion", on_delete=models.DO_NOTHING, blank=True, null=True,verbose_name="usuario actualizacion")
     value = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor")
+    month = models.CharField(max_length=100, blank=True, null=True,verbose_name="Mes")
+    year = models.CharField(max_length=100, blank=True, null=True,verbose_name="Año")
 
     def __str__(self):
         return "{0} - {1}".format(self.consecutive, self.name)
@@ -566,15 +568,18 @@ class Cuts(models.Model):
     def get_cantidad_cuentas_cobro(self):
         return Collects_Account.objects.filter(cut = self).count()
 
+
     def get_novedades(self):
-        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate__in = ['Creado', 'Cargado'])
+        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate__in = ['Generado']).exclude(file5="")
         return cuentas_cobro.count()
 
     def get_valor(self):
-        value_transport = Collects_Account.objects.filter(cut = self).aggregate(Sum('value_transport'))['value_transport__sum']
         value_fees = Collects_Account.objects.filter(cut = self).aggregate(Sum('value_fees'))['value_fees__sum']
-        value=value_transport+value_fees
-        return value if value != None else 0
+        value= int(value_fees)
+        if value > 0:
+            return value
+        else:
+            return 0
 
 def upload_dinamic_collects_account(instance, filename):
     return '/'.join(['Recurso humano', 'Cuentas de Cobro', str(instance.id), filename])
@@ -614,7 +619,7 @@ class Collects_Account(models.Model):
         max_length=255,
         blank=True,
         null=True,
-        verbose_name="Cuenta de cobro transporte sin firmar"
+        verbose_name="Sin definir"
     )
     file3 = ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_collects_account,
@@ -632,7 +637,7 @@ class Collects_Account(models.Model):
         max_length=255,
         blank=True,
         null=True,
-        verbose_name="Cuenta de cobro transporte firmada"
+        verbose_name="Registro de actividades firmada"
     )
     file5= ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_collects_account,

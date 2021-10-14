@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -35,8 +35,14 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
+                    li(class="bold waves-effect waves-light")
+                        a(href="../") Cuentas de cobro
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Agregar cuenta de cobro
+                        a(href="../") Agregar cuentad de cobro
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -54,7 +60,5 @@ block container_principal
 block body_script_auth
     script.
         $(document).ready(function () {
-            $('select').material_select();
-            $("label[for='id_month']").addClass('active');
-            $("label[for='id_year']").addClass('active');
+
         });

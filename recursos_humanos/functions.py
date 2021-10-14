@@ -217,3 +217,8 @@ def convierte_cifra(numero, sw):
             texto_unidad = texto_unidad[sw]
 
     return "%s %s %s" % (texto_centena, texto_decena, texto_unidad)
+
+
+def month_converter(month):
+    months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+    return months[month]

@@ -44,6 +44,24 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
 
+    | {% if show %}
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") call_to_action
+                | Acciones
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="add/") Agregar Cuentas de cobro
+                            i(class="material-icons icon-sican") map
+
+                    div(class="divider divider-perfil")
+    | {% endif %}
+
 block container_principal
     div(class="container-datatable")
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
@@ -60,7 +78,7 @@ block container_principal
                     th Fin
                     th Cuentas de cobro
                     th Seguridad social
-                    th Firmas
+                    th Acciones
             tbody
                 tr
                     td Generar
@@ -74,7 +92,7 @@ block container_principal
                     td Fin
                     td Cuentas de cobro
                     td Seguridad social
-                    td Firmas
+                    td Acciones
 
 
 block body_script_auth

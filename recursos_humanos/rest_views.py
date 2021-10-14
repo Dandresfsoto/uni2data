@@ -712,8 +712,8 @@ class CertificacionesCedulaApi(APIView):
 
 class CutsListApi(BaseDatatableView):
     model = Cuts
-    columns = ['id','consecutive','date_creation','name','cut','user_update','value']
-    order_columns = ['id','consecutive','date_creation','name','cut','user_update','value']
+    columns = ['id','consecutive','date_creation','name','month','user_update','value']
+    order_columns = ['id','consecutive','date_creation','name','month','user_update','value']
 
     def get_initial_queryset(self):
 
@@ -756,7 +756,7 @@ class CutsListApi(BaseDatatableView):
         elif column == 'date_creation':
             return row.pretty_creation_datetime()
 
-        elif column == 'cut':
+        elif column == 'month':
             return '<div class="center-align"><b>' + str(row.get_cantidad_cuentas_cobro()) + '</b></div>'
 
         elif column == 'user_update':
@@ -767,15 +767,16 @@ class CutsListApi(BaseDatatableView):
                 return ''
 
         elif column == 'value':
-            return '<b>${:20,.2f}</b>'.format(row.get_valor())
+            ret = '<b>${:20,.2f}</b>'.format(row.get_valor())
+            return ret
 
         else:
             return super(CutsListApi, self).render_column(row, column)
 
 class CutsCollectAccountListApi(BaseDatatableView):
     model = Collects_Account
-    columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file2']
-    order_columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file2']
+    columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
+    order_columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
 
     def get_initial_queryset(self):
         self.cut = Cuts.objects.get(id=self.kwargs['pk_cut'])
@@ -817,7 +818,13 @@ class CutsCollectAccountListApi(BaseDatatableView):
     def render_column(self, row, column):
 
         if column == 'id':
-            if self.request.user.has_perms(self.permissions.get('cuentas_cobro_editar')) and row.estate != 'Reportado' and row.estate != 'Pagado':
+            if self.request.user.has_perms(self.permissions.get('cuentas_cobro_editar')) and row.estate == 'Generado':
+                ret = '<div class="center-align">' \
+                           '<a href="edit/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Generar cuenta de cobro {1}">' \
+                                '<i class="material-icons">build</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.contract.nombre)
+            elif self.request.user.has_perms(self.permissions.get('cuentas_cobro_editar')) and row.estate == 'Rechazado':
                 ret = '<div class="center-align">' \
                            '<a href="edit/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Generar cuenta de cobro {1}">' \
                                 '<i class="material-icons">build</i>' \
@@ -832,7 +839,14 @@ class CutsCollectAccountListApi(BaseDatatableView):
             return ret
 
         elif column == 'html':
-            if self.request.user.has_perms(self.permissions.get('cuentas_cobro_cargar')) and row.estate != 'Creado' and row.estate != 'Reportado' and row.estate != 'Pagado':
+            if self.request.user.has_perms(self.permissions.get('cuentas_cobro_cargar')) and row.estate == 'Generado':
+                ret = '<div class="center-align">' \
+                           '<a href="upload/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                                '<i class="material-icons">cloud_upload</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.contract.nombre)
+
+            elif self.request.user.has_perms(self.permissions.get('cuentas_cobro_cargar')) and row.estate == 'Rechazado':
                 ret = '<div class="center-align">' \
                            '<a href="upload/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                                 '<i class="material-icons">cloud_upload</i>' \
@@ -853,39 +867,21 @@ class CutsCollectAccountListApi(BaseDatatableView):
             return '{0}'.format(row.contract.contratista)
 
         elif column == 'estate':
-
-            if row.estate == 'Cargado':
-
+            ret = ""
+            if row.estate == 'Rechazado':
                 ret = '<div class="center-align">' \
-                            '<a href="estate/{0}/">' \
-                                '<span><b>Cargado</b></span>' \
-                            '</a>' \
-                      '</div>'.format(row.id, row.estate)
-
-            elif row.estate == 'Reportado':
-
-                ret = '<div class="center-align">' \
-                            '<a href="estate/{0}/">' \
-                                '<span><b>Reportado</b></span>' \
-                            '</a>' \
-                      '</div>'.format(row.id, row.estate)
-
+                      '<a class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<b>{0}</b>' \
+                      '</a>' \
+                      '</div>'.format(row.estate, row.observaciones)
             else:
-                ret = '<div class="center-align">' \
-                            '<span>{1}</span>' \
-                      '</div>'.format(row.id, row.estate)
-
+                ret = '{0}'.format(row.estate)
             return ret
 
         elif column == 'delta':
-            if row.estate == 'Cargado':
+            url_file5 = row.url_file5()
+            if row.estate == 'Generado' and url_file5 != None:
                 return '<span class="new badge" data-badge-caption="">1</span>'
-            elif row.estate =="Reportado" or row.estate =="Pagado":
-                return '<div class="center-align">' \
-                            '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Reportado por: {0}">' \
-                                '<i class="material-icons">verified_user</i>' \
-                            '</a>' \
-                      '</div>'.format(row.user_update.get_full_name_string())
             else:
                 return ''
 
@@ -935,32 +931,30 @@ class CutsCollectAccountListApi(BaseDatatableView):
 
             return ret
 
-        elif column == 'file2':
-            url_file3 = row.url_file3()
-            url_file4 = row.url_file4()
-            url_file6 = row.url_file6()
+        elif column == 'file3':
+            ret = ''
+            if row.estate == 'Generado':
+                ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Aprobar', 'check_box')
 
-            ret = '<div class="center-align">'
-
-            if url_file3 != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
-                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
-                       '</a>'.format(url_file3)
-
-            if url_file4 != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
-                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
-                       '</a>'.format(url_file4)
-
-            if url_file6 != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
-                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
-                       '</a>'.format(url_file6)
+                ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Rechazar', 'highlight_off')
 
 
-            ret += '</div>'
+            if row.estate == 'Rechazado':
+                ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Aprobar', 'check_box')
 
-            return ret
+            if row.estate == 'Aprobado':
+                ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+
+
+            return '<div class="center-align">' + ret + '</div>'
 
         else:
             return super(CutsCollectAccountListApi, self).render_column(row, column)
