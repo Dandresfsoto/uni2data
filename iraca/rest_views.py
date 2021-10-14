@@ -6,6 +6,7 @@ from iraca import models
 from iraca.models import Milestones, Meetings, Certificates, Types, Households
 from mobile.models import FormMobile
 from usuarios.models import Municipios
+from recursos_humanos import models as rh_models
 
 
 class HogaresListApi(BaseDatatableView):
@@ -1879,3 +1880,182 @@ class ResguardListApi(BaseDatatableView):
         else:
             return super(ResguardListApi, self).render_column(row, column)
 
+class InformListApi(BaseDatatableView):
+    model = rh_models.Cuts
+    columns = ['id','consecutive','date_creation','name','month','user_update']
+    order_columns = ['id','consecutive','date_creation','name','month','user_update']
+
+    def get_initial_queryset(self):
+
+        self.permissions = {
+            "ver": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cuentas_cobro.ver",
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search) | Q(consecutive=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                           '<a href="view/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver cuentas de cobro corte {1}">' \
+                                '<i class="material-icons">remove_red_eye</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.consecutive)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'
+
+            return ret
+
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>' + str(row.consecutive) + '</b></div>'
+
+        elif column == 'date_creation':
+            return row.pretty_creation_datetime()
+
+        elif column == 'month':
+            return '<div class="center-align"><b>' + str(row.get_cantidad_cuentas_cobro()) + '</b></div>'
+
+        elif column == 'user_update':
+            novedad = row.get_novedades_inform()
+            if novedad > 0:
+                return '<span class="new badge" data-badge-caption="">{0}</span>'.format(novedad)
+            else:
+                return ''
+
+        else:
+            return super(InformListApi, self).render_column(row, column)
+
+class InformCollectAccountListApi(BaseDatatableView):
+    model = rh_models.Collects_Account
+    columns = ['contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
+    order_columns = ['contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
+
+    def get_initial_queryset(self):
+        self.cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cuentas_cobro.ver",
+            ],
+        }
+        return self.model.objects.filter(cut__id = self.kwargs['pk_cut']).order_by('-creation')
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(contract__nombre__icontains=search) | Q(contract__cargo__icontains=search) | \
+                Q(contract__contratista__nombres__icontains=search) | Q(contract__contratista__apellidos__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'contract':
+            return '<div class="center-align"><b>' + str(row.contract.nombre) + '</b></div>'
+
+        elif column == 'date_creation':
+            return '{0}'.format(row.contract.contratista)
+
+        elif column == 'estate':
+            ret = ""
+            if row.estate_inform == 'Rechazado':
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<b>{0}</b>' \
+                      '</a>' \
+                      '</div>'.format(row.estate_inform, row.observaciones_inform)
+            else:
+                ret = '{0}'.format(row.estate_inform)
+            return ret
+
+        elif column == 'delta':
+            url_file4 = row.url_file4()
+            if row.estate_inform == 'Generado' and url_file4 != None:
+                return '<span class="new badge" data-badge-caption="">1</span>'
+            else:
+                return ''
+
+        elif column == 'user_creation':
+            return row.pretty_print_value_fees()
+
+        elif column == 'data_json':
+            return row.contract.inicio
+
+        elif column == 'valores_json':
+            return row.contract.fin
+
+        elif column == 'file':
+
+            url_file6 = row.url_file6()
+
+
+            ret = '<div class="center-align">'
+
+            if url_file6 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file6)
+
+            ret += '</div>'
+
+            return ret
+
+        elif column == 'file5':
+
+            url_file4 = row.url_file4()
+
+
+            ret = '<div class="center-align">'
+
+            if url_file4 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file4)
+
+            ret += '</div>'
+
+            return ret
+
+        elif column == 'file3':
+            ret = ''
+            if row.estate_inform == 'Generado':
+                ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+                ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+
+
+            if row.estate_inform == 'Rechazado':
+                ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+            if row.estate_inform == 'Aprobado':
+                ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+
+
+            return '<div class="center-align">' + ret + '</div>'
+
+        else:
+            return super(InformCollectAccountListApi, self).render_column(row, column)

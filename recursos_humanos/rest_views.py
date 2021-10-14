@@ -767,7 +767,11 @@ class CutsListApi(BaseDatatableView):
                 return ''
 
         elif column == 'value':
-            ret = '<b>${:20,.2f}</b>'.format(row.get_valor())
+            value = row.get_valor()
+            if value == 0:
+                ret = '<b>$0</b>'
+            else:
+                ret = '<b>${0}</b>'.format(value)
             return ret
 
         else:

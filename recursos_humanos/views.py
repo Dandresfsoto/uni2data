@@ -1351,6 +1351,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
 
                     collect_account.estate = "Generado"
+                    collect_account.estate_inform = "Generado"
                     collect_account.save()
                     month = int(collect_account.month) - 1
                     month = functions.month_converter(month)
@@ -1862,7 +1863,7 @@ class CollectAccountApprobView(View):
         self.permissions = {
             "all": [
                 "usuarios.recursos_humanos.ver",
-                "usuarios.pk_collect_account.cortes.ver",
+                "usuarios.recursos_humanos.cortes.ver",
             ]
         }
 
@@ -1897,8 +1898,8 @@ class CollectAccountRejectView(FormView):
 
         self.permissions = {
             "all": [
-                "usuarios.iraca_2021.ver",
-                "usuarios.iraca_2021.rutas.ver",
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
             ]
         }
 

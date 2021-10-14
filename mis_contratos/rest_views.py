@@ -207,8 +207,8 @@ class SoportesContratoListApi(BaseDatatableView):
 
 class AccountContractListApi(BaseDatatableView):
     model = models.Collects_Account
-    columns = ['id','html','delta','html_2','date_creation','estate','user_creation','data_json','file5','file','file2']
-    order_columns = ['id','html','delta','html_2','date_creation','estate','user_creation','data_json','file5','file','file2']
+    columns = ['id','html','delta','html_2','user_creation','file5','file','file2']
+    order_columns = ['id','html','delta','html_2','user_creation','file5','file','file2']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(contract = self.kwargs['pk']).exclude(value_fees=0).order_by('-cut__consecutive')
@@ -227,7 +227,7 @@ class AccountContractListApi(BaseDatatableView):
 
         elif column == 'html':
             url_file5 = row.url_file5()
-            if row.estate == "Generado" and url_file5 == None:
+            if row.estate == "Generado":
                 ret = '<div class="center-align">' \
                       '<a href="upload_ss/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                       '<i class="material-icons">cloud_upload</i>' \
@@ -248,7 +248,7 @@ class AccountContractListApi(BaseDatatableView):
 
         elif column == 'delta':
             url_file5 = row.url_file5()
-            if row.estate == "Generado" and url_file5 != None:
+            if url_file5 != None and row.estate == "Generado":
                 ret = '<div class="center-align">' \
                       '<a href="upload_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                       '<i class="material-icons">cloud_upload</i>' \
@@ -270,28 +270,20 @@ class AccountContractListApi(BaseDatatableView):
 
         elif column == 'html_2':
             ret=''
-            url_file5 = row.url_file5()
-            url_file6 = row.url_file6()
-            if row.estate == "Generado" and url_file5 != None and url_file6 == None:
+            if row.estate_inform == "Generado":
                 ret = '<div class="center-align">' \
                       '<a href="upload_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                       '<i class="material-icons">assignment_turned_in</i>' \
                       '</a>' \
                       '</div>'.format(row.id, row.contract.nombre)
 
-            elif row.estate == "Generado" and url_file5 != None and url_file6 != None:
+            elif row.estate_inform == "rechazado":
                 ret = '<div class="center-align">' \
                       '<a href="update_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                       '<i class="material-icons">assignment_turned_in</i>' \
                       '</a>' \
                       '</div>'.format(row.id, row.contract.nombre)
 
-            elif row.estate == "Rechazado":
-                ret = '<div class="center-align">' \
-                      '<a href="update_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
-                      '<i class="material-icons">assignment_turned_in</i>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.contract.nombre)
             else:
                 ret = '<div class="center-align">' \
                       '<i class="material-icons">assignment_turned_in</i>' \
@@ -299,17 +291,9 @@ class AccountContractListApi(BaseDatatableView):
 
             return ret
 
-        elif column == 'date_creation':
-            return row.pretty_creation_datetime()
-
-        elif column == 'estate':
-            return row.estate
 
         elif column == 'user_creation':
             return row.pretty_print_value_fees()
-
-        elif column == 'data_json':
-            return row.pretty_print_value_transport()
 
         elif column == 'file':
             url_file5 = row.url_file5()

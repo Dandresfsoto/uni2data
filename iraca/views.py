@@ -16,7 +16,7 @@ from iraca.models import Certificates
 from mobile.models import FormMobile
 from reportes.models import Reportes
 from usuarios.models import Municipios
-
+from recursos_humanos import models as rh_models
 
 class IracaOptionsView(LoginRequiredMixin,
                           MultiplePermissionsRequiredMixin,
@@ -137,6 +137,17 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_name': 'Resguardo',
                 'sican_icon': 'people_outline',
                 'sican_description': 'Modulo de Resguardos indigenas'
+            })
+
+        if self.request.user.has_perm('usuarios.iraca.informes.ver'):
+            items.append({
+                'sican_categoria': 'Informe de actividades',
+                'sican_color': 'grey darken-4',
+                'sican_order': 8,
+                'sican_url': 'inform/',
+                'sican_name': 'Informe de actividades',
+                'sican_icon': 'assignment',
+                'sican_description': 'Informes de actividades cargadas'
             })
 
         return items
@@ -3557,3 +3568,137 @@ class ResguardUpdateView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         kwargs['title'] = "EDITAR COMUNIDAD"
         return super(ResguardUpdateView,self).get_context_data(**kwargs)
+
+#---------------------------------------------------------------------------------
+
+#------------------------------------- INFORMS -----------------------------------
+
+
+class InformListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.informes.ver"
+        ],
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/inform/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CORTES"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/inform/'
+        return super(InformListView,self).get_context_data(**kwargs)
+
+
+class InformCollectsAccountListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.informes.ver",
+        ],
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/inform/collect_account/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        kwargs['title'] = "CORTE {0}".format(cut.consecutive)
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/inform/view/{0}/'.format(cut.id)
+        kwargs['breadcrum_active'] = cut.consecutive
+        return super(InformCollectsAccountListView,self).get_context_data(**kwargs)
+
+class InformCollectsAccountAprobListView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.informes.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.collect_account.estate_inform = 'Aprobado'
+                    self.collect_account.save()
+
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.collect_account.estate_inform = 'Aprobado'
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class InformCollectsAccountRejectListView(FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/inform/collect_account/reject.html'
+    form_class = forms.CollectsAccountInformsRejectForm
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        if collect_account.estate_inform != 'Rechazado':
+            collect_account.estate_inform = 'Rechazado'
+            collect_account.observaciones_inform = form.cleaned_data['observaciones_inform']
+            collect_account.save()
+
+
+        return super(InformCollectsAccountRejectListView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        cuts = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        kwargs['title'] = "Rechazar Informe de actividades"
+        kwargs['breadcrum_1'] = cuts.consecutive
+
+
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(InformCollectsAccountRejectListView, self).get_context_data(**kwargs)
