@@ -270,14 +270,18 @@ class ContratoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ContratoForm, self).__init__(*args, **kwargs)
 
-        self.fields['valor_char'] = forms.CharField(label="Valor del contrato ($)")
+        self.fields['valor_char'] = forms.CharField(label="Valor de los honorarios contrato ($)")
+        self.fields['transporte_char'] = forms.CharField(label="Valor del transporte en el contrato ($)")
 
         try:
             valor = kwargs['instance'].valor
+            transporte = kwargs['instance'].transporte
         except:
             pass
         else:
             self.fields['valor_char'].initial = valor.amount
+            if transporte != None:
+                self.fields['transporte_char'].initial = transporte.amount
 
         self.fields['file'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
         #self.fields['soporte_liquidacion'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
@@ -352,8 +356,14 @@ class ContratoForm(forms.ModelForm):
                             css_class='s12 m6 l4'
                         ),
                         Column(
-                            'grupo_soportes',
+                            'transporte_char',
                             css_class='s12 m6 l4'
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'grupo_soportes',
+                            css_class='s12 m6 l4',
                         )
                     ),
                     Row(
@@ -549,14 +559,19 @@ class ContratoFormSuperUser(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ContratoFormSuperUser, self).__init__(*args, **kwargs)
 
-        self.fields['valor_char'] = forms.CharField(label="Valor del contrato ($)")
+        self.fields['valor_char'] = forms.CharField(label="alor de los honorarios contrato ($)")
+        self.fields['transporte_char'] = forms.CharField(label="Valor del transporte del contrato ($)")
 
         try:
             valor = kwargs['instance'].valor
+            transporte = kwargs['instance'].transporte
         except:
             pass
         else:
+
             self.fields['valor_char'].initial = valor.amount
+            if transporte != None:
+                self.fields['transporte_char'].initial = transporte.amount
 
         self.fields['file'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
         #self.fields['soporte_liquidacion'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
@@ -631,6 +646,12 @@ class ContratoFormSuperUser(forms.ModelForm):
                             'fin',
                             css_class='s12 m6 l4'
                         ),
+                        Column(
+                            'transporte_char',
+                            css_class='s12 m6 l4'
+                        )
+                    ),
+                    Row(
                         Column(
                             'grupo_soportes',
                             css_class='s12 m6 l4'

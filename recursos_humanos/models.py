@@ -293,6 +293,7 @@ class Contratos(models.Model):
     grupo_soportes = models.ForeignKey(GruposSoportes, on_delete=models.DO_NOTHING)
 
     valor = MoneyField(max_digits=20,decimal_places=2,default_currency = 'COP')
+    transporte = MoneyField(max_digits=20,decimal_places=2,default_currency = 'COP',blank=True, null=True, default=0)
 
     file = PDFFileField(upload_to=upload_dinamic_dir,
                         max_upload_size=20971520,
@@ -488,7 +489,8 @@ class Contratos(models.Model):
         return self.fin.strftime('%d de %B del %Y')
 
     def pretty_print_valor(self):
-        return str(self.valor).replace('COL','')
+        valor = self.valor + self.transporte
+        return str(valor).replace('COL','')
 
     def pretty_print_url_minuta(self):
         try:

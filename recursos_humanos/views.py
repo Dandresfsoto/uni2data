@@ -441,6 +441,7 @@ class ContratosCreateView(LoginRequiredMixin,
         self.object = form.save(commit=False)
         self.object.contratista = models.Contratistas.objects.get(id=self.kwargs['pk'])
         self.object.valor = float(form.cleaned_data['valor_char'].replace('$ ','').replace(',',''))
+        self.object.transporte = float(form.cleaned_data['transporte_char'].replace('$ ','').replace(',',''))
         self.object.save()
         return super(ContratosCreateView, self).form_valid(form)
 
@@ -501,6 +502,7 @@ class ContratosUpdateView(LoginRequiredMixin,
         self.object = form.save(commit=False)
         self.object.contratista = models.Contratistas.objects.get(id=self.kwargs['pk'])
         self.object.valor = float(form.cleaned_data['valor_char'].replace('$ ','').replace(',',''))
+        self.object.transporte = float(form.cleaned_data['transporte_char'].replace('$ ','').replace(',',''))
         self.object.save()
         return super(ContratosUpdateView, self).form_valid(form)
 
@@ -546,6 +548,7 @@ class ContratosEstadoUpdateView(LoginRequiredMixin,
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.valor = float(form.cleaned_data['valor_char'].replace('$ ','').replace(',',''))
+        self.object.transporte = float(form.cleaned_data['transporte_char'].replace('$ ','').replace(',',''))
         self.object.save()
         return super(ContratosEstadoUpdateView, self).form_valid(form)
 
