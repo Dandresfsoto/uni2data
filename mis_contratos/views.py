@@ -6,7 +6,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, FormView,
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
 from recursos_humanos import models as rh_models
-from mis_contratos import forms
+from mis_contratos import forms, functions
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 import io
@@ -235,6 +235,10 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
 
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
 
+
+        month = int(collect_account.month)
+        month_inform = functions.month_converter(month)
+
         template_header = BeautifulSoup(
             open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/informe_actividades/inform.html', 'rb'), "html.parser")
 
@@ -254,7 +258,7 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_cedula()))
 
         template_header_tag = template_header.find(class_='month_span')
-        template_header_tag.insert(1, str(collect_account.month))
+        template_header_tag.insert(1, month_inform)
 
         template_header_tag = template_header.find(class_='name_span_1')
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
@@ -351,6 +355,8 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         delta_2 = BeautifulSoup(html.render(delta['ops']),"html.parser",from_encoding='utf-8')
 
         collect_account.file6.delete()
+        month = int(collect_account.month)
+        month_inform = functions.month_converter(month)
 
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
 
@@ -373,7 +379,7 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_cedula()))
 
         template_header_tag = template_header.find(class_='month_span')
-        template_header_tag.insert(1, str(collect_account.month))
+        template_header_tag.insert(1, month_inform)
 
         template_header_tag = template_header.find(class_='name_span_1')
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))

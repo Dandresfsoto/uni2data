@@ -283,6 +283,13 @@ class AccountActivityForm(forms.Form):
                     css_class="s12"
                 ),
             ),
+            Row(
+                HTML(
+                    """
+                    <p style="display:inline; color:red"><b>Despues de presionar guardar, debe descargar, firmar y cargar el documento generado por el sistema</b></p>
+                    """
+                ),
+            ),
 
             Row(
                 Column(
@@ -343,7 +350,13 @@ class AccountUpdateActivityForm(forms.Form):
                     css_class="s12"
                 ),
             ),
-
+            Row(
+                HTML(
+                    """
+                    <p style="display:inline; color:red"><b>Despues de presionar guardar, debe descargar, firmar y cargar el documento generado por el sistema</b></p>
+                    """
+                ),
+            ),
             Row(
                 Column(
                     Div(
