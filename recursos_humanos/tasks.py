@@ -15,6 +15,12 @@ def send_mail_templated_certificacion(template,dictionary,from_email,list_to_ema
     return 'Email enviado'
 
 @app.task
+def send_mail_templated_cuenta_cobro(template,dictionary,from_email,list_to_email):
+    send_mail(template, dictionary, from_email, list_to_email)
+    return 'Email enviado'
+
+
+@app.task
 def build_formato_hv(id):
 
     hv = models.Hv.objects.get(id = id)

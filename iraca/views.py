@@ -8,7 +8,7 @@ from django.utils import timezone
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
 from django.views.generic import TemplateView, CreateView, UpdateView, FormView, View
-
+from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA
 
 #------------------------------- SELECTION ----------------------------------------
 from iraca import forms, models, models_instruments, tasks
@@ -3688,6 +3688,23 @@ class InformCollectsAccountRejectListView(FormView):
             collect_account.estate_inform = 'Rechazado'
             collect_account.observaciones_inform = form.cleaned_data['observaciones_inform']
             collect_account.save()
+
+            user = collect_account.contract.get_user_or_none()
+
+            if user != None:
+                tasks.send_mail_templated_cuenta_cobro(
+                    'mail/recursos_humanos/reject_ia.tpl',
+                    {
+                        'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                        'Contrato': collect_account.contract.nombre,
+                        'nombre': collect_account.contract.contratista.nombres,
+                        'nombre_completo': collect_account.contract.contratista.get_full_name(),
+                        'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
+                        'observaciones': collect_account.observaciones_inform,
+                    },
+                    DEFAULT_FROM_EMAIL,
+                    [user.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
+                )
 
 
         return super(InformCollectsAccountRejectListView, self).form_valid(form)

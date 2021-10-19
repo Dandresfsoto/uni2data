@@ -1447,6 +1447,22 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         'margin-right': '2cm',
                         'dpi': 400
                     }, configuration=config)
+
+                    user = collect_account.contract.get_user_or_none()
+
+                    if user != None:
+                        tasks.send_mail_templated_cuenta_cobro(
+                            'mail/recursos_humanos/cuenta_cobro.tpl',
+                            {
+                                'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                                'Contrato': collect_account.contract.nombre,
+                                'nombre': collect_account.contract.contratista.nombres,
+                                'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
+                            },
+                            DEFAULT_FROM_EMAIL,
+                            [user.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
+                        )
+
                 else:
                     value_rest = value_sum - total_value_fees_sum
                     collect_account = models.Collects_Account.objects.create(
@@ -1929,6 +1945,23 @@ class CollectAccountRejectView(FormView):
             collect_account.estate = 'Rechazado'
             collect_account.observaciones = form.cleaned_data['observaciones']
             collect_account.save()
+
+            user = collect_account.contract.get_user_or_none()
+
+            if user != None:
+                tasks.send_mail_templated_cuenta_cobro(
+                    'mail/recursos_humanos/reject_ss.tpl',
+                    {
+                        'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                        'Contrato': collect_account.contract.nombre,
+                        'nombre': collect_account.contract.contratista.nombres,
+                        'nombre_completo': collect_account.contract.contratista.get_full_name(),
+                        'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
+                        'observaciones': collect_account.observaciones,
+                    },
+                    DEFAULT_FROM_EMAIL,
+                    [user.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
+                )
 
 
         return super(CollectAccountRejectView, self).form_valid(form)

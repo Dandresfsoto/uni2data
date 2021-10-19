@@ -16,6 +16,12 @@ settings_time_zone = timezone(settings.TIME_ZONE)
 
 
 @app.task
+def send_mail_templated_cuenta_cobro(template,dictionary,from_email,list_to_email):
+    send_mail(template, dictionary, from_email, list_to_email)
+    return 'Email enviado'
+
+
+@app.task
 def build_control_panel_Implementation(id):
     reporte = models_reportes.Reportes.objects.get(id=id)
     proceso = "IRACA 2021"
