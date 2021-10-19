@@ -314,7 +314,6 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         return {'pk':self.kwargs['pk'],
                 'pk_accounts':self.kwargs['pk_accounts']}
 
-
 class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
                         FormView):
@@ -434,4 +433,42 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         return {'pk':self.kwargs['pk'],
                 'pk_accounts':self.kwargs['pk_accounts']}
 
+class ContractsAccountsAccountUploadInformView(UpdateView):
 
+    login_url = settings.LOGIN_URL
+    model = rh_models.Collects_Account
+    template_name = 'mis_contratos/accounts/upload_inform.html'
+    form_class = forms.AccountUploadInformForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_accounts'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        contrato = rh_models.Contratos.objects.get(id=self.kwargs['pk'])
+
+        if contrato.contratista.usuario_asociado == self.request.user:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(self.get_success_url())
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.save()
+        return super(ContractsAccountsAccountUploadInformView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+        kwargs['title'] = "CARGAR INFORME DE ACTIVIDADES"
+        kwargs['breadcrum_1'] = collec_account.cut.consecutive
+        kwargs['breadcrum_active'] = collec_account.contract.nombre
+        kwargs['file4_url'] = collec_account.pretty_print_url_file4()
+        return super(ContractsAccountsAccountUploadInformView,self).get_context_data(**kwargs)
+
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk'],
+                'pk_accounts':self.kwargs['pk_accounts']}

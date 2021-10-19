@@ -11,4 +11,5 @@ urlpatterns = [
     path('accounts/<uuid:pk>/upload_account/<uuid:pk_accounts>/', views.ContractsAccountsAccountUploadView.as_view()),
     path('accounts/<uuid:pk>/upload_activity/<uuid:pk_accounts>/', views.ContractsAccountsActivityUploadView.as_view()),
     path('accounts/<uuid:pk>/update_activity/<uuid:pk_accounts>/', views.ContractsAccountsActivityUpdateView.as_view()),
+    path('accounts/<uuid:pk>/upload_inform/<uuid:pk_accounts>/', views.ContractsAccountsAccountUploadInformView.as_view()),
 ]

@@ -207,8 +207,8 @@ class SoportesContratoListApi(BaseDatatableView):
 
 class AccountContractListApi(BaseDatatableView):
     model = models.Collects_Account
-    columns = ['id','html','delta','html_2','user_creation','file5','file','file2']
-    order_columns = ['id','html','delta','html_2','user_creation','file5','file','file2']
+    columns = ['id','html','delta','html_2','html_3','user_creation','file5','file','file2']
+    order_columns = ['id','html','delta','html_2','html_3','user_creation','file5','file','file2']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(contract = self.kwargs['pk']).exclude(value_fees=0).order_by('-cut__consecutive')
@@ -247,20 +247,15 @@ class AccountContractListApi(BaseDatatableView):
             return ret
 
         elif column == 'delta':
-            url_file5 = row.url_file5()
-            if url_file5 != None and row.estate == "Generado":
+            ret = ''
+            url_file3 = row.url_file3()
+            if url_file3 != None:
                 ret = '<div class="center-align">' \
                       '<a href="upload_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                       '<i class="material-icons">cloud_upload</i>' \
                       '</a>' \
                       '</div>'.format(row.id, row.contract.nombre)
 
-            elif row.estate == "Rechazado":
-                ret = '<div class="center-align">' \
-                      '<a href="upload_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
-                      '<i class="material-icons">cloud_upload</i>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.contract.nombre)
             else:
                 ret = '<div class="center-align">' \
                       '<i class="material-icons">cloud_upload</i>' \
@@ -277,7 +272,7 @@ class AccountContractListApi(BaseDatatableView):
                       '</a>' \
                       '</div>'.format(row.id, row.contract.nombre)
 
-            elif row.estate_inform == "rechazado":
+            elif row.estate_inform == "Rechazado":
                 ret = '<div class="center-align">' \
                       '<a href="update_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                       '<i class="material-icons">assignment_turned_in</i>' \
@@ -287,6 +282,29 @@ class AccountContractListApi(BaseDatatableView):
             else:
                 ret = '<div class="center-align">' \
                       '<i class="material-icons">assignment_turned_in</i>' \
+                      '</div>'
+
+            return ret
+
+        elif column == 'html_3':
+            ret = ''
+            if row.estate_inform == "Generado":
+                ret = '<div class="center-align">' \
+                      '<a href="upload_inform/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                      '<i class="material-icons">cloud_upload</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.contract.nombre)
+
+            elif row.estate_inform == "Rechazado":
+                ret = '<div class="center-align">' \
+                      '<a href="upload_inform/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                      '<i class="material-icons">cloud_upload</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.contract.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">cloud_upload</i>' \
                       '</div>'
 
             return ret
