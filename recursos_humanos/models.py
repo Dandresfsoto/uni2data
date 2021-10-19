@@ -577,6 +577,10 @@ class Cuts(models.Model):
         cuentas_cobro = Collects_Account.objects.filter(cut = self, estate_inform__in = ['Generado']).exclude(file4="")
         return cuentas_cobro.count()
 
+    def get_novedades_report(self):
+        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate_inform__in = ['Aprobado'], estate__in = ['Aprobado']).exclude(file3="")
+        return cuentas_cobro.count()
+
     def get_valor(self):
         value_fees = Collects_Account.objects.filter(cut = self).aggregate(Sum('value_fees'))['value_fees__sum']
         if value_fees == None:
@@ -603,6 +607,7 @@ class Collects_Account(models.Model):
     cut = models.ForeignKey(Cuts, on_delete=models.DO_NOTHING, blank=True, null=True,verbose_name="Corte")
     estate = models.CharField(max_length=100, blank=True, null=True,verbose_name="Estado seguridad social")
     estate_inform = models.CharField(max_length=100, blank=True, null=True,verbose_name="Estado informe")
+    estate_report = models.CharField(max_length=100, blank=True, null=True,verbose_name="Estado report")
     value_fees = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor honoriarios profesionales")
     value_transport = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor transporte")
     month = models.CharField(max_length=100, blank=True, null=True,verbose_name="Mes")
@@ -643,7 +648,7 @@ class Collects_Account(models.Model):
         max_length=255,
         blank=True,
         null=True,
-        verbose_name="Registro de actividades firmada"
+        verbose_name="Informe de actividades firmada"
     )
     file5= ContentTypeRestrictedFileField(
         upload_to=upload_dinamic_collects_account,
@@ -671,6 +676,7 @@ class Collects_Account(models.Model):
     valores_json = models.TextField(default='[]', blank=True, null=True)
     observaciones = models.TextField(default='', blank=True, null=True, verbose_name="Observaciones seguridad social")
     observaciones_inform = models.TextField(default='', blank=True, null=True, verbose_name="Observaciones informe de actividades")
+    observaciones_report = models.TextField(default='', blank=True, null=True, verbose_name="Observaciones cuentas de cobro")
     liquidacion = models.BooleanField(default=False)
 
     def __str__(self):

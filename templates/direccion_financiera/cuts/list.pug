@@ -23,19 +23,17 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
-
                     li(class="bold waves-effect waves-light")
-                        a(href="/contratos/") Mis contratos
+                        a(href="/direccion_financiera/") Direccion financiera
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Mis cuentas de cobro
+                        a(href="#") Cortes
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
-
 
 
 block container_principal
@@ -43,35 +41,24 @@ block container_principal
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
             thead
                 tr
-                    th Corte
-                    th Cargar Seguridad social
-                    th Generar informe de actividades
-                    th Cargar informe de actividades
-                    th Cargar cuentas de cobro
-                    th Valor honorarios
-                    th Seguridad social
-                    th Estado seguridad social
+                    th Ver
+                    th Consecutivo
+                    th Fecha de creacion
+                    th Nombre
                     th Cuentas de cobro
-                    th Informe de actividades
-                    th Estado Informe de actividades
-                    th Documentos firmados
-                    th Estado de la cuenta de cobro
+                    th Novedades
+                    th Valor
 
             tbody
                 tr
-                    td Corte
-                    td Cargar Seguridad social
-                    td Generar informe de actividades
-                    th Cargar informe de actividades
-                    td Cargar cuentas de cobro
-                    td Valor honorarios
-                    td Seguridad social
-                    td Estado seguridad social
+                    td Ver
+                    td Consecutivo
+                    td Fecha de creacion
+                    td Nombre
                     td Cuentas de cobro
-                    td Informe de actividades
-                    td Estado Informe de actividades
-                    td Documentos firmados
-                    td Estado de la cuenta de cobro
+                    td Novedades
+                    td Valor
+
 
 
 
@@ -86,8 +73,9 @@ block body_script_auth
                 searching: true,
                 processing: true,
                 serverSide: true,
+                order: [[ 1, "desc" ]],
+                columnDefs: [{"orderable": false, "targets": [0,2,3,4]}],
                 ajax: "{{ url_datatable }}",
-                order: [[ 0, "desc" ]],
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
                 },

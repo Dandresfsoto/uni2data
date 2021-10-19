@@ -207,8 +207,8 @@ class SoportesContratoListApi(BaseDatatableView):
 
 class AccountContractListApi(BaseDatatableView):
     model = models.Collects_Account
-    columns = ['id','html','delta','html_2','html_3','user_creation','file5','file','file2']
-    order_columns = ['id','html','delta','html_2','html_3','user_creation','file5','file','file2']
+    columns = ['id','html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','estate_report']
+    order_columns = ['id','html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','file2','estate_report']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(contract = self.kwargs['pk']).exclude(value_fees=0).order_by('-cut__consecutive')
@@ -247,15 +247,35 @@ class AccountContractListApi(BaseDatatableView):
             return ret
 
         elif column == 'delta':
+            url_file5 = row.url_file5()
             ret = ''
-            url_file3 = row.url_file3()
-            if url_file3 != None:
-                ret = '<div class="center-align">' \
-                      '<a href="upload_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
-                      '<i class="material-icons">cloud_upload</i>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.contract.nombre)
+            if url_file5 != None:
+                estate = row.estate_report
+                if estate == 'Generado':
+                    ret = '<div class="center-align">' \
+                          '<a href="upload_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                          '<i class="material-icons">cloud_upload</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id, row.contract.nombre)
 
+                elif estate == 'Cargado':
+                    ret = '<div class="center-align">' \
+                          '<a href="upload_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                          '<i class="material-icons">cloud_upload</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id, row.contract.nombre)
+
+                elif estate == 'Rechazado':
+                    ret = '<div class="center-align">' \
+                          '<a href="upload_account/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                          '<i class="material-icons">cloud_upload</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id, row.contract.nombre)
+
+                else:
+                    ret = '<div class="center-align">' \
+                          '<i class="material-icons">cloud_upload</i>' \
+                          '</div>'
             else:
                 ret = '<div class="center-align">' \
                       '<i class="material-icons">cloud_upload</i>' \
@@ -264,21 +284,40 @@ class AccountContractListApi(BaseDatatableView):
             return ret
 
         elif column == 'html_2':
-            ret=''
-            if row.estate_inform == "Generado":
-                ret = '<div class="center-align">' \
-                      '<a href="upload_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
-                      '<i class="material-icons">assignment_turned_in</i>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.contract.nombre)
+            url_file5 = row.url_file5()
+            ret = '<div class="center-align">'
+            estate = row.estate_inform
+            if url_file5 != None:
+                if estate != "Aprobado":
+                    if row.estate_inform == "Generado":
+                        if row.delta == None:
+                            ret = '<div class="center-align">' \
+                                  '<a href="upload_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                                  '<i class="material-icons">assignment_turned_in</i>' \
+                                  '</a>' \
+                                  '</div>'.format(row.id, row.contract.nombre)
+                        else:
+                            ret = '<div class="center-align">' \
+                                  '<a href="update_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                                  '<i class="material-icons">assignment_turned_in</i>' \
+                                  '</a>' \
+                                  '</div>'.format(row.id, row.contract.nombre)
 
-            elif row.estate_inform == "Rechazado":
-                ret = '<div class="center-align">' \
-                      '<a href="update_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
-                      '<i class="material-icons">assignment_turned_in</i>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.contract.nombre)
+                    elif row.estate_inform == "Rechazado":
+                        ret = '<div class="center-align">' \
+                              '<a href="update_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                              '<i class="material-icons">assignment_turned_in</i>' \
+                              '</a>' \
+                              '</div>'.format(row.id, row.contract.nombre)
 
+                    else:
+                        ret = '<div class="center-align">' \
+                              '<i class="material-icons">assignment_turned_in</i>' \
+                              '</div>'
+                else:
+                    ret = '<div class="center-align">' \
+                          '<i class="material-icons">assignment_turned_in</i>' \
+                          '</div>'
             else:
                 ret = '<div class="center-align">' \
                       '<i class="material-icons">assignment_turned_in</i>' \
@@ -287,20 +326,28 @@ class AccountContractListApi(BaseDatatableView):
             return ret
 
         elif column == 'html_3':
-            ret = ''
-            if row.estate_inform == "Generado":
-                ret = '<div class="center-align">' \
-                      '<a href="upload_inform/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
-                      '<i class="material-icons">cloud_upload</i>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.contract.nombre)
+            url_file5 = row.url_file5()
+            ret = '<div class="center-align">'
+            if url_file5 != None:
+                ret = ''
+                if row.estate_inform == "Generado":
+                    ret = '<div class="center-align">' \
+                          '<a href="upload_inform/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                          '<i class="material-icons">cloud_upload</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id, row.contract.nombre)
 
-            elif row.estate_inform == "Rechazado":
-                ret = '<div class="center-align">' \
-                      '<a href="upload_inform/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
-                      '<i class="material-icons">cloud_upload</i>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.contract.nombre)
+                elif row.estate_inform == "Rechazado":
+                    ret = '<div class="center-align">' \
+                          '<a href="upload_inform/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                          '<i class="material-icons">cloud_upload</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id, row.contract.nombre)
+
+                else:
+                    ret = '<div class="center-align">' \
+                          '<i class="material-icons">cloud_upload</i>' \
+                          '</div>'
 
             else:
                 ret = '<div class="center-align">' \
@@ -308,7 +355,6 @@ class AccountContractListApi(BaseDatatableView):
                       '</div>'
 
             return ret
-
 
         elif column == 'user_creation':
             return row.pretty_print_value_fees()
@@ -336,7 +382,59 @@ class AccountContractListApi(BaseDatatableView):
 
             return ret
 
+        elif column == 'estate':
+            estate = row.estate
+
+            render = ""
+
+            if estate == "Aprobado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
+                          '</a>'.format(row.estate)
+
+            if estate == "Rechazado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0} por {1}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">block</i>' \
+                          '</a>'.format(row.estate, row.observaciones)
+
+            return '<div class="center-align">' + render + '</div>'
+
+        elif column == 'file6':
+            url_file5 = row.url_file5()
+            ret = '<div class="center-align">'
+            if url_file5 != None:
+                url_file6 = row.url_file6()
+
+                ret = '<div class="center-align">'
+
+                if url_file6 != None:
+                    ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                           '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                           '</a>'.format(url_file6)
+
+                ret += '</div>'
+
+            return ret
+
+        elif column == 'estate_inform':
+            estate = row.estate_inform
+
+            render = ""
+
+            if estate == "Aprobado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
+                          '</a>'.format(row.estate_inform)
+
+            if estate == "Rechazado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0} por {1}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">block</i>' \
+                          '</a>'.format(row.estate_inform, row.observaciones_inform)
+
+            return '<div class="center-align">' + render + '</div>'
+
         elif column == 'file5':
+
 
             url_file5 = row.url_file5()
 
@@ -354,7 +452,6 @@ class AccountContractListApi(BaseDatatableView):
         elif column == 'file2':
             url_file3 = row.url_file3()
             url_file4 = row.url_file4()
-            url_file6 = row.url_file6()
 
             ret = '<div class="center-align">'
 
@@ -364,17 +461,29 @@ class AccountContractListApi(BaseDatatableView):
                        '</a>'.format(url_file3)
 
             if url_file4 != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Informe de actividades">' \
                        '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                        '</a>'.format(url_file4)
 
-            if url_file6 != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por transporte">' \
-                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
-                       '</a>'.format(url_file6)
 
             ret += '</div>'
 
+            return ret
+
+        elif column == 'estate_report':
+            ret = ""
+            if row.estate_report == 'Rechazado':
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<b>{0}</b>' \
+                      '</a>' \
+                      '</div>'.format(row.estate_report, row.observaciones_report)
+            else:
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped" data-position="top" data-delay="50">' \
+                      '<b>{0}</b>' \
+                      '</a>' \
+                      '</div>'.format(row.estate_report)
             return ret
 
         else:

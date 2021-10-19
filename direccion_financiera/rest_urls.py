@@ -44,4 +44,7 @@ urlpatterns = [
     path('reportes/cargar-rubro_2/', rest_views.cargar_rubro_2),
     path('reportes/pagos/cargar-contrato/', rest_views.cargar_contrato),
 
+    path('collects_account/', rest_views.CollectsAccountListApi.as_view()),
+    path('collects_account/view/<uuid:pk_cut>/', rest_views.CutsCollectAccountsListApi.as_view()),
+
 ]

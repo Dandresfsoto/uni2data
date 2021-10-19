@@ -1349,9 +1349,9 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     collect_count = models.Collects_Account.objects.filter(contract=contract).count()
                     collect_count = collect_count+1
 
-
                     collect_account.estate = "Generado"
                     collect_account.estate_inform = "Generado"
+                    collect_account.estate_report = "Generado"
                     collect_account.save()
                     month = int(collect_account.month) - 1
                     month = functions.month_converter(month)
@@ -1462,6 +1462,8 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     collect_count = collect_count + 1
 
                     collect_account.estate = "Generado"
+                    collect_account.estate_inform = "Generado"
+                    collect_account.estate_report = "Generado"
                     collect_account.save()
                     month = int(collect_account.month) - 1
                     month = functions.month_converter(month)
