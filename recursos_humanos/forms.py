@@ -1685,7 +1685,6 @@ class CollectsAccountForm(forms.Form):
 
         if total > value_contract:
             self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
-            self.add_error('value_transport_char', 'El valor total de cuentas de cobro supera el valor del contrato')
 
         value_f = float(cleaned_data.get('value_fees_char').replace('$ ', '').replace(',', ''))
 
@@ -1693,13 +1692,11 @@ class CollectsAccountForm(forms.Form):
 
         if value_total > value_contract:
             self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
-            self.add_error('value_transport_char', 'El valor total de cuentas de cobro supera el valor del contrato')
 
         value_total_total = value_total + total
 
         if value_total_total > value_contract:
             self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
-            self.add_error('value_transport_char', 'El valor total de cuentas de cobro supera el valor del contrato')
 
     def __init__(self, *args, **kwargs):
         super(CollectsAccountForm, self).__init__(*args, **kwargs)

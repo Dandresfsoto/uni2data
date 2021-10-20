@@ -1320,8 +1320,11 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                 collects_accounts = models.Collects_Account.objects.filter(contract=contract)
                 total_value_fees = collects_accounts.aggregate(Sum('value_fees'))['value_fees__sum']
                 values_total = (value_total/days_total) * 30
-                total_value_fees_sum = float(total_value_fees or 0) + float(values_total)
-                value_sum = float(value or 0)
+
+                if total_value_fees == None:
+                    total_value_fees_sum =  float(0) + float(values_total)
+                else:
+                    total_value_fees_sum = float(total_value_fees) + float(values_total)
 
                 if contract.inicio.year == contract.fin.year and contract.inicio.month == contract.fin.month:
                     values_total=value_total
@@ -1329,14 +1332,14 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                 if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
                     date_rest= date(int(year_cut), int(month_cut)+1, 1)
                     days_rest = date_rest - contract.inicio
-                    values_total = (values_total/30) * days_rest.days
+                    values_total = (values_total/30) * (days_rest.days - 1)
 
                 if contract.fin.year == int(year_cut) and contract.fin.month == int(month_cut):
                     total_value_fees = float(total_value_fees)
                     values_total = value_total - int(total_value_fees)
 
 
-                if total_value_fees_sum < value_sum:
+                if total_value_fees_sum < value_total:
                     collect_account = models.Collects_Account.objects.create(
                         contract=contract,
                         cut=cut,
@@ -1464,7 +1467,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         )
 
                 else:
-                    value_rest = value_sum - total_value_fees_sum
+                    value_rest = value_total - total_value_fees
                     collect_account = models.Collects_Account.objects.create(
                         contract=contract,
                         cut=cut,
