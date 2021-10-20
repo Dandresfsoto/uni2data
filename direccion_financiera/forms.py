@@ -13,7 +13,7 @@ from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amo
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
-
+from iraca.models import Resguards
 from recursos_humanos.models import Contratistas, Contratos, Collects_Account
 from django.db.models import Q
 from django.conf import settings
