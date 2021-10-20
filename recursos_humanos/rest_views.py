@@ -779,8 +779,8 @@ class CutsListApi(BaseDatatableView):
 
 class CutsCollectAccountListApi(BaseDatatableView):
     model = Collects_Account
-    columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
-    order_columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
+    columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3','cut']
+    order_columns = ['id','html','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3','cut']
 
     def get_initial_queryset(self):
         self.cut = Cuts.objects.get(id=self.kwargs['pk_cut'])
@@ -959,6 +959,22 @@ class CutsCollectAccountListApi(BaseDatatableView):
 
 
             return '<div class="center-align">' + ret + '</div>'
+
+        elif column == 'cut':
+            ret = ''
+            value = float(row.value_fees)
+            if value <= 0:
+                ret = '<div class="center-align">' \
+                      '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar cuenta de cobro">' \
+                      '<i class="material-icons">delete</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">delete</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
 
         else:
             return super(CutsCollectAccountListApi, self).render_column(row, column)

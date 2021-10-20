@@ -1979,3 +1979,25 @@ class CollectAccountRejectView(FormView):
         for message in storage:
             kwargs['success'] = message
         return super(CollectAccountRejectView, self).get_context_data(**kwargs)
+
+class CollectAccountDeleteView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.cortes.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../"
+
+
+    def dispatch(self, request, *args, **kwargs):
+        cut = models.Cuts.objects.get(id = self.kwargs['pk_cut'])
+        cuenta_cobro = models.Collects_Account.objects.get(id = self.kwargs['pk_collect_account'])
+
+        cuenta_cobro.delete()
+
+        return HttpResponseRedirect('../../')
