@@ -489,7 +489,11 @@ class Contratos(models.Model):
         return self.fin.strftime('%d de %B del %Y')
 
     def pretty_print_valor(self):
-        valor = self.valor + self.transporte
+        transporte = self.transporte
+        if transporte != None:
+            valor = self.valor + self.transporte
+        else:
+            valor = self.valor
         return str(valor).replace('COL','')
 
     def pretty_print_url_minuta(self):
