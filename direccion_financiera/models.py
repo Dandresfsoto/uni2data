@@ -185,6 +185,12 @@ class Reportes(BaseModel):
     def __str__(self):
         return f"{self.consecutive} - {self.nombre}"
 
+    def get_cod_consecutive(self):
+        cod = str(self.enterprise.code)
+        consecutive = str(self.consecutive)
+        cod_consecutive = str(cod + "-" + consecutive)
+        return cod_consecutive
+
     def pretty_print_respaldo(self):
         try:
             url = self.respaldo.url

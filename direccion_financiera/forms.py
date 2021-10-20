@@ -1628,7 +1628,6 @@ class ProjectForm(forms.ModelForm):
 class PurchaseOrderForm(forms.ModelForm):
 
     department = forms.ModelChoiceField(label='Departamento*',queryset=Departamentos.objects.all(), required=False)
-    municipality = forms.ModelChoiceField(label='Municipio*', queryset=Municipios.objects.all(), required=False)
     project_order = forms.ModelChoiceField(label='Proyecto*', queryset=Projects_order.objects.all(), required=False)
 
     third = forms.CharField(max_length=100,label='Cliente',widget=forms.TextInput(attrs={'class':'autocomplete','autocomplete':'off'}))
@@ -1656,6 +1655,13 @@ class PurchaseOrderForm(forms.ModelForm):
         pk = kwargs['initial'].get('pk')
         self.fields['project_order'].queryset = Projects_order.objects.filter(enterprise=pk)
 
+        enterprise = Enterprise.objects.get(id=pk)
+        nit = enterprise.tax_number
+
+        if nit == "901294654":
+            self.fields['beneficiary'].queryset = Resguards.objects.all()
+
+
 
         if self.pk_purchase != None:
             purchase = PurchaseOrders.objects.get(id = self.pk_purchase)
@@ -1665,7 +1671,7 @@ class PurchaseOrderForm(forms.ModelForm):
             self.fields['department'].initial = purchase.department.id
             self.fields['municipality'].queryset = Municipios.objects.filter(departamento=purchase.department.id)
             self.fields['municipality'].initial = purchase.municipality.id
-            self.fields['project'].initial = purchase.project.id
+            self.fields['project_order'].initial = purchase.project_order.id
             self.fields['beneficiary'].initial = purchase.beneficiary
             self.fields['date'].initial = purchase.date
             self.fields['observation'].initial = purchase.observation
@@ -1828,7 +1834,8 @@ class ProductForm(forms.ModelForm):
         if pk_product != None:
             product = Products.objects.get(id=pk_product)
             self.fields['name'].initial = product.name
-            self.fields['price_char'].initial = product.price
+            price=str(product.price).replace('COL$','')
+            self.fields['price_char'].initial = price
             self.fields['stock'].initial = product.stock
 
 

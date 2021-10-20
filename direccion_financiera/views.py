@@ -727,7 +727,7 @@ class FinantialReportView(LoginRequiredMixin,
         enterprise_id = enterprise.id
 
 
-        tasks.build_finantial_reports(reporte_id,enterprise_id)
+        tasks.build_finantial_reports.delay(reporte_id,enterprise_id)
 
         return HttpResponseRedirect('/reportes/')
 
@@ -1781,7 +1781,7 @@ class PurchaseOrderUpdateView(LoginRequiredMixin,
         return super(PurchaseOrderUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
-        kwargs['title'] = "CREAR ORDEN DE COMPRA"
+        kwargs['title'] = "EDITAR ORDEN DE COMPRA"
         enterprice = models.Enterprise.objects.get(id=self.kwargs['pk'])
         purchase = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
         kwargs['breadcrum_1'] = enterprice.name
@@ -1940,6 +1940,7 @@ class ProductsUpdateView(LoginRequiredMixin,
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.purchase_order = models.PurchaseOrders.objects.get(id=self.kwargs['pk_purchase'])
+        self.object.price = utils.autonumeric2float(form.cleaned_data['price_char'])
         self.object.save()
 
         price=self.object.price

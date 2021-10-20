@@ -56,6 +56,13 @@ block body_script_auth
     script.
         $(document).ready(function () {
 
+            $('#id_departure').change(function () {
+                $('#id_counterpart').val(100 -$('#id_departure').val());
+            });
+
+            $('#id_counterpart').change(function () {
+                $('#id_departure').val(100 - $('#id_counterpart').val());
+            });
 
             $('#id_department').select2();
             $('#id_municipality').select2();
@@ -65,6 +72,7 @@ block body_script_auth
             $("label[for='id_project_order']").addClass('active');
             $("label[for='id_department']").addClass('active');
             $("label[for='id_municipality']").addClass('active');
+
 
 
             $("#id_department").change(function () {
@@ -137,5 +145,4 @@ block body_script_auth
 
             });
         });
-
 
