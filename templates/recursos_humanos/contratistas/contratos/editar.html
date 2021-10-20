@@ -55,6 +55,7 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 });</script><script>$(document).ready(function () {
 
     new AutoNumeric('#id_valor_char', { currencySymbol : '$ ' });
+    new AutoNumeric('#id_transporte_char', { currencySymbol : '$ ' });
 
     $('textarea#id_objeto_contrato').characterCounter();
 

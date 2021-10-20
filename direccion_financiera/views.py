@@ -103,6 +103,17 @@ class DireccionFinancieraOptionsView(LoginRequiredMixin,
                 'sican_description': 'Solicitudes de desplazamiento a sedes educativas y municipios.'
             })
 
+        if self.request.user.has_perm('usuarios.direccion_financiera.cuentas_cobro.ver'):
+            items.append({
+                'sican_categoria': 'Cuentas de cobro',
+                'sican_color': 'blue darken-4',
+                'sican_order': 6,
+                'sican_url': 'collects_account/',
+                'sican_name': 'Cuentas de cobro',
+                'sican_icon': 'assignment',
+                'sican_description': 'Cuentas de cobro e informacion para reportes'
+            })
+
         return items
 
     def get_context_data(self, **kwargs):
@@ -2270,4 +2281,99 @@ class DesplazamientosRechazarView(LoginRequiredMixin,
 
 #----------------------------------------------------------------------------------
 
+#---------------------------------- CUENTAS DE COBRO ------------------------------
 
+class CollectsAccountListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.ver",
+            "usuarios.direccion_financiera.cortes.ver"
+        ],
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/cuts/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CORTES"
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/collects_account/'
+        return super(CollectsAccountListView,self).get_context_data(**kwargs)
+
+class CollectsAccountsView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.ver",
+            "usuarios.direccion_financiera.cortes.ver",
+            "usuarios.direccion_financiera.cuentas_cobro.ver"
+        ],
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/cuts/collects/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        kwargs['title'] = "CORTE {0}".format(cut.consecutive)
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/collects_account/view/{0}/'.format(cut.id)
+        kwargs['breadcrum_active'] = cut.consecutive
+        return super(CollectsAccountsView,self).get_context_data(**kwargs)
+
+class CollectsAccountsEstateView(UpdateView):
+
+    login_url = settings.LOGIN_URL
+    model = rh_models.Collects_Account
+    template_name = 'direccion_financiera/cuts/collects/estate.html'
+    form_class = forms.CollectsAccountEstateForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_collect_account'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        self.collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.direccion_financiera.ver",
+                "usuarios.direccion_financiera.cortes.ver",
+                "usuarios.direccion_financiera.cortes.cuentas_cobro.ver",
+                "usuarios.direccion_financiera.cortes.cuentas_cobro.estado"
+            ]
+        }
+
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if self.collect_account.estate_report == 'Generado' and self.collect_account.estate_report == 'Cargado' and self.collect_account.estate_report == 'Reportado':
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.date_update = timezone.now()
+        self.object.user_update = self.request.user
+        self.object.save()
+
+        return super(CollectsAccountsEstateView, self).form_valid(form)
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "ESTADO DE LA CUENTA DE COBRO"
+        kwargs['breadcrum_1'] = self.cut.consecutive
+        kwargs['breadcrum_active'] = self.collect_account.contract.nombre
+        return super(CollectsAccountsEstateView,self).get_context_data(**kwargs)

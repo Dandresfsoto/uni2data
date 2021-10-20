@@ -109,4 +109,10 @@ urlpatterns = [
     path('resguard/', views.ResguardListView.as_view()),
     path('resguard/create/', views.ResguardCreateView.as_view()),
     path('resguard/edit/<uuid:pk>/', views.ResguardUpdateView.as_view()),
+
+
+    path('inform/', views.InformListView.as_view()),
+    path('inform/view/<uuid:pk_cut>/', views.InformCollectsAccountListView.as_view()),
+    path('inform/view/<uuid:pk_cut>/aprobar/<uuid:pk_collect_account>/', views.InformCollectsAccountAprobListView.as_view()),
+    path('inform/view/<uuid:pk_cut>/rechazar/<uuid:pk_collect_account>/', views.InformCollectsAccountRejectListView.as_view()),
 ]

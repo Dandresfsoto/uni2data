@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django import forms
+from django.db.models import Sum
+
 from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, Certificaciones
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
@@ -9,6 +11,7 @@ from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, H
 from recursos_humanos import functions
 import json
 from recursos_humanos import models
+from django.utils import timezone
 from dal import autocomplete
 from django.forms.fields import Field, FileField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
@@ -267,14 +270,18 @@ class ContratoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ContratoForm, self).__init__(*args, **kwargs)
 
-        self.fields['valor_char'] = forms.CharField(label="Valor del contrato ($)")
+        self.fields['valor_char'] = forms.CharField(label="Valor de los honorarios contrato ($)")
+        self.fields['transporte_char'] = forms.CharField(label="Valor del transporte en el contrato ($)")
 
         try:
             valor = kwargs['instance'].valor
+            transporte = kwargs['instance'].transporte
         except:
             pass
         else:
             self.fields['valor_char'].initial = valor.amount
+            if transporte != None:
+                self.fields['transporte_char'].initial = transporte.amount
 
         self.fields['file'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
         #self.fields['soporte_liquidacion'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
@@ -349,8 +356,14 @@ class ContratoForm(forms.ModelForm):
                             css_class='s12 m6 l4'
                         ),
                         Column(
-                            'grupo_soportes',
+                            'transporte_char',
                             css_class='s12 m6 l4'
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'grupo_soportes',
+                            css_class='s12 m6 l4',
                         )
                     ),
                     Row(
@@ -546,14 +559,19 @@ class ContratoFormSuperUser(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ContratoFormSuperUser, self).__init__(*args, **kwargs)
 
-        self.fields['valor_char'] = forms.CharField(label="Valor del contrato ($)")
+        self.fields['valor_char'] = forms.CharField(label="alor de los honorarios contrato ($)")
+        self.fields['transporte_char'] = forms.CharField(label="Valor del transporte del contrato ($)")
 
         try:
             valor = kwargs['instance'].valor
+            transporte = kwargs['instance'].transporte
         except:
             pass
         else:
+
             self.fields['valor_char'].initial = valor.amount
+            if transporte != None:
+                self.fields['transporte_char'].initial = transporte.amount
 
         self.fields['file'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
         #self.fields['soporte_liquidacion'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
@@ -628,6 +646,12 @@ class ContratoFormSuperUser(forms.ModelForm):
                             'fin',
                             css_class='s12 m6 l4'
                         ),
+                        Column(
+                            'transporte_char',
+                            css_class='s12 m6 l4'
+                        )
+                    ),
+                    Row(
                         Column(
                             'grupo_soportes',
                             css_class='s12 m6 l4'
@@ -1447,7 +1471,6 @@ class HvForm(forms.ModelForm):
         model = models.Hv
         fields = ["envio", "contratista", "cargo", "file", "municipio"]
 
-
 class HvEstado(forms.ModelForm):
 
     def clean(self):
@@ -1510,3 +1533,429 @@ class HvEstado(forms.ModelForm):
             'estado': 'Aprobar o rechazar hoja de vida',
             'observacion': 'Observación'
         }
+
+class CutsCreateForm(forms.Form):
+    month = forms.ChoiceField(choices=[
+        ('1', 'Enero'),
+        ('2', 'Febrero'),
+        ('3', 'Marzo'),
+        ('4', 'Abril'),
+        ('5', 'Mayo'),
+        ('6', 'Junio'),
+        ('7', 'Julio'),
+        ('8', 'Agosto'),
+        ('9', 'Septiembre'),
+        ('10', 'Octubre'),
+        ('11', 'Noviembre'),
+        ('12', 'Diciembre')
+    ])
+    year = forms.ChoiceField(label='Año')
+    name = forms.CharField(max_length = 200)
+
+    def __init__(self, *args, **kwargs):
+        super(CutsCreateForm, self).__init__(*args, **kwargs)
+
+        date = timezone.now()
+        year = date.strftime('%Y')
+        year_1 = str(int(year) + 1)
+        month = date.strftime('%B').capitalize()
+
+        self.fields['year'].choices = [(year_1, year_1), (year, year)]
+        self.fields['year'].initial = year
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Crear corte de pago',
+                )
+            ),
+            Row(
+                Column(
+                    'name',
+                    css_class = 's12'
+                )
+            ),
+            Row(
+                Column(
+                    'month',
+                    css_class="s12 m6"
+                ),
+                Column(
+                    'year',
+                    css_class="s12 m6"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+class CutsAddForm(forms.Form):
+
+
+    def __init__(self, *args, **kwargs):
+        super(CutsAddForm, self).__init__(*args, **kwargs)
+
+        cuts = models.Cuts.objects.get(id=kwargs['initial']['pk_cut'])
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Crear corte de pago',
+                )
+            ),
+            Row(
+
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+        year = cuts.year
+        month = cuts.month
+        contracts_ids = models.Contratos.objects.exclude(liquidado = True).filter(ejecucion = True, suscrito=True).values_list('id',flat=True).distinct()
+
+        for contract_id in contracts_ids:
+            contract = models.Contratos.objects.get(id = contract_id)
+            account = models.Collects_Account.objects.filter(contract=contract, cut=cuts).count()
+            if account == 0:
+                if int(contract.inicio.year) <= int(year) and  int(contract.fin.year) >= int(year):
+                    if int(contract.inicio.month) <= int(month) and  int(contract.fin.month) >=  int(month):
+                        self.fields['contrato_' + str(contract.id)] = forms.BooleanField(
+                            label = '{0} Ruta: {1} - {2}'.format(contract.valor,contract.nombre,contract.contratista.get_full_name_cedula()),
+                            required = False
+                         )
+                        self.fields['contrato_' + str(contract.id)].widget.attrs['class'] = 'filled-in'
+
+                        description = '<ul style="margin-top:30px;">'
+                        mid = ''
+
+                        description += '{0}</ul>'.format(mid)
+
+                        self.helper.layout.fields[2].fields.append(
+                            Div(
+                                Div(
+                                    Column(
+                                        'contrato_' + str(contract.id),
+                                        css_class='s12'
+                                    ),
+                                    Column(
+                                        HTML(description)
+                                    )
+                                )
+                            )
+                        )
+
+class CollectsAccountForm(forms.Form):
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+        collect_account = models.Collects_Account.objects.get(id = self.initial['pk_collect_account'])
+        collects_accounts = models.Collects_Account.objects.filter(contract=collect_account.contract)
+        total_value_fees = collects_accounts.aggregate(Sum('value_fees'))['value_fees__sum']
+
+        total = float(total_value_fees)
+
+        value_contract = float(collect_account.contract.valor)
+
+        if total > value_contract:
+            self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+            self.add_error('value_transport_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+
+        value_f = float(cleaned_data.get('value_fees_char').replace('$ ', '').replace(',', ''))
+
+        value_total = value_f
+
+        if value_total > value_contract:
+            self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+            self.add_error('value_transport_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+
+        value_total_total = value_total + total
+
+        if value_total_total > value_contract:
+            self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+            self.add_error('value_transport_char', 'El valor total de cuentas de cobro supera el valor del contrato')
+
+    def __init__(self, *args, **kwargs):
+        super(CollectsAccountForm, self).__init__(*args, **kwargs)
+
+        collect_account = models.Collects_Account.objects.get(id=kwargs['initial']['pk_collect_account'])
+
+
+
+        self.fields['value_fees_char'] = forms.CharField(label="Valor cuenta de cobro por honorarios ($)")
+
+
+        if collect_account.value_fees != 0:
+            self.fields['value_fees_char'].initial = collect_account.get_value_fees()
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Column(
+                    Fieldset(
+                        'Honorarios pagados',
+                    ),
+                    css_class="s12 m6"
+                ),
+            ),
+            Row(
+                Column(
+                    HTML(
+                        """
+                        <div class="col s6">{{ cuentas_fees| safe }}</div>
+                        """
+                    ),
+                    css_class="s12 m6"
+                ),
+            ),
+            Row(
+                HTML(
+                    """
+                    <div class="col s12 m6"><p><b>Corte:</b> {{corte}}</p></div>
+                    <div class="col s12 m6"><p><b>Contratista:</b> {{contratista}}</p></div>
+                    <div class="col s12 m6"><p><b>Contrato:</b> {{contrato}}</p></div>
+                    <div class="col s12 m6"><p><b>Inicio:</b> {{inicio}}</p></div>
+                    <div class="col s12 m6"><p><b>Fin:</b> {{fin}}</p></div>
+                    <div class="col s12 m6"><p><b>Valor contrato:</b> {{valor}}</p></div>
+                    """
+                )
+            ),
+            Row(
+                Column(
+                    'value_fees_char',
+                    css_class="s12 s6"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+class ColletcAcountUploadForm(forms.ModelForm):
+
+
+    def __init__(self, *args, **kwargs):
+        super(ColletcAcountUploadForm, self).__init__(*args, **kwargs)
+        collect_account = models.Collects_Account.objects.get(id=kwargs['initial']['pk_collect_account'])
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Cargar seguridad social',
+                )
+            ),
+            Row(
+                HTML(
+                    """
+                    <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file3_url | safe }}</p>
+                    """
+                )
+            ),
+            Row(
+                Column(
+                    'file5',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Fieldset(
+                    'Cargar cuenta de cobro de honorarios profesionales',
+                )
+            ),
+            Row(
+                HTML(
+                    """
+                    <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file3_url | safe }}</p>
+                    """
+                )
+            ),
+            Row(
+                Column(
+                    'file3',
+                    css_class="s12"
+                ),
+            ),
+
+            Row(
+                Fieldset(
+                    'Cargar Informe de actividades',
+                )
+            ),
+            Row(
+                HTML(
+                    """
+                    <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file4_url | safe }}</p>
+                    """
+                )
+            ),
+            Row(
+                Column(
+                    'file4',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+
+
+    class Meta:
+        model = models.Collects_Account
+        fields = ['file3','file4','file5']
+        widgets = {
+            'file3': forms.FileInput(attrs={'data-max-file-size': "50M",'accept': 'application/pdf'}),
+            'file4': forms.FileInput(attrs={'data - max - file - size': "50M",'accept': 'application / pdf'}),
+            'file5': forms.FileInput(attrs={'data - max - file - size': "50M",'accept': 'application / pdf'}),
+        }
+
+class CollectsAccountEstateForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        estate = cleaned_data.get("estate")
+        observaciones = cleaned_data.get("observaciones")
+
+        if estate == 'Rechazado':
+            if observaciones == None or observaciones == '':
+                self.add_error('observaciones', 'Por favor escriba una observación')
+
+
+    def __init__(self, *args, **kwargs):
+        super(CollectsAccountEstateForm, self).__init__(*args, **kwargs)
+
+        self.fields['estate'].widget = forms.Select(choices = [
+            ('','----------'),
+            ('Reportado', 'Reportado'),
+            ('Rechazado', 'Rechazado'),
+            ('Pagado', 'Pagado')
+        ])
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Revision documental',
+                )
+            ),
+            Row(
+                Column(
+                    'estate',
+                    css_class="s12"
+                ),
+                Column(
+                    'observaciones',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = models.Collects_Account
+        fields = ['estate','observaciones']
+        widgets = {
+            'observaciones': forms.Textarea(attrs={'class': 'materialize-textarea'})
+        }
+
+class CollectsAccountRejectForm(forms.Form):
+
+    observaciones = forms.CharField(widget=forms.Textarea(attrs={'class':'materialize-textarea'}))
+
+
+
+    def __init__(self, *args, **kwargs):
+        super(CollectsAccountRejectForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Observación de rechazo',
+                )
+            ),
+            Row(
+                Column(
+                    'observaciones',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="css/header.css">
+    <script>
+        function substitutePdfVariables() {
+
+            function getParameterByName(name) {
+                var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+                return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+            }
+
+            function substitute(name) {
+                var value = getParameterByName(name);
+                var elements = document.getElementsByClassName(name);
+
+                for (var i = 0; elements && i < elements.length; i++) {
+                    elements[i].textContent = value;
+                }
+            }
+
+            ['frompage', 'topage', 'page', 'webpage', 'section', 'subsection', 'subsubsection']
+                .forEach(function(param) {
+                    substitute(param);
+                });
+        }
+    </script>
+</head>
+<body onload="substitutePdfVariables()">
+
+<table>
+    <tr>
+        <th class="left-th" width="15%" style="align-content: flex-start">
+            <img src="img/andes.png">
+        </th>
+        <th width="25%"class="th-no-padding" style="align-content: flex-end">
+            <table class="table-items">
+                <tr>
+
+                    <th style="text-align: right">
+                        CONTROL DE GESTIÓN DOCUMENTAL
+                    </th>
+                </tr>
+              	<tr>
+                    <th style="text-align: right">
+                        Código GD 05-2021
+                    </th>
+                </tr>
+                <tr>
+                    <th style="text-align: right">
+                        Versión 1
+                    </th>
+                </tr>
+                <tr>
+                    <th style="text-align: right">
+                        Fecha: 26 de julio 2021
+                    </th>
+                </tr>
+                <tr>
+                    <th style="text-align: right">
+                        Página <span class="page"></span> de <span class="topage"></span>
+                    </th>
+                </tr>
+
+            </table>
+        </th>
+    </tr>
+
+</table>
+
+</body>
+</html>
