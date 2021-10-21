@@ -138,6 +138,7 @@ class ContractsAccountsSegurityUploadView(UpdateView):
 
     def form_valid(self, form):
         self.object = form.save()
+        self.object.estate = "Generado"
         self.object.save()
         return super(ContractsAccountsSegurityUploadView, self).form_valid(form)
 
@@ -178,6 +179,7 @@ class ContractsAccountsAccountUploadView(UpdateView):
 
     def form_valid(self, form):
         self.object = form.save()
+        self.object.estate_report = "Cargado"
         self.object.save()
         return super(ContractsAccountsAccountUploadView, self).form_valid(form)
 
@@ -463,6 +465,7 @@ class ContractsAccountsAccountUploadInformView(UpdateView):
 
     def form_valid(self, form):
         self.object = form.save()
+        self.object.estate_inform = "Generado"
         self.object.save()
         return super(ContractsAccountsAccountUploadInformView, self).form_valid(form)
 
