@@ -553,7 +553,7 @@ class Contratos(models.Model):
 class Cuts(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     consecutive = models.IntegerField(verbose_name="Consecutivo")
-    name = models.CharField(max_length=30, unique=True,verbose_name="Nombre")
+    name = models.CharField(max_length=30, verbose_name="Nombre")
     date_creation = models.DateTimeField(auto_now_add=True,verbose_name="Fecha creacion")
     user_creation = models.ForeignKey(User, related_name="user_creation_certificacion", on_delete=models.DO_NOTHING,verbose_name="Usuario creacion")
     date_update = models.DateTimeField(auto_now=True, blank=True, null=True,verbose_name="Fecha actualizacion")
