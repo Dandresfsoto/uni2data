@@ -288,13 +288,31 @@ class CertificacionesCreateView(LoginRequiredMixin,
 
 
         path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
 
-        pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
-            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
-            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
-            '--page-size':'Letter'
-        }, configuration=config)
+        if settings.DEBUG:
+            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+            pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
+                    '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
+                    '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                },
+                configuration=config
+            )
+        else:
+            data = pdfkit.from_url(
+                url=certifiacion.html.url,
+                output_path=False,
+                options={
+                    '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
+                    '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                }
+            )
+            certifiacion.pdf.save('certificacion.pdf', File(io.BytesIO(data)))
+
+
 
         if form.cleaned_data['notificar'] == True:
             adjuntos = [
