@@ -1467,12 +1467,13 @@ class PagosUpdateView(LoginRequiredMixin,
         kwargs['breadcrum_2'] = enterprise.name
         kwargs['breadcrum_1'] = models.Reportes.objects.get(id=self.kwargs['pk_reporte']).nombre
         kwargs['breadcrum_active'] = pago.tercero.fullname()
-        kwargs['tipo_cuenta'] = pago.tercero.tipo_cuenta
-        kwargs['banco'] = pago.tercero.banco.nombre
-        kwargs['cuenta'] = pago.tercero.cuenta
         kwargs['url_descontables'] = '/rest/v1.0/direccion_financiera/pagos/{0}/'.format(pago.id)
         kwargs['cedula'] = pago.tercero.cedula
         kwargs['pago'] = pago
+        if reporte.efectivo == False:
+            kwargs['tipo_cuenta'] = pago.tercero.tipo_cuenta
+            kwargs['banco'] = pago.tercero.banco.nombre
+            kwargs['cuenta'] = pago.tercero.cuenta
         return super(PagosUpdateView,self).get_context_data(**kwargs)
 
 
