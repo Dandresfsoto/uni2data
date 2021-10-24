@@ -677,6 +677,44 @@ class ResguardCreateForm(forms.ModelForm):
             'municipality':'Municipio',
         }
 
+class CollectsAccountInformsRejectForm(forms.Form):
+
+    observaciones_inform = forms.CharField(widget=forms.Textarea(attrs={'class':'materialize-textarea'}))
+
+
+
+    def __init__(self, *args, **kwargs):
+        super(CollectsAccountInformsRejectForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Observación de rechazo',
+                )
+            ),
+            Row(
+                Column(
+                    'observaciones_inform',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
 #----------------------------------------------------------------------------------
 
 #---------------------------- FORMS OBJECTS  -------------------------------------

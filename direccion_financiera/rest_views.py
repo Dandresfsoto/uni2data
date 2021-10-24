@@ -15,6 +15,7 @@ from django.http import Http404
 from rest_framework.response import Response
 from rest_framework import status
 from desplazamiento import models as models_desplazamiento
+from recursos_humanos import models as rh_models
 from usuarios.models import Municipios
 
 
@@ -1178,8 +1179,6 @@ class EnterprisePagosDinamicaAPI(APIView):
 
         return Response(response,status=status.HTTP_200_OK)
 
-
-
 class ReportsRecycleListApi(BaseDatatableView):
     model = Reportes
     columns = ['consecutive', 'usuario_actualizacion','usuario_creacion', 'efectivo', 'proyecto','creation', 'nombre',
@@ -1323,7 +1322,6 @@ class ReportsRecycleListApi(BaseDatatableView):
         else:
             return super(ReportsRecycleListApi, self).render_column(row, column)
 
-
 class PaymentsRecycleListApi(BaseDatatableView):
     model = Pagos
     columns = ['id', 'usuario_creacion', 'creation', 'tercero', 'usuario_actualizacion', 'update_datetime', 'valor', 'estado']
@@ -1418,8 +1416,6 @@ class PaymentsRecycleListApi(BaseDatatableView):
 
         else:
             return super(PaymentsRecycleListApi, self).render_column(row, column)
-
-
 
 class PurchaseOrderListApi(BaseDatatableView):
     model = PurchaseOrders
@@ -1525,7 +1521,6 @@ class PurchaseOrderListApi(BaseDatatableView):
         else:
             return super(PurchaseOrderListApi, self).render_column(row, column)
 
-
 class EnterpriseProductsListApi(BaseDatatableView):
     model = Products
     columns = ['id','name','price','stock','purchase_order','total_price']
@@ -1587,7 +1582,6 @@ class EnterpriseProductsListApi(BaseDatatableView):
 
         else:
             return super(EnterpriseProductsListApi, self).render_column(row, column)
-
 
 class ConsultaPagosListApi(BaseDatatableView):
     model = Pagos
@@ -1854,6 +1848,259 @@ class DesplazamientosListApi(BaseDatatableView):
         else:
             return super(DesplazamientosListApi, self).render_column(row, column)
 
+class CollectsAccountListApi(BaseDatatableView):
+    model = rh_models.Cuts
+    columns = ['id','consecutive','date_creation','name','month','user_update','value']
+    order_columns = ['id','consecutive','date_creation','name','month','user_update','value']
+
+    def get_initial_queryset(self):
+
+        self.permissions = {
+            "ver": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cuentas_cobro.ver",
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search) | Q(consecutive=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                           '<a href="view/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver cuentas de cobro corte {1}">' \
+                                '<i class="material-icons">remove_red_eye</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.consecutive)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'
+
+            return ret
+
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>' + str(row.consecutive) + '</b></div>'
+
+        elif column == 'date_creation':
+            return row.pretty_creation_datetime()
+
+        elif column == 'month':
+            return '<div class="center-align"><b>' + str(row.get_cantidad_cuentas_cobro()) + '</b></div>'
+
+        elif column == 'user_update':
+            novedad = row.get_novedades_report()
+            if novedad > 0:
+                return '<span class="new badge" data-badge-caption="">{0}</span>'.format(novedad)
+            else:
+                return ''
+
+        elif column == 'value':
+            value = row.get_valor()
+            if value == 0:
+                ret = '<b>$0</b>'
+            else:
+                ret = '<b>${0}</b>'.format(value)
+            return ret
+
+        else:
+            return super(CollectsAccountListApi, self).render_column(row, column)
+
+class CutsCollectAccountsListApi(BaseDatatableView):
+    model = rh_models.Collects_Account
+    columns = ['html','contract','date_creation','estate_report','delta','user_creation','data_json','valores_json','file','file3','file4','estate','file5','estate_inform']
+    order_columns = ['html','contract','date_creation','estate_report','delta','user_creation','data_json','valores_json','file','file3','file4','estate','file5','estate_inform']
+
+    def get_initial_queryset(self):
+        self.cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.direccion_financiera.ver",
+                "usuarios.direccion_financiera.cortes.ver"
+            ],
+            "cuentas_cobro_estado": [
+                "usuarios.direccion_financiera.ver",
+                "usuarios.direccion_financiera.cortes.ver",
+                "usuarios.direccion_financiera.cortes.cuentas_cobro.ver",
+                "usuarios.direccion_financiera.cortes.cuentas_cobro.estado"
+            ]
+        }
+        return self.model.objects.filter(cut__id = self.kwargs['pk_cut']).order_by('-creation')
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(contract__nombre__icontains=search) | Q(contract__cargo__icontains=search) | \
+                Q(contract__contratista__nombres__icontains=search) | Q(contract__contratista__apellidos__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'html':
+            url_file4 = row.url_file4()
+            url_file5 = row.url_file5()
+            if row.estate_report != 'Pagado' or row.estate_report != 'Reportado':
+                ret = '<div class="center-align">' \
+                           '<a href="upload/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                                '<i class="material-icons">cloud_upload</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.contract.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">cloud_upload</i>' \
+                       '</div>'
+
+            return ret
+
+        elif column == 'contract':
+            return '<div class="center-align"><b>' + str(row.contract.nombre) + '</b></div>'
+
+        elif column == 'date_creation':
+            return '{0}'.format(row.contract.contratista)
+
+        elif column == 'estate_report':
+            ret = ""
+            if row.estate_report == 'Rechazado':
+                ret = '<div class="center-align">' \
+                      '<a href="estate/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estate_report)
+
+            elif row.estate_report == 'Generado':
+                ret = '<div class="center-align">' \
+                      '<a href="estate/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estate_report)
+
+            elif row.estate_report == 'Cargado':
+                ret = '<div class="center-align">' \
+                      '<a href="estate/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estate_report)
+            else:
+                ret = '{0}'.format(row.estate)
+            return ret
+
+        elif column == 'delta':
+            url_file3 = row.url_file3()
+            url_file4 = row.url_file4()
+            url_file5 = row.url_file5()
+            if row.estate != 'Cargado' and url_file3 != None and url_file4 != None and url_file5 != None:
+                return '<span class="new badge" data-badge-caption="">1</span>'
+            else:
+                return ''
+
+        elif column == 'user_creation':
+            return row.pretty_print_value_fees()
+
+        elif column == 'data_json':
+            return row.contract.inicio
+
+        elif column == 'valores_json':
+            return row.contract.fin
+
+        elif column == 'file':
+            url_file = row.url_file()
+            ret = '<div class="center-align">'
+            if url_file != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file)
+            ret += '</div>'
+
+            return ret
+
+        elif column == 'file3':
+            url_file3 = row.url_file3()
+            ret = '<div class="center-align">'
+            if url_file3 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios firmada">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file3)
+            ret += '</div>'
+
+            return ret
+
+        elif column == 'file4':
+            url_file4 = row.url_file4()
+            ret = '<div class="center-align">'
+            if url_file4 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios firmada">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file4)
+            ret += '</div>'
+
+            return ret
+
+        elif column == 'file5':
+
+            url_file5 = row.url_file5()
+
+
+            ret = '<div class="center-align">'
+
+            if url_file5 != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_file5)
+
+            ret += '</div>'
+
+            return ret
+
+        elif column == 'estate':
+            estate = row.estate
+
+            render = ""
+
+            if estate == "Aprobado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
+                          '</a>'.format(row.estate)
+
+            if estate == "Rechazado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0} por {1}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">block</i>' \
+                          '</a>'.format(row.estate, row.observaciones)
+
+            return '<div class="center-align">' + render + '</div>'
+
+
+        elif column == 'estate_inform':
+            estate = row.estate_inform
+
+            render = ""
+
+            if estate == "Aprobado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
+                          '</a>'.format(row.estate_inform)
+
+            if estate == "Rechazado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0} por {1}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">block</i>' \
+                          '</a>'.format(row.estate_inform, row.observaciones_inform)
+
+            return '<div class="center-align">' + render + '</div>'
+
+
+        else:
+            return super(CutsCollectAccountsListApi, self).render_column(row, column)
 
 
 def cargar_rubro(request):

@@ -78,4 +78,7 @@ urlpatterns = [
 
     path('solicitudes_desplazamiento/editar/<uuid:pk>/aprobar/', views.DesplazamientosAprobarView.as_view()),
 
+    path('collects_account/', views.CollectsAccountListView.as_view()),
+    path('collects_account/view/<uuid:pk_cut>/', views.CollectsAccountsView.as_view()),
+    path('collects_account/view/<uuid:pk_cut>/estate/<uuid:pk_collect_account>/', views.CollectsAccountsEstateView.as_view()),
 ]

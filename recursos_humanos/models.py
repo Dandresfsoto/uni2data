@@ -1,3 +1,6 @@
+import json
+
+from django.db.models import Sum
 from djmoney.models.fields import MoneyField
 from django.db import models
 import uuid
@@ -89,7 +92,6 @@ class Contratistas(models.Model):
 
         return celular
 
-
     def get_lugar_expedicion(self):
         expedicion = ''
 
@@ -103,8 +105,6 @@ class Contratistas(models.Model):
             pass
 
         return expedicion
-
-
 
     def get_lugar_residencia(self):
         residencia = ''
@@ -122,8 +122,6 @@ class Contratistas(models.Model):
             pass
 
         return residencia
-
-
 
 
     def get_full_name(self):
@@ -295,6 +293,7 @@ class Contratos(models.Model):
     grupo_soportes = models.ForeignKey(GruposSoportes, on_delete=models.DO_NOTHING)
 
     valor = MoneyField(max_digits=20,decimal_places=2,default_currency = 'COP')
+    transporte = MoneyField(max_digits=20,decimal_places=2,default_currency = 'COP',blank=True, null=True, default=0)
 
     file = PDFFileField(upload_to=upload_dinamic_dir,
                         max_upload_size=20971520,
@@ -343,6 +342,7 @@ class Contratos(models.Model):
             self.nombre,
             self.pretty_print_valor()
         )
+
 
     def get_autocomplete_text(self):
         return '{0} - {1} - {2}'.format(
@@ -489,7 +489,12 @@ class Contratos(models.Model):
         return self.fin.strftime('%d de %B del %Y')
 
     def pretty_print_valor(self):
-        return str(self.valor).replace('COL','')
+        transporte = self.transporte
+        if transporte != None:
+            valor = self.valor + self.transporte
+        else:
+            valor = self.valor
+        return str(valor).replace('COL','')
 
     def pretty_print_url_minuta(self):
         try:
@@ -545,11 +550,287 @@ class Contratos(models.Model):
         else:
             return '<a href="'+ url +'"> '+ str(self.otrosi_3.name) +'</a>'
 
+class Cuts(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    consecutive = models.IntegerField(verbose_name="Consecutivo")
+    name = models.CharField(max_length=30, verbose_name="Nombre")
+    date_creation = models.DateTimeField(auto_now_add=True,verbose_name="Fecha creacion")
+    user_creation = models.ForeignKey(User, related_name="user_creation_certificacion", on_delete=models.DO_NOTHING,verbose_name="Usuario creacion")
+    date_update = models.DateTimeField(auto_now=True, blank=True, null=True,verbose_name="Fecha actualizacion")
+    user_update = models.ForeignKey(User, related_name="user_update_certificacion", on_delete=models.DO_NOTHING, blank=True, null=True,verbose_name="usuario actualizacion")
+    value = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor")
+    month = models.CharField(max_length=100, blank=True, null=True,verbose_name="Mes")
+    year = models.CharField(max_length=100, blank=True, null=True,verbose_name="Año")
 
+    def __str__(self):
+        return "{0} - {1}".format(self.consecutive, self.name)
+
+    class Meta:
+        verbose_name_plural = "Cortes"
+
+    def pretty_creation_datetime(self):
+        return self.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
+
+    def get_cantidad_cuentas_cobro(self):
+        return Collects_Account.objects.filter(cut = self).count()
+
+
+    def get_novedades(self):
+        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate__in = ['Generado']).exclude(file5="")
+        return cuentas_cobro.count()
+
+    def get_novedades_inform(self):
+        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate_inform__in = ['Generado']).exclude(file4="")
+        return cuentas_cobro.count()
+
+    def get_novedades_report(self):
+        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate_inform__in = ['Aprobado'], estate__in = ['Aprobado']).exclude(file3="")
+        return cuentas_cobro.count()
+
+    def get_valor(self):
+        value_fees = Collects_Account.objects.filter(cut = self).aggregate(Sum('value_fees'))['value_fees__sum']
+        if value_fees == None:
+            return 0
+        elif value_fees > 0:
+            return value_fees
+        else:
+            return 0
+
+def upload_dinamic_collects_account(instance, filename):
+    return '/'.join(['Recurso humano', 'Cuentas de Cobro', str(instance.id), filename])
+
+class Collects_Account(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    contract = models.ForeignKey(Contratos, on_delete=models.DO_NOTHING, verbose_name="Contrato")
+    date_creation = models.DateTimeField(auto_now_add=True, verbose_name="Fecha creacion")
+    user_creation = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True,
+                                         related_name='collects_account_creation_user_rh',verbose_name="usuario creacion")
+
+    date_update = models.DateTimeField(blank=True, null=True,verbose_name="Fecha actualizacion")
+    user_update = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True,
+                                              related_name='collects_account_update_user_rh',verbose_name="usuario actualizacion")
+
+    cut = models.ForeignKey(Cuts, on_delete=models.DO_NOTHING, blank=True, null=True,verbose_name="Corte")
+    estate = models.CharField(max_length=100, blank=True, null=True,verbose_name="Estado seguridad social")
+    estate_inform = models.CharField(max_length=100, blank=True, null=True,verbose_name="Estado informe")
+    estate_report = models.CharField(max_length=100, blank=True, null=True,verbose_name="Estado report")
+    value_fees = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor honoriarios profesionales")
+    value_transport = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True,verbose_name="Valor transporte")
+    month = models.CharField(max_length=100, blank=True, null=True,verbose_name="Mes")
+    year = models.CharField(max_length=100, blank=True, null=True,verbose_name="Año")
+
+
+    file = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Cuenta de cobro honorarios sin firmar"
+    )
+    file2 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Sin definir"
+    )
+    file3 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Cuenta de cobro honorarios firmada"
+    )
+    file4 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Informe de actividades firmada"
+    )
+    file5= ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Seguridad social"
+    )
+    file6 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="Informe de actividades"
+    )
+    html = models.FileField(upload_to=upload_dinamic_collects_account, blank=True, null=True)
+    html_2 = models.FileField(upload_to=upload_dinamic_collects_account, blank=True, null=True)
+    html_3 = models.FileField(upload_to=upload_dinamic_collects_account, blank=True, null=True)
+    delta = models.TextField(blank=True, null=True, max_length=1000)
+    data_json = models.TextField(blank=True, null=True)
+    valores_json = models.TextField(default='[]', blank=True, null=True)
+    observaciones = models.TextField(default='', blank=True, null=True, verbose_name="Observaciones seguridad social")
+    observaciones_inform = models.TextField(default='', blank=True, null=True, verbose_name="Observaciones informe de actividades")
+    observaciones_report = models.TextField(default='', blank=True, null=True, verbose_name="Observaciones cuentas de cobro")
+    liquidacion = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "{0} - {1} - {2}".format(self.cut.consecutive, self.contract.nombre, self.contract.contratista.get_full_name_cedula())
+
+    class Meta:
+        verbose_name_plural = "Cuentas de cobro"
+
+    def pretty_creation_datetime(self):
+        return self.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
+
+    def get_value_fees(self):
+        value = str(self.value_fees).replace('COL$', '')
+        return value
+
+    def get_value_transport(self):
+        return str(self.value_transport).replace('COL$', '')
+
+    def pretty_print_value_fees(self):
+        return str(self.value_fees).replace('COL','')
+
+    def pretty_print_value_transport(self):
+        return str(self.value_transport).replace('COL','')
+
+    def get_descripcion_corte(self):
+        descripcion = ''
+        try:
+            descripcion = self.cut.name
+        except:
+            pass
+        return descripcion
+
+    def get_fecha_corte(self):
+        fecha = ''
+        try:
+            fecha = self.cut.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
+        except:
+            pass
+        return fecha
+
+
+    def url_file(self):
+        url = None
+        try:
+            url = self.file.url
+        except:
+            pass
+        return url
+
+    def url_file2(self):
+        url = None
+        try:
+            url = self.file2.url
+        except:
+            pass
+        return url
+
+    def url_file3(self):
+        url = None
+        try:
+            url = self.file3.url
+        except:
+            pass
+        return url
+
+    def url_file4(self):
+        url = None
+        try:
+            url = self.file4.url
+        except:
+            pass
+        return url
+
+    def url_file5(self):
+        url = None
+        try:
+            url = self.file5.url
+        except:
+            pass
+        return url
+
+    def url_file6(self):
+        url = None
+        try:
+            url = self.file6.url
+        except:
+            pass
+        return url
+
+    def url_file6(self):
+        url = None
+        try:
+            url = self.file6.url
+        except:
+            pass
+        return url
+
+    def pretty_print_url_file(self):
+        try:
+            url = self.file.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file.name) + '</a>'
+
+    def pretty_print_url_file2(self):
+        try:
+            url = self.file2.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file2.name) + '</a>'
+
+    def pretty_print_url_file3(self):
+        try:
+            url = self.file3.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file3.name) + '</a>'
+
+    def pretty_print_url_file4(self):
+        try:
+            url = self.file4.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file4.name) + '</a>'
+
+    def pretty_print_url_file5(self):
+        try:
+            url = self.file5.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file5.name) + '</a>'
+
+
+    def pretty_print_url_file6(self):
+        try:
+            url = self.file6.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file6.name) + '</a>'
 
 def upload_dinamic_dir_soporte_contrato(instance, filename):
     return '/'.join(['Contratos', 'Soportes', str(instance.contrato.id), str(instance.soporte.id), filename])
-
 
 class SoportesContratos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -693,3 +974,4 @@ def SoportesUpdate(sender, instance, **kwargs):
     else:
         contrato.fecha_legalizacion = None
         contrato.save()
+

@@ -43,4 +43,15 @@ urlpatterns = [
 
     path('contratos/reportes/listado/', views.ContratosReporteListadoView.as_view()),
     path('hv/reporte/', views.HvReporteView.as_view()),
+
+
+    path('cuts/', views.CutsListView.as_view()),
+    path('cuts/create/', views.CutsCreateView.as_view()),
+    path('cuts/view/<uuid:pk_cut>/', views.CutsCollectsAccountView.as_view()),
+    path('cuts/view/<uuid:pk_cut>/add/', views.CutsCollectsAddAccountView.as_view()),
+    path('cuts/view/<uuid:pk_cut>/edit/<uuid:pk_collect_account>/', views.CollectAccountUpdateView.as_view()),
+    path('cuts/view/<uuid:pk_cut>/upload/<uuid:pk_collect_account>/', views.CollectAccountUploadView.as_view()),
+    path('cuts/view/<uuid:pk_cut>/aprobar/<uuid:pk_collect_account>/', views.CollectAccountApprobView.as_view()),
+    path('cuts/view/<uuid:pk_cut>/rechazar/<uuid:pk_collect_account>/', views.CollectAccountRejectView.as_view()),
+    path('cuts/view/<uuid:pk_cut>/delete/<uuid:pk_collect_account>/', views.CollectAccountDeleteView.as_view()),
 ]

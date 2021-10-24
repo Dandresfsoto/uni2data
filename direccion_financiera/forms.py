@@ -13,9 +13,8 @@ from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amo
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
-
 from iraca.models import Resguards
-from recursos_humanos.models import Contratistas, Contratos
+from recursos_humanos.models import Contratistas, Contratos, Collects_Account
 from django.db.models import Q
 from django.conf import settings
 from desplazamiento.models import Desplazamiento
@@ -1888,5 +1887,68 @@ class ProductForm(forms.ModelForm):
         labels = {
             'name': 'Nombre del producto',
             'stock': 'Cantidad del producto',
+        }
+
+class CollectsAccountEstateForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        estate_report = cleaned_data.get("estate_report")
+        observaciones_report = cleaned_data.get("observaciones_report")
+
+        if estate_report == 'Rechazado':
+            if observaciones_report == None or observaciones_report == '':
+                self.add_error('observaciones_report', 'Por favor escriba una observación')
+
+
+    def __init__(self, *args, **kwargs):
+        super(CollectsAccountEstateForm, self).__init__(*args, **kwargs)
+
+        self.fields['estate_report'].widget = forms.Select(choices = [
+            ('','----------'),
+            ('Reportado', 'Reportado'),
+            ('Rechazado', 'Rechazado'),
+            ('Pagado', 'Pagado')
+        ])
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Cargar cuenta de cobro',
+                )
+            ),
+            Row(
+                Column(
+                    'estate_report',
+                    css_class="s12"
+                ),
+                Column(
+                    'observaciones_report',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Collects_Account
+        fields = ['estate_report','observaciones_report']
+        widgets = {
+            'observaciones_report': forms.Textarea(attrs={'class': 'materialize-textarea'})
         }
 

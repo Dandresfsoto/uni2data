@@ -45,4 +45,8 @@ urlpatterns = [
     path('bonding/<uuid:pk_household>/', rest_views.BondingListApi.as_view()),
 
     path('resguard/', rest_views.ResguardListApi.as_view()),
+
+
+    path('inform/', rest_views.InformListApi.as_view()),
+    path('inform/view/<uuid:pk_cut>/', rest_views.InformCollectAccountListApi.as_view()),
 ]
