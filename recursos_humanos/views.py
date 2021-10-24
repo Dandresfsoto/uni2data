@@ -288,13 +288,26 @@ class CertificacionesCreateView(LoginRequiredMixin,
 
 
         path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
 
-        pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
-            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
-            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
-            '--page-size':'Letter'
-        }, configuration=config)
+        if settings.DEBUG:
+            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+            pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
+                '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
+                '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
+                '--page-size':'Letter'
+            }, configuration=config)
+        else:
+            data = pdfkit.from_url(
+                url=certifiacion.html.url,
+                output_path=False,
+                options={
+                    '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
+                    '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                }
+            )
+            certifiacion.pdf.save('certificacion.pdf', File(io.BytesIO(data)))
 
         if form.cleaned_data['notificar'] == True:
             adjuntos = [
@@ -968,13 +981,28 @@ class CertificacionesUpdateView(LoginRequiredMixin,
 
 
         path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
-
-        pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
-            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
-            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
-            '--page-size':'Letter'
-        }, configuration=config)
+        if settings.DEBUG:
+            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+            pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
+                '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
+                '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
+                '--enable-local-file-access': None,
+                '--page-size': 'Letter'
+            },
+                             configuration=config
+                             )
+        else:
+            data = pdfkit.from_url(
+                url=certifiacion.html.url,
+                output_path=False,
+                options={
+                    '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
+                    '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                }
+            )
+            certifiacion.pdf.save('certificacion.pdf', File(io.BytesIO(data)))
 
         if form.cleaned_data['notificar'] == True:
             adjuntos = [
@@ -1424,32 +1452,43 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
                     path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-                    config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+
 
                     collect_account.file.save('cuenta_cobro.pdf',
                                               File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
 
-                    options = {
-                        'page-size': 'A4',
-                        'encoding': 'utf-8',
-                        'margin-top': '2cm',
-                        'margin-bottom': '2cm',
-                        'margin-left': '2cm',
-                        'margin-right': '2cm',
-                        'dpi': 400
-                    }
 
-                    pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
-                        '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
-                        '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
-                        'page-size': 'A4',
-                        'encoding': 'utf-8',
-                        'margin-top': '4cm',
-                        'margin-bottom': '3cm',
-                        'margin-left': '2cm',
-                        'margin-right': '2cm',
-                        'dpi': 400
-                    }, configuration=config)
+                    if settings.DEBUG:
+                        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+                        pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
+                            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
+                            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                            'page-size': 'A4',
+                            'encoding': 'utf-8',
+                            'margin-top': '4cm',
+                            'margin-bottom': '3cm',
+                            'margin-left': '2cm',
+                            'margin-right': '2cm',
+                            'dpi': 400
+                        }, configuration=config)
+                    else:
+                        data = pdfkit.from_url(
+                            url=collect_account.html.url,
+                            output_path=False,
+                            options={
+                                '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
+                                '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                                '--enable-local-file-access': None,
+                                'page-size': 'A4',
+                                'encoding': 'utf-8',
+                                'margin-top': '4cm',
+                                'margin-bottom': '3cm',
+                                'margin-left': '2cm',
+                                'margin-right': '2cm',
+                                'dpi': 400
+                            }
+                        )
+                        collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
 
                     user = collect_account.contract.get_user_or_none()
 
@@ -1554,34 +1593,45 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                                               File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
                     path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-                    config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
 
                     collect_account.file.save('cuenta_cobro.pdf',
                                               File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
 
-                    options = {
-                        'page-size': 'A4',
-                        'encoding': 'utf-8',
-                        'margin-top': '2cm',
-                        'margin-bottom': '2cm',
-                        'margin-left': '2cm',
-                        'margin-right': '2cm',
-                        'dpi': 400
-                    }
-
-                    pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
-                        '--header-html': settings.TEMPLATES[0]['DIRS'][
-                                             0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
-                        '--footer-html': settings.TEMPLATES[0]['DIRS'][
-                                             0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
-                        'page-size': 'A4',
-                        'encoding': 'utf-8',
-                        'margin-top': '4cm',
-                        'margin-bottom': '3cm',
-                        'margin-left': '2cm',
-                        'margin-right': '2cm',
-                        'dpi': 400
-                    }, configuration=config)
+                    if settings.DEBUG:
+                        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+                        pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
+                            '--header-html': settings.TEMPLATES[0]['DIRS'][
+                                                 0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
+                            '--footer-html': settings.TEMPLATES[0]['DIRS'][
+                                                 0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                            'page-size': 'A4',
+                            'encoding': 'utf-8',
+                            'margin-top': '4cm',
+                            'margin-bottom': '3cm',
+                            'margin-left': '2cm',
+                            'margin-right': '2cm',
+                            'dpi': 400
+                        }, configuration=config)
+                    else:
+                        data = pdfkit.from_url(
+                            url=collect_account.html.url,
+                            output_path=False,
+                            options={
+                                '--header-html': settings.TEMPLATES[0]['DIRS'][
+                                                     0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
+                                '--footer-html': settings.TEMPLATES[0]['DIRS'][
+                                                     0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                                '--enable-local-file-access': None,
+                                'page-size': 'A4',
+                                'encoding': 'utf-8',
+                                'margin-top': '4cm',
+                                'margin-bottom': '3cm',
+                                'margin-left': '2cm',
+                                'margin-right': '2cm',
+                                'dpi': 400
+                            }
+                        )
+                        collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
 
         return HttpResponseRedirect(self.get_success_url())
 
@@ -1757,34 +1807,41 @@ class CollectAccountUpdateView(FormView):
         collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
         path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
 
         collect_account.file.save('cuenta_cobro.pdf',
                               File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
 
-        options = {
-            'page-size': 'A4',
-            'encoding': 'utf-8',
-            'margin-top': '2cm',
-            'margin-bottom': '2cm',
-            'margin-left': '2cm',
-            'margin-right': '2cm',
-            'dpi': 400
-        }
-
-
-        pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
-            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
-            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
-            'page-size': 'A4',
-            'encoding': 'utf-8',
-            'margin-top': '4cm',
-            'margin-bottom': '3cm',
-            'margin-left': '2cm',
-            'margin-right': '2cm',
-            'dpi': 400
-        }, configuration=config)
-
+        if settings.DEBUG:
+            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+            pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
+                '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
+                '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                'page-size': 'A4',
+                'encoding': 'utf-8',
+                'margin-top': '4cm',
+                'margin-bottom': '3cm',
+                'margin-left': '2cm',
+                'margin-right': '2cm',
+                'dpi': 400
+            }, configuration=config)
+        else:
+            data = pdfkit.from_url(
+                url=collect_account.html.url,
+                output_path=False,
+                options={
+                    '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
+                    '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                    '--enable-local-file-access': None,
+                    'page-size': 'A4',
+                    'encoding': 'utf-8',
+                    'margin-top': '4cm',
+                    'margin-bottom': '3cm',
+                    'margin-left': '2cm',
+                    'margin-right': '2cm',
+                    'dpi': 400
+                }
+            )
+            collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
 
         return super(CollectAccountUpdateView, self).form_valid(form)
 
