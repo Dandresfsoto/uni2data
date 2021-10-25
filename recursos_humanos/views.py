@@ -289,7 +289,7 @@ class CertificacionesCreateView(LoginRequiredMixin,
 
         path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
 
-        if not settings.DEBUG:
+        if settings.DEBUG:
             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
             pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/header/header.html',
