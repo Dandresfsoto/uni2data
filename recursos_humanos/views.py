@@ -294,7 +294,8 @@ class CertificacionesCreateView(LoginRequiredMixin,
             pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/header/header.html',
                 '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/footer/footer.html',
-                '--page-size':'Letter'
+                '--enable-local-file-access': None,
+                '--page-size': 'Letter'
             }, configuration=config)
         else:
             data = pdfkit.from_url(
@@ -988,9 +989,7 @@ class CertificacionesUpdateView(LoginRequiredMixin,
                 '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/footer/footer.html',
                 '--enable-local-file-access': None,
                 '--page-size': 'Letter'
-            },
-                             configuration=config
-                             )
+            },configuration=config)
         else:
             data = pdfkit.from_url(
                 url=certifiacion.html.url,
@@ -1463,13 +1462,8 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
                             '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
                             '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
-                            'page-size': 'A4',
-                            'encoding': 'utf-8',
-                            'margin-top': '4cm',
-                            'margin-bottom': '3cm',
-                            'margin-left': '2cm',
-                            'margin-right': '2cm',
-                            'dpi': 400
+                            '--enable-local-file-access': None,
+                            '--page-size': 'Letter'
                         }, configuration=config)
                     else:
                         data = pdfkit.from_url(
@@ -1479,13 +1473,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
                                 '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                                 '--enable-local-file-access': None,
-                                'page-size': 'A4',
-                                'encoding': 'utf-8',
-                                'margin-top': '4cm',
-                                'margin-bottom': '3cm',
-                                'margin-left': '2cm',
-                                'margin-right': '2cm',
-                                'dpi': 400
+                                '--page-size': 'Letter'
                             }
                         )
                         collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
@@ -1602,13 +1590,8 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
                             '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
                             '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
-                            'page-size': 'A4',
-                            'encoding': 'utf-8',
-                            'margin-top': '4cm',
-                            'margin-bottom': '3cm',
-                            'margin-left': '2cm',
-                            'margin-right': '2cm',
-                            'dpi': 400
+                            '--enable-local-file-access': None,
+                            '--page-size': 'Letter'
                         }, configuration=config)
                     else:
                         data = pdfkit.from_url(
@@ -1618,13 +1601,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
                                 '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                                 '--enable-local-file-access': None,
-                                'page-size': 'A4',
-                                'encoding': 'utf-8',
-                                'margin-top': '4cm',
-                                'margin-bottom': '3cm',
-                                'margin-left': '2cm',
-                                'margin-right': '2cm',
-                                'dpi': 400
+                                '--page-size': 'Letter'
                             }
                         )
                         collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
@@ -1812,13 +1789,8 @@ class CollectAccountUpdateView(FormView):
             pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
                 '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
-                'page-size': 'A4',
-                'encoding': 'utf-8',
-                'margin-top': '4cm',
-                'margin-bottom': '3cm',
-                'margin-left': '2cm',
-                'margin-right': '2cm',
-                'dpi': 400
+                '--enable-local-file-access': None,
+                '--page-size': 'Letter'
             }, configuration=config)
         else:
             data = pdfkit.from_url(
@@ -1828,13 +1800,7 @@ class CollectAccountUpdateView(FormView):
                     '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
                     '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                     '--enable-local-file-access': None,
-                    'page-size': 'A4',
-                    'encoding': 'utf-8',
-                    'margin-top': '4cm',
-                    'margin-bottom': '3cm',
-                    'margin-left': '2cm',
-                    'margin-right': '2cm',
-                    'dpi': 400
+                    '--page-size': 'Letter'
                 }
             )
             collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
