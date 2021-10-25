@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<style>
+    body{
+        font-family: sans-serif;
+        font-size: 14px;
+    }
+
+    strong{
+        font-weight: bold;
+    }
+
+    h1,h2,h3,h4,h5,h6,p{
+        margin: 0;
+    }
+
+    h1{
+        font-size: 2.5rem;
+    }
+
+    h2{
+        font-size: 2.0rem;
+    }
+
+    h3{
+        font-size: 1.5rem;
+    }
+
+    .ql-align-right {
+      text-align: right;
+    }
+    .ql-align-center {
+      text-align: center;
+    }
+    .ql-align-justify {
+      text-align: justify;
+    }
+
+    .codigo{
+        margin-top: 30px;
+        margin-bottom: 30px;
+        font-size: 12px;
+    }
+
+    table{
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 2px solid #ccc;
+        text-align: left;
+        padding: 8px;
+    }
+
+    p.title{
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    p.subtitle{
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .center-th{
+        text-align: center;
+    }
+
+
+    .table-items{
+        font-size: 12px;
+    }
+
+    .th-no-padding{
+        padding: 0;
+    }
+
+    .th-no-padding td, .th-no-padding th{
+        border: none;
+    }
+
+    .div-footer{
+        border-top: 3px solid #888;
+    }
+
+    .div-footer p{
+        text-align: center;
+        margin: 5px 0;
+        color: #888;
+    }
+
+</style>
+
+<body>
+    <div class="container" style="margin-top: 50px;margin-bottom: 50px;">
+        <div class="codigo ql-align-right">
+            <p><b>ID: </b><span class="codigo_span"></span></p>
+        </div>
+        <div class="contenido">
+
+            <div style="text-align: center">
+                <p style="text-decoration: underline;font-size: 18px;"><b>ACTA DE PAZ Y SALVO</b></p>
+                <p style="font-size: 14px;"><b>POR MUTUO ACUERDO O VENCIMIENTO DEL PLAZO</b></p>
+            </div>
+            <div style="text-align: center;margin-top: 20px;">
+                <p style="font-size: 16px;"><b>ASPECTOS GENERALES Y BALANCE FINANCIERO DEL CONTRATO DE</b></p>
+                <p style="font-size: 16px;"><b>PRESTACIÓN DE SERVICIOS</b></p>
+            </div>
+
+
+
+            <div class="resumen" style="margin-top:40px;">
+
+                <table>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">NOMBRE DEL CONTRATISTA</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="contratista_nombre_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">CÉDULA</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="contratista_cedula_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">CARGO</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="contratista_cargo_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">ZONA DE DESARROLLO DE ACTIVIDADES</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="contratista_zona_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">FECHA DE INICIO</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="contrato_inicio_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">FECHA DE FINALIZACIÓN</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="contrato_finalizacion_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">VALOR DEL CONTRATO</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="contrato_valor_total_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr style="background: #ccc;">
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"></p>
+                        </th>
+                        <th width="50%" style="padding: 1px;height: 25px;">
+                            <p style="font-weight: initial;"></p>
+                        </th>
+                    </tr>
+                    <tr class="center-th">
+                        <th width="50%" style="text-align: center;padding: 1px;">
+                            <p style="font-weight: initial;"><b>CONCEPTO</b></p>
+                        </th>
+                        <th width="50%" style="text-align: center;padding: 1px;">
+                            <p style="font-weight: initial;"><b>VALOR</b></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">Valor ejecutado del contrato</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="contrato_valor_ejecutado_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">Desembolsos realizados (cortes de pago)</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="contrato_valor_cortes_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">Descuento Anticipo</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="valor_descuento_anticipo_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;">Otros descuentos</p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span class="valor_otros_descuentos_span_1"></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><b>SALDO A FAVOR DEL CONTRATISTA</b></p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span><b class="saldo_favor_contratista"></b></span></p>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><b>SALDO A FAVOR DE ASOANDES</b></p>
+                        </th>
+                        <th width="50%" style="padding: 1px;">
+                            <p style="font-weight: initial;"><span><b class="saldo_favor_andes"></b></span></p>
+                        </th>
+                    </tr>
+
+                </table>
+
+                <p style="margin-top: 30px;">
+                    En consecuencia la ASOCIACIÓN NACIONAL PARA EL DESARROLLO SOCIAL ANDES y el señor (a)
+                    <span><b class="contratista_nombre_span_2"></b></span> identificado con la C.C No <span><b class="contratista_cedula_span_2"></b></span> se declaran a PAZ Y SALVO por todo
+                    concepto en relación con la ejecución del contrato de prestación de servicios <span><b class="contrato_codigo_span_1"></b></span>.
+                </p>
+                <p style="margin-top: 10px;text-align: justify;">
+                    Mediante la suscripción de la presente acta de paz y salvo, el contratista y el supervisor asumen bajo gravedad de
+                    juramento, plena responsabilidad por la veracidad de la información en ella contenida, y en esa medida garantizan
+                    el cumplimiento de todas y cada una de las obligaciones contractuales de las dos partes (Artículo 60 Ley 80 de 1993).
+                </p>
+                <p style="margin-top: 10px;text-align: justify;">
+                    Para constancia se firma por los que en ella intervinieron, a los <span class="dia_firma_span_1"></span> días del mes de <span class="mes_firma_span_1"></span>
+                    de <span class="ano_firma_span_1"></span> .
+                </p>
+
+            </div>
+
+
+
+
+        </div>
+        <div class="firma" style="margin-top:40px;">
+
+            <table>
+                <tr>
+                    <th width="50%" style="border: none">
+                        <p style="margin-bottom: 80px;text-align: initial;font-weight: initial;">Contratante:</p>
+                        <p><b>ANDREA PAOLA SANTOS GUALDRÓN</b></p>
+                        <p style="font-weight: initial;">Representante Legal</p>
+                    </th>
+                    <th width="50%" style="border: none">
+                        <p style="margin-bottom: 80px;text-align: initial;font-weight: initial;">Contratista:</p>
+                        <p><b class="contratista_nombre_span_3"></b></p>
+                        <p style="font-weight: initial;">Contratista</p>
+                    </th>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -289,11 +289,11 @@ class CertificacionesCreateView(LoginRequiredMixin,
 
         path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
 
-        if settings.DEBUG:
+        if not settings.DEBUG:
             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
             pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
-                '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
-                '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
+                '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/header/header.html',
+                '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/footer/footer.html',
                 '--page-size':'Letter'
             }, configuration=config)
         else:
@@ -301,8 +301,8 @@ class CertificacionesCreateView(LoginRequiredMixin,
                 url=certifiacion.html.url,
                 output_path=False,
                 options={
-                    '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
-                    '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
+                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/header/header.html',
+                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/footer/footer.html',
                     '--enable-local-file-access': None,
                     '--page-size': 'Letter'
                 }
@@ -984,8 +984,8 @@ class CertificacionesUpdateView(LoginRequiredMixin,
         if settings.DEBUG:
             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
             pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
-                '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
-                '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
+                '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/header/header.html',
+                '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/footer/footer.html',
                 '--enable-local-file-access': None,
                 '--page-size': 'Letter'
             },
@@ -996,8 +996,8 @@ class CertificacionesUpdateView(LoginRequiredMixin,
                 url=certifiacion.html.url,
                 output_path=False,
                 options={
-                    '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\header\\header.html',
-                    '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\footer\\footer.html',
+                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/header/header.html',
+                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/footer/footer.html',
                     '--enable-local-file-access': None,
                     '--page-size': 'Letter'
                 }
@@ -1461,8 +1461,8 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     if settings.DEBUG:
                         config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                         pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
-                            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
-                            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                            '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
+                            '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                             'page-size': 'A4',
                             'encoding': 'utf-8',
                             'margin-top': '4cm',
@@ -1476,8 +1476,8 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                             url=collect_account.html.url,
                             output_path=False,
                             options={
-                                '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
-                                '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                                '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
+                                '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                                 '--enable-local-file-access': None,
                                 'page-size': 'A4',
                                 'encoding': 'utf-8',
@@ -1600,10 +1600,8 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     if settings.DEBUG:
                         config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                         pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
-                            '--header-html': settings.TEMPLATES[0]['DIRS'][
-                                                 0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
-                            '--footer-html': settings.TEMPLATES[0]['DIRS'][
-                                                 0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                            '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
+                            '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                             'page-size': 'A4',
                             'encoding': 'utf-8',
                             'margin-top': '4cm',
@@ -1617,10 +1615,8 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                             url=collect_account.html.url,
                             output_path=False,
                             options={
-                                '--header-html': settings.TEMPLATES[0]['DIRS'][
-                                                     0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
-                                '--footer-html': settings.TEMPLATES[0]['DIRS'][
-                                                     0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                                '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
+                                '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                                 '--enable-local-file-access': None,
                                 'page-size': 'A4',
                                 'encoding': 'utf-8',
@@ -1814,8 +1810,8 @@ class CollectAccountUpdateView(FormView):
         if settings.DEBUG:
             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
             pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
-                '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
-                '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
+                '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                 'page-size': 'A4',
                 'encoding': 'utf-8',
                 'margin-top': '4cm',
@@ -1829,8 +1825,8 @@ class CollectAccountUpdateView(FormView):
                 url=collect_account.html.url,
                 output_path=False,
                 options={
-                    '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\header\\header.html',
-                    '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\cuentas_cobro\\footer\\footer.html',
+                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
+                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                     '--enable-local-file-access': None,
                     'page-size': 'A4',
                     'encoding': 'utf-8',
