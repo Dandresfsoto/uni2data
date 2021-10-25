@@ -3,12 +3,11 @@ body{
 }
 
 table{
-    border-collapse: collapse;
     width: 100%;
 }
 
 td, th {
-    border: 2px solid #ccc;
+    border: 0;
     text-align: left;
     padding: 8px;
 }
