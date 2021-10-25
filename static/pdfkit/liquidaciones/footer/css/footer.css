@@ -1,0 +1,13 @@
+body{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.div-footer{
+    border-top: 3px solid #888;
+}
+
+.div-footer p{
+    text-align: center;
+    margin: 5px 0;
+    color: #888;
+}

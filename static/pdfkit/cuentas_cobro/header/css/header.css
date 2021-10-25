@@ -1,0 +1,50 @@
+body{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+table{
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 2px solid #ccc;
+    text-align: left;
+    padding: 8px;
+}
+
+p.title{
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+p.subtitle{
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 0;
+}
+
+.center-th{
+    text-align: center;
+}
+
+.des-div{
+    height: 25px;
+    width: 100%;
+}
+
+.table-items{
+    font-size: 12px;
+}
+
+.th-no-padding{
+    padding: 0;
+}
+
+.th-no-padding td, .th-no-padding th{
+    border: none;
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="css/header.css">
+    <script>
+        function substitutePdfVariables() {
+
+            function getParameterByName(name) {
+                var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+                return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+            }
+
+            function substitute(name) {
+                var value = getParameterByName(name);
+                var elements = document.getElementsByClassName(name);
+
+                for (var i = 0; elements && i < elements.length; i++) {
+                    elements[i].textContent = value;
+                }
+            }
+
+            ['frompage', 'topage', 'page', 'webpage', 'section', 'subsection', 'subsubsection']
+                .forEach(function(param) {
+                    substitute(param);
+                });
+        }
+    </script>
+</head>
+<body onload="substitutePdfVariables()">
+
+<table>
+    <tr>
+        <th class="center-th" width="15%">
+            <img src="img/andes.png">
+        </th>
+        <th width="60%">
+            <p class="title">ACTA DE LIQUIDACIÓN DE CONTRATO DE PRESTACIÓN DE SERVICIOS</p>
+        </th>
+        <th width="25%"class="th-no-padding">
+            <table class="table-items">
+                <tr>
+
+                    <th style="border-bottom: 2px solid #ccc;">
+                        Código: F-GAF-05
+                    </th>
+                </tr>
+                <tr>
+                    <th style="border-bottom: 2px solid #ccc;">
+                        Versión: V1
+                    </th>
+                </tr>
+                <tr>
+                    <th style="border-bottom: 2px solid #ccc;">
+                        Fecha: 10-01-2018
+                    </th>
+                </tr>
+                <tr>
+                    <th>
+                        Página <span class="page"></span> de <span class="topage"></span>
+                    </th>
+                </tr>
+
+            </table>
+        </th>
+    </tr>
+
+</table>
+
+</body>
+</html>
