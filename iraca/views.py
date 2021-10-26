@@ -1349,9 +1349,9 @@ class SocializationMilestonesEstateUpdateView(LoginRequiredMixin,
     permissions = {
         "all": [
             "usuarios.iraca.socializacion.ver",
-            "usuarios.iraca.socializacion.contactos.ver",
-            "usuarios.iraca.socializacion.contactos.crear",
-            "usuarios.iraca.sociali zacion.contactos.editar",
+            "usuarios.iraca.socializacion.hitos.ver",
+            "usuarios.iraca.socializacion.hitos.crear",
+            "usuarios.iraca.socializacion.hitos.editar",
         ]
     }
     login_url = settings.LOGIN_URL
@@ -1478,7 +1478,7 @@ class SocializationContactsUpdateView(LoginRequiredMixin,
 
 #----------------------------------------------------------------------------------
 
-#---------------------------------------- RUTAS -----------------------------------
+#-------------------------------- IMPLEMENTACION -----------------------------------
 
 class ImplementationListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
@@ -2258,6 +2258,10 @@ class ImplementationHouseholdView(TemplateView):
         kwargs['breadcrum_1'] = self.route.name
         kwargs['breadcrum_active'] = self.household.document
         return super(ImplementationHouseholdView,self).get_context_data(**kwargs)
+
+#----------------------------------------------------------------------------------
+
+#-------------------------------- FORMULACION -------------------------------------
 
 class FormulationListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
@@ -3244,6 +3248,9 @@ class FormulationSupportHouseholdInstrumentsView(TemplateView):
             kwargs['success'] = message
         return super(FormulationSupportHouseholdInstrumentsView,self).get_context_data(**kwargs)
 
+#----------------------------------------------------------------------------------
+
+#------------------------------------- BONDING ------------------------------------
 
 
 class HouseholdsListView(LoginRequiredMixin,
@@ -3513,6 +3520,13 @@ class HouseholdsReportTotalView(View):
             else:
                 return HttpResponseRedirect('../../')
 
+
+#----------------------------------------------------------------------------------
+
+#------------------------------------- RESGUARD ------------------------------------
+
+
+
 class ResguardListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
                       TemplateView):
@@ -3577,8 +3591,8 @@ class ResguardUpdateView(LoginRequiredMixin,
         permissions = {
             "all": [
                 "usuarios.iraca.ver",
-                "usuarios.iraca.db.ver",
-                "usuarios.iraca.db.editar"
+                "usuarios.iraca.resguardo.ver",
+                "usuarios.iraca.resguardo.editar"
             ]
         }
         return permissions
@@ -3689,8 +3703,8 @@ class InformCollectsAccountRejectListView(FormView):
 
         self.permissions = {
             "all": [
-                "usuarios.recursos_humanos.ver",
-                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.iraca.informes.ver",
+                "usuarios.iraca.informes.cortes.ver",
             ]
         }
 

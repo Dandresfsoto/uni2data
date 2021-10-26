@@ -278,32 +278,30 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
                                     File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
         path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
 
         collect_account.file6.save('informe_actividades.pdf',
                                    File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
 
-        options = {
-            'page-size': 'A4',
-            'encoding': 'utf-8',
-            'margin-top': '2cm',
-            'margin-bottom': '2cm',
-            'margin-left': '2cm',
-            'margin-right': '2cm',
-            'dpi': 400
-        }
-
-        pdfkit.from_file([collect_account.html_3.path], collect_account.file6.path, {
-            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\informe_actividades\\header\\header.html',
-            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\informe_actividades\\footer\\footer.html',
-            'page-size': 'A4',
-            'encoding': 'utf-8',
-            'margin-top': '4cm',
-            'margin-bottom': '3cm',
-            'margin-left': '2cm',
-            'margin-right': '2cm',
-            'dpi': 400
-        }, configuration=config)
+        if settings.DEBUG:
+            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+            pdfkit.from_file([collect_account.html_3.path], collect_account.file6.path, {
+                '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/header/header.html',
+                '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/footer/footer.html',
+                '--enable-local-file-access': None,
+                '--page-size': 'Letter'
+            }, configuration=config)
+        else:
+            data = pdfkit.from_url(
+                url=collect_account.html_3.url,
+                output_path=False,
+                options={
+                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/header/header.html',
+                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/footer/footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                }
+            )
+            collect_account.file6.save('certificacion.pdf', File(io.BytesIO(data)))
 
 
         return super(ContractsAccountsActivityUploadView, self).form_valid(form)
@@ -399,33 +397,31 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
                                     File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
         path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+
 
         collect_account.file6.save('informe_actividades.pdf',
                                    File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
 
-        options = {
-            'page-size': 'A4',
-            'encoding': 'utf-8',
-            'margin-top': '2cm',
-            'margin-bottom': '2cm',
-            'margin-left': '2cm',
-            'margin-right': '2cm',
-            'dpi': 400
-        }
-
-        pdfkit.from_file([collect_account.html_3.path], collect_account.file6.path, {
-            '--header-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\informe_actividades\\header\\header.html',
-            '--footer-html': settings.TEMPLATES[0]['DIRS'][0] + '\\pdfkit\\informe_actividades\\footer\\footer.html',
-            'page-size': 'A4',
-            'encoding': 'utf-8',
-            'margin-top': '4cm',
-            'margin-bottom': '3cm',
-            'margin-left': '2cm',
-            'margin-right': '2cm',
-            'dpi': 400
-        }, configuration=config)
-
+        if settings.DEBUG:
+            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+            pdfkit.from_file([collect_account.html_3.path], collect_account.file6.path, {
+                '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/header/header.html',
+                '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/footer/footer.html',
+                '--enable-local-file-access': None,
+                '--page-size': 'Letter'
+            }, configuration=config)
+        else:
+            data = pdfkit.from_url(
+                url=collect_account.html_3.url,
+                output_path=False,
+                options={
+                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/header/header.html',
+                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/footer/footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                }
+            )
+            collect_account.file6.save('certificacion.pdf', File(io.BytesIO(data)))
 
         return super(ContractsAccountsActivityUpdateView, self).form_valid(form)
 

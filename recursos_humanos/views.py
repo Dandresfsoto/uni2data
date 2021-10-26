@@ -1332,12 +1332,12 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
             if form.cleaned_data['contrato_{0}'.format(contract.id)]:
                 month_cut = cut.month
                 year_cut = cut.year
-                value =  contract.valor
+                value = contract.valor
                 start = contract.inicio
                 end = contract.fin
                 rd = rdelta.relativedelta(end,start)
                 rd_months = rd.months
-                rd_days = rd.days - 1
+                rd_days = rd.days
                 days_total = rd_months * 30 + rd_days
                 value_f = float(value)
                 value_total = int(value_f)
@@ -1346,20 +1346,17 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
                 collects_accounts = models.Collects_Account.objects.filter(contract=contract)
                 total_value_fees = collects_accounts.aggregate(Sum('value_fees'))['value_fees__sum']
-                values_total = (value_total/days_total) * 30
+                values_total = round((value_total/days_total) * 30)
 
                 if total_value_fees == None:
                     total_value_fees_sum =  float(0) + float(values_total)
                 else:
                     total_value_fees_sum = float(total_value_fees) + float(values_total)
 
-                if contract.inicio.year == contract.fin.year and contract.inicio.month == contract.fin.month:
-                    values_total=value_total
-
                 if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
                     date_rest= date(int(year_cut), int(month_cut)+1, 1)
                     days_rest = date_rest - contract.inicio
-                    values_total = (values_total/30) * (days_rest.days - 1)
+                    values_total = (values_total/30) * (days_rest.days-1)
 
                 if contract.fin.year == int(year_cut) and contract.fin.month == int(month_cut):
                     total_value_fees = float(total_value_fees)

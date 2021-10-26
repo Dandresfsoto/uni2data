@@ -515,3 +515,15 @@ class Documento(models.Model):
 
     def get_extension(self):
         return self.file.name.split('.')[-1]
+
+
+def upload_dinamic_dir_carga_masiva_hogares(instance, filename):
+    return '/'.join(['Carga Masiva Hogares', filename])
+
+class CargaMasivaHogares(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    nombre = models.CharField(max_length=100)
+    file = models.FileField(upload_to=upload_dinamic_dir_carga_masiva_hogares, blank=True, null=True)
+
+    def __str__(self):
+        return self.nombre
