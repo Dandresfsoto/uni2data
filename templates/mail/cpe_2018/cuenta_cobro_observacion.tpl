@@ -20,7 +20,7 @@ Hola {{ nombre }}, Observación cuenta de cobro
 				<table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border: 1px solid #cccccc; border-collapse: collapse;">
 					<tr>
 						<td align="center" bgcolor="#004c99" style="padding: 50px; color: #fff; font-size: 100px; font-weight: bold; font-family: Arial, sans-serif;">
-							<img src="{{ url_base }}/static/img/SICAN.png" alt="SICAN" height="100" style="display: block;" />
+							<img src="{{ url_base }}/static/img/uni2data.png" alt="UNI2DATA" height="100" style="display: block;" />
 						</td>
 					</tr>
 					<tr>
