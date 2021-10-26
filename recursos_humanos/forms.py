@@ -559,7 +559,7 @@ class ContratoFormSuperUser(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ContratoFormSuperUser, self).__init__(*args, **kwargs)
 
-        self.fields['valor_char'] = forms.CharField(label="alor de los honorarios contrato ($)")
+        self.fields['valor_char'] = forms.CharField(label="Valor de los honorarios contrato ($)")
         self.fields['transporte_char'] = forms.CharField(label="Valor del transporte del contrato ($)")
 
         try:
