@@ -1339,7 +1339,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
                 rd_months = rd.months
                 rd_days = rd.days
-                days_total = rd_months * 30 + rd_days + 1
+                days_total = rd_months * 30 + rd_days
                 value_f = float(value)
                 value_total = int(value_f)
 
@@ -1475,20 +1475,22 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         )
                         collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
 
-                    user = collect_account.contract.get_user_or_none()
+                        user = collect_account.contract.get_user_or_none()
 
-                    if user != None:
-                        tasks.send_mail_templated_cuenta_cobro(
-                            'mail/recursos_humanos/cuenta_cobro.tpl',
-                            {
-                                'url_base': 'https://' + self.request.META['HTTP_HOST'],
-                                'Contrato': collect_account.contract.nombre,
-                                'nombre': collect_account.contract.contratista.nombres,
-                                'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
-                            },
-                            DEFAULT_FROM_EMAIL,
-                            [user.email, EMAIL_HOST_USER]
-                        )
+                        if user != None:
+                            tasks.send_mail_templated_cuenta_cobro(
+                                'mail/recursos_humanos/cuenta_cobro.tpl',
+                                {
+                                    'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                                    'Contrato': collect_account.contract.nombre,
+                                    'nombre': collect_account.contract.contratista.nombres,
+                                    'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
+                                },
+                                DEFAULT_FROM_EMAIL,
+                                [user.email, EMAIL_HOST_USER]
+                            )
+
+
 
                 else:
                     value_rest = value_total - total_value_fees
@@ -1723,6 +1725,9 @@ class CollectAccountUpdateView(FormView):
         value_letter_num = value_money
         value_letter = numero_to_letras(int(value_letter_num))
 
+        month = int(collect_account.month) - 1
+        month = functions.month_converter(month)
+
         if collect_account.estate != 'Cargado':
             collect_account.estate = 'Generado'
         collect_account.save()
@@ -1763,7 +1768,7 @@ class CollectAccountUpdateView(FormView):
         template_header_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
 
         template_header_tag = template_header.find(class_='month_span')
-        template_header_tag.insert(1, str(collect_account.month))
+        template_header_tag.insert(1, str(month))
 
         template_header_tag = template_header.find(class_='year_span')
         template_header_tag.insert(1, str(collect_account.year))
