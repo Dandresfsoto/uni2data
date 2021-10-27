@@ -226,6 +226,9 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         day = timezone.now()
         date = day.strftime("%Y/%m/%d")
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+        month_cut = collect_account.cut.month
+        year_cut = collect_account.cut.year
+        date_any = date(int(year_cut), int(month_cut), 1)
 
         collect_account.delta = form.cleaned_data['contenido']
         collect_account.save()
@@ -238,7 +241,7 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
 
 
-        month = int(collect_account.month)
+        month = int(collect_account.month) - 1
         month_inform = functions.month_converter(month)
 
         template_header = BeautifulSoup(
@@ -248,7 +251,7 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         template_header_tag.insert(1, str(collect_account.id))
 
         template_header_tag = template_header.find(class_='date_span')
-        template_header_tag.insert(1, str(date))
+        template_header_tag.insert(1, str(date_any))
 
         template_header_tag = template_header.find(class_='charge_span')
         template_header_tag.insert(1, str(collect_account.contract.contratista.cargo))
@@ -264,6 +267,9 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
 
         template_header_tag = template_header.find(class_='name_span_1')
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
+
+        template_header_tag = template_header.find(class_='document_span_1')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula()))
 
         template_header_tag = template_header.find(class_='content_span_1')
         template_header_tag.insert(1, delta_2)
@@ -347,6 +353,10 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         day = timezone.now()
         date = day.strftime("%Y/%m/%d")
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+        month_cut = collect_account.cut.month
+        year_cut = collect_account.cut.year
+        date_any = date(int(year_cut), int(month_cut), 1)
+
 
         collect_account.delta = form.cleaned_data['contenido']
         collect_account.save()
@@ -355,8 +365,9 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         delta_2 = BeautifulSoup(html.render(delta['ops']),"html.parser",from_encoding='utf-8')
 
         collect_account.file6.delete()
-        month = int(collect_account.month)
+        month = int(collect_account.month) -1
         month_inform = functions.month_converter(month)
+
 
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
 
@@ -367,7 +378,7 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         template_header_tag.insert(1, str(collect_account.id))
 
         template_header_tag = template_header.find(class_='date_span')
-        template_header_tag.insert(1, str(date))
+        template_header_tag.insert(1, str(date_any))
 
         template_header_tag = template_header.find(class_='charge_span')
         template_header_tag.insert(1, str(collect_account.contract.contratista.cargo))
@@ -389,6 +400,10 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
 
         template_header_tag = template_header.find(class_='name_span_2')
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
+
+        template_header_tag = template_header.find(class_='document_span_1')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula()))
+
 
         template_header_tag = template_header.find(class_='document_span_2')
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_cedula()))
