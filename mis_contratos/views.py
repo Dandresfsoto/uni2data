@@ -12,6 +12,7 @@ from django.utils import timezone
 import io
 from django.core.files import File
 import pdfkit
+from datetime import date, datetime
 
 #------------------------------- SELECCIÓN ----------------------------------------
 
@@ -226,9 +227,8 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         day = timezone.now()
         date = day.strftime("%Y/%m/%d")
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
-        month_cut = collect_account.cut.month
-        year_cut = collect_account.cut.year
-        date_any = date(int(year_cut), int(month_cut), 1)
+        date_any= str(collect_account.contract.inicio)
+
 
         collect_account.delta = form.cleaned_data['contenido']
         collect_account.save()
@@ -251,7 +251,7 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         template_header_tag.insert(1, str(collect_account.id))
 
         template_header_tag = template_header.find(class_='date_span')
-        template_header_tag.insert(1, str(date_any))
+        template_header_tag.insert(1, date_any)
 
         template_header_tag = template_header.find(class_='charge_span')
         template_header_tag.insert(1, str(collect_account.contract.contratista.cargo))
@@ -269,7 +269,7 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
 
         template_header_tag = template_header.find(class_='document_span_1')
-        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula()))
+        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
 
         template_header_tag = template_header.find(class_='content_span_1')
         template_header_tag.insert(1, delta_2)
@@ -353,9 +353,7 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         day = timezone.now()
         date = day.strftime("%Y/%m/%d")
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
-        month_cut = collect_account.cut.month
-        year_cut = collect_account.cut.year
-        date_any = date(int(year_cut), int(month_cut), 1)
+        date_any= str(collect_account.contract.inicio)
 
 
         collect_account.delta = form.cleaned_data['contenido']
@@ -378,7 +376,7 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         template_header_tag.insert(1, str(collect_account.id))
 
         template_header_tag = template_header.find(class_='date_span')
-        template_header_tag.insert(1, str(date_any))
+        template_header_tag.insert(1, date_any)
 
         template_header_tag = template_header.find(class_='charge_span')
         template_header_tag.insert(1, str(collect_account.contract.contratista.cargo))
@@ -402,7 +400,7 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
 
         template_header_tag = template_header.find(class_='document_span_1')
-        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula()))
+        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
 
 
         template_header_tag = template_header.find(class_='document_span_2')
