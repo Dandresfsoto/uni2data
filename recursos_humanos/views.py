@@ -1487,7 +1487,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                                 'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
                             },
                             DEFAULT_FROM_EMAIL,
-                            [user.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
+                            [user.email, EMAIL_HOST_USER]
                         )
 
                 else:
