@@ -1917,8 +1917,8 @@ class CollectsAccountListApi(BaseDatatableView):
 
 class CutsCollectAccountsListApi(BaseDatatableView):
     model = rh_models.Collects_Account
-    columns = ['html','contract','date_creation','estate_report','delta','user_creation','data_json','valores_json','file','file3','file4','estate','file5','estate_inform']
-    order_columns = ['html','contract','date_creation','estate_report','delta','user_creation','data_json','valores_json','file','file3','file4','estate','file5','estate_inform']
+    columns = ['html','contract','date_creation','estate_report','delta','user_creation','data_json','valores_json','file','file3','file4','estate_inform','file5','estate']
+    order_columns = ['html','contract','date_creation','estate_report','delta','user_creation','data_json','valores_json','file','file3','file4','estate_inform','file5','estate']
 
     def get_initial_queryset(self):
         self.cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
@@ -2040,7 +2040,7 @@ class CutsCollectAccountsListApi(BaseDatatableView):
             url_file4 = row.url_file4()
             ret = '<div class="center-align">'
             if url_file4 != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios firmada">' \
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Registro informe de actividades">' \
                        '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                        '</a>'.format(url_file4)
             ret += '</div>'
@@ -2055,7 +2055,7 @@ class CutsCollectAccountsListApi(BaseDatatableView):
             ret = '<div class="center-align">'
 
             if url_file5 != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Seguridad social">' \
                        '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                        '</a>'.format(url_file5)
 
