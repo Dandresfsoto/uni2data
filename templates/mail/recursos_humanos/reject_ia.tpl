@@ -85,7 +85,7 @@ Hola {{ nombre }}, Te han rechazado tu informe de actividades
 							<table border="0" cellpadding="0" cellspacing="0" width="100%">
 								<tr>
 									<td style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px;" width="75%">
-										&copy; 2018 Asociación Nacional para el Desarrollo Social - ANDES
+										&copy; Asociación Colombiana de innovacion - ASOCOINN
 									</td>
 								</tr>
 							</table>

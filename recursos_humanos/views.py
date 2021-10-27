@@ -250,11 +250,11 @@ class CertificacionesCreateView(LoginRequiredMixin,
         elif form.cleaned_data['firma'] == 'Gerencia':
 
             template_no_header = BeautifulSoup(
-                open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/certificaciones/no_header/certificacion_gerencia.html',
+                open(settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/no_header/certificacion_gerencia.html',
                      'rb'), "html.parser")
 
             template_header = BeautifulSoup(
-                open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/certificaciones/header/certificacion_gerencia.html',
+                open(settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/header/certificacion_gerencia.html',
                      'rb'), "html.parser")
 
         template_no_header_tag = template_no_header.find(class_='contenido')
@@ -946,11 +946,11 @@ class CertificacionesUpdateView(LoginRequiredMixin,
         elif form.cleaned_data['firma'] == 'Gerencia':
 
             template_no_header = BeautifulSoup(
-                open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/certificaciones/no_header/certificacion_gerencia.html',
+                open(settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/no_header/certificacion_gerencia.html',
                      'rb'), "html.parser")
 
             template_header = BeautifulSoup(
-                open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/certificaciones/header/certificacion_gerencia.html',
+                open(settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/header/certificacion_gerencia.html',
                      'rb'), "html.parser")
 
         template_no_header_tag = template_no_header.find(class_='contenido')
@@ -1336,11 +1336,13 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                 start = contract.inicio
                 end = contract.fin
                 rd = rdelta.relativedelta(end,start)
+
                 rd_months = rd.months
                 rd_days = rd.days
-                days_total = rd_months * 30 + rd_days
+                days_total = rd_months * 30 + rd_days + 1
                 value_f = float(value)
                 value_total = int(value_f)
+
 
 
 
@@ -1354,9 +1356,9 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     total_value_fees_sum = float(total_value_fees) + float(values_total)
 
                 if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
-                    date_rest= date(int(year_cut), int(month_cut)+1, 1)
+                    date_rest= date(int(year_cut), int(month_cut), 30)
                     days_rest = date_rest - contract.inicio
-                    values_total = (values_total/30) * (days_rest.days-1)
+                    values_total = (values_total/30) * (days_rest.days)
 
                 if contract.fin.year == int(year_cut) and contract.fin.month == int(month_cut):
                     total_value_fees = float(total_value_fees)
@@ -1401,7 +1403,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     collect_account.save()
 
                     template_header = BeautifulSoup(
-                        open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'), "html.parser")
+                        open(settings.STATICFILES_DIRS[0]  + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'), "html.parser")
 
                     template_header_tag = template_header.find(class_='codigo_span')
                     template_header_tag.insert(1, str(collect_account.id))
@@ -1436,8 +1438,6 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     template_header_tag = template_header.find(class_='position_span')
                     template_header_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
 
-                    template_header_tag = template_header.find(class_='position_span')
-                    template_header_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
 
                     template_header_tag = template_header.find(class_='month_span')
                     template_header_tag.insert(1, str(month))
@@ -1529,7 +1529,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     collect_account.save()
 
                     template_header = BeautifulSoup(
-                        open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'),
+                        open(settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'),
                         "html.parser")
 
                     template_header_tag = template_header.find(class_='codigo_span')
@@ -1561,9 +1561,6 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
                     template_header_tag = template_header.find(class_='value_letter_num_span')
                     template_header_tag.insert(1, str(value_letter_num))
-
-                    template_header_tag = template_header.find(class_='position_span')
-                    template_header_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
 
                     template_header_tag = template_header.find(class_='position_span')
                     template_header_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
@@ -1730,7 +1727,7 @@ class CollectAccountUpdateView(FormView):
             collect_account.estate = 'Generado'
         collect_account.save()
 
-        template_header = BeautifulSoup(open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/cuentas_cobro/cuenta.html','rb'), "html.parser")
+        template_header = BeautifulSoup(open(settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/cuenta.html','rb'), "html.parser")
 
         template_header_tag = template_header.find(class_='codigo_span')
         template_header_tag.insert(1, str(collect_account.id))
@@ -1761,9 +1758,6 @@ class CollectAccountUpdateView(FormView):
 
         template_header_tag = template_header.find(class_='value_letter_num_span')
         template_header_tag.insert(1, str(value_letter_num))
-
-        template_header_tag = template_header.find(class_='position_span')
-        template_header_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
 
         template_header_tag = template_header.find(class_='position_span')
         template_header_tag.insert(1, str(collect_account.contract.contratista.cargo.nombre))
