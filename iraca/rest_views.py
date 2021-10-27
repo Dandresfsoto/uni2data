@@ -1889,9 +1889,9 @@ class InformListApi(BaseDatatableView):
 
         self.permissions = {
             "ver": [
-                "usuarios.recursos_humanos.ver",
-                "usuarios.recursos_humanos.cortes.ver",
-                "usuarios.recursos_humanos.cuentas_cobro.ver",
+                "usuarios.iraca.ver",
+                "usuarios.iraca.cortes.ver",
+                "usuarios.iraca.cuentas_cobro.ver",
             ]
         }
         return self.model.objects.all()
@@ -1949,9 +1949,9 @@ class InformCollectAccountListApi(BaseDatatableView):
 
         self.permissions = {
             "ver": [
-                "usuarios.recursos_humanos.ver",
-                "usuarios.recursos_humanos.cortes.ver",
-                "usuarios.recursos_humanos.cuentas_cobro.ver",
+                "usuarios.iraca.ver",
+                "usuarios.iraca.cortes.ver",
+                "usuarios.iraca.cuentas_cobro.ver",
             ],
         }
         return self.model.objects.filter(cut__id = self.kwargs['pk_cut']).order_by('-creation')
