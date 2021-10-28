@@ -729,7 +729,7 @@ class CutsListApi(BaseDatatableView):
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
-            q = Q(name__icontains=search) | Q(consecutive=search)
+            q = Q(name__icontains=search) | Q(consecutive__icontains=search)
             qs = qs.filter(q)
         return qs
 
@@ -814,7 +814,7 @@ class CutsCollectAccountListApi(BaseDatatableView):
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
-            q = Q(contract__nombre__icontains=search) | Q(contract__cargo__icontains=search) | \
+            q = Q(contract__nombre__icontains=search) | \
                 Q(contract__contratista__nombres__icontains=search) | Q(contract__contratista__apellidos__icontains=search)
             qs = qs.filter(q)
         return qs
