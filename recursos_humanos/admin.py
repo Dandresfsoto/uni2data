@@ -32,6 +32,7 @@ def actualizar_contratos(modeladmin, request, queryset):
                     tipo_contrato = file[11].value,
                     grupo_soportes = models.GruposSoportes.objects.get(id = file[12].value),
                     valor = file[9].value,
+                    transporte = file[15].value,
                     proyecto = Proyecto.objects.get(id = file[13].value),
                     cargo = models.Cargos.objects.get(id = file[14].value)
                 )
