@@ -962,8 +962,7 @@ class CutsCollectAccountListApi(BaseDatatableView):
 
         elif column == 'cut':
             ret = ''
-            value = float(row.value_fees)
-            if value <= 0:
+            if row.estate != 'Aprobado':
                 ret = '<div class="center-align">' \
                       '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar cuenta de cobro">' \
                       '<i class="material-icons">delete</i>' \
