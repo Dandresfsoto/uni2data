@@ -9,7 +9,7 @@ def actualizar_contratos(modeladmin, request, queryset):
 
     for data in queryset:
         wb = openpyxl.load_workbook(data.file)
-        ws = wb.get_active_sheet()
+        ws = wb.active
 
         for file in ws.rows:
 
