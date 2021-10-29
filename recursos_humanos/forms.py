@@ -1642,7 +1642,7 @@ class CutsAddForm(forms.Form):
 
         for contract_id in contracts_ids:
             contract = models.Contratos.objects.get(id = contract_id)
-            account = models.Collects_Account.objects.filter(contract=contract, year=year,month=month).exclude().count()
+            account = models.Collects_Account.objects.filter(contract=contract, cut=cuts).exclude().count()
             if account == 0:
                 if int(contract.inicio.year) <= int(year) and  int(contract.fin.year) >= int(year):
                     if int(contract.inicio.month) <= int(month) and  int(contract.fin.month) >=  int(month):
