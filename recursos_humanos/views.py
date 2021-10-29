@@ -1917,11 +1917,11 @@ class CollectAccountApprobView(View):
                 if request.user.is_superuser:
                     self.collect_account.estate = 'Aprobado'
                     self.collect_account.save()
-
                     return HttpResponseRedirect('../../')
                 else:
                     if request.user.has_perms(self.permissions.get('all')):
                         self.collect_account.estate = 'Aprobado'
+                        self.collect_account.save()
                         return HttpResponseRedirect('../../')
                     else:
                         return HttpResponseRedirect('../../')

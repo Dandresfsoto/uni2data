@@ -3684,6 +3684,7 @@ class InformCollectsAccountAprobListView(View):
                 else:
                     if request.user.has_perms(self.permissions.get('all')):
                         self.collect_account.estate_inform = 'Aprobado'
+                        self.collect_account.save()
                         return HttpResponseRedirect('../../')
                     else:
                         return HttpResponseRedirect('../../')
