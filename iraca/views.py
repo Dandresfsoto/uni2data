@@ -3718,6 +3718,12 @@ class InformCollectsAccountRejectListView(FormView):
                     else:
                         handler = self.http_method_not_allowed
                     return handler(request, *args, **kwargs)
+                else:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
             else:
                 return HttpResponseRedirect('../../')
 
