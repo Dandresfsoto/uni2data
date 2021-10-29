@@ -1766,7 +1766,7 @@ class CollectAccountUpdateView(FormView):
         template_header_tag.insert(1, str(value_letter_num))
 
         template_header_tag = template_header.find(class_='position_span')
-        template_header_tag.insert(1, str(collect_account.contract.contratista.nombre))
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
 
         template_header_tag = template_header.find(class_='month_span')
         template_header_tag.insert(1, str(month))
