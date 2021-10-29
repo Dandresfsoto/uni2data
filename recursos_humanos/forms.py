@@ -1638,7 +1638,8 @@ class CutsAddForm(forms.Form):
         year = cuts.year
         month = cuts.month
 
-        contracts_ids = models.Contratos.objects.exclude(liquidado = True).filter(ejecucion = True, suscrito=True).values_list('id',flat=True).distinct()
+        collects_ids = models.Collects_Account.objects.filter(year = year, month=month).values_list('contract__id',flat=True)
+        contracts_ids = Contratos.objects.filter(ejecucion = True, suscrito=True,liquidado = False).exclude(id__in=collects_ids).values_list('id',flat=True).distinct()
 
         for contract_id in contracts_ids:
             contract = models.Contratos.objects.get(id = contract_id)

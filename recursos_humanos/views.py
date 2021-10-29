@@ -1324,7 +1324,10 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
     def form_valid(self, form):
         cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
-        contracts_ids = models.Contratos.objects.exclude(liquidado=True).filter(ejecucion=True,suscrito=True).values_list('id',flat=True).distinct()
+        year = cut.year
+        month = cut.month
+        collects_ids = models.Collects_Account.objects.filter(year=year, month=month).values_list('contract__id',flat=True)
+        contracts_ids = Contratos.objects.filter(ejecucion=True, suscrito=True, liquidado=False).exclude(id__in=collects_ids).values_list('id', flat=True).distinct()
         user = self.request.user
 
         for contract_id in contracts_ids:
