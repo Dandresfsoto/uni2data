@@ -1359,9 +1359,15 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     total_value_fees_sum = float(total_value_fees) + float(values_total)
 
                 if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
-                    date_rest= date(int(year_cut), int(month_cut), 30)
-                    days_rest = date_rest - contract.inicio
-                    values_total = (values_total/30) * (days_rest.days)
+                    days_monht = functions.obtener_dias_del_mes(month,year)
+                    if days_monht != 31:
+                        date_rest= date(int(year_cut), int(month_cut), int(days_monht))
+                        days_rest = date_rest - contract.inicio
+                        values_total = (values_total/30) * (days_rest.days + 1)
+                    else:
+                        date_rest = date(int(year_cut), int(month_cut), 30)
+                        days_rest = date_rest - contract.inicio
+                        values_total = (values_total / 30) * (days_rest.days + 1)
 
                 if contract.fin.year == int(year_cut) and contract.fin.month == int(month_cut):
                     total_value_fees = float(total_value_fees)

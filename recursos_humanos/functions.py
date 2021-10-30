@@ -141,7 +141,6 @@ def delta_empty():
 
     return ret
 
-
 def numero_to_letras(numero):
     indicador = [("", ""), ("MIL", "MIL"), ("MILLON", "MILLONES"), ("MIL", "MIL"), ("BILLON", "BILLONES")]
     entero = int(numero)
@@ -170,7 +169,6 @@ def numero_to_letras(numero):
     numero_letras = numero_letras
 
     return numero_letras
-
 
 def convierte_cifra(numero, sw):
     lista_centana = ["", ("CIEN", "CIENTO"), "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS",
@@ -218,7 +216,23 @@ def convierte_cifra(numero, sw):
 
     return "%s %s %s" % (texto_centena, texto_decena, texto_unidad)
 
-
 def month_converter(month):
     months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
     return months[month]
+
+def es_bisiesto(anio: int) -> bool:
+    return anio % 4 == 0 and (anio % 100 != 0 or anio % 400 == 0)
+
+def obtener_dias_del_mes(mes: int, anio: int) -> int:
+    # Abril, junio, septiembre y noviembre tienen 30
+    if mes in [4, 6, 9, 11]:
+        return 30
+    # Febrero depende de si es o no bisiesto
+    if mes == 2:
+        if es_bisiesto(anio):
+            return 29
+        else:
+            return 28
+    else:
+        # En caso contrario, tiene 31 días
+        return 31
