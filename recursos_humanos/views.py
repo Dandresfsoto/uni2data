@@ -1324,7 +1324,10 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
     def form_valid(self, form):
         cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
-        contracts_ids = models.Contratos.objects.exclude(liquidado=True).filter(ejecucion=True,suscrito=True).values_list('id',flat=True).distinct()
+        year = cut.year
+        month = cut.month
+        collects_ids = models.Collects_Account.objects.filter(year=year, month=month).values_list('contract__id',flat=True)
+        contracts_ids = Contratos.objects.filter(ejecucion=True, suscrito=True, liquidado=False).exclude(id__in=collects_ids).values_list('id', flat=True).distinct()
         user = self.request.user
 
         for contract_id in contracts_ids:
@@ -1356,9 +1359,15 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     total_value_fees_sum = float(total_value_fees) + float(values_total)
 
                 if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
-                    date_rest= date(int(year_cut), int(month_cut), 30)
-                    days_rest = date_rest - contract.inicio
-                    values_total = (values_total/30) * (days_rest.days)
+                    days_monht = functions.obtener_dias_del_mes(month,year)
+                    if days_monht != 31:
+                        date_rest= date(int(year_cut), int(month_cut), int(days_monht))
+                        days_rest = date_rest - contract.inicio
+                        values_total = (values_total/30) * (days_rest.days + 1)
+                    else:
+                        date_rest = date(int(year_cut), int(month_cut), 30)
+                        days_rest = date_rest - contract.inicio
+                        values_total = (values_total / 30) * (days_rest.days + 1)
 
                 if contract.fin.year == int(year_cut) and contract.fin.month == int(month_cut):
                     total_value_fees = float(total_value_fees)
@@ -1914,11 +1923,11 @@ class CollectAccountApprobView(View):
                 if request.user.is_superuser:
                     self.collect_account.estate = 'Aprobado'
                     self.collect_account.save()
-
                     return HttpResponseRedirect('../../')
                 else:
                     if request.user.has_perms(self.permissions.get('all')):
                         self.collect_account.estate = 'Aprobado'
+                        self.collect_account.save()
                         return HttpResponseRedirect('../../')
                     else:
                         return HttpResponseRedirect('../../')

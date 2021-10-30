@@ -729,7 +729,11 @@ class CutsListApi(BaseDatatableView):
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
-            q = Q(name__icontains=search) | Q(consecutive__icontains=search)
+            account_q = Q(contract__contratista__cedula__icontains=search) | Q(contract__contratista__nombres__icontains=search) | Q(contract__contratista__apellidos__icontains=search)
+
+            ids = Collects_Account.objects.filter(account_q).values_list('cut__id', flat=True)
+
+            q = Q(name__icontains=search) | Q(consecutive__icontains=search) | Q(id__in = ids)
             qs = qs.filter(q)
         return qs
 

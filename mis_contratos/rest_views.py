@@ -290,7 +290,7 @@ class AccountContractListApi(BaseDatatableView):
             if url_file5 != None:
                 if estate != "Aprobado":
                     if row.estate_inform == "Generado":
-                        if row.delta == None:
+                        if row.delta == "":
                             ret = '<div class="center-align">' \
                                   '<a href="upload_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                                   '<i class="material-icons">assignment_turned_in</i>' \
