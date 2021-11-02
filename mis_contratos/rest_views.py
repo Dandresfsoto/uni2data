@@ -285,12 +285,13 @@ class AccountContractListApi(BaseDatatableView):
 
         elif column == 'html_2':
             url_file5 = row.url_file5()
+            url_file6 = row.url_file6()
             ret = '<div class="center-align">'
             estate = row.estate_inform
             if url_file5 != None:
                 if estate != "Aprobado":
                     if row.estate_inform == "Generado":
-                        if row.delta == "":
+                        if url_file6 == None:
                             ret = '<div class="center-align">' \
                                   '<a href="upload_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
                                   '<i class="material-icons">assignment_turned_in</i>' \
