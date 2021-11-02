@@ -1367,7 +1367,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     else:
                         date_rest = date(int(year_cut), int(month_cut), 30)
                         days_rest = date_rest - contract.inicio
-                        values_total = (values_total / 30) * (days_rest.days + 1)
+                        values_total = (values_total / 30) * (days_rest.days)
 
                 if contract.fin.year == int(year_cut) and contract.fin.month == int(month_cut):
                     total_value_fees = float(total_value_fees)
