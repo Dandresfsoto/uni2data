@@ -1323,11 +1323,15 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
         return permissions
 
     def form_valid(self, form):
+        import datetime
         cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
-        year = cut.year
-        month = cut.month
+        year = int(cut.year)
+        month = int(cut.month)
+        t_init = datetime.date(year, month, 1)
+        t_end = datetime.date(year,month,28)
+
         collects_ids = models.Collects_Account.objects.filter(year=year, month=month).values_list('contract__id',flat=True)
-        contracts_ids = Contratos.objects.filter(ejecucion=True, suscrito=True, liquidado=False).exclude(id__in=collects_ids).values_list('id', flat=True).distinct()
+        contracts_ids = Contratos.objects.filter(ejecucion = True, suscrito=True,liquidado = False, inicio__lte=t_init, fin__gt=t_end).exclude(id__in=collects_ids).values_list('id',flat=True).distinct()
         user = self.request.user
 
         for contract_id in contracts_ids:
@@ -1486,18 +1490,18 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
                         user = collect_account.contract.get_user_or_none()
 
-                        #if user != None:
-                        #    tasks.send_mail_templated_cuenta_cobro(
-                        #        'mail/recursos_humanos/cuenta_cobro.tpl',
-                        #        {
-                        #            'url_base': 'https://' + self.request.META['HTTP_HOST'],
-                        #            'Contrato': collect_account.contract.nombre,
-                        #            'nombre': collect_account.contract.contratista.nombres,
-                        #            'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
-                        #        },
-                        #        DEFAULT_FROM_EMAIL,
-                        #        [user.email, EMAIL_HOST_USER]
-                        #    )
+                        if user != None:
+                            tasks.send_mail_templated_cuenta_cobro(
+                                'mail/recursos_humanos/cuenta_cobro.tpl',
+                                {
+                                    'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                                    'Contrato': collect_account.contract.nombre,
+                                    'nombre': collect_account.contract.contratista.nombres,
+                                    'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
+                                },
+                                DEFAULT_FROM_EMAIL,
+                                [user.email, EMAIL_HOST_USER]
+                            )
 
 
 
