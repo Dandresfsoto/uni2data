@@ -1486,18 +1486,18 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
                         user = collect_account.contract.get_user_or_none()
 
-                        if user != None:
-                            tasks.send_mail_templated_cuenta_cobro(
-                                'mail/recursos_humanos/cuenta_cobro.tpl',
-                                {
-                                    'url_base': 'https://' + self.request.META['HTTP_HOST'],
-                                    'Contrato': collect_account.contract.nombre,
-                                    'nombre': collect_account.contract.contratista.nombres,
-                                    'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
-                                },
-                                DEFAULT_FROM_EMAIL,
-                                [user.email, EMAIL_HOST_USER]
-                            )
+                        #if user != None:
+                        #    tasks.send_mail_templated_cuenta_cobro(
+                        #        'mail/recursos_humanos/cuenta_cobro.tpl',
+                        #        {
+                        #            'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                        #            'Contrato': collect_account.contract.nombre,
+                        #            'nombre': collect_account.contract.contratista.nombres,
+                        #            'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
+                        #        },
+                        #        DEFAULT_FROM_EMAIL,
+                        #        [user.email, EMAIL_HOST_USER]
+                        #    )
 
 
 
@@ -2026,3 +2026,25 @@ class CollectAccountDeleteView(LoginRequiredMixin,
         cuenta_cobro.delete()
 
         return HttpResponseRedirect('../../')
+
+class CutsReport(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.cortes.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        reporte = Reportes.objects.create(
+            usuario = self.request.user,
+            nombre = 'Listado de cortes y cuentas de cobro',
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
+        )
+
+        tasks.build_list_collects_account(reporte.id)
+
+        return HttpResponseRedirect('/reportes/')

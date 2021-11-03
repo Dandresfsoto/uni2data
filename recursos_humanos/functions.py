@@ -2,7 +2,7 @@ import json
 
 from num2words import num2words
 
-from recursos_humanos.models import Contratos
+from recursos_humanos.models import *
 from django.utils import timezone
 
 def certificacion_laboral(contratista):
