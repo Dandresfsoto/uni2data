@@ -1641,36 +1641,35 @@ class CutsAddForm(forms.Form):
         collects_ids = models.Collects_Account.objects.filter(year = year, month=month).values_list('contract__id',flat=True)
         contracts_ids = Contratos.objects.filter(ejecucion = True, suscrito=True,liquidado = False).exclude(id__in=collects_ids).values_list('id',flat=True).distinct()
 
+
         for contract_id in contracts_ids:
             contract = models.Contratos.objects.get(id = contract_id)
             account = models.Collects_Account.objects.filter(contract=contract, cut=cuts).exclude().count()
             if account == 0:
-                if int(contract.inicio.year) <= int(year) and  int(contract.fin.year) >= int(year):
-                    if int(contract.inicio.month) <= int(month) and  int(contract.fin.month) >=  int(month):
-                        self.fields['contrato_' + str(contract.id)] = forms.BooleanField(
-                            label = '{0} Ruta: {1} - {2}'.format(contract.valor,contract.nombre,contract.contratista.get_full_name_cedula()),
-                            required = False
-                         )
-                        self.fields['contrato_' + str(contract.id)].widget.attrs['class'] = 'filled-in'
+                self.fields['contrato_' + str(contract.id)] = forms.BooleanField(
+                    label = '{0} Ruta: {1} - {2}'.format(contract.valor,contract.nombre,contract.contratista.get_full_name_cedula()),
+                    required = False
+                 )
+                self.fields['contrato_' + str(contract.id)].widget.attrs['class'] = 'filled-in'
 
-                        description = '<ul style="margin-top:30px;">'
-                        mid = ''
+                description = '<ul style="margin-top:30px;">'
+                mid = ''
 
-                        description += '{0}</ul>'.format(mid)
+                description += '{0}</ul>'.format(mid)
 
-                        self.helper.layout.fields[2].fields.append(
-                            Div(
-                                Div(
-                                    Column(
-                                        'contrato_' + str(contract.id),
-                                        css_class='s12'
-                                    ),
-                                    Column(
-                                        HTML(description)
-                                    )
-                                )
+                self.helper.layout.fields[2].fields.append(
+                    Div(
+                        Div(
+                            Column(
+                                'contrato_' + str(contract.id),
+                                css_class='s12'
+                            ),
+                            Column(
+                                HTML(description)
                             )
                         )
+                    )
+                )
 
 class CollectsAccountForm(forms.Form):
 
