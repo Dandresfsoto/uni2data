@@ -207,8 +207,8 @@ class SoportesContratoListApi(BaseDatatableView):
 
 class AccountContractListApi(BaseDatatableView):
     model = models.Collects_Account
-    columns = ['id','html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','estate_report']
-    order_columns = ['id','html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','file2','estate_report']
+    columns = ['html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','estate_report']
+    order_columns = ['html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','file2','estate_report']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(contract = self.kwargs['pk']).exclude(value_fees=0).order_by('-cut__consecutive')
@@ -222,10 +222,7 @@ class AccountContractListApi(BaseDatatableView):
 
     def render_column(self, row, column):
 
-        if column == 'id':
-            return row.cut.consecutive
-
-        elif column == 'html':
+        if column == 'html':
             url_file5 = row.url_file5()
             if row.estate == "Generado":
                 ret = '<div class="center-align">' \

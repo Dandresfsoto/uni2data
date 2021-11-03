@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+import datetime
+
 from django import forms
 from django.db.models import Sum
 
@@ -1635,41 +1638,44 @@ class CutsAddForm(forms.Form):
             )
         )
 
-        year = cuts.year
-        month = cuts.month
+        year = int(cuts.year)
+        month = int(cuts.month)
 
         collects_ids = models.Collects_Account.objects.filter(year = year, month=month).values_list('contract__id',flat=True)
-        contracts_ids = Contratos.objects.filter(ejecucion = True, suscrito=True,liquidado = False).exclude(id__in=collects_ids).values_list('id',flat=True).distinct()
+        contracts_ids = Contratos.objects.filter(ejecucion = True, suscrito=True,liquidado = False, inicio__lte=datetime.date(year, month, 1), fin__gt=datetime.date(year, month, 28)).exclude(id__in=collects_ids).values_list('id',flat=True).distinct()
 
 
         for contract_id in contracts_ids:
             contract = models.Contratos.objects.get(id = contract_id)
-            account = models.Collects_Account.objects.filter(contract=contract, cut=cuts).exclude().count()
-            if account == 0:
-                self.fields['contrato_' + str(contract.id)] = forms.BooleanField(
-                    label = '{0} Ruta: {1} - {2}'.format(contract.valor,contract.nombre,contract.contratista.get_full_name_cedula()),
-                    required = False
-                 )
-                self.fields['contrato_' + str(contract.id)].widget.attrs['class'] = 'filled-in'
+            month_init = int(contract.inicio.month)
+            year_init = int(contract.inicio.year)
+            month_end = int(contract.fin.month)
+            year_end = int(contract.fin.year)
 
-                description = '<ul style="margin-top:30px;">'
-                mid = ''
+            self.fields['contrato_' + str(contract.id)] = forms.BooleanField(
+                label = '{0} Ruta: {1} - {2}'.format(contract.valor,contract.nombre,contract.contratista.get_full_name_cedula()),
+                required = False
+             )
+            self.fields['contrato_' + str(contract.id)].widget.attrs['class'] = 'filled-in'
 
-                description += '{0}</ul>'.format(mid)
+            description = '<ul style="margin-top:30px;">'
+            mid = ''
 
-                self.helper.layout.fields[2].fields.append(
+            description += '{0}</ul>'.format(mid)
+
+            self.helper.layout.fields[2].fields.append(
+                Div(
                     Div(
-                        Div(
-                            Column(
-                                'contrato_' + str(contract.id),
-                                css_class='s12'
-                            ),
-                            Column(
-                                HTML(description)
-                            )
+                        Column(
+                            'contrato_' + str(contract.id),
+                            css_class='s12'
+                        ),
+                        Column(
+                            HTML(description)
                         )
                     )
                 )
+            )
 
 class CollectsAccountForm(forms.Form):
 
