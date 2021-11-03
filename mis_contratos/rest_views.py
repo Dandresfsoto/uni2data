@@ -305,11 +305,18 @@ class AccountContractListApi(BaseDatatableView):
                                   '</div>'.format(row.id, row.contract.nombre)
 
                     elif row.estate_inform == "Rechazado":
-                        ret = '<div class="center-align">' \
-                              '<a href="update_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
-                              '<i class="material-icons">assignment_turned_in</i>' \
-                              '</a>' \
-                              '</div>'.format(row.id, row.contract.nombre)
+                        if url_file6 == None or url_file6 == "" or row.delta == "" or row.delta == None:
+                            ret = '<div class="center-align">' \
+                                  '<a href="upload_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                                  '<i class="material-icons">assignment_turned_in</i>' \
+                                  '</a>' \
+                                  '</div>'.format(row.id, row.contract.nombre)
+                        else:
+                            ret = '<div class="center-align">' \
+                                  '<a href="update_activity/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar cuenta de cobro {1}">' \
+                                  '<i class="material-icons">assignment_turned_in</i>' \
+                                  '</a>' \
+                                  '</div>'.format(row.id, row.contract.nombre)
 
                     else:
                         ret = '<div class="center-align">' \
