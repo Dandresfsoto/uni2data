@@ -286,3 +286,60 @@ def build_reporte_hv(id):
 def send_mail_templated_collect_account(template,dictionary,from_email,list_to_email):
     send_mail(template, dictionary, from_email, list_to_email)
     return 'Email enviado'
+
+@app.task
+def build_list_collects_account(id):
+    from recursos_humanos.models import Contratos, Cuts, Collects_Account
+    reporte = models_reportes.Reportes.objects.get(id = id)
+    proceso = "SICAN-LIST-CUENTAS DE COBRO"
+
+
+    titulos = ['Consecutivo', 'Código','Proyecto', 'Cargo' ,'Contratista', 'Cédula','Fecha inicio', 'Fecha finalización', 'Valor total contrato']
+
+    formatos = ['0', 'General','General', 'General', 'General', '0', 'dd/mm/yyyy', 'dd/mm/yyyy', '"$"#,##0_);("$"#,##0)'
+                ]
+
+    ancho_columnas = [20, 30, 30, 30, 40,25, 35, 40, 20]
+
+    contenidos = []
+    order = []
+
+    for cut in models.Cuts.objects.filter().order_by('consecutive'):
+        order.append(cut)
+        titulos.append(f'{cut.consecutive} - {cut.name}')
+        formatos.append('General')
+        ancho_columnas.append(30)
+
+
+
+    i = 0
+    for contrato in Contratos.objects.filter(visible = True).order_by('-creation'):
+        i += 1
+
+        collects_account = []
+
+
+        lista = [
+            int(i),
+            contrato.nombre,
+            contrato.get_proyecto(),
+            contrato.get_cargo(),
+            contrato.contratista.get_full_name(),
+            contrato.contratista.cedula,
+            contrato.inicio,
+            contrato.fin,
+            contrato.valor.amount,
+        ]
+        for cut in order:
+            lista.append(cut.get_collects(cut, contrato))
+
+        contenidos.append(lista)
+
+
+    output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
+
+    filename = str(reporte.id) + '.xlsx'
+    reporte.file.save(filename, File(output))
+
+
+    return "Archivo paquete ID: " + filename

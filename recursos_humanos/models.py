@@ -568,6 +568,17 @@ class Cuts(models.Model):
     class Meta:
         verbose_name_plural = "Cortes"
 
+    def get_collects(self, cut, contrato):
+
+        collects = Collects_Account.objects.filter(contract = contrato, cut=cut)
+
+        try:
+            estado = collects[0].get_value_fees()
+        except:
+            estado = ''
+
+        return estado
+
     def pretty_creation_datetime(self):
         return self.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
 

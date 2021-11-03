@@ -1323,11 +1323,15 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
         return permissions
 
     def form_valid(self, form):
+        import datetime
         cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
-        year = cut.year
-        month = cut.month
+        year = int(cut.year)
+        month = int(cut.month)
+        t_init = datetime.date(year, month, 1)
+        t_end = datetime.date(year,month,28)
+
         collects_ids = models.Collects_Account.objects.filter(year=year, month=month).values_list('contract__id',flat=True)
-        contracts_ids = Contratos.objects.filter(ejecucion=True, suscrito=True, liquidado=False).exclude(id__in=collects_ids).values_list('id', flat=True).distinct()
+        contracts_ids = Contratos.objects.filter(ejecucion = True, suscrito=True,liquidado = False, inicio__lte=t_init, fin__gt=t_end).exclude(id__in=collects_ids).values_list('id',flat=True).distinct()
         user = self.request.user
 
         for contract_id in contracts_ids:
@@ -2026,3 +2030,25 @@ class CollectAccountDeleteView(LoginRequiredMixin,
         cuenta_cobro.delete()
 
         return HttpResponseRedirect('../../')
+
+class CutsReport(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.cortes.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        reporte = Reportes.objects.create(
+            usuario = self.request.user,
+            nombre = 'Listado de cortes y cuentas de cobro',
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
+        )
+
+        tasks.build_list_collects_account(reporte.id)
+
+        return HttpResponseRedirect('/reportes/')
