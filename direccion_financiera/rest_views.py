@@ -8,7 +8,7 @@ from requests import request
 
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, RubroPresupuestalLevel2, \
     RubroPresupuestalLevel3, Proyecto, Enterprise, PurchaseOrders, Products
-from recursos_humanos.models import Contratistas, Contratos
+from recursos_humanos.models import Contratistas, Contratos, Collects_Account
 from django.db.models import Q
 from rest_framework.views import APIView
 from django.http import Http404
@@ -1867,7 +1867,13 @@ class CollectsAccountListApi(BaseDatatableView):
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
-            q = Q(name__icontains=search) | Q(consecutive__icontains=search)
+            account_q = Q(contract__contratista__cedula__icontains=search) | Q(
+                contract__contratista__nombres__icontains=search) | Q(
+                contract__contratista__apellidos__icontains=search)
+
+            ids = Collects_Account.objects.filter(account_q).values_list('cut__id', flat=True)
+
+            q = Q(name__icontains=search) | Q(consecutive__icontains=search) | Q(id__in=ids)
             qs = qs.filter(q)
         return qs
 
@@ -1975,7 +1981,14 @@ class CutsCollectAccountsListApi(BaseDatatableView):
             if row.estate_report == 'Rechazado':
                 ret = '<div class="center-align">' \
                       '<a href="estate/{0}/">' \
-                      '<span><b>{1}</b></span>' \
+                      '<span style="color:red"><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estate_report)
+
+            elif row.estate_report == 'Reportado':
+                ret = '<div class="center-align">' \
+                      '<a href="estate/{0}/">' \
+                      '<span style="color:green"><b>{1}</b></span>' \
                       '</a>' \
                       '</div>'.format(row.id, row.estate_report)
 
@@ -1992,8 +2005,9 @@ class CutsCollectAccountsListApi(BaseDatatableView):
                       '<span><b>{1}</b></span>' \
                       '</a>' \
                       '</div>'.format(row.id, row.estate_report)
+
             else:
-                ret = '{0}'.format(row.estate)
+                ret = '{0}'.format(row.estate_report)
             return ret
 
         elif column == 'delta':
