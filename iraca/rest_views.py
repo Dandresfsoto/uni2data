@@ -5,6 +5,7 @@ from django.utils import timezone
 from iraca import models
 from iraca.models import Milestones, Meetings, Certificates, Types, Households
 from mobile.models import FormMobile
+from recursos_humanos.models import Collects_Account
 from usuarios.models import Municipios
 from recursos_humanos import models as rh_models
 
@@ -1899,7 +1900,13 @@ class InformListApi(BaseDatatableView):
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
-            q = Q(name__icontains=search) | Q(consecutive__icontains=search)
+            account_q = Q(contract__contratista__cedula__icontains=search) | Q(
+                contract__contratista__nombres__icontains=search) | Q(
+                contract__contratista__apellidos__icontains=search)
+
+            ids = Collects_Account.objects.filter(account_q).values_list('cut__id', flat=True)
+
+            q = Q(name__icontains=search) | Q(consecutive__icontains=search) | Q(id__in=ids)
             qs = qs.filter(q)
         return qs
 
