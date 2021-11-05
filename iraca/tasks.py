@@ -666,6 +666,7 @@ def build_bonding_report(id):
 
     return "Reporte generado: " + filename
 
+@app.task
 def build_bonding_total_report(id):
     reporte = models_reportes.Reportes.objects.get(id=id)
     proceso = "IRACA 2021"
