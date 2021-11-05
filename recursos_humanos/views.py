@@ -1331,7 +1331,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
         t_end = datetime.date(year,month,28)
 
         collects_ids = models.Collects_Account.objects.filter(year=year, month=month).values_list('contract__id',flat=True)
-        contracts_ids = Contratos.objects.filter(ejecucion = True, suscrito=True,liquidado = False, inicio__lte=t_init, fin__gt=t_end).exclude(id__in=collects_ids).values_list('id',flat=True).distinct()
+        contracts_ids = Contratos.objects.filter(ejecucion = True, suscrito=True,liquidado = False, fin__gt=t_end).exclude(id__in=collects_ids).values_list('id',flat=True).distinct()
         user = self.request.user
 
         for contract_id in contracts_ids:
@@ -1364,14 +1364,22 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
                 if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
                     days_monht = functions.obtener_dias_del_mes(month,year)
-                    if days_monht != 31:
-                        date_rest= date(int(year_cut), int(month_cut), int(days_monht))
-                        days_rest = date_rest - contract.inicio
-                        values_total = (values_total/30) * (days_rest.days + 1)
-                    else:
-                        date_rest = date(int(year_cut), int(month_cut), 30)
+                    if days_monht == 31:
+                        date_rest = date(int(year_cut), int(month_cut), int(days_monht))
                         days_rest = date_rest - contract.inicio
                         values_total = (values_total / 30) * (days_rest.days)
+                    elif days_monht == 30:
+                        date_rest = date(int(year_cut), int(month_cut), 30)
+                        days_rest = date_rest - contract.inicio
+                        values_total = (values_total / 30) * (days_rest.days +1)
+                    elif days_monht == 29:
+                        date_rest = date(int(year_cut), int(month_cut), 30)
+                        days_rest = date_rest - contract.inicio
+                        values_total = (values_total / 30) * (days_rest.days + 2)
+                    elif days_monht == 28:
+                        date_rest = date(int(year_cut), int(month_cut), 30)
+                        days_rest = date_rest - contract.inicio
+                        values_total = (values_total / 30) * (days_rest.days + 3)
 
                 if contract.fin.year == int(year_cut) and contract.fin.month == int(month_cut):
                     total_value_fees = float(total_value_fees)
