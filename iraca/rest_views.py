@@ -2042,15 +2042,31 @@ class InformCollectAccountListApi(BaseDatatableView):
 
         elif column == 'file3':
             ret = ''
+            url_file4 = row.url_file4()
             if row.estate_inform == 'Generado':
-                ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                       '<i class="material-icons">{2}</i>' \
-                       '</a>'.format(row.id, 'Aprobar', 'check_box')
+                if self.request.user.is_superuser:
+                    ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Aprobar', 'check_box')
 
-                ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                       '<i class="material-icons">{2}</i>' \
-                       '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+                    ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+                else:
+                    if url_file4 != None or url_file4 == "":
+                        ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                               '<i class="material-icons">{2}</i>' \
+                               '</a>'.format(row.id, 'Aprobar', 'check_box')
 
+                        ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                               '<i class="material-icons">{2}</i>' \
+                               '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+                    else:
+                        ret += '<i class="material-icons">{2}</i>' \
+                               '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+                        ret += '<i class="material-icons">{2}</i>' \
+                               '</a>'.format(row.id, 'Rechazar', 'highlight_off')
 
             if row.estate_inform == 'Rechazado':
                 ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
