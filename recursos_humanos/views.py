@@ -1212,7 +1212,7 @@ class ContratosReporteListadoView(LoginRequiredMixin,
             consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
         )
 
-        tasks.build_listado_contratos.delay(reporte.id)
+        tasks.build_listado_contratos(reporte.id)
 
         return HttpResponseRedirect('/reportes/')
 

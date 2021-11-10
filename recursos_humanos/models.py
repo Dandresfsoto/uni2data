@@ -595,7 +595,7 @@ class Cuts(models.Model):
         return cuentas_cobro.count()
 
     def get_novedades_report(self):
-        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate_inform__in = ['Aprobado'], estate__in = ['Aprobado']).exclude(file3="")
+        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate_inform__in = ['Aprobado'], estate__in = ['Aprobado'], estate_report__in = ['Cargado']).exclude(file3="")
         return cuentas_cobro.count()
 
     def get_valor(self):
