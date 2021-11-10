@@ -2012,10 +2012,7 @@ class CutsCollectAccountsListApi(BaseDatatableView):
             return ret
 
         elif column == 'delta':
-            url_file3 = row.url_file3()
-            url_file4 = row.url_file4()
-            url_file5 = row.url_file5()
-            if row.estate != 'Cargado' and url_file3 != None and url_file4 != None and url_file5 != None:
+            if row.estate_report == 'Cargado' and row.estate == 'Aprobado' and row.estate_inform == 'Aprobado':
                 return '<span class="new badge" data-badge-caption="">1</span>'
             else:
                 return ''
