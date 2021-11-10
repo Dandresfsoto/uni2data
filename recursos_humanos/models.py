@@ -426,6 +426,29 @@ class Contratos(models.Model):
                 pass
         return email
 
+    def get_email_contractor(self):
+        email = ''
+        try:
+            email = self.contratista.email
+        except:
+            pass
+        return email
+
+    def get_movil(self):
+        movil = ''
+        try:
+            movil = self.contratista.movil
+        except:
+            pass
+        return movil
+
+    def get_birthay(self):
+        birthday = ''
+        try:
+            birthday = self.contratista.birthday
+        except:
+            pass
+        return birthday
 
     def get_direccion(self):
         direccion = ''
