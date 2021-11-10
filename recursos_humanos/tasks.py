@@ -223,7 +223,7 @@ def build_listado_contratos(id):
             contrato.contratista.get_lugar_expedicion(),
             contrato.get_direccion(),
             contrato.contratista.get_lugar_residencia(),
-            contrato.contratista.get_movil(),
+            contrato.get_movil(),
             contrato.get_tipo_sangre(),
             contrato.get_birthay(),
             contrato.get_email_contractor(),
