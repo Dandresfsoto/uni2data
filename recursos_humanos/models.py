@@ -437,7 +437,7 @@ class Contratos(models.Model):
     def get_movil(self):
         movil = ''
         try:
-            movil = self.contratista.movil
+            movil = self.contratista.celular
         except:
             pass
         return movil
