@@ -1249,13 +1249,13 @@ class CutsListView(LoginRequiredMixin,
 
     permissions = {
         "all": [
-            "usuarios.recurso_humano.ver",
-            "usuarios.recurso_humano.cortes.ver"
+            "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.cortes.ver"
         ],
         "crear": [
-            "usuarios.recurso_humano.ver",
-            "usuarios.recurso_humano.cortes.ver",
-            "usuarios.recurso_humano.cortes.crear"
+            "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.cortes.ver",
+            "usuarios.recursos_humanos.cortes.crear"
         ]
     }
     login_url = settings.LOGIN_URL
@@ -1280,9 +1280,9 @@ class CutsCreateView(LoginRequiredMixin,
     def get_permission_required(self, request=None):
         permissions = {
             "all": [
-                "usuarios.recurso_humano.ver",
-                "usuarios.recurso_humano.cortes.ver",
-                "usuarios.recurso_humano.cortes.crear"
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cortes.crear"
             ]
         }
         return permissions
@@ -1315,9 +1315,9 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
     def get_permission_required(self, request=None):
         permissions = {
             "all": [
-                "usuarios.recurso_humano.ver",
-                "usuarios.recurso_humano.cortes.ver",
-                "usuarios.recurso_humano.cortes.crear"
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cortes.crear"
             ]
         }
         return permissions
