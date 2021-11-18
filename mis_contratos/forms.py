@@ -290,7 +290,6 @@ class AccountActivityForm(forms.Form):
                     """
                 ),
             ),
-
             Row(
                 Column(
                     Div(
@@ -309,6 +308,8 @@ class AccountActivityForm(forms.Form):
 class AccountUpdateActivityForm(forms.Form):
     contenido = forms.CharField(widget=forms.HiddenInput())
     inicial = forms.CharField(widget=forms.HiddenInput())
+
+
 
     def __init__(self, *args, **kwargs):
         super(AccountUpdateActivityForm, self).__init__(*args, **kwargs)
@@ -350,6 +351,7 @@ class AccountUpdateActivityForm(forms.Form):
                     css_class="s12"
                 ),
             ),
+
             Row(
                 HTML(
                     """
@@ -373,6 +375,43 @@ class AccountUpdateActivityForm(forms.Form):
         )
 
 class AccountUploadInformForm(forms.ModelForm):
+    foto1 = forms.FileField(widget=forms.FileInput(attrs={'accept': 'image/jpg,image/jpeg,image/png'}))
+    foto2 = forms.FileField(widget=forms.FileInput(attrs={'accept': 'image/jpg,image/jpeg,image/png'}))
+    foto3 = forms.FileField(widget=forms.FileInput(attrs={'accept': 'image/jpg,image/jpeg,image/png'}), required=False)
+    foto4 = forms.FileField(widget=forms.FileInput(attrs={'accept': 'image/jpg,image/jpeg,image/png'}), required=False)
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+        foto1 = cleaned_data.get("foto1")
+        foto2 = cleaned_data.get("foto2")
+        foto3 = cleaned_data.get("foto3")
+        foto4 = cleaned_data.get("foto4")
+
+        if foto1 != None:
+            if foto1.name.split('.')[-1] in ['jpg', 'jpeg', 'png']:
+                pass
+            else:
+                self.add_error('foto1', 'El archivo cargado no tiene un formato valido')
+
+        if foto2 != None:
+            if foto2.name.split('.')[-1] in ['jpg', 'jpeg', 'png']:
+                pass
+            else:
+                self.add_error('foto2', 'El archivo cargado no tiene un formato valido')
+
+        if foto3 != None:
+            if foto3.name.split('.')[-1] in ['jpg', 'jpeg', 'png']:
+                pass
+            else:
+                self.add_error('foto3', 'El archivo cargado no tiene un formato valido')
+
+        if foto4 != None:
+            if foto4.name.split('.')[-1] in ['jpg', 'jpeg', 'png']:
+                pass
+            else:
+                self.add_error('foto4', 'El archivo cargado no tiene un formato valido')
+
 
 
     def __init__(self, *args, **kwargs):
@@ -382,6 +421,19 @@ class AccountUploadInformForm(forms.ModelForm):
         values = float(collec_account.value_transport)
 
         self.fields['file4'].widget = forms.FileInput()
+
+        if collec_account.url_foto1() != None:
+            self.fields['foto1'].widget.attrs['data-default-file'] = collec_account.url_foto1()
+
+        if collec_account.url_foto2() != None:
+            self.fields['foto2'].widget.attrs['data-default-file'] = collec_account.url_foto2()
+
+        if collec_account.url_foto3() != None:
+            self.fields['foto3'].widget.attrs['data-default-file'] = collec_account.url_foto3()
+
+        if collec_account.url_foto4() != None:
+            self.fields['foto4'].widget.attrs['data-default-file'] = collec_account.url_foto4()
+
 
 
         self.helper = FormHelper(self)
@@ -410,6 +462,24 @@ class AccountUploadInformForm(forms.ModelForm):
             ),
             Row(
                 Column(
+                    'foto1',
+                    css_class='s12 m6'
+                ),
+                Column(
+                    'foto2',
+                    css_class='s12 m6'
+                ),
+                Column(
+                    'foto3',
+                    css_class='s12 m6'
+                ),
+                Column(
+                    'foto4',
+                    css_class='s12 m6'
+                )
+            ),
+            Row(
+                Column(
                     Div(
                         Submit(
                             'submit',
@@ -425,7 +495,7 @@ class AccountUploadInformForm(forms.ModelForm):
 
     class Meta:
         model = Collects_Account
-        fields = ['file4']
+        fields = ['file4','foto1','foto2','foto3','foto4']
 
 
 

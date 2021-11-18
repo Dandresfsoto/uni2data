@@ -3767,3 +3767,33 @@ class InformCollectsAccountRejectListView(FormView):
         for message in storage:
             kwargs['success'] = message
         return super(InformCollectsAccountRejectListView, self).get_context_data(**kwargs)
+
+class InformCollectsAccountView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+    template_name = 'iraca/inform/collect_account/view.html'
+
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.cuts = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        self.collect = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.informes.ver",
+                "usuarios.iraca.informes.cortes.ver",
+            ]
+        }
+
+        return super(InformCollectsAccountView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        cuts = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        collect = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        kwargs['title'] = "Ver evidencias"
+        kwargs['breadcrum_1'] = cuts.consecutive
+        kwargs['objeto'] = collect
+        return super(InformCollectsAccountView,self).get_context_data(**kwargs)
+

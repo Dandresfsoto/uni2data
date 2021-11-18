@@ -280,6 +280,7 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         template_header_tag = template_header.find(class_='document_span_2')
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_cedula()))
 
+
         collect_account.html_3.save('informe_actividades.html',
                                     File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
@@ -358,6 +359,7 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
 
         collect_account.delta = form.cleaned_data['contenido']
         collect_account.save()
+
         delta = json.loads(form.cleaned_data['contenido'])
 
         delta_2 = BeautifulSoup(html.render(delta['ops']),"html.parser",from_encoding='utf-8')
@@ -402,9 +404,9 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         template_header_tag = template_header.find(class_='document_span_1')
         template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
 
-
         template_header_tag = template_header.find(class_='document_span_2')
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_cedula()))
+
 
         collect_account.html_3.save('informe_actividades.html',
                                     File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
@@ -434,7 +436,7 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
                     '--page-size': 'Letter'
                 }
             )
-            collect_account.file6.save('certificacion.pdf', File(io.BytesIO(data)))
+            collect_account.file6.save('informe_actividades.pdf', File(io.BytesIO(data)))
 
         return super(ContractsAccountsActivityUpdateView, self).form_valid(form)
 
