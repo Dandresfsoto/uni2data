@@ -375,8 +375,8 @@ class AccountUpdateActivityForm(forms.Form):
         )
 
 class AccountUploadInformForm(forms.ModelForm):
-    foto1 = forms.FileField(widget=forms.FileInput(attrs={'accept': 'image/jpg,image/jpeg,image/png'}))
-    foto2 = forms.FileField(widget=forms.FileInput(attrs={'accept': 'image/jpg,image/jpeg,image/png'}))
+    foto1 = forms.FileField(widget=forms.FileInput(attrs={'accept': 'image/jpg,image/jpeg,image/png'}), required=False)
+    foto2 = forms.FileField(widget=forms.FileInput(attrs={'accept': 'image/jpg,image/jpeg,image/png'}), required=False)
     foto3 = forms.FileField(widget=forms.FileInput(attrs={'accept': 'image/jpg,image/jpeg,image/png'}), required=False)
     foto4 = forms.FileField(widget=forms.FileInput(attrs={'accept': 'image/jpg,image/jpeg,image/png'}), required=False)
 
@@ -411,8 +411,6 @@ class AccountUploadInformForm(forms.ModelForm):
                 pass
             else:
                 self.add_error('foto4', 'El archivo cargado no tiene un formato valido')
-
-
 
     def __init__(self, *args, **kwargs):
         super(AccountUploadInformForm, self).__init__(*args, **kwargs)
@@ -496,6 +494,3 @@ class AccountUploadInformForm(forms.ModelForm):
     class Meta:
         model = Collects_Account
         fields = ['file4','foto1','foto2','foto3','foto4']
-
-
-

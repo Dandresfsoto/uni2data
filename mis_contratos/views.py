@@ -308,7 +308,7 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
                     '--page-size': 'Letter'
                 }
             )
-            collect_account.file6.save('certificacion.pdf', File(io.BytesIO(data)))
+            collect_account.file6.save('informe_actividades.pdf', File(io.BytesIO(data)))
 
 
         return super(ContractsAccountsActivityUploadView, self).form_valid(form)
