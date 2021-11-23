@@ -177,13 +177,13 @@ def build_listado_contratos(id):
 
 
     titulos = ['Consecutivo', 'Código', 'Estado contrato','Proyecto', 'Cargo' ,'Fecha de creación','Contratista', 'Cédula', 'Lugar de Expedición', 'Dirección','Residencia','Celular','Tipo de sangre', 'Fecha de nacimiento' ,'Correo','Fecha inicio', 'Fecha finalización', 'Tipo contrato', 'Valor',
-               'Fecha de legalización']
+               'Fecha de legalización', 'Contrato']
 
     formatos = ['0', 'General', 'General','General', 'General', 'General', 'General', 'General', '0', 'General', 'General','General','General','dd/mm/yyyy','General', 'dd/mm/yyyy', 'dd/mm/yyyy', 'General', '"$"#,##0_);("$"#,##0)',
-                'dd/mm/yyyy']
+                'dd/mm/yyyy','General']
 
     ancho_columnas = [20, 30, 30, 30, 30, 30, 40, 25, 25, 25, 25,25,25,25,25,25, 35, 40, 20,
-                      40]
+                      40, 20]
 
     contenidos = []
 
@@ -208,7 +208,7 @@ def build_listado_contratos(id):
                 if url == None:
                     soportes.append('')
                 else:
-                    soportes.append(('Link','https://sican.asoandes.org' + s.url_file()))
+                    soportes.append(('Link', s.url_file()))
 
 
         contenidos.append([
@@ -231,7 +231,8 @@ def build_listado_contratos(id):
             contrato.fin,
             contrato.tipo_contrato,
             contrato.valor.amount,
-            contrato.fecha_legalizacion
+            contrato.fecha_legalizacion,
+            contrato.url_file()
         ]+soportes)
 
     output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
