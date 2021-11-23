@@ -210,6 +210,11 @@ def build_listado_contratos(id):
                 else:
                     soportes.append(('Link', s.url_file()))
 
+        contract_url = contrato.url_file()
+        if contract_url != None:
+            contract = ('Link',contrato.url_file())
+        else:
+            contract = ""
 
         contenidos.append([
             int(i),
@@ -232,7 +237,7 @@ def build_listado_contratos(id):
             contrato.tipo_contrato,
             contrato.valor.amount,
             contrato.fecha_legalizacion,
-            contrato.url_file()
+            contract,
         ]+soportes)
 
     output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
