@@ -1948,8 +1948,8 @@ class InformListApi(BaseDatatableView):
 
 class InformCollectAccountListApi(BaseDatatableView):
     model = rh_models.Collects_Account
-    columns = ['contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
-    order_columns = ['contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
+    columns = ['id','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
+    order_columns = ['id','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
 
     def get_initial_queryset(self):
         self.cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
@@ -1977,6 +1977,14 @@ class InformCollectAccountListApi(BaseDatatableView):
         if column == 'contract':
             return '<div class="center-align"><b>' + str(row.contract.nombre) + '</b></div>'
 
+        if column == 'id':
+            ret = '<div class="center-align">' \
+                       '<a href="view/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver cuentas de cobro corte {1}">' \
+                            '<i class="material-icons">remove_red_eye</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id,row.contract.nombre)
+
+            return ret
         elif column == 'date_creation':
             return '{0}'.format(row.contract.contratista)
 

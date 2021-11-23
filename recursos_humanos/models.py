@@ -708,6 +708,58 @@ class Collects_Account(models.Model):
         null=True,
         verbose_name="Informe de actividades"
     )
+
+    foto1 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=[
+            'image/jpg',
+            'image/jpeg',
+            'image/png'
+        ],
+        max_upload_size=50485760,
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    foto2 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=[
+            'image/jpg',
+            'image/jpeg',
+            'image/png'
+        ],
+        max_upload_size=50485760,
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    foto3 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=[
+            'image/jpg',
+            'image/jpeg',
+            'image/png'
+        ],
+        max_upload_size=50485760,
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    foto4 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_collects_account,
+        content_types=[
+            'image/jpg',
+            'image/jpeg',
+            'image/png'
+        ],
+        max_upload_size=50485760,
+        max_length=255,
+        blank=True,
+        null=True
+    )
     html = models.FileField(upload_to=upload_dinamic_collects_account, blank=True, null=True)
     html_2 = models.FileField(upload_to=upload_dinamic_collects_account, blank=True, null=True)
     html_3 = models.FileField(upload_to=upload_dinamic_collects_account, blank=True, null=True)
@@ -854,7 +906,6 @@ class Collects_Account(models.Model):
         else:
             return '<a href="' + url + '"> ' + str(self.file5.name) + '</a>'
 
-
     def pretty_print_url_file6(self):
         try:
             url = self.file6.url
@@ -862,6 +913,38 @@ class Collects_Account(models.Model):
             return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
         else:
             return '<a href="' + url + '"> ' + str(self.file6.name) + '</a>'
+
+    def url_foto1(self):
+        url = None
+        try:
+            url = self.foto1.url
+        except:
+            pass
+        return url
+
+    def url_foto2(self):
+        url = None
+        try:
+            url = self.foto2.url
+        except:
+            pass
+        return url
+
+    def url_foto3(self):
+        url = None
+        try:
+            url = self.foto3.url
+        except:
+            pass
+        return url
+
+    def url_foto4(self):
+        url = None
+        try:
+            url = self.foto4.url
+        except:
+            pass
+        return url
 
 def upload_dinamic_dir_soporte_contrato(instance, filename):
     return '/'.join(['Contratos', 'Soportes', str(instance.contrato.id), str(instance.soporte.id), filename])
