@@ -1365,9 +1365,9 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                 if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
                     days_monht = functions.obtener_dias_del_mes(month,year)
                     if days_monht == 31:
-                        date_rest = date(int(year_cut), int(month_cut), 31)
+                        date_rest = date(int(year_cut), int(month_cut), 30)
                         days_rest = date_rest - contract.inicio
-                        values_total = (values_total / 30) * (days_rest.days)
+                        values_total = (values_total / 30) * (days_rest.days +1)
                     elif days_monht == 30:
                         date_rest = date(int(year_cut), int(month_cut), 30)
                         days_rest = date_rest - contract.inicio
