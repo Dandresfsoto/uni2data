@@ -1534,7 +1534,8 @@ class AmortizacionesPagosListView(LoginRequiredMixin,
         reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
         pago = models.Pagos.objects.get(id = self.kwargs['pk_pago'])
         kwargs['title'] = "AMORTIZACIONES"
-        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/reportes/pagos/{0}/amortizaciones/{1}/'.format(
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/reportes/pagos/{1}/amortizaciones/{2}/'.format(
+            self.kwargs['pk'],
             self.kwargs['pk_reporte'],
             self.kwargs['pk_pago']
         )
