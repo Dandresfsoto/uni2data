@@ -1497,7 +1497,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
 
                         user = collect_account.contract.get_user_or_none()
-
+                        """
                         if user != None:
                             tasks.send_mail_templated_cuenta_cobro(
                                 'mail/recursos_humanos/cuenta_cobro.tpl',
@@ -1510,7 +1510,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                                 DEFAULT_FROM_EMAIL,
                                 [user.email, EMAIL_HOST_USER]
                             )
-
+                        """
 
 
                 else:

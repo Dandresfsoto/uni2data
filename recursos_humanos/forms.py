@@ -1621,6 +1621,14 @@ class CutsAddForm(forms.Form):
                 )
             ),
             Row(
+                HTML(
+                    """
+                    <a id="id_todos" style="display:inline-block;margin-top:10px;" class="waves-effect waves-light btn pink darken-4"><i class="material-icons left">done_all</i>todos</a>
+                    """
+                ),
+                css_class='s12'
+            ),
+            Row(
 
             ),
             Row(
