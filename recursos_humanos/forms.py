@@ -1692,6 +1692,7 @@ class CollectsAccountForm(forms.Form):
         total_value_fees = collects_accounts.aggregate(Sum('value_fees'))['value_fees__sum']
 
         total = float(total_value_fees)
+        value_collect = float(collect_account.value_fees)
 
         value_contract = float(collect_account.contract.valor)
 
@@ -1705,6 +1706,7 @@ class CollectsAccountForm(forms.Form):
         if value_total > value_contract:
             self.add_error('value_fees_char', 'El valor total de cuentas de cobro supera el valor del contrato')
 
+        total = total - value_collect
         value_total_total = value_total + total
 
         if value_total_total > value_contract:
