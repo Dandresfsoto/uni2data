@@ -60,5 +60,9 @@ block container_principal
 block body_script_auth
     script.
         $(document).ready(function () {
-
+            $('#id_todos').click(function () {
+                if($(".filled-in").prop("checked", false)){
+                    $(".filled-in").prop("checked", true);
+                }
+            });
         });

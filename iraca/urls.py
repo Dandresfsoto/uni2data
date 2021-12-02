@@ -116,4 +116,5 @@ urlpatterns = [
     path('inform/view/<uuid:pk_cut>/aprobar/<uuid:pk_collect_account>/', views.InformCollectsAccountAprobListView.as_view()),
     path('inform/view/<uuid:pk_cut>/rechazar/<uuid:pk_collect_account>/', views.InformCollectsAccountRejectListView.as_view()),
     path('inform/view/<uuid:pk_cut>/view/<uuid:pk_collect_account>/', views.InformCollectsAccountView.as_view()),
+    path('inform/view/<uuid:pk_cut>/report/', views.ReportCollectsAccountListView.as_view()),
 ]

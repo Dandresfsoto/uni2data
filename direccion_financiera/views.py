@@ -976,7 +976,7 @@ class ReporteReportesView(LoginRequiredMixin,
                 amortizacion.save()
 
                 try:
-                    siguiente = models.Amortizaciones.objects.get(estado = 'Pendiente',pago = amortizacion.pago,consecutive = amortizacion.consecutive + 1)
+                    siguiente = models.Amortizaciones.objects.get(estado = 'Pendiente',pago = amortizacion.pago,consecutivo = amortizacion.consecutivo + 1)
                 except:
                     pass
                 else:
@@ -1533,6 +1533,7 @@ class AmortizacionesPagosListView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
         pago = models.Pagos.objects.get(id = self.kwargs['pk_pago'])
+        enterprise = models.Enterprise.objects.get(id = self.kwargs['pk'])
         kwargs['title'] = "AMORTIZACIONES"
         kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/enterprise/{0}/reportes/pagos/{1}/amortizaciones/{2}/'.format(
             self.kwargs['pk'],
@@ -1540,6 +1541,7 @@ class AmortizacionesPagosListView(LoginRequiredMixin,
             self.kwargs['pk_pago']
         )
         kwargs['breadcrum_1'] = reporte.nombre
+        kwargs['breadcrum_2'] = enterprise.name
         kwargs['breadcrum_active'] = pago.tercero.get_full_name()
         return super(AmortizacionesPagosListView,self).get_context_data(**kwargs)
 
@@ -1560,7 +1562,7 @@ class AmortizacionesPagosUpdateView(LoginRequiredMixin,
     success_url = "../../"
 
     def dispatch(self, request, *args, **kwargs):
-        enterprise = models.Reportes.objects.get(id=self.kwargs['pk'])
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
         reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
         pago = models.Pagos.objects.get(id=self.kwargs['pk_pago'])
         amortizacion = models.Amortizaciones.objects.get(id=self.kwargs['pk_amortizacion'])
@@ -1597,7 +1599,7 @@ class AmortizacionesPagosUpdateView(LoginRequiredMixin,
                 pago = pago,
                 valor = valor_inicial - valor,
                 estado = 'Pendiente',
-                consecutive = amortizacion.consecutive+1
+                consecutivo = amortizacion.consecutivo+1
             )
             amortizacion.valor = valor
             amortizacion.save()
@@ -1615,14 +1617,15 @@ class AmortizacionesPagosUpdateView(LoginRequiredMixin,
         return super(AmortizacionesPagosUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
-        enterprise = models.Reportes.objects.get(id=self.kwargs['pk'])
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
         reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
         pago = models.Pagos.objects.get(id=self.kwargs['pk_pago'])
         amortizacion = models.Amortizaciones.objects.get(id=self.kwargs['pk_amortizacion'])
         kwargs['title'] = "Editar amortización"
         kwargs['breadcrum_1'] = reporte.nombre
         kwargs['breadcrum_2'] = pago.tercero.get_full_name()
-        kwargs['breadcrum_active'] = amortizacion.consecutive
+        kwargs['breadcrum_3'] = enterprise.name
+        kwargs['breadcrum_active'] = amortizacion.consecutivo
         return super(AmortizacionesPagosUpdateView,self).get_context_data(**kwargs)
 
 # -------------------------------------- REPORTES ELIMINADOS -------------------------------------
