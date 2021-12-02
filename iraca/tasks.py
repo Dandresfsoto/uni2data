@@ -1139,3 +1139,50 @@ def build_bonding_total_report(id):
     reporte.file.save(filename, File(output))
 
     return "Reporte generado: " + filename
+
+@app.task
+def build_list_collects_account(id, id_cuts):
+    from recursos_humanos.models import Cuts, Collects_Account
+    reporte = models_reportes.Reportes.objects.get(id=id)
+    cuts = Cuts.objects.get(id = id_cuts)
+    proceso = "SICAN-LIST-CUENTAS DE COBRO"
+
+
+    titulos = ['Consecutivo', 'Código','Proyecto', 'Cargo' ,'Contratista', 'Cédula', 'Valor total contrato','Seguridad social','informe de actividades','Reporte']
+
+    formatos = ['0', 'General','General', 'General', 'General', '0', '"$"#,##0_);("$"#,##0)','0','0','0']
+
+    ancho_columnas = [20, 30, 30, 30, 40,25, 35, 40, 20, 40, 40, 40]
+
+    contenidos = []
+    order = []
+
+
+    i = 0
+    for collect_account in Collects_Account.objects.filter(cut=id_cuts):
+        i += 1
+
+
+        lista = [
+            int(i),
+            collect_account.contract.nombre,
+            collect_account.contract.get_proyecto(),
+            collect_account.contract.get_cargo(),
+            collect_account.contract.contratista.get_full_name(),
+            collect_account.contract.contratista.cedula,
+            collect_account.contract.valor.amount,
+            collect_account.estate,
+            collect_account.estate_inform,
+            collect_account.estate_report,
+        ]
+
+        contenidos.append(lista)
+
+
+    output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
+
+    filename = str(reporte.id) + '.xlsx'
+    reporte.file.save(filename, File(output))
+
+
+    return "Archivo paquete ID: " + filename

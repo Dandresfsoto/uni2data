@@ -3797,3 +3797,30 @@ class InformCollectsAccountView(TemplateView):
         kwargs['objeto'] = collect
         return super(InformCollectsAccountView,self).get_context_data(**kwargs)
 
+
+
+class ReportCollectsAccountListView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.informes.ver",
+            "usuarios.iraca.informes.cortes.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        cuts = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        id_cuts = cuts.id
+        reporte = Reportes.objects.create(
+            usuario = self.request.user,
+            nombre = 'Reporte estado del corte' + str(cuts.consecutive),
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
+        )
+
+        tasks.build_list_collects_account(reporte.id,id_cuts)
+
+        return HttpResponseRedirect('/reportes/')
+

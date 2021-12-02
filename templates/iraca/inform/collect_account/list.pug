@@ -43,6 +43,26 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
+
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") description
+                | Reportes
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="report/") Reporte Acumulado
+                            i(class="material-icons icon-sican") event_note
+
+                    div(class="divider divider-perfil")
+
+
 block container_principal
     div(class="container-datatable")
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
@@ -59,6 +79,8 @@ block container_principal
                     th Informe de actividades
                     th Firma
                     th Acciones
+                    th Seguridad social
+                    th Reporte
             tbody
                 tr
                     td Ver
@@ -72,6 +94,8 @@ block container_principal
                     td Informe de actividades
                     td Firma
                     td Acciones
+                    td Seguridad social
+                    td Reporte
 
 
 block body_script_auth
