@@ -53,5 +53,9 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 
 
 });</script><script>$(document).ready(function () {
-
+    $('#id_todos').click(function () {
+        if($(".filled-in").prop("checked", false)){
+            $(".filled-in").prop("checked", true);
+        }
+    });
 });</script></body></html>

@@ -1948,8 +1948,8 @@ class InformListApi(BaseDatatableView):
 
 class InformCollectAccountListApi(BaseDatatableView):
     model = rh_models.Collects_Account
-    columns = ['id','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
-    order_columns = ['id','contract','date_creation','estate','delta','user_creation','data_json','valores_json','file','file5','file3']
+    columns = ['id','contract','date_creation','estate_inform','delta','user_creation','data_json','valores_json','file','file5','file3','estate','estate_report']
+    order_columns = ['id','contract','date_creation','estate_inform','delta','user_creation','data_json','valores_json','file','file5','estate','estate_report']
 
     def get_initial_queryset(self):
         self.cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
@@ -1988,7 +1988,7 @@ class InformCollectAccountListApi(BaseDatatableView):
         elif column == 'date_creation':
             return '{0}'.format(row.contract.contratista)
 
-        elif column == 'estate':
+        elif column == 'estate_inform':
             ret = ""
             if row.estate_inform == 'Rechazado':
                 ret = '<div class="center-align">' \
@@ -2088,6 +2088,39 @@ class InformCollectAccountListApi(BaseDatatableView):
 
 
             return '<div class="center-align">' + ret + '</div>'
+
+        elif column == 'estate':
+            estate = row.estate
+
+            render = ""
+
+            if estate == "Aprobado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
+                          '</a>'.format(row.estate)
+
+            if estate == "Rechazado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0} por {1}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">block</i>' \
+                          '</a>'.format(row.estate, row.observaciones)
+
+            return '<div class="center-align">' + render + '</div>'
+
+        elif column == 'estate_report':
+            ret = ""
+            if row.estate_report == 'Rechazado':
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<b>{0}</b>' \
+                      '</a>' \
+                      '</div>'.format(row.estate_report, row.observaciones_report)
+            else:
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped" data-position="top" data-delay="50">' \
+                      '<b>{0}</b>' \
+                      '</a>' \
+                      '</div>'.format(row.estate_report)
+            return ret
 
         else:
             return super(InformCollectAccountListApi, self).render_column(row, column)
