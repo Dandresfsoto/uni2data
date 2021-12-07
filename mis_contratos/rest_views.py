@@ -1,4 +1,6 @@
 from django_datatables_view.base_datatable_view import BaseDatatableView
+
+from mis_contratos import functions
 from recursos_humanos import models
 from recursos_humanos import models as models_rh
 from django.db.models import Q
@@ -207,8 +209,8 @@ class SoportesContratoListApi(BaseDatatableView):
 
 class AccountContractListApi(BaseDatatableView):
     model = models.Collects_Account
-    columns = ['html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','estate_report']
-    order_columns = ['html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','file2','estate_report']
+    columns = ['id','html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','estate_report']
+    order_columns = ['id','html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','estate_report']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(contract = self.kwargs['pk']).exclude(value_fees=0).order_by('-cut__consecutive')
@@ -222,7 +224,19 @@ class AccountContractListApi(BaseDatatableView):
 
     def render_column(self, row, column):
 
-        if column == 'html':
+        if column == 'id':
+            ret = ""
+            month = int(row.cut.month) - 1
+            month_inform = functions.month_converter(month)
+
+            ret = '<div class="center-align">' \
+                  '<a class="tooltipped" data-position="top" data-delay="50" data-tooltip="{0}" >' \
+                  '<b>{1}</b>' \
+                  '</a>' \
+                  '</div>'.format(row.observaciones_report, month_inform)
+            return ret
+
+        elif column == 'html':
             url_file5 = row.url_file5()
             if row.estate == "Generado":
                 ret = '<div class="center-align">' \
@@ -413,7 +427,7 @@ class AccountContractListApi(BaseDatatableView):
                 ret = '<div class="center-align">'
 
                 if url_file6 != None:
-                    ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                    ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Informe de actividades">' \
                            '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                            '</a>'.format(url_file6)
 
