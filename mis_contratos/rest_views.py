@@ -460,7 +460,7 @@ class AccountContractListApi(BaseDatatableView):
             ret = '<div class="center-align">'
 
             if url_file5 != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Planilla de seguridad social">' \
                        '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                        '</a>'.format(url_file5)
 
@@ -475,12 +475,12 @@ class AccountContractListApi(BaseDatatableView):
             ret = '<div class="center-align">'
 
             if url_file3 != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios">' \
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cuenta de cobro por honorarios firmada">' \
                        '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                        '</a>'.format(url_file3)
 
             if url_file4 != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Informe de actividades">' \
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Informe de actividades firmado">' \
                        '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
                        '</a>'.format(url_file4)
 
