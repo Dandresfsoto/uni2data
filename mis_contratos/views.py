@@ -247,9 +247,6 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         template_header = BeautifulSoup(
             open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/informe_actividades/inform.html', 'rb'), "html.parser")
 
-        template_header_tag = template_header.find(class_='codigo_span')
-        template_header_tag.insert(1, str(collect_account.id))
-
         template_header_tag = template_header.find(class_='date_span')
         template_header_tag.insert(1, date_any)
 
@@ -374,8 +371,6 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         template_header = BeautifulSoup(
             open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/informe_actividades/inform.html', 'rb'), "html.parser")
 
-        template_header_tag = template_header.find(class_='codigo_span')
-        template_header_tag.insert(1, str(collect_account.id))
 
         template_header_tag = template_header.find(class_='date_span')
         template_header_tag.insert(1, date_any)
