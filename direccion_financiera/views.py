@@ -2329,6 +2329,65 @@ class CollectsAccountsView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = cut.consecutive
         return super(CollectsAccountsView,self).get_context_data(**kwargs)
 
+class CollectAccountUploadView(UpdateView):
+
+    login_url = settings.LOGIN_URL
+    model = rh_models.Collects_Account
+    template_name = 'recursos_humanos/cuts/collects/upload.html'
+    form_class = forms.ColletcAcountUploadForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_collect_account'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
+        self.collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        self.permissions = {
+            "cargar_cuentas_cobro": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.ver",
+                "usuarios.recursos_humanos.cortes.cuentas_cobro.cargar"
+            ]
+        }
+
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('cargar_cuentas_cobro')):
+                if self.collec_account.estate == 'Creado' or self.collec_account.estate == 'Reportado':
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.estado = 'Cargado'
+        self.object.save()
+        return super(CollectAccountUploadView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CUENTA DE COBRO CONTRATO {0}".format(self.collec_account.contract.nombre)
+        kwargs['breadcrum_1'] = self.cut.consecutive
+        kwargs['breadcrum_active'] = self.collec_account.contract.nombre
+        kwargs['file3_url'] = self.collec_account.pretty_print_url_file3()
+        kwargs['file4_url'] = self.collec_account.pretty_print_url_file4()
+        kwargs['file5_url'] = self.collec_account.pretty_print_url_file5()
+        return super(CollectAccountUploadView,self).get_context_data(**kwargs)
+
+
+    def get_initial(self):
+        return {'pk_cut':self.kwargs['pk_cut'],
+                'pk_collect_account':self.kwargs['pk_collect_account'],}
+
 class CollectsAccountsEstateView(UpdateView):
 
     login_url = settings.LOGIN_URL

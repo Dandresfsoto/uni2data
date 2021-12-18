@@ -1797,7 +1797,7 @@ class ColletcAcountUploadForm(forms.ModelForm):
             Row(
                 HTML(
                     """
-                    <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file3_url | safe }}</p>
+                    <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file5_url | safe }}</p>
                     """
                 )
             ),
