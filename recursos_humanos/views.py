@@ -1381,10 +1381,6 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         days_rest = date_rest - contract.inicio
                         values_total = (values_total / 30) * (days_rest.days + 3)
 
-                if contract.fin.year == int(year_cut) and contract.fin.month == int(month_cut):
-                    total_value_fees = float(total_value_fees)
-                    values_total = value_total - int(total_value_fees)
-
 
                 if total_value_fees_sum < value_total:
                     collect_account = models.Collects_Account.objects.create(
