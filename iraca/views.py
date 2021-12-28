@@ -3845,3 +3845,40 @@ class ReportCollectsAccountListView(LoginRequiredMixin,
 
         return HttpResponseRedirect('/reportes/')
 
+class HistorialCollectsAccountView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.informes.ver",
+            "usuarios.iraca.informes.cortes.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/inform/collect_account/register.html'
+
+    def get_items_registers(self):
+
+        list = []
+        registers = rh_models.Registration.objects.filter(collect_account__id = self.kwargs['pk_collect_account']).order_by('-creation')
+
+        for register in registers:
+            list.append({
+                'propio': True if register.user == self.request.user else False,
+                'fecha': register.pretty_creation_datetime(),
+                'usuario': register.user.get_full_name_string(),
+                'html': register.delta,
+            })
+
+        return list
+
+    def get_context_data(self, **kwargs):
+        registers = self.get_items_registers()
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        kwargs['title'] = "GESTIÓN"
+        kwargs['registros'] = registers
+        kwargs['registros_cantidad'] = len(registers)
+        kwargs['breadcrum_1'] = collect_account.cut.consecutive
+        kwargs['breadcrum_active'] = collect_account.contract.nombre
+        return super(HistorialCollectsAccountView,self).get_context_data(**kwargs)
+

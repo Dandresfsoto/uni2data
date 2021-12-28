@@ -1948,8 +1948,8 @@ class InformListApi(BaseDatatableView):
 
 class InformCollectAccountListApi(BaseDatatableView):
     model = rh_models.Collects_Account
-    columns = ['id','contract','date_creation','estate_inform','delta','user_creation','data_json','valores_json','file','file5','file3','estate','estate_report']
-    order_columns = ['id','contract','date_creation','estate_inform','delta','user_creation','data_json','valores_json','file','file5','estate','estate_report']
+    columns = ['id','contract','date_creation','estate_inform','delta','user_creation','data_json','valores_json','file','file5','file3','estate','estate_report','date_update']
+    order_columns = ['id','contract','date_creation','estate_inform','delta','user_creation','data_json','valores_json','file','file5','estate','estate_report','date_update']
 
     def get_initial_queryset(self):
         self.cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
@@ -2120,6 +2120,15 @@ class InformCollectAccountListApi(BaseDatatableView):
                       '<b>{0}</b>' \
                       '</a>' \
                       '</div>'.format(row.estate_report)
+            return ret
+
+        elif column == 'date_update':
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                           '<a href="historial/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver historial">' \
+                                '<i class="material-icons">message</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id)
             return ret
 
         else:
