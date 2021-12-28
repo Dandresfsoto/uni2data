@@ -19,6 +19,7 @@ from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRE
 from recursos_humanos.models import Contratos, Contratistas
 from reportes.models import Reportes
 import json
+from delta import html
 from desplazamiento.models import Desplazamiento, Solicitudes
 from desplazamiento.forms import DesplazamientoForm, FinancieraSolicitudForm
 from direccion_financiera import functions
@@ -2372,6 +2373,14 @@ class CollectAccountUploadView(UpdateView):
         self.object = form.save()
         self.object.estado = 'Cargado'
         self.object.save()
+
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        rh_models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Cargo documentacion desde el area financiera"
+        )
         return super(CollectAccountUploadView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -2432,6 +2441,13 @@ class CollectsAccountsEstateView(UpdateView):
         self.object.date_update = timezone.now()
         self.object.user_update = self.request.user
         self.object.save()
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        rh_models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Cambio de estado a: " + collect_account.estate_report
+        )
 
         return super(CollectsAccountsEstateView, self).form_valid(form)
 
@@ -2441,3 +2457,42 @@ class CollectsAccountsEstateView(UpdateView):
         kwargs['breadcrum_1'] = self.cut.consecutive
         kwargs['breadcrum_active'] = self.collect_account.contract.nombre
         return super(CollectsAccountsEstateView,self).get_context_data(**kwargs)
+
+class CollectsAccountsRegisterView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.cortes.ver",
+            "usuarios.recursos_humanos.cortes.cuentas_cobro.ver",
+            "usuarios.recursos_humanos.cortes.cuentas_cobro.cargar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/cuts/collects/register.html'
+
+    def get_items_registers(self):
+
+        list = []
+        registers = rh_models.Registration.objects.filter(collect_account__id = self.kwargs['pk_collect_account']).order_by('-creation')
+
+        for register in registers:
+            list.append({
+                'propio': True if register.user == self.request.user else False,
+                'fecha': register.pretty_creation_datetime(),
+                'usuario': register.user.get_full_name_string(),
+                'html': register.delta,
+            })
+
+        return list
+
+    def get_context_data(self, **kwargs):
+        registers = self.get_items_registers()
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        kwargs['title'] = "GESTIÓN"
+        kwargs['registros'] = registers
+        kwargs['registros_cantidad'] = len(registers)
+        kwargs['breadcrum_1'] = collect_account.cut.consecutive
+        kwargs['breadcrum_active'] = collect_account.contract.nombre
+        return super(CollectsAccountsRegisterView,self).get_context_data(**kwargs)

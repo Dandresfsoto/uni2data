@@ -141,6 +141,15 @@ class ContractsAccountsSegurityUploadView(UpdateView):
         self.object = form.save()
         self.object.estate = "Generado"
         self.object.save()
+
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+
+        rh_models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="cargo la seguridad social"
+        )
         return super(ContractsAccountsSegurityUploadView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -182,6 +191,15 @@ class ContractsAccountsAccountUploadView(UpdateView):
         self.object = form.save()
         self.object.estate_report = "Cargado"
         self.object.save()
+
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+
+        rh_models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Cargo la cuenta de cobro firmada"
+        )
         return super(ContractsAccountsAccountUploadView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -306,6 +324,13 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
                 }
             )
             collect_account.file6.save('informe_actividades.pdf', File(io.BytesIO(data)))
+
+        rh_models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Genero el informe de actividades"
+        )
 
 
         return super(ContractsAccountsActivityUploadView, self).form_valid(form)
@@ -433,6 +458,13 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
             )
             collect_account.file6.save('informe_actividades.pdf', File(io.BytesIO(data)))
 
+        rh_models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Actualizo el informe de actividades"
+        )
+
         return super(ContractsAccountsActivityUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -473,6 +505,13 @@ class ContractsAccountsAccountUploadInformView(UpdateView):
         self.object = form.save()
         self.object.estate_inform = "Generado"
         self.object.save()
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+        rh_models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Cargo informe de actividades firmado"
+        )
         return super(ContractsAccountsAccountUploadInformView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):

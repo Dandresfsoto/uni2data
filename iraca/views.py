@@ -3679,12 +3679,26 @@ class InformCollectsAccountAprobListView(View):
                 if request.user.is_superuser:
                     self.collect_account.estate_inform = 'Aprobado'
                     self.collect_account.save()
+                    collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+                    rh_models.Registration.objects.create(
+                        cut=collect_account.cut,
+                        user=self.request.user,
+                        collect_account=collect_account,
+                        delta="Informe de actividades aprobado"
+                    )
 
                     return HttpResponseRedirect('../../')
                 else:
                     if request.user.has_perms(self.permissions.get('all')):
                         self.collect_account.estate_inform = 'Aprobado'
                         self.collect_account.save()
+                        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+                        rh_models.Registration.objects.create(
+                            cut=collect_account.cut,
+                            user=self.request.user,
+                            collect_account=collect_account,
+                            delta="Informe de actividades aprobado"
+                        )
                         return HttpResponseRedirect('../../')
                     else:
                         return HttpResponseRedirect('../../')
@@ -3754,6 +3768,13 @@ class InformCollectsAccountRejectListView(FormView):
                     [user.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
                 )
 
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        rh_models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Informe de actividades rechazado por: " + collect_account.observaciones_inform
+        )
 
         return super(InformCollectsAccountRejectListView, self).form_valid(form)
 

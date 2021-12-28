@@ -1923,8 +1923,8 @@ class CollectsAccountListApi(BaseDatatableView):
 
 class CutsCollectAccountsListApi(BaseDatatableView):
     model = rh_models.Collects_Account
-    columns = ['html','contract','date_creation','estate_report','delta','user_creation','data_json','valores_json','file','file3','file4','estate_inform','file5','estate']
-    order_columns = ['html','contract','date_creation','estate_report','delta','user_creation','data_json','valores_json','file','file3','file4','estate_inform','file5','estate']
+    columns = ['html','date_update','contract','date_creation','estate_report','delta','user_creation','data_json','valores_json','file','file3','file4','estate_inform','file5','estate']
+    order_columns = ['html','date_update','contract','date_creation','estate_report','delta','user_creation','data_json','valores_json','file','file3','file4','estate_inform','file5','estate']
 
     def get_initial_queryset(self):
         self.cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
@@ -1969,6 +1969,15 @@ class CutsCollectAccountsListApi(BaseDatatableView):
                            '<i class="material-icons">cloud_upload</i>' \
                        '</div>'
 
+            return ret
+
+        elif column == 'date_update':
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                           '<a href="register/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver historial">' \
+                                '<i class="material-icons">remove_red_eye</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id)
             return ret
 
         elif column == 'contract':
