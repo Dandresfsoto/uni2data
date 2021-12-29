@@ -1494,18 +1494,18 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
                         user = collect_account.contract.get_user_or_none()
 
-                        if user != None:
-                            tasks.send_mail_templated_cuenta_cobro(
-                                'mail/recursos_humanos/cuenta_cobro.tpl',
-                                {
-                                    'url_base': 'https://' + self.request.META['HTTP_HOST'],
-                                    'Contrato': collect_account.contract.nombre,
-                                    'nombre': collect_account.contract.contratista.nombres,
-                                    'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
-                                },
-                                DEFAULT_FROM_EMAIL,
-                                [user.email, EMAIL_HOST_USER]
-                            )
+                        #if user != None:
+                        #    tasks.send_mail_templated_cuenta_cobro(
+                        #        'mail/recursos_humanos/cuenta_cobro.tpl',
+                        #        {
+                        #            'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                        #            'Contrato': collect_account.contract.nombre,
+                        #            'nombre': collect_account.contract.contratista.nombres,
+                        #            'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
+                        #        },
+                        #        DEFAULT_FROM_EMAIL,
+                        #        [user.email, EMAIL_HOST_USER]
+                        #    )
 
 
 
