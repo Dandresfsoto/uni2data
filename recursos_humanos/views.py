@@ -1617,7 +1617,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                                 '--page-size': 'Letter'
                             }
                         )
-                        collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
+                        collect_account.file.save('cuenta_cobro.pdf', File(io.BytesIO(data)))
 
         return HttpResponseRedirect(self.get_success_url())
 

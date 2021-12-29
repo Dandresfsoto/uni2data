@@ -2023,6 +2023,8 @@ class CutsCollectAccountsListApi(BaseDatatableView):
         elif column == 'delta':
             if row.estate_report == 'Cargado' and row.estate == 'Aprobado' and row.estate_inform == 'Aprobado':
                 return '<span class="new badge" data-badge-caption="">1</span>'
+            elif row.estate_report == 'Generado' and row.estate == 'Aprobado' and row.estate_inform == 'Aprobado':
+                return '<span class="new badge" data-badge-caption="">1</span>'
             else:
                 return ''
 
