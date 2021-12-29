@@ -618,7 +618,7 @@ class Cuts(models.Model):
         return cuentas_cobro.count()
 
     def get_novedades_report(self):
-        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate_inform__in = ['Aprobado'], estate__in = ['Aprobado'], estate_report__in = ['Cargado']).exclude(file3="")
+        cuentas_cobro = Collects_Account.objects.filter(cut = self, estate_inform__in = ['Aprobado'], estate__in = ['Aprobado'], estate_report__in = ['Cargado','Generado']).exclude(file3="")
         return cuentas_cobro.count()
 
     def get_valor(self):
@@ -945,6 +945,17 @@ class Collects_Account(models.Model):
         except:
             pass
         return url
+
+class Registration(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    creation = models.DateTimeField(auto_now_add=True)
+    cut = models.ForeignKey(Cuts, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, related_name="user_register",on_delete=models.DO_NOTHING)
+    delta = models.CharField(max_length=10000)
+    collect_account = models.ForeignKey(Collects_Account, on_delete=models.DO_NOTHING, blank=True, null=True)
+
+    def pretty_creation_datetime(self):
+        return self.creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
 
 def upload_dinamic_dir_soporte_contrato(instance, filename):
     return '/'.join(['Contratos', 'Soportes', str(instance.contrato.id), str(instance.soporte.id), filename])

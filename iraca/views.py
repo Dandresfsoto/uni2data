@@ -3679,12 +3679,26 @@ class InformCollectsAccountAprobListView(View):
                 if request.user.is_superuser:
                     self.collect_account.estate_inform = 'Aprobado'
                     self.collect_account.save()
+                    collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+                    rh_models.Registration.objects.create(
+                        cut=collect_account.cut,
+                        user=self.request.user,
+                        collect_account=collect_account,
+                        delta="Informe de actividades aprobado"
+                    )
 
                     return HttpResponseRedirect('../../')
                 else:
                     if request.user.has_perms(self.permissions.get('all')):
                         self.collect_account.estate_inform = 'Aprobado'
                         self.collect_account.save()
+                        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+                        rh_models.Registration.objects.create(
+                            cut=collect_account.cut,
+                            user=self.request.user,
+                            collect_account=collect_account,
+                            delta="Informe de actividades aprobado"
+                        )
                         return HttpResponseRedirect('../../')
                     else:
                         return HttpResponseRedirect('../../')
@@ -3754,6 +3768,13 @@ class InformCollectsAccountRejectListView(FormView):
                     [user.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
                 )
 
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        rh_models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Informe de actividades rechazado por: " + collect_account.observaciones_inform
+        )
 
         return super(InformCollectsAccountRejectListView, self).form_valid(form)
 
@@ -3823,4 +3844,41 @@ class ReportCollectsAccountListView(LoginRequiredMixin,
         tasks.build_list_collects_account.delay(reporte.id,id_cuts)
 
         return HttpResponseRedirect('/reportes/')
+
+class HistorialCollectsAccountView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.informes.ver",
+            "usuarios.iraca.informes.cortes.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/inform/collect_account/register.html'
+
+    def get_items_registers(self):
+
+        list = []
+        registers = rh_models.Registration.objects.filter(collect_account__id = self.kwargs['pk_collect_account']).order_by('-creation')
+
+        for register in registers:
+            list.append({
+                'propio': True if register.user == self.request.user else False,
+                'fecha': register.pretty_creation_datetime(),
+                'usuario': register.user.get_full_name_string(),
+                'html': register.delta,
+            })
+
+        return list
+
+    def get_context_data(self, **kwargs):
+        registers = self.get_items_registers()
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        kwargs['title'] = "GESTIÓN"
+        kwargs['registros'] = registers
+        kwargs['registros_cantidad'] = len(registers)
+        kwargs['breadcrum_1'] = collect_account.cut.consecutive
+        kwargs['breadcrum_active'] = collect_account.contract.nombre
+        return super(HistorialCollectsAccountView,self).get_context_data(**kwargs)
 

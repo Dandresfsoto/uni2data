@@ -1494,18 +1494,18 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
                         user = collect_account.contract.get_user_or_none()
 
-                        if user != None:
-                            tasks.send_mail_templated_cuenta_cobro(
-                                'mail/recursos_humanos/cuenta_cobro.tpl',
-                                {
-                                    'url_base': 'https://' + self.request.META['HTTP_HOST'],
-                                    'Contrato': collect_account.contract.nombre,
-                                    'nombre': collect_account.contract.contratista.nombres,
-                                    'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
-                                },
-                                DEFAULT_FROM_EMAIL,
-                                [user.email, EMAIL_HOST_USER]
-                            )
+                        #if user != None:
+                        #    tasks.send_mail_templated_cuenta_cobro(
+                        #        'mail/recursos_humanos/cuenta_cobro.tpl',
+                        #        {
+                        #            'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                        #            'Contrato': collect_account.contract.nombre,
+                        #            'nombre': collect_account.contract.contratista.nombres,
+                        #            'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
+                        #        },
+                        #        DEFAULT_FROM_EMAIL,
+                        #        [user.email, EMAIL_HOST_USER]
+                        #    )
 
 
 
@@ -1617,7 +1617,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                                 '--page-size': 'Letter'
                             }
                         )
-                        collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
+                        collect_account.file.save('cuenta_cobro.pdf', File(io.BytesIO(data)))
 
         return HttpResponseRedirect(self.get_success_url())
 
@@ -1819,6 +1819,13 @@ class CollectAccountUpdateView(FormView):
             )
             collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
 
+        models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account = collect_account,
+            delta = "Actualizo la cuenta de cobro"
+        )
+
         return super(CollectAccountUpdateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -1892,6 +1899,16 @@ class CollectAccountUploadView(UpdateView):
         self.object = form.save()
         self.object.estado = 'Cargado'
         self.object.save()
+
+        collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Cargo documentos desde el modulo Recursos humanos"
+        )
+
         return super(CollectAccountUploadView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -1931,11 +1948,29 @@ class CollectAccountApprobView(View):
                 if request.user.is_superuser:
                     self.collect_account.estate = 'Aprobado'
                     self.collect_account.save()
+
+                    collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+                    models.Registration.objects.create(
+                        cut=collect_account.cut,
+                        user=self.request.user,
+                        collect_account=collect_account,
+                        delta="Aprobo la seguridad social"
+                    )
                     return HttpResponseRedirect('../../')
                 else:
                     if request.user.has_perms(self.permissions.get('all')):
                         self.collect_account.estate = 'Aprobado'
                         self.collect_account.save()
+
+                        collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+                        models.Registration.objects.create(
+                            cut=collect_account.cut,
+                            user=self.request.user,
+                            collect_account=collect_account,
+                            delta="Aprobo la seguridad social"
+                        )
                         return HttpResponseRedirect('../../')
                     else:
                         return HttpResponseRedirect('../../')
@@ -1999,6 +2034,15 @@ class CollectAccountRejectView(FormView):
                     [user.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
                 )
 
+            collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+            models.Registration.objects.create(
+                cut=collect_account.cut,
+                user=self.request.user,
+                collect_account=collect_account,
+                delta="Rechazo la seguridad social por: " + collect_account.observaciones
+            )
+
 
         return super(CollectAccountRejectView, self).form_valid(form)
 
@@ -2030,8 +2074,10 @@ class CollectAccountDeleteView(LoginRequiredMixin,
     def dispatch(self, request, *args, **kwargs):
         cut = models.Cuts.objects.get(id = self.kwargs['pk_cut'])
         cuenta_cobro = models.Collects_Account.objects.get(id = self.kwargs['pk_collect_account'])
-
+        registers= models.Registration.objects.filter(collect_account=cuenta_cobro)
+        registers.delete()
         cuenta_cobro.delete()
+
 
         return HttpResponseRedirect('../../')
 
