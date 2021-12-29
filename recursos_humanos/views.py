@@ -1358,9 +1358,9 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                 values_total = round((value_total/days_total) * 30)
 
                 if total_value_fees == None:
-                    total_value_fees_sum =  float(0) + float(values_total)
+                    total_value_fees_sum =  float(0)
                 else:
-                    total_value_fees_sum = float(total_value_fees) + float(values_total)
+                    total_value_fees_sum = float(total_value_fees)
 
                 if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
                     days_monht = functions.obtener_dias_del_mes(month,year)
@@ -1507,10 +1507,8 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         #        [user.email, EMAIL_HOST_USER]
                         #    )
 
-
-
                 else:
-                    value_rest = value_total - total_value_fees
+                    value_rest = int(value_total) - int(total_value_fees)
                     collect_account = models.Collects_Account.objects.create(
                         contract=contract,
                         cut=cut,
