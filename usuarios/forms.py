@@ -124,6 +124,50 @@ class UserForm(forms.ModelForm):
             'is_verificated': 'Cuenta verificada'
         }
 
+class PasswordForm(forms.ModelForm):
+    password = forms.CharField(label="Password")
+    def __init__(self, *args, **kwargs):
+        super(PasswordForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Fieldset(
+                'Escriba la nueva contraseña',
+                Row(),
+                Row(
+                    Column(
+                        Column(
+                            'password',
+                            css_class='s12 center-align',
+                        ),
+                        css_class="s12",
+                    )
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = User
+        fields = ['password']
+
+        labels = {
+            'password': 'Contraseña',
+        }
+
 class PermisoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(PermisoForm, self).__init__(*args, **kwargs)
