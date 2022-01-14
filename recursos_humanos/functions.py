@@ -50,10 +50,11 @@ def certificacion_laboral(contratista):
                     'insert': '\n'
                 })
                 contratos.append({
+                    'attributes': {'align': 'justify','list':'ordered'},
                     'insert': contrato.get_obligaciones()
                 })
                 contratos.append({
-                    'attributes': {'align': 'justify'},
+                    'attributes': {'align': 'justify','list':'ordered'},
                     'insert': '\n'
                 })
                 contratos.append({
