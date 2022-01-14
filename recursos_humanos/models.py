@@ -39,6 +39,7 @@ class CargaMasivaContratos(models.Model):
 class Cargos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     nombre = models.CharField(max_length=100)
+    obligaciones = models.TextField(max_length=10000, blank=True, null=True)
 
     def __str__(self):
         return self.nombre
@@ -357,7 +358,13 @@ class Contratos(models.Model):
             self.contratista.get_full_name_cedula()
         )
 
-
+    def get_obligaciones(self):
+        obligaciones=' '
+        try:
+            obligaciones=self.cargo.obligaciones
+        except:
+            pass
+        return obligaciones
 
     def get_estado_contrato(self):
         estado = ''

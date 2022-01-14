@@ -1176,8 +1176,7 @@ class CertificacionesForm(forms.Form):
     inicial = forms.CharField(widget=forms.HiddenInput())
     firma = forms.CharField(widget=forms.Select(choices=[
         ('','----------'),
-        ('Director administrativo y financiero', 'Director administrativo y financiero'),
-        ('Gerencia', 'Gerencia')
+        ('Representante legal', 'Representante legal')
     ]))
     notificar = forms.BooleanField(required=False)
 
