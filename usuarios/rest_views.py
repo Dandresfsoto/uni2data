@@ -49,8 +49,8 @@ class NotificationsApi(APIView):
 
 class CuentasListApi(BaseDatatableView):
     model = User
-    columns = ['id','email','first_name','last_name','last_online','is_active']
-    order_columns = ['id','email', 'first_name','last_name','last_online','is_active']
+    columns = ['id','email','first_name','last_name','last_online','is_active','password']
+    order_columns = ['id','email', 'first_name','last_name','last_online','is_active','password']
 
 
     def filter_queryset(self, qs):
@@ -105,6 +105,22 @@ class CuentasListApi(BaseDatatableView):
                           '</a>'
 
             return '<div class="center-align">' + render + '</div>'
+
+        elif column == 'password':
+            ret = ''
+            if self.request.user.is_superuser or self.request.user.has_perm('usuarios.usuarios.cuentas.editar'):
+                ret = '<div class="center-align">' \
+                      '<a href="password/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar usuario: {1}">' \
+                      '<i class="material-icons" style="color:red">https</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.email)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">https</i>' \
+                      '</div>'.format(row.id, row.email)
+
+            return ret
 
         else:
             return super(CuentasListApi, self).render_column(row, column)
