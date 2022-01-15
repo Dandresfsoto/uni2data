@@ -9,6 +9,8 @@ urlpatterns = [
     path('cuentas/crear/', views.CuentasCreateView.as_view()),
     path('cuentas/editar/<uuid:pk>/', views.CuentasUpdateView.as_view()),
 
+    path('cuentas/password/<uuid:pk>/', views.PasswordUpdateView.as_view()),
+
     path('permisos/', views.PermisosListView.as_view()),
     path('permisos/crear/', views.PermisosCreateView.as_view()),
     path('permisos/editar/<int:pk>/', views.PermisosUpdateView.as_view()),

@@ -169,6 +169,32 @@ class CuentasUpdateView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = models.User.objects.get(id=self.kwargs['pk']).email
         return super(CuentasUpdateView,self).get_context_data(**kwargs)
 
+
+class PasswordUpdateView(LoginRequiredMixin,FormView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'usuarios/cuentas/password.html'
+    form_class = forms.PasswordForm
+    success_url = "../../"
+    model = models.User
+
+    def form_valid(self, form):
+
+        password = form.cleaned_data['password']
+        user = models.User.objects.get(id=self.kwargs['pk'])
+
+        user.set_password(password)
+        user.save()
+
+        return super(PasswordUpdateView, self).form_valid(form)
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "ACTUALIZAR CONTRASEÑA"
+        kwargs['breadcrum_active'] = models.User.objects.get(id=self.kwargs['pk']).email
+        return super(PasswordUpdateView,self).get_context_data(**kwargs)
+
 #----------------------------------------------------------------------------------
 
 #--------------------------------- ROLES ------------------------------------------

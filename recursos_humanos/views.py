@@ -237,25 +237,13 @@ class CertificacionesCreateView(LoginRequiredMixin,
         delta_obj = json.loads(form.cleaned_data['contenido'])
         html_render = BeautifulSoup(html.render(delta_obj['ops']),"html.parser",from_encoding='utf-8')
 
-        if form.cleaned_data['firma'] == 'Director administrativo y financiero':
 
-            template_no_header = BeautifulSoup(open(settings.TEMPLATES[0]['DIRS'][
-                                          0] + '/pdfkit/certificaciones/no_header/certificacion_direccion_financiera.html',
-                                      'rb'), "html.parser")
 
-            template_header = BeautifulSoup(open(settings.TEMPLATES[0]['DIRS'][
-                                          0] + '/pdfkit/certificaciones/header/certificacion_direccion_financiera.html',
-                                      'rb'), "html.parser")
+        template_no_header = BeautifulSoup(open(settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/no_header/certificacion_direccion_financiera.html',
+                                  'rb'), "html.parser")
 
-        elif form.cleaned_data['firma'] == 'Gerencia':
-
-            template_no_header = BeautifulSoup(
-                open(settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/no_header/certificacion_gerencia.html',
-                     'rb'), "html.parser")
-
-            template_header = BeautifulSoup(
-                open(settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/header/certificacion_gerencia.html',
-                     'rb'), "html.parser")
+        template_header = BeautifulSoup(open(settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/header/certificacion_direccion_financiera.html',
+                                  'rb'), "html.parser")
 
         template_no_header_tag = template_no_header.find(class_='contenido')
         template_no_header_tag.insert(1,html_render)
@@ -933,25 +921,14 @@ class CertificacionesUpdateView(LoginRequiredMixin,
         delta_obj = json.loads(form.cleaned_data['contenido'])
         html_render = BeautifulSoup(html.render(delta_obj['ops']),"html.parser",from_encoding='utf-8')
 
-        if form.cleaned_data['firma'] == 'Director administrativo y financiero':
+        template_no_header = BeautifulSoup(open(
+            settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/no_header/certificacion_direccion_financiera.html',
+            'rb'), "html.parser")
 
-            template_no_header = BeautifulSoup(open(settings.TEMPLATES[0]['DIRS'][
-                                          0] + '/pdfkit/certificaciones/no_header/certificacion_direccion_financiera.html',
-                                      'rb'), "html.parser")
+        template_header = BeautifulSoup(open(
+            settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/header/certificacion_direccion_financiera.html',
+            'rb'), "html.parser")
 
-            template_header = BeautifulSoup(open(settings.TEMPLATES[0]['DIRS'][
-                                          0] + '/pdfkit/certificaciones/header/certificacion_direccion_financiera.html',
-                                      'rb'), "html.parser")
-
-        elif form.cleaned_data['firma'] == 'Gerencia':
-
-            template_no_header = BeautifulSoup(
-                open(settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/no_header/certificacion_gerencia.html',
-                     'rb'), "html.parser")
-
-            template_header = BeautifulSoup(
-                open(settings.STATICFILES_DIRS[0] + '/pdfkit/certificaciones/header/certificacion_gerencia.html',
-                     'rb'), "html.parser")
 
         template_no_header_tag = template_no_header.find(class_='contenido')
         template_no_header_tag.insert(1,html_render)

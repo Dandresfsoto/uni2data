@@ -35,9 +35,32 @@ def certificacion_laboral(contratista):
                 'attributes': {'align': 'justify'},
                 'insert': '\n'
             })
-            contratos.append({
-                'insert': '\n'
-            })
+            if contrato.cargo.obligaciones == None:
+                contratos.append({
+                    'attributes': {'align': 'justify'},
+                    'insert': '\n'
+                })
+            else:
+                contratos.append({
+                    'attributes': {'bold': True},
+                    'insert': 'Obligaciones del contratista :'
+                })
+                contratos.append({
+                    'attributes': {'align': 'justify'},
+                    'insert': '\n'
+                })
+                contratos.append({
+                    'attributes': {'align': 'justify','list':'ordered'},
+                    'insert': contrato.get_obligaciones()
+                })
+                contratos.append({
+                    'attributes': {'align': 'justify','list':'ordered'},
+                    'insert': '\n'
+                })
+                contratos.append({
+                    'attributes': {'align': 'justify'},
+                    'insert': '\n'
+                })
     else:
         contratos.append(
             {
@@ -59,7 +82,7 @@ def certificacion_laboral(contratista):
             'ops':[
                 {
                     'attributes': {'bold':True},
-                    'insert': 'LA ASOCIACIÓN NACIONAL PARA EL DESARROLLO SOCIAL ANDES'
+                    'insert': 'ASOCIACIÓN COLOMBIANA DE INNOVACIÓN'
                 },
                 {
                     'attributes': {'align': 'center','header':3},
@@ -70,7 +93,7 @@ def certificacion_laboral(contratista):
                 },
                 {
                     'attributes': {'bold': True},
-                    'insert': 'NIT. 800.228.885-3'
+                    'insert': 'NIT. 901.294.654-6'
                 },
                 {
                     'attributes': {'align': 'center', 'header': 3},
@@ -91,7 +114,7 @@ def certificacion_laboral(contratista):
                     'insert': '\n'
                 },
                 {
-                    'insert': 'Que en el sistema de información SICAN se encuentra registrada la siguiente información de '
+                    'insert': 'Que en el sistema de información UNI2DATA se encuentra registrada la siguiente información de '
                 },
                 {
                     'attributes': {'bold': True},
