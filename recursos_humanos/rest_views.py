@@ -983,6 +983,121 @@ class CutsCollectAccountListApi(BaseDatatableView):
         else:
             return super(CutsCollectAccountListApi, self).render_column(row, column)
 
+class LiquidationsListApi(BaseDatatableView):
+    model = Contratos
+    columns = ['id','nombre','contratista','cargo','creation','valor','estado','file','fecha_legalizacion','visible']
+    order_columns = ['id','nombre','contratista','cargo','creation','valor','estado','file','fecha_legalizacion','visible']
+
+    def get_initial_queryset(self):
+        return self.model.objects.filter(tipo_contrato='Ops')
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(nombre__icontains=search) | Q(contratista__nombres__icontains=search) | \
+                Q(contratista__apellidos__icontains=search) | Q(contratista__cedula__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+        if column == 'id':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if self.request.user.has_perm('usuarios.recursos_humanos.contratos.editar'):
+                    ret = '<div class="center-align">' \
+                               '<a href="edit/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar liquidacion: {1}">' \
+                                    '<i class="material-icons">add_box</i>' \
+                               '</a>' \
+                           '</div>'.format(liquidacion.id,row.nombre)
+
+                else:
+                    ret = '<div class="center-align">' \
+                               '<i class="material-icons">add_box</i>' \
+                           '</div>'.format(liquidacion.id,row.nombre)
+            else:
+                if self.request.user.has_perm('usuarios.recursos_humanos.contratos.editar'):
+                    ret = '<div class="center-align">' \
+                          '<a href="create/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Generar liquidacion: {1}">' \
+                          '<i class="material-icons">add_box</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id, row.nombre)
+
+                else:
+                    ret = '<div class="center-align">' \
+                          '<i class="material-icons">add_box</i>' \
+                          '</div>'.format(row.id, row.nombre)
+            return ret
+
+        elif column == 'contratista':
+            return row.contratista.get_full_name_cedula()
+
+        elif column == 'cargo':
+            return row.get_cargo()
+
+        elif column == 'creation':
+            inicio = row.pretty_print_inicio()
+            fin = row.pretty_print_fin()
+            fechas = inicio +" - "+ fin
+            return fechas
+
+        elif column == 'valor':
+            return row.pretty_print_valor()
+
+
+        elif column == 'estado':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if liquidacion.estado != None:
+                    return '<a href="estado/{1}/"><div class="center-align"><b>{0}</b></div></a>'.format(liquidacion.estado, liquidacion.id)
+                else:
+                    return liquidacion.estado
+            else:
+                return ''
+
+        elif column == 'file':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if liquidacion.url_file() != None:
+                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                          '<i class="material-icons">insert_drive_file</i>' \
+                          '</a></div>'.format(liquidacion.url_file(), 'Descargar archivo')
+                else:
+                    ret = ''
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'fecha_legalizacion':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if liquidacion.url_file2() != None:
+                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                          '<i class="material-icons">insert_drive_file</i>' \
+                          '</a></div>'.format(liquidacion.url_file2(), 'Descargar archivo')
+                else:
+                    ret = ''
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'visible':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None and self.request.user.is_superuser:
+                ret = '<div class="center-align">' \
+                      '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar cuenta de cobro">' \
+                      '<i class="material-icons">delete</i>' \
+                      '</a>' \
+                      '</div>'.format(liquidacion.id)
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">delete</i>' \
+                      '</div>'
+
+            return ret
+
+        else:
+            return super(LiquidationsListApi, self).render_column(row, column)
+
 class ContratistaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         if not self.request.user.is_authenticated:

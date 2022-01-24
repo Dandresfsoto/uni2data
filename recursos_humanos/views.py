@@ -16,7 +16,7 @@ import json
 from bs4 import BeautifulSoup
 import os
 from django.utils import timezone
-
+from PyPDF2 import PdfFileMerger
 from recursos_humanos.functions import numero_to_letras
 from recursos_humanos.models import Collects_Account, Contratos
 from recursos_humanos.tasks import send_mail_templated_certificacion
@@ -132,6 +132,17 @@ class RhoptionsView(LoginRequiredMixin,
                 'sican_name': 'Cortes de pago',
                 'sican_icon': 'attach_money',
                 'sican_description': 'Listado de cortes de pago'
+            })
+
+        if self.request.user.has_perm('usuarios.recursos_humanos.liquidacion.ver'):
+            items.append({
+                'sican_categoria': 'Liquidacion',
+                'sican_color': '#e53935 red darken-3',
+                'sican_order': 8,
+                'sican_url': 'liquidations/',
+                'sican_name': 'Liquidaciones',
+                'sican_icon': 'assignment',
+                'sican_description': 'Listado de contratos para liquidacion'
             })
 
         return items
@@ -1373,7 +1384,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     fecha = timezone.now()
 
                     collect_count = models.Collects_Account.objects.filter(contract=contract).count()
-                    collect_count = collect_count+2
+                    collect_count = collect_count + 1
 
                     collect_account.estate = "Generado"
                     collect_account.estate_inform = "Generado"
@@ -1700,7 +1711,7 @@ class CollectAccountUpdateView(FormView):
         contract = collect_account.contract
 
         collect_count = models.Collects_Account.objects.filter(contract=contract).count()
-        collect_count = collect_count + 2
+        collect_count = collect_count + 1
 
         collect_account.value_fees = utils.autonumeric2float(form.cleaned_data['value_fees_char'])
         collect_account.estate = "Generado"
@@ -2077,3 +2088,768 @@ class CutsReport(LoginRequiredMixin,
         tasks.build_list_collects_account.delay(reporte.id)
 
         return HttpResponseRedirect('/reportes/')
+
+
+#----------------------------------------------------------------------------------
+
+#-------------------------------Liquidaciones--------------------------------------
+
+class LiquidationsListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.liquidaciones.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/liquidations/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Liquidaciones"
+        kwargs['url_datatable'] = '/rest/v1.0/recursos_humanos/liquidations/'
+        return super(LiquidationsListView,self).get_context_data(**kwargs)
+
+class LiquidationsCreateView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/liquidations/create.html'
+    form_class = forms.CreateLiquidationForm
+    success_url = '../../'
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.liquidaciones.ver"
+        ]
+    }
+
+    def get_cuentas_fees(self):
+        contrato = models.Contratos.objects.get(id=self.kwargs['pk_contract'])
+        accounts = models.Collects_Account.objects.filter(contract=contrato).exclude(value_fees=0)
+        list= ''
+        count= accounts.count()
+
+        for account in accounts:
+            month = account.month
+            year = account.year
+            value = account.value_fees
+            cut = account.cut.consecutive
+            list += '<p><b>Corte: </b>{0}</p><p><b>Fecha: </b>{1} - {2}</p><ul>{3}</ul>'.format(cut,month,year,value)
+
+        return list
+
+    def get_context_data(self, **kwargs):
+        contrato = models.Contratos.objects.get(id=self.kwargs['pk_contract'])
+        cuentas = models.Collects_Account.objects.filter(contract=contrato)
+        total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        valor_pagar = float(contrato.valor) - float(total_valor)
+
+        kwargs['title'] = "LIQUIDACION - Contrato: {0}".format(contrato.nombre)
+        kwargs['breadcrum_active'] = contrato.nombre
+        kwargs['valor'] = contrato.pretty_print_valor()
+        kwargs['contratista'] = contrato.contratista.get_full_name()
+        kwargs['contrato'] = contrato.nombre
+        kwargs['inicio'] = contrato.inicio
+        kwargs['fin'] = contrato.pretty_print_fin()
+        kwargs['cuentas'] = self.get_cuentas_fees()
+        kwargs['valor_pagar'] = "${:,.2f}".format(valor_pagar)
+
+        return super(LiquidationsCreateView,self).get_context_data(**kwargs)
+
+    def form_valid(self, form):
+        contrato = models.Contratos.objects.get(id=self.kwargs['pk_contract'])
+        fecha = timezone.now()
+
+        cuentas = models.Collects_Account.objects.filter(contract=contrato)
+        total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+
+        Valor_pagar = float(contrato.valor) - float(total_valor)
+
+
+        if float(contrato.valor) == float(total_valor):
+            liquidacion, created = models.Liquidations.objects.get_or_create(
+                contrato=contrato,
+                valor_ejecutado = contrato.valor,
+                valor = 0,
+                estado="Generada",
+                fecha_actualizacion=timezone.now(),
+                usuario_actualizacion=self.request.user,
+                mes = form.cleaned_data['mes'],
+                año = form.cleaned_data['año'],
+            )
+            contrato.liquidado = True
+            contrato.save()
+            template_header = BeautifulSoup(
+                open(settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/liquidacion.html', 'rb'),
+                "html.parser")
+
+            template_header_tag = template_header.find(class_='contratista_contrato_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.nombre).upper())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contratista_objeto_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
+
+            template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor())
+
+            template_header_tag = template_header.find(class_='contrato_valor_total_span_2')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_ejecutado())
+
+            template_header_tag = template_header.find(class_='contrato_valor_span_1')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor())
+
+            template_header_tag = template_header.find(class_='contrato_inicio_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_inicio())
+
+            template_header_tag = template_header.find(class_='contrato_finalizacion_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_2')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_2')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contrato_codigo_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.nombre))
+
+            template_header_tag = template_header.find(class_='contrato_finalizacion_span_2')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_3')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_3')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contratista_cargo_span')
+            template_header_tag.insert(1, str(liquidacion.contrato.cargo.nombre))
+
+            liquidacion.html.save('liquidacion.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+
+            liquidacion.file.save('liquidacion.pdf',
+                                  File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+            if settings.DEBUG:
+                config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+                pdfkit.from_file([liquidacion.html.path], liquidacion.file.path, {
+                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
+                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/footer/footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                }, configuration=config)
+            else:
+                data = pdfkit.from_url(
+                    url=liquidacion.html.url,
+                    output_path=False,
+                    options={
+                        '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
+                        '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/footer/footer.html',
+                        '--enable-local-file-access': None,
+                        '--page-size': 'Letter'
+                    }
+                )
+                liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
+
+            """
+            usuario = contrato.get_user_or_none()
+
+            if usuario != None:
+                tasks.send_mail_templated_liquidacion(
+                    'mail/cpe_2018/cuenta_cobro.tpl',
+                    {
+                        'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                        'ruta': contrato.nombre,
+                        'nombre': contrato.contratista.nombres,
+                        'nombre_completo': contrato.contratista.get_full_name(),
+                    },
+                    DEFAULT_FROM_EMAIL,
+                    [usuario.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
+                )
+            """
+
+        elif float(contrato.valor) > float(total_valor):
+            visible = form.cleaned_data['visible']
+
+            if visible==False:
+                liquidacion, created = models.Liquidations.objects.get_or_create(
+                    contrato=contrato,
+                    valor_ejecutado=contrato.valor,
+                    valor=Valor_pagar,
+                    estado="Generada",
+                    fecha_actualizacion=timezone.now(),
+                    usuario_actualizacion=self.request.user,
+                    mes=form.cleaned_data['mes'],
+                    año=form.cleaned_data['año'],
+                )
+
+            else:
+                valor_pagar = float(form.cleaned_data['valor'].replace('$ ', '').replace(',', ''))
+                total_ejecutado = float(total_valor) + float(valor_pagar)
+
+                liquidacion, created = models.Liquidations.objects.get_or_create(
+                    contrato=contrato,
+                    valor_ejecutado=total_ejecutado,
+                    valor=valor_pagar,
+                    estado="Generada",
+                    fecha_actualizacion=timezone.now(),
+                    usuario_actualizacion=self.request.user,
+                    mes=form.cleaned_data['mes'],
+                    año=form.cleaned_data['año'],
+                )
+
+            contrato.liquidado = True
+            contrato.save()
+
+            template_header = BeautifulSoup(
+                open(settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/liquidacion.html', 'rb'),
+                "html.parser")
+
+            template_header_tag = template_header.find(class_='contratista_contrato_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.nombre).upper())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contratista_objeto_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
+
+            template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor())
+
+            template_header_tag = template_header.find(class_='contrato_valor_total_span_2')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_ejecutado())
+
+            template_header_tag = template_header.find(class_='contrato_valor_span_1')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor())
+
+            template_header_tag = template_header.find(class_='contrato_inicio_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_inicio())
+
+            template_header_tag = template_header.find(class_='contrato_finalizacion_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_2')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_2')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contrato_codigo_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.nombre))
+
+            template_header_tag = template_header.find(class_='contrato_finalizacion_span_2')
+            if contrato.fecha_liquidacion != None:
+                template_header_tag.insert(1, liquidacion.contrato.pretty_print_liquidacion())
+            elif contrato.fecha_liquidacion != None:
+                template_header_tag.insert(1, liquidacion.contrato.pretty_print_renuncia())
+            else:
+                template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_3')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_3')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contratista_cargo_span')
+            template_header_tag.insert(1, str(liquidacion.contrato.cargo.nombre))
+
+            liquidacion.html.save('liquidacion.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+            liquidacion.file.save('liquidacion.pdf',
+                                  File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+
+
+
+            collect_count = models.Collects_Account.objects.filter(contract=contrato).count()
+            number = collect_count + 1
+
+            value_money = float(liquidacion.valor)
+            value_letter_num = value_money
+            value_letter = numero_to_letras(int(value_letter_num))
+
+            template_header_2 = BeautifulSoup(
+                open(settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'), "html.parser")
+
+            template_header_tag_2 = template_header_2.find(class_='fecha_span')
+            template_header_tag_2.insert(1, liquidacion.pretty_creation_datetime())
+
+            template_header_tag_2 = template_header_2.find(class_='number_span')
+            template_header_tag_2.insert(1, str(number))
+
+            template_header_tag_2 = template_header_2.find(class_='contract_span')
+            template_header_tag_2.insert(1, liquidacion.contrato.nombre)
+
+            template_header_tag_2 = template_header_2.find(class_='contractor_name_span')
+            template_header_tag_2.insert(1, liquidacion.contrato.contratista.get_full_name())
+
+            template_header_tag_2 = template_header_2.find(class_='contractor_document_span')
+            template_header_tag_2.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag_2 = template_header_2.find(class_='contractor_name_firm')
+            template_header_tag_2.insert(1, liquidacion.contrato.contratista.get_full_name())
+
+            template_header_tag_2 = template_header_2.find(class_='contractor_document_firm')
+            template_header_tag_2.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag_2 = template_header_2.find(class_='value_letter_span')
+            template_header_tag_2.insert(1, value_letter)
+
+            template_header_tag_2 = template_header_2.find(class_='value_letter_num_span')
+            template_header_tag_2.insert(1, str(value_letter_num))
+
+            template_header_tag_2 = template_header_2.find(class_='position_span')
+            template_header_tag_2.insert(1, str(liquidacion.contrato.get_cargo()))
+
+            template_header_tag_2 = template_header_2.find(class_='month_span')
+            template_header_tag_2.insert(1, str(liquidacion.mes))
+
+            template_header_tag_2 = template_header_2.find(class_='year_span')
+            template_header_tag_2.insert(1, str(liquidacion.año))
+
+            liquidacion.html2.save('cuenta_cobro.html', File(io.BytesIO(template_header_2.prettify(encoding='utf-8'))))
+            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+
+            if settings.DEBUG:
+                config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+                pdfkit.from_file([liquidacion.html.path,liquidacion.html2.path], liquidacion.file.path, {
+                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
+                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/footer/footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                }, configuration=config)
+            else:
+                data = pdfkit.from_url(
+                    url=[liquidacion.html.url,liquidacion.html2.url],
+                    output_path=False,
+                    options={
+                        '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
+                        '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/footer/footer.html',
+                        '--enable-local-file-access': None,
+                        '--page-size': 'Letter'
+                    }
+                )
+                liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
+
+            """
+            usuario = contrato.get_user_or_none()
+
+            if usuario != None:
+                tasks.send_mail_templated_liquidacion(
+                    'mail/cpe_2018/cuenta_cobro.tpl',
+                    {
+                        'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                        'ruta': contrato.nombre,
+                        'nombre': contrato.contratista.nombres,
+                        'nombre_completo': contrato.contratista.get_full_name(),
+                    },
+                    DEFAULT_FROM_EMAIL,
+                    [usuario.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
+                )
+            """
+
+
+
+        return super(LiquidationsCreateView,self).form_valid(form)
+
+    def get_initial(self):
+        return {'pk_contract':self.kwargs['pk_contract']}
+
+class LiquidationsEditView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/liquidations/edit.html'
+    form_class = forms.EditLiquidationForm
+    success_url = '../../'
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.liquidaciones.ver"
+        ]
+    }
+
+    def get_cuentas_fees(self):
+        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        contrato = liquidacion.contrato
+        accounts = models.Collects_Account.objects.filter(contract=contrato).exclude(value_fees=0)
+        list= ''
+        count= accounts.count()
+
+        for account in accounts:
+            month = account.month
+            year = account.year
+            value = account.value_fees
+            cut = account.cut.consecutive
+            list += '<p><b>Corte: </b>{0}</p><p><b>Fecha: </b>{1} - {2}</p><ul>{3}</ul>'.format(cut,month,year,value)
+
+        return list
+
+    def get_context_data(self, **kwargs):
+        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        contrato = liquidacion.contrato
+        cuentas = models.Collects_Account.objects.filter(contract=contrato)
+        total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        valor_pagar = float(contrato.valor) - float(total_valor)
+
+        kwargs['title'] = "LIQUIDACION - Contrato: {0}".format(contrato.nombre)
+        kwargs['breadcrum_active'] = contrato.nombre
+        kwargs['valor'] = contrato.pretty_print_valor()
+        kwargs['contratista'] = contrato.contratista.get_full_name()
+        kwargs['contrato'] = contrato.nombre
+        kwargs['inicio'] = contrato.inicio
+        kwargs['fin'] = contrato.pretty_print_fin()
+        kwargs['cuentas'] = self.get_cuentas_fees()
+        kwargs['valor_pagar'] = "${:,.2f}".format(valor_pagar)
+
+        return super(LiquidationsEditView,self).get_context_data(**kwargs)
+
+    def form_valid(self, form):
+        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        contrato = liquidacion.contrato
+        fecha = timezone.now()
+
+        cuentas = models.Collects_Account.objects.filter(contract=contrato)
+        total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+
+        Valor_pagar = float(contrato.valor) - float(total_valor)
+
+
+        if float(contrato.valor) == float(total_valor):
+            liquidacion.valor_ejecutado = float(contrato.valor)
+            liquidacion.valor = 0
+            liquidacion.estado="Generada"
+            liquidacion.fecha_actualizacion=timezone.now()
+            liquidacion.usuario_actualizacion=self.request.user
+            liquidacion.save()
+
+            liquidacion.file.delete()
+
+            template_header = BeautifulSoup(
+                open(settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/liquidacion.html', 'rb'),
+                "html.parser")
+
+            template_header_tag = template_header.find(class_='contratista_contrato_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.nombre).upper())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contratista_objeto_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
+
+            template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor())
+
+            template_header_tag = template_header.find(class_='contrato_valor_total_span_2')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_ejecutado())
+
+            template_header_tag = template_header.find(class_='contrato_valor_span_1')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor())
+
+            template_header_tag = template_header.find(class_='contrato_inicio_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_inicio())
+
+            template_header_tag = template_header.find(class_='contrato_finalizacion_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_2')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_2')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contrato_codigo_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.nombre))
+
+            template_header_tag = template_header.find(class_='contrato_finalizacion_span_2')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_3')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_3')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contratista_cargo_span')
+            template_header_tag.insert(1, str(liquidacion.contrato.cargo.nombre))
+
+            liquidacion.html.save('liquidacion.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+
+            liquidacion.file.save('liquidacion.pdf',
+                                  File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+            if settings.DEBUG:
+                config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+                pdfkit.from_file([liquidacion.html.path], liquidacion.file.path, {
+                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
+                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/footer/footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                }, configuration=config)
+            else:
+                data = pdfkit.from_url(
+                    url=liquidacion.html.url,
+                    output_path=False,
+                    options={
+                        '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
+                        '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/footer/footer.html',
+                        '--enable-local-file-access': None,
+                        '--page-size': 'Letter'
+                    }
+                )
+                liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
+
+            """
+            usuario = contrato.get_user_or_none()
+
+            if usuario != None:
+                tasks.send_mail_templated_liquidacion(
+                    'mail/cpe_2018/cuenta_cobro.tpl',
+                    {
+                        'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                        'ruta': contrato.nombre,
+                        'nombre': contrato.contratista.nombres,
+                        'nombre_completo': contrato.contratista.get_full_name(),
+                    },
+                    DEFAULT_FROM_EMAIL,
+                    [usuario.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
+                )
+            """
+
+        elif float(contrato.valor) > float(total_valor):
+            visible = form.cleaned_data['visible']
+
+            if visible==False:
+                liquidacion.valor_ejecutado=float(contrato.valor)
+                liquidacion.valor=float(Valor_pagar)
+                liquidacion.estado="Generada"
+                liquidacion.fecha_actualizacion=timezone.now()
+                liquidacion.usuario_actualizacion=self.request.user
+                liquidacion.mes=form.cleaned_data['mes']
+                liquidacion.año=form.cleaned_data['año']
+                liquidacion.visible=form.cleaned_data['visible']
+                liquidacion.save()
+            else:
+                valor_pagar = float(form.cleaned_data['valor'].replace('$ ', '').replace(',', ''))
+                total_ejecutado = float(total_valor) + float(valor_pagar)
+                liquidacion.valor_ejecutado=total_ejecutado
+                liquidacion.valor=valor_pagar
+                liquidacion.estado="Generada"
+                liquidacion.fecha_actualizacion=timezone.now()
+                liquidacion.usuario_actualizacion=self.request.user
+                liquidacion.mes=form.cleaned_data['mes']
+                liquidacion.año=form.cleaned_data['año']
+                liquidacion.visible = form.cleaned_data['visible']
+                liquidacion.save()
+
+
+            liquidacion.file.delete()
+            template_header = BeautifulSoup(
+                open(settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/liquidacion.html', 'rb'),
+                "html.parser")
+
+            template_header_tag = template_header.find(class_='contratista_contrato_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.nombre).upper())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contratista_objeto_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
+
+            template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor())
+
+            template_header_tag = template_header.find(class_='contrato_valor_total_span_2')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_ejecutado())
+
+            template_header_tag = template_header.find(class_='contrato_valor_span_1')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor())
+
+            template_header_tag = template_header.find(class_='contrato_inicio_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_inicio())
+
+            template_header_tag = template_header.find(class_='contrato_finalizacion_span_1')
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_2')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_2')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contrato_codigo_span_1')
+            template_header_tag.insert(1, str(liquidacion.contrato.nombre))
+
+            template_header_tag = template_header.find(class_='contrato_finalizacion_span_2')
+            if contrato.fecha_liquidacion != None:
+                template_header_tag.insert(1, liquidacion.contrato.pretty_print_liquidacion())
+            elif contrato.fecha_liquidacion != None:
+                template_header_tag.insert(1, liquidacion.contrato.pretty_print_renuncia())
+            else:
+                template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+
+            template_header_tag = template_header.find(class_='contratista_nombre_span_3')
+            template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
+
+            template_header_tag = template_header.find(class_='contratista_cedula_span_3')
+            template_header_tag.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag = template_header.find(class_='contratista_cargo_span')
+            template_header_tag.insert(1, str(liquidacion.contrato.cargo.nombre))
+
+            liquidacion.html.save('liquidacion.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+            liquidacion.file.save('liquidacion.pdf',
+                                  File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+
+
+
+            collect_count = models.Collects_Account.objects.filter(contract=contrato).count()
+            number = collect_count + 1
+
+            value_money = float(liquidacion.valor)
+            value_letter_num = value_money
+            value_letter = numero_to_letras(int(value_letter_num))
+
+            template_header_2 = BeautifulSoup(
+                open(settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'), "html.parser")
+
+            template_header_tag_2 = template_header_2.find(class_='fecha_span')
+            template_header_tag_2.insert(1, liquidacion.pretty_creation_datetime())
+
+            template_header_tag_2 = template_header_2.find(class_='number_span')
+            template_header_tag_2.insert(1, str(number))
+
+            template_header_tag_2 = template_header_2.find(class_='contract_span')
+            template_header_tag_2.insert(1, liquidacion.contrato.nombre)
+
+            template_header_tag_2 = template_header_2.find(class_='contractor_name_span')
+            template_header_tag_2.insert(1, liquidacion.contrato.contratista.get_full_name())
+
+            template_header_tag_2 = template_header_2.find(class_='contractor_document_span')
+            template_header_tag_2.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag_2 = template_header_2.find(class_='contractor_name_firm')
+            template_header_tag_2.insert(1, liquidacion.contrato.contratista.get_full_name())
+
+            template_header_tag_2 = template_header_2.find(class_='contractor_document_firm')
+            template_header_tag_2.insert(1, str(liquidacion.contrato.contratista.cedula))
+
+            template_header_tag_2 = template_header_2.find(class_='value_letter_span')
+            template_header_tag_2.insert(1, value_letter)
+
+            template_header_tag_2 = template_header_2.find(class_='value_letter_num_span')
+            template_header_tag_2.insert(1, str(value_letter_num))
+
+            template_header_tag_2 = template_header_2.find(class_='position_span')
+            template_header_tag_2.insert(1, str(liquidacion.contrato.get_cargo()))
+
+            template_header_tag_2 = template_header_2.find(class_='month_span')
+            template_header_tag_2.insert(1, str(liquidacion.mes))
+
+            template_header_tag_2 = template_header_2.find(class_='year_span')
+            template_header_tag_2.insert(1, str(liquidacion.año))
+
+            liquidacion.html2.save('cuenta_cobro.html', File(io.BytesIO(template_header_2.prettify(encoding='utf-8'))))
+            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+
+            if settings.DEBUG:
+                config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+                pdfkit.from_file([liquidacion.html.path,liquidacion.html2.path], liquidacion.file.path, {
+                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
+                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/footer/footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                }, configuration=config)
+            else:
+                data = pdfkit.from_url(
+                    url=[liquidacion.html.url,liquidacion.html2.url],
+                    output_path=False,
+                    options={
+                        '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
+                        '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/footer/footer.html',
+                        '--enable-local-file-access': None,
+                        '--page-size': 'Letter'
+                    }
+                )
+                liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
+
+            """
+            usuario = contrato.get_user_or_none()
+
+            if usuario != None:
+                tasks.send_mail_templated_liquidacion(
+                    'mail/cpe_2018/cuenta_cobro.tpl',
+                    {
+                        'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                        'ruta': contrato.nombre,
+                        'nombre': contrato.contratista.nombres,
+                        'nombre_completo': contrato.contratista.get_full_name(),
+                    },
+                    DEFAULT_FROM_EMAIL,
+                    [usuario.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
+                )
+            """
+
+
+
+        return super(LiquidationsEditView,self).form_valid(form)
+
+    def get_initial(self):
+        return {'pk_liquidacion':self.kwargs['pk_liquidacion']}
+
+
+class LiquidationsDelete(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.liquidaciones.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../"
+
+
+    def dispatch(self, request, *args, **kwargs):
+        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        liquidacion.delete()
+
+
+        return HttpResponseRedirect('../../')

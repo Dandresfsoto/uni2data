@@ -1968,3 +1968,482 @@ class CollectsAccountRejectForm(forms.Form):
                 ),
             )
         )
+
+class CreateLiquidationForm(forms.Form):
+
+    visible = forms.BooleanField(required=False, label="¿Desea cambiar el valor a favor del contratista?")
+    mes = forms.CharField(required=False,label='Mes', max_length=100, widget=forms.Select(choices=[
+        ('', '----------'),
+        ('Enero', 'Enero'),
+        ('Febrero', 'Febrero'),
+        ('Marzo', 'Marzo'),
+        ('Abril', 'Abril'),
+        ('Mayo', 'Mayo'),
+        ('Junio', 'Junio'),
+        ('Julio', 'Julio'),
+        ('Agosto', 'Agosto'),
+        ('Septiembre', 'Septiembre'),
+        ('Octubre', 'Octubre'),
+        ('Noviembre', 'Noviembre'),
+        ('Diciembre', 'Diciembre')
+    ]))
+
+    año = forms.CharField(required=False,label='Mes', max_length=100, widget=forms.Select(choices=[
+        ('', '----------'),
+        ('2020', '2020'),
+        ('2021', '2021'),
+    ]))
+
+    def __init__(self, *args, **kwargs):
+        super(CreateLiquidationForm, self).__init__(*args, **kwargs)
+
+        contrato = models.Contratos.objects.get(id=kwargs['initial']['pk_contract'])
+        cuentas= models.Collects_Account.objects.filter(contract=contrato)
+        total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+
+
+        if float(contrato.valor) == float(total_valor):
+
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+
+                Row(
+                    Fieldset(
+                        'Informacion del contrato',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <div class="col s12 m6"><p><b>Contratista:</b> {{contratista}}</p></div>
+                        <div class="col s12 m6"><p><b>Contrato:</b> {{contrato}}</p></div>
+                        <div class="col s12 m6"><p><b>Inicio:</b> {{inicio}}</p></div>
+                        <div class="col s12 m6"><p><b>Fin:</b> {{fin}}</p></div>
+                        <div class="col s12 m6"><p><b>Valor del contrato:</b> {{valor}}</p></div>
+                        """
+                    )
+                ),
+                Row(
+                    Fieldset(
+                        'Informacion de cuentas de cobro',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <div class="col s12">{{ cuentas| safe }}</div>
+                        """
+                    )
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+        if float(contrato.valor) > float(total_valor):
+            self.fields['valor'] = forms.CharField(required=False,label="Valor a favor del contratista ($)")
+
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+                Row(
+                    Fieldset(
+                        'Informacion del contrato',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <div class="col s12 m6"><p><b>Contratista:</b> {{contratista}}</p></div>
+                        <div class="col s12 m6"><p><b>Contrato:</b> {{contrato}}</p></div>
+                        <div class="col s12 m6"><p><b>Inicio:</b> {{inicio}}</p></div>
+                        <div class="col s12 m6"><p><b>Fin:</b> {{fin}}</p></div>
+                        <div class="col s12 m6"><p><b>Valor del contrato:</b> {{valor}}</p></div>
+                        """
+                    )
+                ),
+                Row(
+                    Fieldset(
+                        'Informacion de cuentas de cobro',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <div class="col s12">{{ cuentas| safe }}</div>
+                        """
+                    )
+                ),
+                Row(
+                    Fieldset(
+                        'Saldo a favor',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <div class="col s12 m6"><p><b>Valor:</b> {{valor_pagar}}</p></div>
+                        """
+                    )
+                ),
+                Row(
+                    Column(
+                        'mes',
+                        css_class='s6'
+                    ),
+                    Column(
+                        'año',
+                        css_class='s6'
+                    )
+                ),
+                Row(
+                    Column(
+                        Row(
+                            Fieldset(
+                                'Cambiar valor:',
+                            )
+                        ),
+                        Row(
+                            Column(
+                                'visible',
+                                css_class='s12 m6'
+                            )
+                        ),
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Column(
+                        Row(
+                            Fieldset(
+                                'Nuevo valor:'
+                            )
+                        ),
+                        Row(
+                            Column(
+                                'valor',
+                                css_class='s12'
+                            )
+                        ),
+                    ),
+                    id='valor_pagar',
+                    style="display:none"
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+class EditLiquidationForm(forms.Form):
+
+    visible = forms.BooleanField(required=False, label="¿Desea cambiar el valor a favor del contratista?")
+    mes = forms.CharField(required=False,label='Mes', max_length=100, widget=forms.Select(choices=[
+        ('', '----------'),
+        ('Enero', 'Enero'),
+        ('Febrero', 'Febrero'),
+        ('Marzo', 'Marzo'),
+        ('Abril', 'Abril'),
+        ('Mayo', 'Mayo'),
+        ('Junio', 'Junio'),
+        ('Julio', 'Julio'),
+        ('Agosto', 'Agosto'),
+        ('Septiembre', 'Septiembre'),
+        ('Octubre', 'Octubre'),
+        ('Noviembre', 'Noviembre'),
+        ('Diciembre', 'Diciembre')
+    ]))
+
+    año = forms.CharField(required=False,label='Mes', max_length=100, widget=forms.Select(choices=[
+        ('', '----------'),
+        ('2020', '2020'),
+        ('2021', '2021'),
+    ]))
+
+    def __init__(self, *args, **kwargs):
+        super(EditLiquidationForm, self).__init__(*args, **kwargs)
+
+        liquidacion = models.Liquidations.objects.get(id=kwargs['initial']['pk_liquidacion'])
+        contrato=liquidacion.contrato
+        cuentas= models.Collects_Account.objects.filter(contract=contrato)
+        total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+
+
+        if float(contrato.valor) == float(total_valor):
+
+
+
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+
+                Row(
+                    Fieldset(
+                        'Informacion del contrato',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <div class="col s12 m6"><p><b>Contratista:</b> {{contratista}}</p></div>
+                        <div class="col s12 m6"><p><b>Contrato:</b> {{contrato}}</p></div>
+                        <div class="col s12 m6"><p><b>Inicio:</b> {{inicio}}</p></div>
+                        <div class="col s12 m6"><p><b>Fin:</b> {{fin}}</p></div>
+                        <div class="col s12 m6"><p><b>Valor del contrato:</b> {{valor}}</p></div>
+                        """
+                    )
+                ),
+                Row(
+                    Fieldset(
+                        'Informacion de cuentas de cobro',
+                    )
+                ),
+                Row(
+                    HTML(
+                        """
+                        <div class="col s12">{{ cuentas| safe }}</div>
+                        """
+                    )
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+        if float(contrato.valor) > float(total_valor):
+            self.fields['mes'].initial = liquidacion.mes
+            self.fields['año'].initial = liquidacion.año
+            self.fields['valor'] = forms.CharField(required=False,label="Valor a favor del contratista ($)")
+            self.fields['valor'].initial = str(liquidacion.valor.amount)
+            self.fields['visible'].initial = liquidacion.visible
+            if liquidacion.visible == True:
+                self.helper = FormHelper(self)
+                self.helper.layout = Layout(
+
+                    Row(
+                        Fieldset(
+                            'Informacion del contrato',
+                        )
+                    ),
+                    Row(
+                        HTML(
+                            """
+                            <div class="col s12 m6"><p><b>Contratista:</b> {{contratista}}</p></div>
+                            <div class="col s12 m6"><p><b>Contrato:</b> {{contrato}}</p></div>
+                            <div class="col s12 m6"><p><b>Inicio:</b> {{inicio}}</p></div>
+                            <div class="col s12 m6"><p><b>Fin:</b> {{fin}}</p></div>
+                            <div class="col s12 m6"><p><b>Valor del contrato:</b> {{valor}}</p></div>
+                            """
+                        )
+                    ),
+                    Row(
+                        Fieldset(
+                            'Informacion de cuentas de cobro',
+                        )
+                    ),
+                    Row(
+                        HTML(
+                            """
+                            <div class="col s12">{{ cuentas| safe }}</div>
+                            """
+                        )
+                    ),
+                    Row(
+                        Fieldset(
+                            'Saldo a favor',
+                        )
+                    ),
+                    Row(
+                        HTML(
+                            """
+                            <div class="col s12 m6"><p><b>Valor:</b> {{valor_pagar}}</p></div>
+                            """
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'mes',
+                            css_class='s6'
+                        ),
+                        Column(
+                            'año',
+                            css_class='s6'
+                        )
+                    ),
+                    Row(
+                        Column(
+                            Row(
+                                Fieldset(
+                                    'Cambiar valor:',
+                                )
+                            ),
+                            Row(
+                                Column(
+                                    'visible',
+                                    css_class='s12 m6'
+                                )
+                            ),
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            Row(
+                                Fieldset(
+                                    'Nuevo valor:'
+                                )
+                            ),
+                            Row(
+                                Column(
+                                    'valor',
+                                    css_class='s12'
+                                )
+                            ),
+                        ),
+                        id='valor_pagar',
+                    ),
+                    Row(
+                        Column(
+                            Div(
+                                Submit(
+                                    'submit',
+                                    'Guardar',
+                                    css_class='button-submit'
+                                ),
+                                css_class="right-align"
+                            ),
+                            css_class="s12"
+                        ),
+                    )
+                )
+            else:
+                self.helper = FormHelper(self)
+                self.helper.layout = Layout(
+
+                    Row(
+                        Fieldset(
+                            'Informacion del contrato',
+                        )
+                    ),
+                    Row(
+                        HTML(
+                            """
+                            <div class="col s12 m6"><p><b>Contratista:</b> {{contratista}}</p></div>
+                            <div class="col s12 m6"><p><b>Contrato:</b> {{contrato}}</p></div>
+                            <div class="col s12 m6"><p><b>Inicio:</b> {{inicio}}</p></div>
+                            <div class="col s12 m6"><p><b>Fin:</b> {{fin}}</p></div>
+                            <div class="col s12 m6"><p><b>Valor del contrato:</b> {{valor}}</p></div>
+                            """
+                        )
+                    ),
+                    Row(
+                        Fieldset(
+                            'Informacion de cuentas de cobro',
+                        )
+                    ),
+                    Row(
+                        HTML(
+                            """
+                            <div class="col s12">{{ cuentas| safe }}</div>
+                            """
+                        )
+                    ),
+                    Row(
+                        Fieldset(
+                            'Saldo a favor',
+                        )
+                    ),
+                    Row(
+                        HTML(
+                            """
+                            <div class="col s12 m6"><p><b>Valor:</b> {{valor_pagar}}</p></div>
+                            """
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'mes',
+                            css_class='s6'
+                        ),
+                        Column(
+                            'año',
+                            css_class='s6'
+                        )
+                    ),
+                    Row(
+                        Column(
+                            Row(
+                                Fieldset(
+                                    'Cambiar valor:',
+                                )
+                            ),
+                            Row(
+                                Column(
+                                    'visible',
+                                    css_class='s12 m6'
+                                )
+                            ),
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            Row(
+                                Fieldset(
+                                    'Nuevo valor:'
+                                )
+                            ),
+                            Row(
+                                Column(
+                                    'valor',
+                                    css_class='s12'
+                                )
+                            ),
+                        ),
+                        id='valor_pagar',
+                        style="display:none"
+                    ),
+                    Row(
+                        Column(
+                            Div(
+                                Submit(
+                                    'submit',
+                                    'Guardar',
+                                    css_class='button-submit'
+                                ),
+                                css_class="right-align"
+                            ),
+                            css_class="s12"
+                        ),
+                    )
+                )

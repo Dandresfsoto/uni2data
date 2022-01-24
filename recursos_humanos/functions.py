@@ -1,7 +1,7 @@
 import json
 
 from num2words import num2words
-
+from PyPDF2 import PdfFileMerger
 from recursos_humanos.models import *
 from django.utils import timezone
 
@@ -259,3 +259,213 @@ def obtener_dias_del_mes(mes: int, anio: int) -> int:
     else:
         # En caso contrario, tiene 31 días
         return 31
+
+def delta_cuenta_cobro_parcial(liquidacion,valor,mes,year):
+
+    expedicion = ''
+    texto = ''
+    fecha = timezone.now()
+
+    if liquidacion.contrato.contratista.usuario_asociado != None:
+        municipio = liquidacion.contrato.contratista.usuario_asociado.lugar_expedicion.nombre
+        departamento = liquidacion.contrato.contratista.usuario_asociado.lugar_expedicion.departamento.nombre
+        expedicion = ' expedida en {0}, {1}.'.format(municipio,departamento)
+
+
+    if valor%1000000.00 == 0 :
+        texto = '{0} de pesos MTC.'.format(num2words(valor, lang='es_CO'))
+    else:
+        texto = '{0} pesos MTC.'.format(num2words(valor, lang='es_CO'))
+
+
+    concepto = ''
+
+
+    if liquidacion.contrato.cargo == None:
+
+        if liquidacion.contrato.proyecto == None:
+            concepto = 'Honorarios profesionales mes de {0} del año {1}, contrato {2}.'.format(
+                            mes,
+                            year,
+                            liquidacion.contrato.nombre
+                        )
+        else:
+            concepto = 'Honorarios profesionales mes de {0} del año {1}, contrato {2} en el marco del proyecto {3}.'.format(
+                mes,
+                year,
+                liquidacion.contrato.nombre,
+                liquidacion.contrato.proyecto.nombre
+            )
+    else:
+        if liquidacion.contrato.proyecto == None:
+            concepto = 'Honorarios profesionales mes de {0} del año {1} en el cargo de {2}, contrato {3}.'.format(
+                mes,
+                year,
+                liquidacion.contrato.cargo,
+                liquidacion.contrato.nombre
+            )
+        else:
+            concepto = 'Honorarios profesionales mes de {0} del año {1} en el cargo de {2}, contrato {3} en el marco del proyecto {4}.'.format(
+                mes,
+                year,
+                liquidacion.contrato.cargo,
+                liquidacion.contrato.nombre,
+                liquidacion.contrato.proyecto.nombre
+            )
+
+
+    ret = {
+        'ops': [
+                    {
+                        'insert': 'ID: {0}'.format(liquidacion.id)
+                    },
+                    {
+                        'attributes': {'bold': True, 'align':'right','size':'8px'},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '\n\n\n'
+                    },
+                    {
+                        'attributes': {'bold': True},
+                        'insert': 'CUENTA DE COBRO'
+                    },
+                    {
+                        'attributes': {'align': 'center', 'header': 1},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '\n\n'
+                    },
+                    {
+                        'attributes': {'bold': True},
+                        'insert': 'Debe a:'
+                    },
+                    {
+                        'attributes': {'align': 'center', 'header': 2},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '\n\n'
+                    },
+                    {
+                        'attributes': {'bold': True},
+                        'insert': liquidacion.contrato.contratista.get_full_name().upper()
+                    },
+                    {
+                        'insert': ', identificado con '
+                    },
+                    {
+                        'attributes': {'bold': True},
+                        'insert': 'C.C'
+                    },
+                    {
+                        'insert': ' '
+                    },
+                    {
+                        'attributes': {'bold': True},
+                        'insert': str(liquidacion.contrato.contratista.cedula).upper()
+                    },
+                    {
+                        'insert': expedicion
+                    },
+                    {
+                        'attributes': {'header': 3},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '\n\n'
+                    },
+                    {
+                        'attributes': {'bold': True},
+                        'insert': 'La suma de:'
+                    },
+                    {
+                        'attributes': {'align': 'center', 'header': 2},
+                        'insert': '\n'
+                    },
+                    {
+                        'attributes': {'align': 'center'},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '${:20,.2f}'.format(valor).replace(' ','')
+                    },
+                    {
+                        'attributes': {'align': 'center', 'header': 3},
+                        'insert': '\n'
+                    },
+                    {
+                        'attributes': {'align': 'center'},
+                        'insert': '\n\n'
+                    },
+                    {
+                        'attributes': {'bold': True},
+                        'insert': 'Son: '
+                    },
+                    {
+                        'insert': texto
+                    },
+                    {
+                        'attributes': {'align': 'justify','header': 3},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '\n'
+                    },
+                    {
+                        'attributes': {'bold': True},
+                        'insert': 'Por concepto de: '
+                    },
+                    {
+                        'insert': concepto
+                    },
+
+                    {
+                        'attributes': {'header': 3},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '\nDada en __________________, a los ______ dias del mes de _________________ del año __________.'
+                    },
+
+                    {
+                        'attributes': {'header': 3},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '\n\n\n'
+                    },
+                    {
+                        'attributes': {'bold': True},
+                        'insert': 'Firma: _____________________'
+                    },
+                    {
+                        'attributes': {'header': 3},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '\n\n'
+                    },
+                    {
+                        'attributes': {'bold': True},
+                        'insert': 'Cédula: _____________________'
+                    },
+                    {
+                        'attributes': {'header': 3},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '\n\n'
+                    },
+                    {
+                        'attributes': {'header': 3, 'bold': False},
+                        'insert': '\n'
+                    },
+                    {
+                        'insert': '\nPor favor aplicar la retención sobre el articulo 383 del estatuto tributario en razón a que a la fecha no he contratado o vinculado dos (2) o más trabajadores asociados a la actividad que desarrollo'
+                    },
+               ]
+    }
+
+    return ret
