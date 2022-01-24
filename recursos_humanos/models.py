@@ -518,6 +518,12 @@ class Contratos(models.Model):
     def pretty_print_fin(self):
         return self.fin.strftime('%d de %B del %Y')
 
+    def pretty_print_renuncia(self):
+        return self.fecha_renuncia.strftime('%d de %B del %Y')
+
+    def pretty_print_liquidacion(self):
+        return self.fecha_liquidacion.strftime('%d de %B del %Y')
+
     def pretty_print_valor(self):
         valor = self.valor
         return str(valor).replace('COL','')
@@ -575,6 +581,17 @@ class Contratos(models.Model):
             return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
         else:
             return '<a href="'+ url +'"> '+ str(self.otrosi_3.name) +'</a>'
+
+    def get_liquidacion(self):
+
+        liquidacion = None
+
+        try:
+            liquidacion = Liquidations.objects.get(contrato = self)
+        except:
+            pass
+
+        return liquidacion
 
 class Cuts(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -959,6 +976,88 @@ class Registration(models.Model):
 
     def pretty_creation_datetime(self):
         return self.creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
+
+def upload_dinamic_dir_liquidation(instance, filename):
+    return '/'.join(['Contratos', 'Liquidacion', str(instance.contrato.nombre), filename])
+
+class Liquidations(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    contrato = models.ForeignKey(Contratos, on_delete=models.DO_NOTHING, blank=True, null=True)
+    valor = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True)
+    valor_ejecutado = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True)
+    estado = models.CharField(max_length=100,blank=True,null = True)
+    mes=models.CharField(max_length=100,blank=True,null = True)
+    año = models.CharField(max_length=100, blank=True, null=True)
+    file = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_dir_liquidation,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name = "liquidacion sin firmar"
+    )
+    file2 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_dir_liquidation,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name = "liquidacion firmada"
+    )
+
+    html = models.FileField(upload_to=upload_dinamic_dir_liquidation, blank=True, null=True)
+    html2 = models.FileField(upload_to=upload_dinamic_dir_liquidation, blank=True, null=True)
+    delta = models.TextField(blank=True, null=True)
+    data_json = models.TextField(blank=True, null=True)
+    observaciones = models.TextField(default='', blank=True, null=True)
+    fecha_actualizacion = models.DateTimeField(blank=True, null=True)
+    usuario_actualizacion = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True,related_name='usuario_actualizacion_liquidacion_ops')
+    visible = models.BooleanField(default=False)
+
+    date_creation = models.DateTimeField(auto_now_add=True, verbose_name="Fecha creacion", blank=True, null=True)
+
+
+    def __str__(self):
+        return self.contrato.nombre
+
+    def get_nombre_contrato(self):
+        return self.contrato.nombre
+
+    def get_inicio_contrato(self):
+        return self.contrato.inicio
+
+    def get_fin_contrato(self):
+        return self.contrato.fin
+
+    def get_valor_contrato(self):
+        return self.contrato.pretty_print_valor()
+
+    def pretty_print_valor_ejecutado(self):
+        return str(self.valor_ejecutado).replace('COL','')
+
+    def pretty_print_valor(self):
+        return str(self.valor).replace('COL','')
+
+    def url_file(self):
+        url = None
+        try:
+            url = self.file.url
+        except:
+            pass
+        return url
+
+    def url_file2(self):
+        url = None
+        try:
+            url = self.file2.url
+        except:
+            pass
+        return url
+
+    def pretty_creation_datetime(self):
+        return self.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
 
 def upload_dinamic_dir_soporte_contrato(instance, filename):
     return '/'.join(['Contratos', 'Soportes', str(instance.contrato.id), str(instance.soporte.id), filename])
