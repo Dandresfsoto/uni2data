@@ -1384,7 +1384,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     fecha = timezone.now()
 
                     collect_count = models.Collects_Account.objects.filter(contract=contract).count()
-                    collect_count = collect_count + 1
+                    collect_count = collect_count
 
                     collect_account.estate = "Generado"
                     collect_account.estate_inform = "Generado"
@@ -1507,7 +1507,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                     fecha = timezone.now()
 
                     collect_count = models.Collects_Account.objects.filter(contract=contract).count()
-                    collect_count = collect_count + 1
+                    collect_count = collect_count
 
                     collect_account.estate = "Generado"
                     collect_account.estate_inform = "Generado"
@@ -1708,7 +1708,7 @@ class CollectAccountUpdateView(FormView):
         contract = collect_account.contract
 
         collect_count = models.Collects_Account.objects.filter(contract=contract).count()
-        collect_count = collect_count + 1
+        collect_count = collect_count
 
         collect_account.value_fees = utils.autonumeric2float(form.cleaned_data['value_fees_char'])
         collect_account.estate = "Generado"
