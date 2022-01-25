@@ -22,6 +22,8 @@ from django.contrib.auth.models import Permission, Group
 from direccion_financiera.models import Proyecto
 from usuarios.models import Municipios
 
+from simple_history.models import HistoricalRecords
+
 settings_time_zone = timezone_pyzt(settings.TIME_ZONE)
 # Create your models here.
 
@@ -76,6 +78,7 @@ class Contratistas(models.Model):
 
     usuario_asociado = models.ForeignKey(User, related_name="usuario_asociado", on_delete=models.DO_NOTHING, blank=True, null=True)
 
+    history = HistoricalRecords()
 
     def __str__(self):
         return '{0} {1} - {2}'.format(self.nombres,self.apellidos,str(self.cedula))

@@ -141,7 +141,8 @@ THIRD_PARTY_APPS = [
     'storages',
     'djmoney',
     'mathfilters',
-    'sequences'
+    'sequences',
+    'simple_history',
 ]
 
 LOCAL_APPS = [
@@ -174,7 +175,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'config.middleware.LoginRequiredMiddleware',
-    'social_django.middleware.SocialAuthExceptionMiddleware'
+    'social_django.middleware.SocialAuthExceptionMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
