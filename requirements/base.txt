@@ -43,3 +43,4 @@ sentry-sdk==0.14.1
 py-moneyed==1.1
 cryptography==3.3.1
 django-sequences==2.6
+django-simple-history==3.0.0

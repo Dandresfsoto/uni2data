@@ -5,6 +5,7 @@ from PyPDF2 import PdfFileMerger
 from recursos_humanos.models import *
 from pytz import timezone as timezone_pyzt
 settings_time_zone = timezone_pyzt(settings.TIME_ZONE)
+
 def certificacion_laboral(contratista):
 
     contratos = []
@@ -12,13 +13,25 @@ def certificacion_laboral(contratista):
     contratos_obj = Contratos.objects.filter(contratista=contratista)
 
     if contratos_obj.count() > 0:
+        dia_actual=timezone.now().day
+        mes_actual=timezone.now().month
+        mes_actual = month_converter(mes_actual)
+        año_actual=timezone.now().year
         for contrato in contratos_obj:
+            año_inicio=contrato.inicio.year
+            mes_inicio=contrato.inicio.month
+            mes_inicio = month_converter(mes_inicio)
+            dia_inicio=contrato.inicio.day
+            año_fin=contrato.inicio.year
+            mes_fin=contrato.inicio.month
+            mes_fin = month_converter(mes_fin)
+            dia_fin=contrato.inicio.day
             contratos.append({
                 'attributes': {'bold': True},
                 'insert': 'CONTRATO {0} N° {1}: '.format(contrato.tipo_contrato.upper(),contrato.nombre.upper())
             })
             contratos.append({
-                'insert': '{0} - {1}'.format(contrato.pretty_print_inicio(),contrato.pretty_print_fin())
+                'insert': '{0} de {1} del {2} - {3} de {4} del {5}'.format(dia_inicio,mes_inicio,año_inicio,dia_fin,mes_fin,año_fin)
             })
             contratos.append({
                 'attributes': {'align': 'justify'},
@@ -140,7 +153,7 @@ def certificacion_laboral(contratista):
             ] + contratos +
             [
                 {
-                    'insert': 'La presente se expide a solicitud del interesado a los {}'.format(timezone.now().strftime('%d días del mes de %B del %Y.'))
+                    'insert': 'La presente se expide a solicitud del interesado a los {0} días del mes de {1} del {2}.'.format(dia_actual,mes_actual,año_actual)
                 },
                 {
                     'attributes': {'align': 'justify'},
