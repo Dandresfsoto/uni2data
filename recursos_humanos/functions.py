@@ -3,7 +3,6 @@ import json
 from num2words import num2words
 from PyPDF2 import PdfFileMerger
 from recursos_humanos.models import *
-from django.utils import timezone
 from pytz import timezone as timezone_pyzt
 settings_time_zone = timezone_pyzt(settings.TIME_ZONE)
 
