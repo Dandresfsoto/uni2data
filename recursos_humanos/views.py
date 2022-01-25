@@ -1534,6 +1534,8 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         open(settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'),
                         "html.parser")
 
+
+
                     template_header_tag = template_header.find(class_='fecha_span')
                     template_header_tag.insert(1, collect_account.pretty_creation_datetime())
 
@@ -1732,8 +1734,6 @@ class CollectAccountUpdateView(FormView):
 
         template_header = BeautifulSoup(open(settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/cuenta.html','rb'), "html.parser")
 
-        template_header_tag = template_header.find(class_='codigo_span')
-        template_header_tag.insert(1, str(collect_account.id))
 
         template_header_tag = template_header.find(class_='fecha_span')
         template_header_tag.insert(1, collect_account.pretty_creation_datetime())
