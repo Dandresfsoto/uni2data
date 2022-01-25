@@ -7,7 +7,7 @@ from django.dispatch import receiver
 from djmoney.models.fields import MoneyField
 from pytz import timezone
 from config.extrafields import ContentTypeRestrictedFileField
-
+from simple_history.models import HistoricalRecords
 from common.models import BaseModel
 from usuarios.models import User, Departamentos, Municipios
 
@@ -181,6 +181,8 @@ class Reportes(BaseModel):
     numero_comprobante_pago = models.CharField(max_length=200,blank=True,null=True)
     fecha_pago = models.DateField(blank=True,null=True)
     file_comprobante_egreso = models.FileField(upload_to=upload_dinamic_dir_comprobante_egreso, blank=True, null=True)
+
+    history = HistoricalRecords()
 
     def __str__(self):
         return f"{self.consecutive} - {self.nombre}"
@@ -362,6 +364,8 @@ class Pagos(models.Model):
     banco = models.CharField(max_length=500, blank=True, null=True)
     cuenta = models.CharField(max_length=500, blank=True, null=True)
     cargo = models.CharField(max_length=500, blank=True, null=True)
+
+    history = HistoricalRecords()
 
     def __str__(self):
         return str(self.valor)
