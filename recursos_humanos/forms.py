@@ -275,12 +275,12 @@ class ContratoForm(forms.ModelForm):
 
         self.fields['valor_char'] = forms.CharField(label="Valor de los honorarios contrato ($)")
         self.fields['transporte_char'] = forms.CharField(label="Valor del transporte en el contrato ($)")
-        self.fields['valor_mensual_char'] = forms.CharField(label="Valor del transporte en el contrato ($)")
+        self.fields['valor_mensual_char'] = forms.CharField(label="Valor de honorarios mensual en el contrato ($)")
 
         try:
             valor = kwargs['instance'].valor
             transporte = kwargs['instance'].transporte
-            valor_mensual = kwargs['instance'].transporte
+            valor_mensual = kwargs['instance'].valor_mensual
         except:
             pass
         else:
@@ -288,7 +288,7 @@ class ContratoForm(forms.ModelForm):
             if transporte != None:
                 self.fields['transporte_char'].initial = transporte.amount
             if valor_mensual != None:
-                self.fields['valor_mensual_char'].initial = transporte.amount
+                self.fields['valor_mensual_char'].initial = valor_mensual.amount
 
         self.fields['file'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
         #self.fields['soporte_liquidacion'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
@@ -382,12 +382,18 @@ class ContratoForm(forms.ModelForm):
                     Row(
                         Column(
                             'valor_char',
-                            css_class='s12 m6 l4'
+                            css_class='s12'
                         ),
+                    ),
+                    Row(
                         Column(
                             'transporte_char',
-                            css_class='s12 m6 l4'
-                        )
+                            css_class='s12 m6'
+                        ),
+                        Column(
+                            'valor_mensual_char',
+                            css_class='s12 m6'
+                        ),
                     ),
                 ),
             ),

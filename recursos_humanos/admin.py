@@ -39,9 +39,10 @@ def actualizar_contratos(modeladmin, request, queryset):
                     ejecucion=True,
                 )
             if models.Contratos.objects.filter(nombre = file[0].value).count() != 0:
-                models.Contratos.objects.update(
-                    valor_mensual = file[16].value,
-                )
+                contrato = models.Contratos.objects.get(nombre = file[0].value)
+                contrato.valor_mensual = file[16].value
+                contrato.save()
+
 
 
 
@@ -59,3 +60,4 @@ admin.site.register(models.Contratos)
 admin.site.register(models.Registration)
 admin.site.register(models.Liquidations)
 admin.site.register(models.Certificaciones)
+admin.site.register(models.GruposSoportes)

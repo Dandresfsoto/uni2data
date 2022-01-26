@@ -53,11 +53,40 @@ block body_script_auth
     script.
         $(document).ready(function () {
 
-            new AutoNumeric('#id_valor_char', { currencySymbol : '$ ' });
-            new AutoNumeric('#id_transporte_char', { currencySymbol : '$ ' });
-            new AutoNumeric('#id_valor_mensual_char', { currencySymbol : '$ ' });
+            new AutoNumeric('#id_valor_char', {currencySymbol: '$ '});
+            new AutoNumeric('#id_transporte_char', {currencySymbol: '$ '});
+            new AutoNumeric('#id_valor_mensual_char', {currencySymbol: '$ '});
 
             $('textarea#id_objeto_contrato').characterCounter();
+
+
+            $('#id_otro_si_1').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el otrosi #1',
+                    'replace': 'Arrastra y suelta el otrosi #1 para reemplazar',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+            $('#id_otro_si_2').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el otrosi #2',
+                    'replace': 'Arrastra y suelta el otrosi #2 para reemplazar',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+            $('#id_otro_si_3').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el otrosi #3',
+                    'replace': 'Arrastra y suelta el otrosi #3 para reemplazar',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
 
             $('#id_file').dropify({
                 messages: {
@@ -148,5 +177,4 @@ block body_script_auth
             $("label[for='id_tipo_contrato']").addClass('active');
             $("label[for='id_proyecto']").addClass('active');
             $("label[for='id_cargo']").addClass('active');
-
         });
