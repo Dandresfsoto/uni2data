@@ -38,6 +38,11 @@ def actualizar_contratos(modeladmin, request, queryset):
                     suscrito=True,
                     ejecucion=True,
                 )
+            if models.Contratos.objects.filter(nombre = file[0].value).count() != 0:
+                models.Contratos.objects.update(
+                    valor_mensual = file[16].value,
+                )
+
 
 
 class CargaMasivaContratosAdmin(admin.ModelAdmin):
@@ -53,3 +58,4 @@ admin.site.register(models.Collects_Account)
 admin.site.register(models.Contratos)
 admin.site.register(models.Registration)
 admin.site.register(models.Liquidations)
+admin.site.register(models.Certificaciones)

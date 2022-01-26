@@ -275,16 +275,20 @@ class ContratoForm(forms.ModelForm):
 
         self.fields['valor_char'] = forms.CharField(label="Valor de los honorarios contrato ($)")
         self.fields['transporte_char'] = forms.CharField(label="Valor del transporte en el contrato ($)")
+        self.fields['valor_mensual_char'] = forms.CharField(label="Valor del transporte en el contrato ($)")
 
         try:
             valor = kwargs['instance'].valor
             transporte = kwargs['instance'].transporte
+            valor_mensual = kwargs['instance'].transporte
         except:
             pass
         else:
             self.fields['valor_char'].initial = valor.amount
             if transporte != None:
                 self.fields['transporte_char'].initial = transporte.amount
+            if valor_mensual != None:
+                self.fields['valor_mensual_char'].initial = transporte.amount
 
         self.fields['file'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
         #self.fields['soporte_liquidacion'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
@@ -345,9 +349,9 @@ class ContratoForm(forms.ModelForm):
                             css_class='s12 m6 l4'
                         ),
                         Column(
-                            'valor_char',
-                            css_class='s12 m6 l4'
-                        )
+                            'grupo_soportes',
+                            css_class='s12 m6 l4',
+                        ),
                     ),
                     Row(
                         Column(
@@ -358,27 +362,35 @@ class ContratoForm(forms.ModelForm):
                             'fin',
                             css_class='s12 m6 l4'
                         ),
+                    ),
+                ),
+                Row(
+                    Column(
+                        'objeto_contrato',
+                        css_class='s12'
+                    )
+                ),
+                css_class="s12"
+            ),
+            Row(
+                Column(
+                    Row(
+                        Fieldset(
+                            'Valores del contrato:',
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'valor_char',
+                            css_class='s12 m6 l4'
+                        ),
                         Column(
                             'transporte_char',
                             css_class='s12 m6 l4'
                         )
                     ),
-                    Row(
-                        Column(
-                            'grupo_soportes',
-                            css_class='s12 m6 l4',
-                        )
-                    ),
-                    Row(
-                        Column(
-                            'objeto_contrato',
-                            css_class='s12'
-                        )
-                    ),
-                    css_class="s12"
                 ),
             ),
-
             Row(
                 Column(
                     Row(
@@ -557,31 +569,33 @@ class ContratoFormSuperUser(forms.ModelForm):
         if soporte_renuncia != None and fecha_renuncia == None:
             self.add_error('fecha_renuncia', 'Por favor completa este campo')
 
-
-
     def __init__(self, *args, **kwargs):
         super(ContratoFormSuperUser, self).__init__(*args, **kwargs)
 
         self.fields['valor_char'] = forms.CharField(label="Valor de los honorarios contrato ($)")
-        self.fields['transporte_char'] = forms.CharField(label="Valor del transporte del contrato ($)")
+        self.fields['transporte_char'] = forms.CharField(label="Valor del transporte en el contrato ($)")
+        self.fields['valor_mensual_char'] = forms.CharField(label="Valor de honorarios mensual en el contrato ($)")
 
         try:
             valor = kwargs['instance'].valor
             transporte = kwargs['instance'].transporte
+            valor_mensual = kwargs['instance'].valor_mensual
         except:
             pass
         else:
-
             self.fields['valor_char'].initial = valor.amount
             if transporte != None:
                 self.fields['transporte_char'].initial = transporte.amount
+            if valor_mensual != None:
+                self.fields['valor_mensual_char'].initial = valor_mensual.amount
 
-        self.fields['file'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
-        #self.fields['soporte_liquidacion'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
-        #self.fields['soporte_renuncia'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
-        self.fields['objeto_contrato'].widget = forms.Textarea(attrs={'class': 'materialize-textarea','data-length':'1000'})
+        self.fields['file'].widget = forms.FileInput(attrs={'accept': 'application/pdf,application/x-pdf'})
+        # self.fields['soporte_liquidacion'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
+        # self.fields['soporte_renuncia'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
+        self.fields['objeto_contrato'].widget = forms.Textarea(
+            attrs={'class': 'materialize-textarea', 'data-length': '1000'})
         self.fields['tipo_contrato'].widget = forms.Select(choices=[
-            ('','----------'),
+            ('', '----------'),
             ('Ops', 'Ops'),
             ('Laboral', 'Laboral')
         ])
@@ -608,7 +622,7 @@ class ContratoFormSuperUser(forms.ModelForm):
                         <p><b>Cédula del contratista: </b> {{ contratista_cedula }} </p>
                         """
                     ),
-                    css_class = 's12'
+                    css_class='s12'
                 )
             ),
 
@@ -636,9 +650,9 @@ class ContratoFormSuperUser(forms.ModelForm):
                             css_class='s12 m6 l4'
                         ),
                         Column(
-                            'valor_char',
-                            css_class='s12 m6 l4'
-                        )
+                            'grupo_soportes',
+                            css_class='s12 m6 l4',
+                        ),
                     ),
                     Row(
                         Column(
@@ -649,27 +663,41 @@ class ContratoFormSuperUser(forms.ModelForm):
                             'fin',
                             css_class='s12 m6 l4'
                         ),
+                    ),
+                ),
+                Row(
+                    Column(
+                        'objeto_contrato',
+                        css_class='s12'
+                    )
+                ),
+                css_class="s12"
+            ),
+            Row(
+                Column(
+                    Row(
+                        Fieldset(
+                            'Valores del contrato:',
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'valor_char',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
                         Column(
                             'transporte_char',
-                            css_class='s12 m6 l4'
-                        )
-                    ),
-                    Row(
+                            css_class='s12 m6'
+                        ),
                         Column(
-                            'grupo_soportes',
-                            css_class='s12 m6 l4'
-                        )
+                            'valor_mensual_char',
+                            css_class='s12 m6'
+                        ),
                     ),
-                    Row(
-                        Column(
-                            'objeto_contrato',
-                            css_class='s12'
-                        )
-                    ),
-                    css_class="s12"
                 ),
             ),
-
             Row(
                 Column(
                     Row(
@@ -797,7 +825,6 @@ class ContratoFormSuperUser(forms.ModelForm):
                     css_class="s12"
                 ),
             ),
-
             Row(
                 Column(
                     Row(
@@ -815,7 +842,6 @@ class ContratoFormSuperUser(forms.ModelForm):
                     css_class="s12"
                 ),
             ),
-
             Row(
                 Column(
                     Div(
