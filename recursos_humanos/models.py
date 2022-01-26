@@ -298,6 +298,7 @@ class Contratos(models.Model):
 
     valor = MoneyField(max_digits=20,decimal_places=2,default_currency = 'COP')
     transporte = MoneyField(max_digits=20,decimal_places=2,default_currency = 'COP',blank=True, null=True, default=0)
+    valor_mensual = MoneyField(max_digits=20,decimal_places=2,default_currency = 'COP',blank=True, null=True, default=0)
 
     file = PDFFileField(upload_to=upload_dinamic_dir,
                         max_upload_size=20971520,
