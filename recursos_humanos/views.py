@@ -455,6 +455,7 @@ class ContratosCreateView(LoginRequiredMixin,
         self.object.contratista = models.Contratistas.objects.get(id=self.kwargs['pk'])
         self.object.valor = float(form.cleaned_data['valor_char'].replace('$ ','').replace(',',''))
         self.object.transporte = float(form.cleaned_data['transporte_char'].replace('$ ','').replace(',',''))
+        self.object.valor_mensual = float(form.cleaned_data['valor_mensual_char'].replace('$ ','').replace(',',''))
         self.object.save()
         return super(ContratosCreateView, self).form_valid(form)
 
@@ -516,6 +517,7 @@ class ContratosUpdateView(LoginRequiredMixin,
         self.object.contratista = models.Contratistas.objects.get(id=self.kwargs['pk'])
         self.object.valor = float(form.cleaned_data['valor_char'].replace('$ ','').replace(',',''))
         self.object.transporte = float(form.cleaned_data['transporte_char'].replace('$ ','').replace(',',''))
+        self.object.valor_mensual = float(form.cleaned_data['valor_mensual_char'].replace('$ ','').replace(',',''))
         self.object.save()
         return super(ContratosUpdateView, self).form_valid(form)
 
@@ -562,6 +564,7 @@ class ContratosEstadoUpdateView(LoginRequiredMixin,
         self.object = form.save(commit=False)
         self.object.valor = float(form.cleaned_data['valor_char'].replace('$ ','').replace(',',''))
         self.object.transporte = float(form.cleaned_data['transporte_char'].replace('$ ','').replace(',',''))
+        self.object.valor_mensual = float(form.cleaned_data['valor_mensual_char'].replace('$ ','').replace(',',''))
         self.object.save()
         return super(ContratosEstadoUpdateView, self).form_valid(form)
 
@@ -1325,281 +1328,609 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
         for contract_id in contracts_ids:
             contract = models.Contratos.objects.get(id=contract_id)
             if form.cleaned_data['contrato_{0}'.format(contract.id)]:
-                month_cut = cut.month
-                year_cut = cut.year
-                value = contract.valor
-                start = contract.inicio
-                end = contract.fin
-                rd = rdelta.relativedelta(end,start)
+                if float(contract.valor_mensual) <= 0 or float(contract.valor)==None:
+                    month_cut = cut.month
+                    year_cut = cut.year
+                    value = contract.valor
+                    start = contract.inicio
+                    end = contract.fin
+                    rd = rdelta.relativedelta(end,start)
 
-                rd_months = rd.months
-                rd_days = rd.days
-                days_total = rd_months * 30 + rd_days
-                value_f = float(value)
-                value_total = int(value_f)
-
-
-
-
-                collects_accounts = models.Collects_Account.objects.filter(contract=contract)
-                total_value_fees = collects_accounts.aggregate(Sum('value_fees'))['value_fees__sum']
-                values_total = round((value_total/days_total) * 30)
-
-                if total_value_fees == None:
-                    total_value_fees_sum =  float(0)
-                else:
-                    total_value_fees_sum = float(total_value_fees)
-
-                if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
-                    days_monht = functions.obtener_dias_del_mes(month,year)
-                    if days_monht == 31:
-                        date_rest = date(int(year_cut), int(month_cut), 30)
-                        days_rest = date_rest - contract.inicio
-                        values_total = (values_total / 30) * (days_rest.days +1)
-                    elif days_monht == 30:
-                        date_rest = date(int(year_cut), int(month_cut), 30)
-                        days_rest = date_rest - contract.inicio
-                        values_total = (values_total / 30) * (days_rest.days +1)
-                    elif days_monht == 29:
-                        date_rest = date(int(year_cut), int(month_cut), 29)
-                        days_rest = date_rest - contract.inicio
-                        values_total = (values_total / 30) * (days_rest.days + 2)
-                    elif days_monht == 28:
-                        date_rest = date(int(year_cut), int(month_cut), 28)
-                        days_rest = date_rest - contract.inicio
-                        values_total = (values_total / 30) * (days_rest.days + 3)
+                    rd_months = rd.months
+                    rd_days = rd.days
+                    days_total = rd_months * 30 + rd_days
+                    value_f = float(value)
+                    value_total = int(value_f)
 
 
-                if total_value_fees_sum < value_total:
-                    collect_account = models.Collects_Account.objects.create(
-                        contract=contract,
-                        cut=cut,
-                        user_creation=user,
-                        estate='Creado',
-                        value_fees=values_total,
-                        month=cut.month,
-                        year=cut.year,
-                    )
-
-                    fecha = timezone.now()
-
-                    collect_count = models.Collects_Account.objects.filter(contract=contract).count()
-                    collect_count = collect_count
-
-                    collect_account.estate = "Generado"
-                    collect_account.estate_inform = "Generado"
-                    collect_account.estate_report = "Generado"
-                    collect_account.save()
-                    month = int(collect_account.month) - 1
-                    month = functions.month_converter(month)
-
-                    fee_account_value = collect_account.get_value_fees()
-                    fee_value = fee_account_value.replace('$', '').replace(',', '')
-
-                    collect_account.file.delete()
-                    collect_account.html.delete()
-
-                    value_money = float(collect_account.value_fees)
-                    value_letter_num = value_money
-                    value_letter = numero_to_letras(int(value_letter_num))
-
-                    if collect_account.estate != 'Cargado':
-                        collect_account.estate = 'Generado'
-                    collect_account.save()
-
-                    template_header = BeautifulSoup(
-                        open(settings.STATICFILES_DIRS[0]  + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'), "html.parser")
-
-                    template_header_tag = template_header.find(class_='fecha_span')
-                    template_header_tag.insert(1, collect_account.pretty_creation_datetime())
-
-                    template_header_tag = template_header.find(class_='number_span')
-                    template_header_tag.insert(1, str(collect_count))
-
-                    template_header_tag = template_header.find(class_='contract_span')
-                    template_header_tag.insert(1, collect_account.contract.nombre)
-
-                    template_header_tag = template_header.find(class_='contractor_name_span')
-                    template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
-
-                    template_header_tag = template_header.find(class_='contractor_document_span')
-                    template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
-
-                    template_header_tag = template_header.find(class_='contractor_name_firm')
-                    template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
-
-                    template_header_tag = template_header.find(class_='contractor_document_firm')
-                    template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
-
-                    template_header_tag = template_header.find(class_='value_letter_span')
-                    template_header_tag.insert(1, value_letter)
-
-                    template_header_tag = template_header.find(class_='value_letter_num_span')
-                    template_header_tag.insert(1, str(value_letter_num))
-
-                    template_header_tag = template_header.find(class_='position_span')
-                    template_header_tag.insert(1, str(collect_account.contract.cargo.nombre))
 
 
-                    template_header_tag = template_header.find(class_='month_span')
-                    template_header_tag.insert(1, str(month))
+                    collects_accounts = models.Collects_Account.objects.filter(contract=contract)
+                    total_value_fees = collects_accounts.aggregate(Sum('value_fees'))['value_fees__sum']
+                    values_total = round((value_total/days_total) * 30)
 
-                    template_header_tag = template_header.find(class_='year_span')
-                    template_header_tag.insert(1, str(collect_account.year))
-
-                    collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
-
-                    path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-
-
-                    collect_account.file.save('cuenta_cobro.pdf',
-                                              File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
-
-
-                    if settings.DEBUG:
-                        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
-                        pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
-                            '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
-                            '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
-                            '--enable-local-file-access': None,
-                            '--page-size': 'Letter'
-                        }, configuration=config)
+                    if total_value_fees == None:
+                        total_value_fees_sum =  float(0)
                     else:
-                        data = pdfkit.from_url(
-                            url=collect_account.html.url,
-                            output_path=False,
-                            options={
+                        total_value_fees_sum = float(total_value_fees)
+
+                    if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
+                        days_monht = functions.obtener_dias_del_mes(month,year)
+                        if days_monht == 31:
+                            date_rest = date(int(year_cut), int(month_cut), 30)
+                            days_rest = date_rest - contract.inicio
+                            values_total = (values_total / 30) * (days_rest.days +1)
+                        elif days_monht == 30:
+                            date_rest = date(int(year_cut), int(month_cut), 30)
+                            days_rest = date_rest - contract.inicio
+                            values_total = (values_total / 30) * (days_rest.days +1)
+                        elif days_monht == 29:
+                            date_rest = date(int(year_cut), int(month_cut), 29)
+                            days_rest = date_rest - contract.inicio
+                            values_total = (values_total / 30) * (days_rest.days + 2)
+                        elif days_monht == 28:
+                            date_rest = date(int(year_cut), int(month_cut), 28)
+                            days_rest = date_rest - contract.inicio
+                            values_total = (values_total / 30) * (days_rest.days + 3)
+
+                    if contract.fin.year == int(year_cut) and contract.fin.month == int(month_cut):
+                        days_monht = functions.obtener_dias_del_mes(month,year)
+                        if contract.fin.day == 30:
+                            date_rest = date(int(year_cut), int(month_cut), 1)
+                            days_rest = contract.fin - date_rest
+                            values_total = (values_total / 30) * (days_rest.days + 1)
+                        else:
+                            if days_monht == 31:
+                                date_rest = date(int(year_cut), int(month_cut), 1)
+                                days_rest = contract.fin - date_rest
+                                values_total = (values_total / 30) * (days_rest.days)
+                            elif days_monht == 30:
+                                date_rest = date(int(year_cut), int(month_cut), 1)
+                                days_rest = contract.fin - date_rest
+                                values_total = (values_total / 30) * (days_rest.days+1)
+                            elif days_monht == 29:
+                                date_rest = date(int(year_cut), int(month_cut), 1)
+                                days_rest = contract.fin - date_rest
+                                values_total = (values_total / 30) * (days_rest.days+2)
+                            elif days_monht == 28:
+                                date_rest = date(int(year_cut), int(month_cut), 1)
+                                days_rest = contract.fin - date_rest
+                                values_total = (values_total / 30) * (days_rest.days+3)
+
+
+                    if total_value_fees_sum < value_total:
+                        collect_account = models.Collects_Account.objects.create(
+                            contract=contract,
+                            cut=cut,
+                            user_creation=user,
+                            estate='Creado',
+                            value_fees=values_total,
+                            month=cut.month,
+                            year=cut.year,
+                        )
+
+                        fecha = timezone.now()
+
+                        collect_count = models.Collects_Account.objects.filter(contract=contract).count()
+                        collect_count = collect_count
+
+                        collect_account.estate = "Generado"
+                        collect_account.estate_inform = "Generado"
+                        collect_account.estate_report = "Generado"
+                        collect_account.save()
+                        month = int(collect_account.month) - 1
+                        month = functions.month_converter(month)
+
+                        fee_account_value = collect_account.get_value_fees()
+                        fee_value = fee_account_value.replace('$', '').replace(',', '')
+
+                        collect_account.file.delete()
+                        collect_account.html.delete()
+
+                        value_money = float(collect_account.value_fees)
+                        value_letter_num = value_money
+                        value_letter = numero_to_letras(int(value_letter_num))
+
+                        if collect_account.estate != 'Cargado':
+                            collect_account.estate = 'Generado'
+                        collect_account.save()
+
+                        template_header = BeautifulSoup(
+                            open(settings.STATICFILES_DIRS[0]  + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'), "html.parser")
+
+                        template_header_tag = template_header.find(class_='fecha_span')
+                        template_header_tag.insert(1, collect_account.pretty_creation_datetime())
+
+                        template_header_tag = template_header.find(class_='number_span')
+                        template_header_tag.insert(1, str(collect_count))
+
+                        template_header_tag = template_header.find(class_='contract_span')
+                        template_header_tag.insert(1, collect_account.contract.nombre)
+
+                        template_header_tag = template_header.find(class_='contractor_name_span')
+                        template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+                        template_header_tag = template_header.find(class_='contractor_document_span')
+                        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+                        template_header_tag = template_header.find(class_='contractor_name_firm')
+                        template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+                        template_header_tag = template_header.find(class_='contractor_document_firm')
+                        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+                        template_header_tag = template_header.find(class_='value_letter_span')
+                        template_header_tag.insert(1, value_letter)
+
+                        template_header_tag = template_header.find(class_='value_letter_num_span')
+                        template_header_tag.insert(1, str(value_letter_num))
+
+                        template_header_tag = template_header.find(class_='position_span')
+                        template_header_tag.insert(1, str(collect_account.contract.cargo.nombre))
+
+
+                        template_header_tag = template_header.find(class_='month_span')
+                        template_header_tag.insert(1, str(month))
+
+                        template_header_tag = template_header.find(class_='year_span')
+                        template_header_tag.insert(1, str(collect_account.year))
+
+                        collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+                        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+
+                        collect_account.file.save('cuenta_cobro.pdf',
+                                                  File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+
+                        if settings.DEBUG:
+                            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+                            pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
                                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
                                 '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                                 '--enable-local-file-access': None,
                                 '--page-size': 'Letter'
-                            }
-                        )
-                        collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
+                            }, configuration=config)
+                        else:
+                            data = pdfkit.from_url(
+                                url=collect_account.html.url,
+                                output_path=False,
+                                options={
+                                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
+                                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
+                                    '--enable-local-file-access': None,
+                                    '--page-size': 'Letter'
+                                }
+                            )
+                            collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
 
-                        user = collect_account.contract.get_user_or_none()
+                            user = collect_account.contract.get_user_or_none()
 
-                        #if user != None:
-                        #    tasks.send_mail_templated_cuenta_cobro(
-                        #        'mail/recursos_humanos/cuenta_cobro.tpl',
-                        #        {
-                        #            'url_base': 'https://' + self.request.META['HTTP_HOST'],
-                        #            'Contrato': collect_account.contract.nombre,
-                        #            'nombre': collect_account.contract.contratista.nombres,
-                        #            'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
-                        #        },
-                        #        DEFAULT_FROM_EMAIL,
-                        #        [user.email, EMAIL_HOST_USER]
-                        #    )
+                            #if user != None:
+                            #    tasks.send_mail_templated_cuenta_cobro(
+                            #        'mail/recursos_humanos/cuenta_cobro.tpl',
+                            #        {
+                            #            'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                            #            'Contrato': collect_account.contract.nombre,
+                            #            'nombre': collect_account.contract.contratista.nombres,
+                            #            'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
+                            #        },
+                            #        DEFAULT_FROM_EMAIL,
+                            #        [user.email, EMAIL_HOST_USER]
+                            #    )
 
-                else:
-                    value_rest = int(value_total) - int(total_value_fees)
-                    collect_account = models.Collects_Account.objects.create(
-                        contract=contract,
-                        cut=cut,
-                        user_creation=user,
-                        estate='Creado',
-                        value_fees=value_rest,
-                        month=cut.month,
-                        year=cut.year,
-                    )
-
-                    fecha = timezone.now()
-
-                    collect_count = models.Collects_Account.objects.filter(contract=contract).count()
-                    collect_count = collect_count
-
-                    collect_account.estate = "Generado"
-                    collect_account.estate_inform = "Generado"
-                    collect_account.estate_report = "Generado"
-                    collect_account.save()
-                    month = int(collect_account.month) - 1
-                    month = functions.month_converter(month)
-
-                    fee_account_value = collect_account.get_value_fees()
-                    fee_value = fee_account_value.replace('$', '').replace(',', '')
-
-                    collect_account.file.delete()
-                    collect_account.html.delete()
-
-                    value_money = float(collect_account.value_fees)
-                    value_letter_num = value_money
-                    value_letter = numero_to_letras(int(value_letter_num))
-
-                    if collect_account.estate != 'Cargado':
-                        collect_account.estate = 'Generado'
-                    collect_account.save()
-
-                    template_header = BeautifulSoup(
-                        open(settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'),
-                        "html.parser")
-
-
-
-                    template_header_tag = template_header.find(class_='fecha_span')
-                    template_header_tag.insert(1, collect_account.pretty_creation_datetime())
-
-                    template_header_tag = template_header.find(class_='number_span')
-                    template_header_tag.insert(1, str(collect_count))
-
-                    template_header_tag = template_header.find(class_='contract_span')
-                    template_header_tag.insert(1, collect_account.contract.nombre)
-
-                    template_header_tag = template_header.find(class_='contractor_name_span')
-                    template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
-
-                    template_header_tag = template_header.find(class_='contractor_document_span')
-                    template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
-
-                    template_header_tag = template_header.find(class_='contractor_name_firm')
-                    template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
-
-                    template_header_tag = template_header.find(class_='contractor_document_firm')
-                    template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
-
-                    template_header_tag = template_header.find(class_='value_letter_span')
-                    template_header_tag.insert(1, value_letter)
-
-                    template_header_tag = template_header.find(class_='value_letter_num_span')
-                    template_header_tag.insert(1, str(value_letter_num))
-
-                    template_header_tag = template_header.find(class_='position_span')
-                    template_header_tag.insert(1, str(collect_account.contract.cargo.nombre))
-
-                    template_header_tag = template_header.find(class_='month_span')
-                    template_header_tag.insert(1, str(month))
-
-                    template_header_tag = template_header.find(class_='year_span')
-                    template_header_tag.insert(1, str(collect_account.year))
-
-                    collect_account.html.save('cuenta_cobro.html',
-                                              File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
-
-                    path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-
-                    collect_account.file.save('cuenta_cobro.pdf',
-                                              File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
-
-                    if settings.DEBUG:
-                        config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
-                        pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
-                            '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
-                            '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
-                            '--enable-local-file-access': None,
-                            '--page-size': 'Letter'
-                        }, configuration=config)
                     else:
-                        data = pdfkit.from_url(
-                            url=collect_account.html.url,
-                            output_path=False,
-                            options={
+                        value_rest = int(value_total) - int(total_value_fees)
+                        collect_account = models.Collects_Account.objects.create(
+                            contract=contract,
+                            cut=cut,
+                            user_creation=user,
+                            estate='Creado',
+                            value_fees=value_rest,
+                            month=cut.month,
+                            year=cut.year,
+                        )
+
+                        fecha = timezone.now()
+
+                        collect_count = models.Collects_Account.objects.filter(contract=contract).count()
+                        collect_count = collect_count
+
+                        collect_account.estate = "Generado"
+                        collect_account.estate_inform = "Generado"
+                        collect_account.estate_report = "Generado"
+                        collect_account.save()
+                        month = int(collect_account.month) - 1
+                        month = functions.month_converter(month)
+
+                        fee_account_value = collect_account.get_value_fees()
+                        fee_value = fee_account_value.replace('$', '').replace(',', '')
+
+                        collect_account.file.delete()
+                        collect_account.html.delete()
+
+                        value_money = float(collect_account.value_fees)
+                        value_letter_num = value_money
+                        value_letter = numero_to_letras(int(value_letter_num))
+
+                        if collect_account.estate != 'Cargado':
+                            collect_account.estate = 'Generado'
+                        collect_account.save()
+
+                        template_header = BeautifulSoup(
+                            open(settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'),
+                            "html.parser")
+
+
+
+                        template_header_tag = template_header.find(class_='fecha_span')
+                        template_header_tag.insert(1, collect_account.pretty_creation_datetime())
+
+                        template_header_tag = template_header.find(class_='number_span')
+                        template_header_tag.insert(1, str(collect_count))
+
+                        template_header_tag = template_header.find(class_='contract_span')
+                        template_header_tag.insert(1, collect_account.contract.nombre)
+
+                        template_header_tag = template_header.find(class_='contractor_name_span')
+                        template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+                        template_header_tag = template_header.find(class_='contractor_document_span')
+                        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+                        template_header_tag = template_header.find(class_='contractor_name_firm')
+                        template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+                        template_header_tag = template_header.find(class_='contractor_document_firm')
+                        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+                        template_header_tag = template_header.find(class_='value_letter_span')
+                        template_header_tag.insert(1, value_letter)
+
+                        template_header_tag = template_header.find(class_='value_letter_num_span')
+                        template_header_tag.insert(1, str(value_letter_num))
+
+                        template_header_tag = template_header.find(class_='position_span')
+                        template_header_tag.insert(1, str(collect_account.contract.cargo.nombre))
+
+                        template_header_tag = template_header.find(class_='month_span')
+                        template_header_tag.insert(1, str(month))
+
+                        template_header_tag = template_header.find(class_='year_span')
+                        template_header_tag.insert(1, str(collect_account.year))
+
+                        collect_account.html.save('cuenta_cobro.html',
+                                                  File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+                        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+                        collect_account.file.save('cuenta_cobro.pdf',
+                                                  File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+                        if settings.DEBUG:
+                            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+                            pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
                                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
                                 '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
                                 '--enable-local-file-access': None,
                                 '--page-size': 'Letter'
-                            }
+                            }, configuration=config)
+                        else:
+                            data = pdfkit.from_url(
+                                url=collect_account.html.url,
+                                output_path=False,
+                                options={
+                                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
+                                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/footer/footer.html',
+                                    '--enable-local-file-access': None,
+                                    '--page-size': 'Letter'
+                                }
+                            )
+                            collect_account.file.save('cuenta_cobro.pdf', File(io.BytesIO(data)))
+                else:
+                    month_cut = cut.month
+                    year_cut = cut.year
+                    value = contract.valor
+                    start = contract.inicio
+                    end = contract.fin
+                    valor_mensual= contract.valor_mensual
+
+
+
+                    collects_accounts = models.Collects_Account.objects.filter(contract=contract)
+                    total_value_fees = collects_accounts.aggregate(Sum('value_fees'))['value_fees__sum']
+
+
+                    if total_value_fees == None:
+                        total_value_fees_sum = float(0)
+                    else:
+                        total_value_fees_sum = float(total_value_fees)
+
+                    if contract.inicio.year == int(year_cut) and contract.inicio.month == int(month_cut):
+                        days_monht = functions.obtener_dias_del_mes(month, year)
+                        if days_monht == 31:
+                            date_rest = date(int(year_cut), int(month_cut), 31)
+                            days_rest = date_rest - contract.inicio
+                            values_total = (valor_mensual / 30) * (days_rest.days)
+                        elif days_monht == 30:
+                            date_rest = date(int(year_cut), int(month_cut), 30)
+                            days_rest = date_rest - contract.inicio
+                            values_total = (valor_mensual / 30) * (days_rest.days+1)
+                        elif days_monht == 29:
+                            date_rest = date(int(year_cut), int(month_cut), 29)
+                            days_rest = date_rest - contract.inicio
+                            values_total = (valor_mensual / 30) * (days_rest.days+2)
+                        elif days_monht == 28:
+                            date_rest = date(int(year_cut), int(month_cut), 28)
+                            days_rest = date_rest - contract.inicio
+                            values_total = (valor_mensual / 30) * (days_rest.days+3)
+
+                    elif contract.fin.year == int(year_cut) and contract.fin.month == int(month_cut):
+                        if contract.fin.day == 30:
+                            date_rest = date(int(year_cut), int(month_cut), 1)
+                            days_rest = contract.fin - date_rest
+                            values_total = (valor_mensual / 30) * (days_rest.days+1)
+                        else:
+                            days_monht = functions.obtener_dias_del_mes(month, year)
+                            if days_monht == 31:
+                                date_rest = date(int(year_cut), int(month_cut), 1)
+                                days_rest = contract.fin - date_rest
+                                values_total = (valor_mensual / 30) * (days_rest.days)
+                            elif days_monht == 30:
+                                date_rest = date(int(year_cut), int(month_cut), 1)
+                                days_rest = contract.fin - date_rest
+                                values_total = (valor_mensual / 30) * (days_rest.days+1)
+                            elif days_monht == 29:
+                                date_rest = date(int(year_cut), int(month_cut), 1)
+                                days_rest = contract.fin - date_rest
+                                values_total = (valor_mensual / 30) * (days_rest.days + 2)
+                            elif days_monht == 28:
+                                date_rest = date(int(year_cut), int(month_cut), 1)
+                                days_rest = contract.fin - date_rest
+                                values_total = (valor_mensual / 30) * (days_rest.days + 3)
+                    else:
+                        values_total=valor_mensual
+
+                    total_value_fees_sum = total_value_fees_sum + float(values_total)
+
+                    if float(total_value_fees_sum) <= float(value):
+                        collect_account = models.Collects_Account.objects.create(
+                            contract=contract,
+                            cut=cut,
+                            user_creation=user,
+                            estate='Creado',
+                            value_fees=values_total,
+                            month=cut.month,
+                            year=cut.year,
                         )
-                        collect_account.file.save('cuenta_cobro.pdf', File(io.BytesIO(data)))
+
+
+                        fecha = timezone.now()
+
+                        collect_count = models.Collects_Account.objects.filter(contract=contract).count()
+                        collect_count = collect_count
+
+                        collect_account.estate = "Generado"
+                        collect_account.estate_inform = "Generado"
+                        collect_account.estate_report = "Generado"
+                        collect_account.save()
+                        month = int(collect_account.month) - 1
+                        month = functions.month_converter(month)
+
+                        fee_account_value = collect_account.get_value_fees()
+                        fee_value = fee_account_value.replace('$', '').replace(',', '')
+
+                        collect_account.file.delete()
+                        collect_account.html.delete()
+
+                        value_money = float(collect_account.value_fees)
+                        value_letter_num = value_money
+                        value_letter = numero_to_letras(int(value_letter_num))
+
+                        if collect_account.estate != 'Cargado':
+                            collect_account.estate = 'Generado'
+                        collect_account.save()
+
+                        template_header = BeautifulSoup(
+                            open(settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'),
+                            "html.parser")
+
+                        template_header_tag = template_header.find(class_='fecha_span')
+                        template_header_tag.insert(1, collect_account.pretty_creation_datetime())
+
+                        template_header_tag = template_header.find(class_='number_span')
+                        template_header_tag.insert(1, str(collect_count))
+
+                        template_header_tag = template_header.find(class_='contract_span')
+                        template_header_tag.insert(1, collect_account.contract.nombre)
+
+                        template_header_tag = template_header.find(class_='contractor_name_span')
+                        template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+                        template_header_tag = template_header.find(class_='contractor_document_span')
+                        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+                        template_header_tag = template_header.find(class_='contractor_name_firm')
+                        template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+                        template_header_tag = template_header.find(class_='contractor_document_firm')
+                        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+                        template_header_tag = template_header.find(class_='value_letter_span')
+                        template_header_tag.insert(1, value_letter)
+
+                        template_header_tag = template_header.find(class_='value_letter_num_span')
+                        template_header_tag.insert(1, str(value_letter_num))
+
+                        template_header_tag = template_header.find(class_='position_span')
+                        template_header_tag.insert(1, str(collect_account.contract.cargo.nombre))
+
+                        template_header_tag = template_header.find(class_='month_span')
+                        template_header_tag.insert(1, str(month))
+
+                        template_header_tag = template_header.find(class_='year_span')
+                        template_header_tag.insert(1, str(collect_account.year))
+
+                        collect_account.html.save('cuenta_cobro.html',
+                                                  File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+                        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+                        collect_account.file.save('cuenta_cobro.pdf',
+                                                  File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf',
+                                                            'rb')))
+
+                        if settings.DEBUG:
+                            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+                            pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
+                                '--header-html': settings.STATICFILES_DIRS[
+                                                     0] + '/pdfkit/cuentas_cobro/header/header.html',
+                                '--footer-html': settings.STATICFILES_DIRS[
+                                                     0] + '/pdfkit/cuentas_cobro/footer/footer.html',
+                                '--enable-local-file-access': None,
+                                '--page-size': 'Letter'
+                            }, configuration=config)
+                        else:
+                            data = pdfkit.from_url(
+                                url=collect_account.html.url,
+                                output_path=False,
+                                options={
+                                    '--header-html': settings.STATICFILES_DIRS[
+                                                         0] + '/pdfkit/cuentas_cobro/header/header.html',
+                                    '--footer-html': settings.STATICFILES_DIRS[
+                                                         0] + '/pdfkit/cuentas_cobro/footer/footer.html',
+                                    '--enable-local-file-access': None,
+                                    '--page-size': 'Letter'
+                                }
+                            )
+                            collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
+
+                            user = collect_account.contract.get_user_or_none()
+
+                            # if user != None:
+                            #    tasks.send_mail_templated_cuenta_cobro(
+                            #        'mail/recursos_humanos/cuenta_cobro.tpl',
+                            #        {
+                            #            'url_base': 'https://' + self.request.META['HTTP_HOST'],
+                            #            'Contrato': collect_account.contract.nombre,
+                            #            'nombre': collect_account.contract.contratista.nombres,
+                            #            'valor': '$ {:20,.2f}'.format(collect_account.value_fees.amount),
+                            #        },
+                            #        DEFAULT_FROM_EMAIL,
+                            #        [user.email, EMAIL_HOST_USER]
+                            #    )
+                    else:
+                        value_rest = float(value) - float(total_value_fees)
+                        collect_account = models.Collects_Account.objects.create(
+                            contract=contract,
+                            cut=cut,
+                            user_creation=user,
+                            estate='Creado',
+                            value_fees=value_rest,
+                            month=cut.month,
+                            year=cut.year,
+                        )
+
+                        fecha = timezone.now()
+
+                        collect_count = models.Collects_Account.objects.filter(contract=contract).count()
+                        collect_count = collect_count
+
+                        collect_account.estate = "Generado"
+                        collect_account.estate_inform = "Generado"
+                        collect_account.estate_report = "Generado"
+                        collect_account.save()
+                        month = int(collect_account.month) - 1
+                        month = functions.month_converter(month)
+
+                        fee_account_value = collect_account.get_value_fees()
+                        fee_value = fee_account_value.replace('$', '').replace(',', '')
+
+                        collect_account.file.delete()
+                        collect_account.html.delete()
+
+                        value_money = float(collect_account.value_fees)
+                        value_letter_num = value_money
+                        value_letter = numero_to_letras(int(value_letter_num))
+
+                        if collect_account.estate != 'Cargado':
+                            collect_account.estate = 'Generado'
+                        collect_account.save()
+
+                        template_header = BeautifulSoup(
+                            open(settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/cuenta.html', 'rb'),
+                            "html.parser")
+
+                        template_header_tag = template_header.find(class_='fecha_span')
+                        template_header_tag.insert(1, collect_account.pretty_creation_datetime())
+
+                        template_header_tag = template_header.find(class_='number_span')
+                        template_header_tag.insert(1, str(collect_count))
+
+                        template_header_tag = template_header.find(class_='contract_span')
+                        template_header_tag.insert(1, collect_account.contract.nombre)
+
+                        template_header_tag = template_header.find(class_='contractor_name_span')
+                        template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+                        template_header_tag = template_header.find(class_='contractor_document_span')
+                        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+                        template_header_tag = template_header.find(class_='contractor_name_firm')
+                        template_header_tag.insert(1, collect_account.contract.contratista.get_full_name())
+
+                        template_header_tag = template_header.find(class_='contractor_document_firm')
+                        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+                        template_header_tag = template_header.find(class_='value_letter_span')
+                        template_header_tag.insert(1, value_letter)
+
+                        template_header_tag = template_header.find(class_='value_letter_num_span')
+                        template_header_tag.insert(1, str(value_letter_num))
+
+                        template_header_tag = template_header.find(class_='position_span')
+                        template_header_tag.insert(1, str(collect_account.contract.cargo.nombre))
+
+                        template_header_tag = template_header.find(class_='month_span')
+                        template_header_tag.insert(1, str(month))
+
+                        template_header_tag = template_header.find(class_='year_span')
+                        template_header_tag.insert(1, str(collect_account.year))
+
+                        collect_account.html.save('cuenta_cobro.html',
+                                                  File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+                        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+                        collect_account.file.save('cuenta_cobro.pdf',
+                                                  File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf',
+                                                            'rb')))
+
+                        if settings.DEBUG:
+                            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+                            pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
+                                '--header-html': settings.STATICFILES_DIRS[
+                                                     0] + '/pdfkit/cuentas_cobro/header/header.html',
+                                '--footer-html': settings.STATICFILES_DIRS[
+                                                     0] + '/pdfkit/cuentas_cobro/footer/footer.html',
+                                '--enable-local-file-access': None,
+                                '--page-size': 'Letter'
+                            }, configuration=config)
+                        else:
+                            data = pdfkit.from_url(
+                                url=collect_account.html.url,
+                                output_path=False,
+                                options={
+                                    '--header-html': settings.STATICFILES_DIRS[
+                                                         0] + '/pdfkit/cuentas_cobro/header/header.html',
+                                    '--footer-html': settings.STATICFILES_DIRS[
+                                                         0] + '/pdfkit/cuentas_cobro/footer/footer.html',
+                                    '--enable-local-file-access': None,
+                                    '--page-size': 'Letter'
+                                }
+                            )
+                            collect_account.file.save('cuenta_cobro.pdf', File(io.BytesIO(data)))
 
         return HttpResponseRedirect(self.get_success_url())
 
