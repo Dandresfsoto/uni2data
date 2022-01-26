@@ -12,7 +12,7 @@ def certificacion_laboral(contratista):
 
     contratos_obj = Contratos.objects.filter(contratista=contratista)
     dia_actual = timezone.now().day
-    mes_actual = timezone.now().month
+    mes_actual = timezone.now().month-1
     mes_actual = month_converter(mes_actual)
     año_actual = timezone.now().year
     if contratos_obj.count() > 0:
