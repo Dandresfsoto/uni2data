@@ -18,12 +18,12 @@ def certificacion_laboral(contratista):
     if contratos_obj.count() > 0:
         for contrato in contratos_obj:
             año_inicio=contrato.inicio.year
-            mes_inicio=contrato.inicio.month
+            mes_inicio=contrato.inicio.month-1
             mes_inicio = month_converter(mes_inicio)
             dia_inicio=contrato.inicio.day
             año_fin=contrato.fin.year
-            mes_fin=contrato.fin.month
-            mes_fin = month_converter(mes_fin)
+            mes_fin=contrato.fin.month-1
+            mes_fin=month_converter(mes_fin)
             dia_fin=contrato.fin.day
             contratos.append({
                 'attributes': {'bold': True},
