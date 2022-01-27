@@ -334,10 +334,10 @@ class PagosDinamicaAPI(APIView):
 class ReportesListApi(BaseDatatableView):
     model = Reportes
     columns = ['consecutive', 'usuario_actualizacion','usuario_creacion', 'efectivo', 'proyecto','creation', 'nombre',
-               'plano', 'valor', 'estado', 'servicio']
+               'plano', 'valor', 'estado', 'servicio','enterprise']
 
     order_columns = ['consecutive', 'usuario_actualizacion','usuario_creacion', 'efectivo','proyecto','creation', 'nombre',
-               'plano', 'valor', 'estado', 'servicio']
+               'plano', 'valor', 'estado', 'servicio','enterprise']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(enterprise__id=self.kwargs['pk'], activo=True)
@@ -506,6 +506,22 @@ class ReportesListApi(BaseDatatableView):
             else:
                 ret = '<div class="center-align">' \
                            '<i class="material-icons">delete</i>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            return ret
+
+        elif column == 'enterprise':
+            ret = ''
+            if self.request.user.is_superuser and (row.estado == "Reportado" or row.estado == "En pagaduria"):
+                ret = '<div class="center-align">' \
+                           '<a href="reset/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Reiniciar reporte: {1}">' \
+                                '<i class="material-icons" style="color:blue">autorenew</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">autorenew</i>' \
                        '</div>'.format(row.id,row.nombre)
 
             return ret

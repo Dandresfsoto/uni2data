@@ -469,6 +469,11 @@ def send_mail_templated_reporte(template,dictionary,from_email,list_to_email,att
     return 'Email enviado'
 
 @app.task
+def send_mail_templated_reporte_delete(template,dictionary,from_email,list_to_email):
+    send_mail(template, dictionary, from_email, list_to_email)
+    return 'Email enviado'
+
+@app.task
 def build_listado_terceros(id):
     from recursos_humanos.models import Contratistas
     reporte = models_reportes.Reportes.objects.get(id = id)

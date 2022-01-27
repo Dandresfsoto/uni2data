@@ -615,6 +615,53 @@ class ReporteUpdateForm(forms.ModelForm):
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'})
         }
 
+class ReporteResetForm(forms.Form):
+
+
+    def __init__(self, *args, **kwargs):
+        super(ReporteResetForm, self).__init__(*args, **kwargs)
+
+        pk_reporte = kwargs['initial'].get('pk_reporte')
+        self.pk_reporte = pk_reporte
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    '¿Esta seguro que desea reiniciar el reporte {{consecutivo}}?'
+                ),
+                css_class = "s12",
+                style = "text-align:center;margin-bottom:100px"
+            ),
+            Row(
+                Column(
+                    Div(
+                        Button(
+                            'reject',
+                            'Rechazar',
+                            style="background-color:red",
+                            onClick="location.href='../../'",
+                        ),
+                        css_class="left-align",
+                    ),
+                    css_class='s12 m6'
+                ),
+                Column(
+                    Div(
+                        Submit(
+                            'Submit',
+                            'Aceptar',
+                            css_class='button-submit',
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class='s12 m6'
+                ),
+            )
+        )
+
 class ResultadoReporteForm(forms.ModelForm):
 
     def clean(self):

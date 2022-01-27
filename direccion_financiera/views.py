@@ -1029,14 +1029,14 @@ class ReportesDeleteView(LoginRequiredMixin,
 
 
         if reporte.estado == 'En pagaduria' or reporte.estado == 'Reportado':
-            template = 'mail/direccion_financiera/reportes/reporte_sin_respaldo.tpl'
+            template = 'mail/direccion_financiera/reportes/eliminar_reporte.tpl'
 
-            send_mail_templated_reporte(
+            tasks.send_mail_templated_reporte_delete(
                 template,
                 {
                     'consecutivo': str(reporte.consecutive),
                     'nombre_reporte': str(reporte.consecutive) + ' - ' + reporte.nombre,
-                    'valor': reporte.pretty_print_valor_descuentos(),
+                    'valor': reporte.pretty_print_valor(),
                     'proyecto': reporte.proyecto.nombre,
                 },
                 DEFAULT_FROM_EMAIL,
@@ -1083,6 +1083,60 @@ class ReportesRecordView(LoginRequiredMixin,
             'pk': self.kwargs['pk'],
             'pk_reporte': self.kwargs['pk_reporte']
         }
+
+
+class ReportesResetView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.reportes.ver",
+            "usuarios.direccion_financiera.reportes.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/reportes/reset.html'
+    form_class = forms.ReporteResetForm
+    success_url = "../../"
+
+    model = models.Reportes
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+
+    def form_valid(self, form):
+
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
+        pagos = models.Pagos.objects.filter(reporte=reporte).update(estado="Pago creado")
+        reporte.estado = "Carga de pagos"
+        reporte.save()
+
+        template = 'mail/direccion_financiera/reportes/eliminar_reporte.tpl'
+
+        tasks.send_mail_templated_reporte_delete(
+            template,
+            {
+                'consecutivo': str(reporte.consecutive),
+                'nombre_reporte': str(reporte.consecutive) + ' - ' + reporte.nombre,
+                'valor': reporte.pretty_print_valor(),
+                'proyecto': reporte.proyecto.nombre,
+            },
+            DEFAULT_FROM_EMAIL,
+            [self.request.user.email,EMAIL_HOST_USER,EMAIL_DIRECCION_FINANCIERA, EMAIL_CONTABILIDAD, EMAIL_GERENCIA]
+        )
+
+        return super(ReportesResetView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
+        kwargs['breadcrum_1'] = enterprise.name
+        kwargs['consecutivo'] = reporte.consecutive
+        kwargs['title'] = "CREAR REPORTE"
+
+        return super(ReportesResetView,self).get_context_data(**kwargs)
 
 #----------------------------------------------------------------------------------
 
