@@ -2012,7 +2012,7 @@ class CollectAccountUpdateView(FormView):
 
     def get_cuentas_fees(self,collect_account):
 
-        accounts = models.Collects_Account.objects.filter(contract=self.collect_account.contract).exclude(value_fees=0)
+        accounts = models.Collects_Account.objects.filter(contract=self.collect_account.contract).exclude(liquidacion=True)
         list= ''
         count= accounts.count()
 
@@ -2455,7 +2455,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
 
     def get_cuentas_fees(self):
         contrato = models.Contratos.objects.get(id=self.kwargs['pk_contract'])
-        accounts = models.Collects_Account.objects.filter(contract=contrato).exclude(value_fees=0)
+        accounts = models.Collects_Account.objects.filter(contract=contrato).exclude(liquidacion=True)
         list= ''
         count= accounts.count()
 
@@ -2776,6 +2776,19 @@ class LiquidationsCreateView(LoginRequiredMixin,
                 )
                 liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
 
+            cuenta_cobro = Collects_Account.objects.create(
+                contract=contrato,
+                user_creation=self.request.user,
+                value_fees=liquidacion.valor,
+                month=form.cleaned_data['mes'],
+                year=form.cleaned_data['año'],
+                file=liquidacion.file,
+                liquidacion=True,
+                estate="Generado",
+                estate_inform="Generado",
+                estate_report="Generado",
+            )
+
             """
             usuario = contrato.get_user_or_none()
 
@@ -2818,7 +2831,7 @@ class LiquidationsEditView(LoginRequiredMixin,
     def get_cuentas_fees(self):
         liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
         contrato = liquidacion.contrato
-        accounts = models.Collects_Account.objects.filter(contract=contrato).exclude(value_fees=0)
+        accounts = models.Collects_Account.objects.filter(contract=contrato).exclude(liquidacion=True)
         list= ''
         count= accounts.count()
 
@@ -2827,6 +2840,7 @@ class LiquidationsEditView(LoginRequiredMixin,
             year = account.year
             value = account.value_fees
             cut = account.cut.consecutive
+
             list += '<p><b>Corte: </b>{0}</p><p><b>Fecha: </b>{1} - {2}</p><ul>{3}</ul>'.format(cut,month,year,value)
 
         return list
@@ -2951,6 +2965,7 @@ class LiquidationsEditView(LoginRequiredMixin,
                     }
                 )
                 liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
+
 
             """
             usuario = contrato.get_user_or_none()
@@ -3131,7 +3146,6 @@ class LiquidationsEditView(LoginRequiredMixin,
                         '--page-size': 'Letter'
                     }
                 )
-                liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
 
             """
             usuario = contrato.get_user_or_none()
@@ -3150,7 +3164,16 @@ class LiquidationsEditView(LoginRequiredMixin,
                 )
             """
 
-
+        cuenta_cobro = Collects_Account.objects.get(contract=contrato, liquidacion=True)
+        cuenta_cobro.value_fees = liquidacion.valor
+        cuenta_cobro.month = liquidacion.mes
+        cuenta_cobro.year = liquidacion.año
+        cuenta_cobro.file = liquidacion.file
+        cuenta_cobro.liquidacion = True
+        cuenta_cobro.estate = "Generado"
+        cuenta_cobro.estate_inform = "Generado"
+        cuenta_cobro.estate_report = "Generado"
+        cuenta_cobro.save()
 
         return super(LiquidationsEditView,self).form_valid(form)
 
@@ -3175,6 +3198,8 @@ class LiquidationsDelete(LoginRequiredMixin,
     def dispatch(self, request, *args, **kwargs):
         liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
         contrato = liquidacion.contrato
+        cuenta = models.Collects_Account.objects.get(contract=contrato,liquidacion=True)
+        cuenta.delete()
         contrato.liquidado = False
         contrato.save()
         liquidacion.delete()

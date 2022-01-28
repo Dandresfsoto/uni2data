@@ -796,7 +796,7 @@ class Collects_Account(models.Model):
     liquidacion = models.BooleanField(default=False)
 
     def __str__(self):
-        return "{0} - {1} - {2}".format(self.cut.consecutive, self.contract.nombre, self.contract.contratista.get_full_name_cedula())
+        return "{0} {1}  - {2} - {3}".format(self.month,self.year, self.contract.nombre, self.contract.contratista.get_full_name_cedula())
 
     class Meta:
         verbose_name_plural = "Cuentas de cobro"
@@ -973,7 +973,7 @@ class Collects_Account(models.Model):
 class Registration(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     creation = models.DateTimeField(auto_now_add=True)
-    cut = models.ForeignKey(Cuts, on_delete=models.DO_NOTHING)
+    cut = models.ForeignKey(Cuts, on_delete=models.DO_NOTHING,blank=True, null=True)
     user = models.ForeignKey(User, related_name="user_register",on_delete=models.DO_NOTHING)
     delta = models.CharField(max_length=10000)
     collect_account = models.ForeignKey(Collects_Account, on_delete=models.DO_NOTHING, blank=True, null=True)
@@ -1009,6 +1009,24 @@ class Liquidations(models.Model):
         blank=True,
         null=True,
         verbose_name = "liquidacion firmada"
+    )
+    file3 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_dir_liquidation,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="informe de actividades firmado"
+    )
+    file4 = ContentTypeRestrictedFileField(
+        upload_to=upload_dinamic_dir_liquidation,
+        content_types=['application/pdf'],
+        max_upload_size=5242880,
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="seguridad social"
     )
 
     html = models.FileField(upload_to=upload_dinamic_dir_liquidation, blank=True, null=True)
@@ -1056,6 +1074,22 @@ class Liquidations(models.Model):
         url = None
         try:
             url = self.file2.url
+        except:
+            pass
+        return url
+
+    def url_file3(self):
+        url = None
+        try:
+            url = self.file3.url
+        except:
+            pass
+        return url
+
+    def url_file4(self):
+        url = None
+        try:
+            url = self.file4.url
         except:
             pass
         return url

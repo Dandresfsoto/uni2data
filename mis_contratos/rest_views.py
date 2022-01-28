@@ -225,16 +225,25 @@ class AccountContractListApi(BaseDatatableView):
     def render_column(self, row, column):
 
         if column == 'id':
-            ret = ""
-            month = int(row.cut.month) - 1
-            month_inform = functions.month_converter(month)
+            if row.liquidacion==False:
+                ret = ""
+                month = int(row.cut.month) - 1
+                month_inform = functions.month_converter(month)
 
-            ret = '<div class="center-align">' \
-                  '<a class="tooltipped" data-position="top" data-delay="50" data-tooltip="{0}" >' \
-                  '<b>{1}</b>' \
-                  '</a>' \
-                  '</div>'.format(row.observaciones_report, month_inform)
-            return ret
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped" data-position="top" data-delay="50" data-tooltip="{0}" >' \
+                      '<b>{1}</b>' \
+                      '</a>' \
+                      '</div>'.format(row.observaciones_report, month_inform)
+                return ret
+            else:
+                ret = ""
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped" data-position="top" data-delay="50" data-tooltip="Liquidación" >' \
+                      '<b>Liquidación</b>' \
+                      '</a>' \
+                      '</div>'
+                return ret
 
         elif column == 'html':
             url_file5 = row.url_file5()

@@ -985,8 +985,8 @@ class CutsCollectAccountListApi(BaseDatatableView):
 
 class LiquidationsListApi(BaseDatatableView):
     model = Contratos
-    columns = ['id','nombre','contratista','cargo','creation','valor','estado','file','fecha_legalizacion','visible']
-    order_columns = ['id','nombre','contratista','cargo','creation','valor','estado','file','fecha_legalizacion','visible']
+    columns = ['id','nombre','contratista','cargo','creation','valor','estado','file','fecha_legalizacion','inicio','fin','visible']
+    order_columns = ['id','nombre','contratista','cargo','creation','valor','estado','file','fecha_legalizacion','inicio','fin','visible']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(tipo_contrato='Ops')
@@ -1074,6 +1074,32 @@ class LiquidationsListApi(BaseDatatableView):
                     ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
                           '<i class="material-icons">insert_drive_file</i>' \
                           '</a></div>'.format(liquidacion.url_file2(), 'Descargar archivo')
+                else:
+                    ret = ''
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'inicio':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if liquidacion.url_file4() != None:
+                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                          '<i class="material-icons">insert_drive_file</i>' \
+                          '</a></div>'.format(liquidacion.url_file4(), 'Descargar archivo')
+                else:
+                    ret = ''
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'fin':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if liquidacion.url_file3() != None:
+                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                          '<i class="material-icons">insert_drive_file</i>' \
+                          '</a></div>'.format(liquidacion.url_file3(), 'Descargar archivo')
                 else:
                     ret = ''
             else:

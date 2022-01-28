@@ -143,19 +143,28 @@ class ContractsAccountsSegurityUploadView(UpdateView):
         self.object.save()
 
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
+        if collect_account.liquidacion==False:
+            rh_models.Registration.objects.create(
+                cut=collect_account.cut,
+                user=self.request.user,
+                collect_account=collect_account,
+                delta="cargo la seguridad social"
+            )
+        else:
+            liquidacion=rh_models.Liquidations.objects.get(contrato=collect_account.contract)
+            liquidacion.file4=collect_account.file5
+            liquidacion.save()
+            rh_models.Registration.objects.create(
+                user=self.request.user,
+                collect_account=collect_account,
+                delta="cargo la seguridad social"
+            )
 
-        rh_models.Registration.objects.create(
-            cut=collect_account.cut,
-            user=self.request.user,
-            collect_account=collect_account,
-            delta="cargo la seguridad social"
-        )
         return super(ContractsAccountsSegurityUploadView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
         collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
         kwargs['title'] = "CARGAR SEGURIDAD SOCIAL"
-        kwargs['breadcrum_1'] = collec_account.cut.consecutive
         kwargs['breadcrum_active'] = collec_account.contract.nombre
         kwargs['file5_url'] = collec_account.pretty_print_url_file5()
         return super(ContractsAccountsSegurityUploadView,self).get_context_data(**kwargs)
@@ -193,19 +202,27 @@ class ContractsAccountsAccountUploadView(UpdateView):
         self.object.save()
 
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
-
-        rh_models.Registration.objects.create(
-            cut=collect_account.cut,
-            user=self.request.user,
-            collect_account=collect_account,
-            delta="Cargo la cuenta de cobro firmada"
-        )
+        if collect_account.liquidacion == False:
+            rh_models.Registration.objects.create(
+                cut=collect_account.cut,
+                user=self.request.user,
+                collect_account=collect_account,
+                delta="Cargo la cuenta de cobro firmada"
+            )
+        else:
+            liquidacion = rh_models.Liquidations.objects.get(contrato=collect_account.contract)
+            liquidacion.file2 = collect_account.file3
+            liquidacion.save()
+            rh_models.Registration.objects.create(
+                user=self.request.user,
+                collect_account=collect_account,
+                delta="Cargo la cuenta de cobro firmada"
+            )
         return super(ContractsAccountsAccountUploadView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
         collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
         kwargs['title'] = "CARGAR CUENTA DE COBRO"
-        kwargs['breadcrum_1'] = collec_account.cut.consecutive
         kwargs['breadcrum_active'] = collec_account.contract.nombre
         kwargs['file3_url'] = collec_account.pretty_print_url_file3()
         kwargs['file4_url'] = collec_account.pretty_print_url_file4()
@@ -506,18 +523,27 @@ class ContractsAccountsAccountUploadInformView(UpdateView):
         self.object.estate_inform = "Generado"
         self.object.save()
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
-        rh_models.Registration.objects.create(
-            cut=collect_account.cut,
-            user=self.request.user,
-            collect_account=collect_account,
-            delta="Cargo informe de actividades firmado"
-        )
+        if collect_account.liquidacion == False:
+            rh_models.Registration.objects.create(
+                cut=collect_account.cut,
+                user=self.request.user,
+                collect_account=collect_account,
+                delta="Cargo informe de actividades firmado"
+            )
+        else:
+            liquidacion = rh_models.Liquidations.objects.get(contrato=collect_account.contract)
+            liquidacion.file3 = collect_account.file4
+            liquidacion.save()
+            rh_models.Registration.objects.create(
+                user=self.request.user,
+                collect_account=collect_account,
+                delta="Cargo informe de actividades firmado"
+            )
         return super(ContractsAccountsAccountUploadInformView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
         collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
         kwargs['title'] = "CARGAR INFORME DE ACTIVIDADES"
-        kwargs['breadcrum_1'] = collec_account.cut.consecutive
         kwargs['breadcrum_active'] = collec_account.contract.nombre
         kwargs['file4_url'] = collec_account.pretty_print_url_file4()
         return super(ContractsAccountsAccountUploadInformView,self).get_context_data(**kwargs)
