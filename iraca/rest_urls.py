@@ -49,4 +49,6 @@ urlpatterns = [
 
     path('inform/', rest_views.InformListApi.as_view()),
     path('inform/view/<uuid:pk_cut>/', rest_views.InformCollectAccountListApi.as_view()),
+
+    path('liquidaciones/', rest_views.LiquidacionesListApi.as_view())
 ]

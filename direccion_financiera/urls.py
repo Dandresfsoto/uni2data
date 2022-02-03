@@ -86,4 +86,7 @@ urlpatterns = [
     path('collects_account/view/<uuid:pk_cut>/estate/<uuid:pk_collect_account>/', views.CollectsAccountsEstateView.as_view()),
     path('collects_account/view/<uuid:pk_cut>/register/<uuid:pk_collect_account>/', views.CollectsAccountsRegisterView.as_view()),
 
+    path('liquidaciones/', views.LiquidacionesListView.as_view()),
+    path('liquidaciones/historial/<uuid:pk_liquidacion>/', views.LiquidacionesHistorialtView.as_view()),
+    path('liquidaciones/estado/<uuid:pk_liquidacion>/', views.LiquidacionesEstadoView.as_view()),
 ]

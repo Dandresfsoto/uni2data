@@ -150,6 +150,16 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_description': 'Informes de actividades cargadas'
             })
 
+        if self.request.user.has_perm('usuarios.iraca.liquidaciones.ver'):
+            items.append({
+                'sican_categoria': 'liquidaciones',
+                'sican_color': 'red darken-4',
+                'sican_order': 9,
+                'sican_url': 'liquidaciones/',
+                'sican_name': 'Liquidaciones',
+                'sican_icon': 'account_balance',
+                'sican_description': 'Informes de actividades y liquidaciones'
+            })
         return items
 
     def get_context_data(self, **kwargs):
@@ -3818,8 +3828,6 @@ class InformCollectsAccountView(TemplateView):
         kwargs['objeto'] = collect
         return super(InformCollectsAccountView,self).get_context_data(**kwargs)
 
-
-
 class ReportCollectsAccountListView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
                         View):
@@ -3882,3 +3890,210 @@ class HistorialCollectsAccountView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = collect_account.contract.nombre
         return super(HistorialCollectsAccountView,self).get_context_data(**kwargs)
 
+#----------------------------------------------------------------------------------
+
+#-------------------------------Liquidaciones--------------------------------------
+
+class LiquidacionesListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.liquidaciones.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/liquidaciones/lista.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Liquidaciones"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/liquidaciones/'
+        return super(LiquidacionesListView,self).get_context_data(**kwargs)
+
+class LiquidacionesAporbarInforme(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.liquidaciones.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.liquidacion.estado_informe = 'Aprobado'
+                    self.liquidacion.save()
+
+                    liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                    cuenta = rh_models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                    cuenta.estate_inform="Aprobado"
+                    cuenta.save()
+
+                    rh_models.Registration.objects.create(
+                        cut=cuenta.cut,
+                        user=self.request.user,
+                        collect_account=cuenta,
+                        delta="Aprobo el informe de actividades de la liquidacion"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.liquidacion.estado_informe = 'Aprobado'
+                        self.liquidacion.save()
+
+
+                        liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                        cuenta = rh_models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                        cuenta.estate_inform = "Aprobado"
+                        cuenta.save()
+
+                        rh_models.Registration.objects.create(
+                            cut=cuenta.cut,
+                            user=self.request.user,
+                            collect_account=cuenta,
+                            delta="Aprobo el informe de actividades de la liquidacion"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class LiquidacionesRechazarInforme(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.liquidaciones.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.liquidacion.estado_informe = 'Rechazado'
+                    self.liquidacion.save()
+
+                    liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                    cuenta = rh_models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                    cuenta.estate_inform="Rechazado"
+                    cuenta.save()
+
+                    rh_models.Registration.objects.create(
+                        cut=cuenta.cut,
+                        user=self.request.user,
+                        collect_account=cuenta,
+                        delta="Rechazo el informe de actividades de la liquidacion"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.liquidacion.estado_informe = 'Rechazado'
+                        self.liquidacion.save()
+
+
+                        liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                        cuenta = rh_models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                        cuenta.estate_inform = "Rechazado"
+                        cuenta.save()
+
+                        rh_models.Registration.objects.create(
+                            cut=cuenta.cut,
+                            user=self.request.user,
+                            collect_account=cuenta,
+                            delta="Rechazo el informe de actividades de la liquidacion"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class LiquidacionesVerInforme(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+    template_name = 'iraca/liquidaciones/ver.html'
+
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.liquidaciones.ver",
+            ]
+        }
+
+        return super(LiquidacionesVerInforme, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        collect = rh_models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+        kwargs['title'] = "Ver evidencias"
+        kwargs['objeto'] = collect
+        kwargs['breadcum_active'] = liquidacion.contrato.nombre
+        return super(LiquidacionesVerInforme,self).get_context_data(**kwargs)
+
+class LiquidationsHistorialInforme(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.liquidaciones.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/liquidaciones/historial.html'
+
+    def get_items_registers(self):
+
+        list = []
+        liquidacion = rh_models.Liquidations.objects.get(id= self.kwargs['pk_liquidacion'])
+
+        cuenta= rh_models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+
+        registers = rh_models.Registration.objects.filter(collect_account=cuenta).order_by('-creation')
+
+        for register in registers:
+            list.append({
+                'propio': True if register.user == self.request.user else False,
+                'fecha': register.pretty_creation_datetime(),
+                'usuario': register.user.get_full_name_string(),
+                'html': register.delta,
+            })
+
+        return list
+
+    def get_context_data(self, **kwargs):
+        registers = self.get_items_registers()
+        liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        collect_account = rh_models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+        kwargs['title'] = "GESTIÓN"
+        kwargs['registros'] = registers
+        kwargs['registros_cantidad'] = len(registers)
+        kwargs['breadcrum_active'] = collect_account.contract.nombre
+        return super(LiquidationsHistorialInforme,self).get_context_data(**kwargs)

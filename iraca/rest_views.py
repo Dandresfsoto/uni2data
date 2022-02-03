@@ -2133,3 +2133,129 @@ class InformCollectAccountListApi(BaseDatatableView):
 
         else:
             return super(InformCollectAccountListApi, self).render_column(row, column)
+
+class LiquidacionesListApi(BaseDatatableView):
+    model = rh_models.Contratos
+    columns = ['id','nombre','contratista','cargo','valor','file','estado','inicio','fin','objeto_contrato','tipo_contrato']
+    order_columns = ['id','nombre','contratista','cargo','valor','estado','file','estado','inicio','fin','objeto_contrato','tipo_contrato']
+
+    def get_initial_queryset(self):
+        return self.model.objects.filter(tipo_contrato='Ops',liquidado=True)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(nombre__icontains=search) | Q(contratista__nombres__icontains=search) | \
+                Q(contratista__apellidos__icontains=search) | Q(contratista__cedula__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+        if column == 'id':
+            liquidacion = row.get_liquidacion()
+            ret = '<div class="center-align">' \
+                       '<a href="ver/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar liquidacion: {1}">' \
+                            '<i class="material-icons">remove_red_eye</i>' \
+                       '</a>' \
+                   '</div>'.format(liquidacion.id,row.nombre)
+            return ret
+
+        elif column == 'contratista':
+            return row.contratista.get_full_name_cedula()
+
+        elif column == 'cargo':
+            return row.get_cargo()
+
+        elif column == 'valor':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                valor = str(liquidacion.valor).replace('COL', '')
+                return valor
+            else:
+                valor = ""
+                return valor
+
+        elif column == 'estado':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if liquidacion.estado_informe != None:
+                    return '<a><div class="center-align"><b>{0}</b></div></a>'.format(liquidacion.estado_informe)
+                else:
+                    return liquidacion.estado_informe
+            else:
+                return ''
+
+        elif column == 'file':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if liquidacion.url_file3() != None:
+                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                          '<i class="material-icons">insert_drive_file</i>' \
+                          '</a></div>'.format(liquidacion.url_file3(), 'Descargar archivo')
+                else:
+                    ret = ''
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'inicio':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if liquidacion.url_file() != None:
+                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                          '<i class="material-icons">insert_drive_file</i>' \
+                          '</a></div>'.format(liquidacion.url_file(), 'Descargar archivo')
+                else:
+                    ret = ''
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'fin':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if liquidacion.url_file2() != None:
+                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                          '<i class="material-icons">insert_drive_file</i>' \
+                          '</a></div>'.format(liquidacion.url_file2(), 'Descargar archivo')
+                else:
+                    ret = ''
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'objeto_contrato':
+            liquidacion = row.get_liquidacion()
+            ret = ''
+            if liquidacion != None:
+                if liquidacion.estado_informe == 'Generada':
+                    ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(liquidacion.id, 'Aprobar', 'check_box')
+
+                    ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(liquidacion.id, 'Rechazar', 'highlight_off')
+
+                elif liquidacion.estado_informe == 'Rechazado':
+                    ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(liquidacion.id, 'Aprobar', 'check_box')
+
+                elif liquidacion.estado_informe == 'Aprobado':
+                    ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(liquidacion.id, 'Rechazar', 'highlight_off')
+
+            return ret
+
+        if column == 'tipo_contrato':
+            liquidacion = row.get_liquidacion()
+            ret = '<div class="center-align">' \
+                       '<a href="historial/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar liquidacion: {1}">' \
+                            '<i class="material-icons">history</i>' \
+                       '</a>' \
+                   '</div>'.format(liquidacion.id,row.nombre)
+            return ret
+        else:
+            return super(LiquidacionesListApi, self).render_column(row, column)

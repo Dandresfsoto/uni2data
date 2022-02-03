@@ -14,7 +14,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
 from iraca.models import Resguards
-from recursos_humanos.models import Contratistas, Contratos, Collects_Account
+from recursos_humanos.models import Contratistas, Contratos, Collects_Account, Liquidations
 from django.db.models import Q
 from django.conf import settings
 from desplazamiento.models import Desplazamiento
@@ -1964,7 +1964,7 @@ class CollectsAccountEstateForm(forms.ModelForm):
 
             Row(
                 Fieldset(
-                    'Cargar cuenta de cobro',
+                    'Estado cuenta de cobro',
                 )
             ),
             Row(
@@ -2087,4 +2087,67 @@ class ColletcAcountUploadForm(forms.ModelForm):
             'file3': forms.FileInput(attrs={'data-max-file-size': "50M",'accept': 'application/pdf'}),
             'file4': forms.FileInput(attrs={'data - max - file - size': "50M",'accept': 'application / pdf'}),
             'file5': forms.FileInput(attrs={'data - max - file - size': "50M",'accept': 'application / pdf'}),
+        }
+
+class LiquidacionestadoForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        estado = cleaned_data.get("estado")
+        observaciones = cleaned_data.get("observaciones")
+
+        if estado == 'Rechazado':
+            if observaciones == None or observaciones == '':
+                self.add_error('observaciones', 'Por favor escriba una observación')
+
+
+    def __init__(self, *args, **kwargs):
+        super(LiquidacionestadoForm, self).__init__(*args, **kwargs)
+
+        self.fields['estado'].widget = forms.Select(choices = [
+            ('','----------'),
+            ('Reportado', 'Reportado'),
+            ('Rechazado', 'Rechazado'),
+            ('Pagado', 'Pagado')
+        ])
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Estado Liquidacion',
+                )
+            ),
+            Row(
+                Column(
+                    'estado',
+                    css_class="s12"
+                ),
+                Column(
+                    'observaciones',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Liquidations
+        fields = ['estado','observaciones']
+        widgets = {
+            'observaciones': forms.Textarea(attrs={'class': 'materialize-textarea'})
         }

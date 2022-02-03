@@ -212,11 +212,12 @@ class ContractsAccountsAccountUploadView(UpdateView):
         else:
             liquidacion = rh_models.Liquidations.objects.get(contrato=collect_account.contract)
             liquidacion.file2 = collect_account.file3
+            liquidacion.estado = "Cargado"
             liquidacion.save()
             rh_models.Registration.objects.create(
                 user=self.request.user,
                 collect_account=collect_account,
-                delta="Cargo la cuenta de cobro firmada"
+                delta="Cargo la liquidacion firmada"
             )
         return super(ContractsAccountsAccountUploadView, self).form_valid(form)
 
@@ -275,9 +276,11 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
 
         collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
 
-
-        month = int(collect_account.month) - 1
-        month_inform = functions.month_converter(month)
+        if collect_account.liquidacion==True:
+            month_inform = collect_account.month
+        else:
+            month = int(collect_account.month) - 1
+            month_inform = functions.month_converter(month)
 
         template_header = BeautifulSoup(
             open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/informe_actividades/inform.html', 'rb'), "html.parser")
@@ -355,7 +358,6 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
         kwargs['title'] = "CREAR INFORME DE ACTIVIDADES"
-        kwargs['breadcrum_1'] = collec_account.cut.consecutive
         kwargs['breadcrum_active'] = collec_account.contract.nombre
         return super(ContractsAccountsActivityUploadView,self).get_context_data(**kwargs)
 
@@ -487,7 +489,6 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_accounts'])
         kwargs['title'] = "CREAR INFORME DE ACTIVIDADES"
-        kwargs['breadcrum_1'] = collec_account.cut.consecutive
         kwargs['breadcrum_active'] = collec_account.contract.nombre
         return super(ContractsAccountsActivityUpdateView,self).get_context_data(**kwargs)
 

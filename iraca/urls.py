@@ -117,6 +117,11 @@ urlpatterns = [
     path('inform/view/<uuid:pk_cut>/rechazar/<uuid:pk_collect_account>/', views.InformCollectsAccountRejectListView.as_view()),
     path('inform/view/<uuid:pk_cut>/view/<uuid:pk_collect_account>/', views.InformCollectsAccountView.as_view()),
     path('inform/view/<uuid:pk_cut>/report/', views.ReportCollectsAccountListView.as_view()),
-
     path('inform/view/<uuid:pk_cut>/historial/<uuid:pk_collect_account>/', views.HistorialCollectsAccountView.as_view()),
+
+    path('liquidaciones/', views.LiquidacionesListView.as_view()),
+    path('liquidaciones/aprobar/<uuid:pk_liquidacion>/', views.LiquidacionesAporbarInforme.as_view()),
+    path('liquidaciones/rechazar/<uuid:pk_liquidacion>/', views.LiquidacionesRechazarInforme.as_view()),
+    path('liquidaciones/ver/<uuid:pk_liquidacion>/', views.LiquidacionesVerInforme.as_view()),
+    path('liquidaciones/historial/<uuid:pk_liquidacion>/', views.LiquidationsHistorialInforme.as_view()),
 ]

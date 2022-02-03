@@ -985,8 +985,8 @@ class CutsCollectAccountListApi(BaseDatatableView):
 
 class LiquidationsListApi(BaseDatatableView):
     model = Contratos
-    columns = ['id','nombre','contratista','cargo','creation','valor','estado','file','fecha_legalizacion','inicio','fin','visible']
-    order_columns = ['id','nombre','contratista','cargo','creation','valor','estado','file','fecha_legalizacion','inicio','fin','visible']
+    columns = ['id','nombre','contratista','cargo','creation','valor','file','estado','inicio','fin','objeto_contrato','tipo_contrato','visible']
+    order_columns = ['id','nombre','contratista','cargo','creation','valor','estado','file','estado','inicio','fin','objeto_contrato','tipo_contrato','visible']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(tipo_contrato='Ops')
@@ -1015,7 +1015,7 @@ class LiquidationsListApi(BaseDatatableView):
                                '<i class="material-icons">add_box</i>' \
                            '</div>'.format(liquidacion.id,row.nombre)
             else:
-                if self.request.user.has_perm('usuarios.recursos_humanos.contratos.editar'):
+                if self.request.user.has_perm('usuarios.recursos_humanos.liquidaciones.ver'):
                     ret = '<div class="center-align">' \
                           '<a href="create/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Generar liquidacion: {1}">' \
                           '<i class="material-icons">add_box</i>' \
@@ -1041,46 +1041,25 @@ class LiquidationsListApi(BaseDatatableView):
             return fechas
 
         elif column == 'valor':
-            return row.pretty_print_valor()
-
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                valor = str(liquidacion.valor).replace('COL','')
+                return valor
+            else:
+                valor = ""
+                return valor
 
         elif column == 'estado':
             liquidacion = row.get_liquidacion()
             if liquidacion != None:
-                if liquidacion.estado != None:
-                    return '<a href="estado/{1}/"><div class="center-align"><b>{0}</b></div></a>'.format(liquidacion.estado, liquidacion.id)
+                if liquidacion.estado_seguridad != None:
+                    return '<a><div class="center-align"><b>{0}</b></div></a>'.format(liquidacion.estado_seguridad)
                 else:
-                    return liquidacion.estado
+                    return liquidacion.estado_seguridad
             else:
                 return ''
 
         elif column == 'file':
-            liquidacion = row.get_liquidacion()
-            if liquidacion != None:
-                if liquidacion.url_file() != None:
-                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                          '<i class="material-icons">insert_drive_file</i>' \
-                          '</a></div>'.format(liquidacion.url_file(), 'Descargar archivo')
-                else:
-                    ret = ''
-            else:
-                ret = ''
-            return ret
-
-        elif column == 'fecha_legalizacion':
-            liquidacion = row.get_liquidacion()
-            if liquidacion != None:
-                if liquidacion.url_file2() != None:
-                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                          '<i class="material-icons">insert_drive_file</i>' \
-                          '</a></div>'.format(liquidacion.url_file2(), 'Descargar archivo')
-                else:
-                    ret = ''
-            else:
-                ret = ''
-            return ret
-
-        elif column == 'inicio':
             liquidacion = row.get_liquidacion()
             if liquidacion != None:
                 if liquidacion.url_file4() != None:
@@ -1093,22 +1072,78 @@ class LiquidationsListApi(BaseDatatableView):
                 ret = ''
             return ret
 
-        elif column == 'fin':
+        elif column == 'inicio':
             liquidacion = row.get_liquidacion()
             if liquidacion != None:
-                if liquidacion.url_file3() != None:
+                if liquidacion.url_file() != None:
                     ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
                           '<i class="material-icons">insert_drive_file</i>' \
-                          '</a></div>'.format(liquidacion.url_file3(), 'Descargar archivo')
+                          '</a></div>'.format(liquidacion.url_file(), 'Descargar archivo')
                 else:
                     ret = ''
             else:
                 ret = ''
             return ret
 
+        elif column == 'fin':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if liquidacion.url_file2() != None:
+                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                          '<i class="material-icons">insert_drive_file</i>' \
+                          '</a></div>'.format(liquidacion.url_file2(), 'Descargar archivo')
+                else:
+                    ret = ''
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'objeto_contrato':
+            liquidacion = row.get_liquidacion()
+            ret = ''
+            if liquidacion != None:
+                if liquidacion.estado_seguridad == 'Generada':
+                    ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(liquidacion.id, 'Aprobar', 'check_box')
+
+                    ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(liquidacion.id, 'Rechazar', 'highlight_off')
+
+                elif liquidacion.estado_seguridad == 'Rechazado':
+                    ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(liquidacion.id, 'Aprobar', 'check_box')
+
+                elif liquidacion.estado_seguridad == 'Aprobado':
+                    ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(liquidacion.id, 'Rechazar', 'highlight_off')
+
+            return ret
+
+        elif column == 'tipo_contrato':
+            liquidacion = row.get_liquidacion()
+            if liquidacion != None:
+                if self.request.user.has_perm('usuarios.recursos_humanos.liquidaciones.ver'):
+                    ret = '<div class="center-align">' \
+                               '<a href="historial/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Historial liquidacion: {1}">' \
+                                    '<i class="material-icons">history</i>' \
+                               '</a>' \
+                           '</div>'.format(liquidacion.id,row.nombre)
+
+                else:
+                    ret = '<div class="center-align">' \
+                               '<i class="material-icons">history</i>' \
+                           '</div>'.format(liquidacion.id,row.nombre)
+            else:
+                ret=""
+            return ret
+
         elif column == 'visible':
             liquidacion = row.get_liquidacion()
-            if liquidacion != None and self.request.user.is_superuser:
+            if liquidacion != None:
                 ret = '<div class="center-align">' \
                       '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar cuenta de cobro">' \
                       '<i class="material-icons">delete</i>' \

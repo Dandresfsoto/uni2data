@@ -2502,6 +2502,8 @@ class LiquidationsCreateView(LoginRequiredMixin,
                 valor_ejecutado = contrato.valor,
                 valor = 0,
                 estado="Generada",
+                estado_seguridad="Generada",
+                estado_informe="Generada",
                 fecha_actualizacion=timezone.now(),
                 usuario_actualizacion=self.request.user,
                 mes = form.cleaned_data['mes'],
@@ -2616,6 +2618,8 @@ class LiquidationsCreateView(LoginRequiredMixin,
                     valor_ejecutado=contrato.valor,
                     valor=Valor_pagar,
                     estado="Generada",
+                    estado_seguridad="Generada",
+                    estado_informe="Generada",
                     fecha_actualizacion=timezone.now(),
                     usuario_actualizacion=self.request.user,
                     mes=form.cleaned_data['mes'],
@@ -2631,6 +2635,8 @@ class LiquidationsCreateView(LoginRequiredMixin,
                     valor_ejecutado=total_ejecutado,
                     valor=valor_pagar,
                     estado="Generada",
+                    estado_seguridad="Generada",
+                    estado_informe="Generada",
                     fecha_actualizacion=timezone.now(),
                     usuario_actualizacion=self.request.user,
                     mes=form.cleaned_data['mes'],
@@ -2879,6 +2885,8 @@ class LiquidationsEditView(LoginRequiredMixin,
             liquidacion.valor_ejecutado = float(contrato.valor)
             liquidacion.valor = 0
             liquidacion.estado="Generada"
+            liquidacion.estado_informe="Generada"
+            liquidacion.estado_seguridad="Generada"
             liquidacion.fecha_actualizacion=timezone.now()
             liquidacion.usuario_actualizacion=self.request.user
             liquidacion.save()
@@ -2991,6 +2999,8 @@ class LiquidationsEditView(LoginRequiredMixin,
                 liquidacion.valor_ejecutado=float(contrato.valor)
                 liquidacion.valor=float(Valor_pagar)
                 liquidacion.estado="Generada"
+                liquidacion.estado_informe = "Generada"
+                liquidacion.estado_seguridad = "Generada"
                 liquidacion.fecha_actualizacion=timezone.now()
                 liquidacion.usuario_actualizacion=self.request.user
                 liquidacion.mes=form.cleaned_data['mes']
@@ -3003,6 +3013,8 @@ class LiquidationsEditView(LoginRequiredMixin,
                 liquidacion.valor_ejecutado=total_ejecutado
                 liquidacion.valor=valor_pagar
                 liquidacion.estado="Generada"
+                liquidacion.estado_informe = "Generada"
+                liquidacion.estado_seguridad = "Generada"
                 liquidacion.fecha_actualizacion=timezone.now()
                 liquidacion.usuario_actualizacion=self.request.user
                 liquidacion.mes=form.cleaned_data['mes']
@@ -3180,7 +3192,6 @@ class LiquidationsEditView(LoginRequiredMixin,
     def get_initial(self):
         return {'pk_liquidacion':self.kwargs['pk_liquidacion']}
 
-
 class LiquidationsDelete(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
                         View):
@@ -3199,11 +3210,170 @@ class LiquidationsDelete(LoginRequiredMixin,
         liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
         contrato = liquidacion.contrato
         cuenta = models.Collects_Account.objects.get(contract=contrato,liquidacion=True)
+        registro=models.Registration.objects.filter(collect_account=cuenta)
+        registro.delete()
         cuenta.delete()
         contrato.liquidado = False
         contrato.save()
         liquidacion.delete()
 
-
-
         return HttpResponseRedirect('../../')
+
+class LiquidationsAporbarSeguridad(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.liquidaciones.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.liquidacion.estado_seguridad = 'Aprobado'
+                    self.liquidacion.save()
+
+                    liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                    cuenta = models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                    cuenta.estate="Aprobado"
+                    cuenta.save()
+
+                    models.Registration.objects.create(
+                        cut=cuenta.cut,
+                        user=self.request.user,
+                        collect_account=cuenta,
+                        delta="Aprobo la seguridad social de la liquidacion"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.liquidacion.estado_seguridad = 'Aprobado'
+                        self.liquidacion.save()
+
+
+                        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                        cuenta = models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                        cuenta.estate = "Aprobado"
+                        cuenta.save()
+
+                        models.Registration.objects.create(
+                            cut=cuenta.cut,
+                            user=self.request.user,
+                            collect_account=cuenta,
+                            delta="Aprobo la seguridad social de la liquidacion"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class LiquidationsRechazarSeguridad(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.liquidaciones.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.liquidacion.estado_seguridad = 'Rechazado'
+                    self.liquidacion.save()
+
+                    liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                    cuenta = models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                    cuenta.estate="Rechazado"
+                    cuenta.save()
+
+                    models.Registration.objects.create(
+                        cut=cuenta.cut,
+                        user=self.request.user,
+                        collect_account=cuenta,
+                        delta="Rechazo la seguridad social de la liquidacion"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.liquidacion.estado_seguridad = 'Rechazado'
+                        self.liquidacion.save()
+
+
+                        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                        cuenta = models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                        cuenta.estate = "Rechazado"
+                        cuenta.save()
+
+                        models.Registration.objects.create(
+                            cut=cuenta.cut,
+                            user=self.request.user,
+                            collect_account=cuenta,
+                            delta="Rechazo la seguridad social de la liquidacion"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class LiquidationsHistorialSeguridad(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.liquidaciones.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/liquidations/historial.html'
+
+    def get_items_registers(self):
+
+        list = []
+        liquidacion = models.Liquidations.objects.get(id= self.kwargs['pk_liquidacion'])
+
+        cuenta= models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+
+        registers = models.Registration.objects.filter(collect_account=cuenta).order_by('-creation')
+
+        for register in registers:
+            list.append({
+                'propio': True if register.user == self.request.user else False,
+                'fecha': register.pretty_creation_datetime(),
+                'usuario': register.user.get_full_name_string(),
+                'html': register.delta,
+            })
+
+        return list
+
+    def get_context_data(self, **kwargs):
+        registers = self.get_items_registers()
+        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        collect_account = models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+        kwargs['title'] = "GESTIÓN"
+        kwargs['registros'] = registers
+        kwargs['registros_cantidad'] = len(registers)
+        kwargs['breadcrum_active'] = collect_account.contract.nombre
+        return super(LiquidationsHistorialSeguridad,self).get_context_data(**kwargs)

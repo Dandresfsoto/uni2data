@@ -990,6 +990,8 @@ class Liquidations(models.Model):
     valor = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True)
     valor_ejecutado = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True)
     estado = models.CharField(max_length=100,blank=True,null = True)
+    estado_informe = models.CharField(max_length=100,blank=True,null = True)
+    estado_seguridad = models.CharField(max_length=100,blank=True,null = True)
     mes=models.CharField(max_length=100,blank=True,null = True)
     año = models.CharField(max_length=100, blank=True, null=True)
     file = ContentTypeRestrictedFileField(
