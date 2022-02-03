@@ -1,6 +1,6 @@
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, \
-    Certificaciones, Hv, TrazabilidadHv, Cuts, Collects_Account
+    Certificaciones, Hv, TrazabilidadHv, Cuts, Collects_Account, Cargos
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -1158,6 +1158,42 @@ class LiquidationsListApi(BaseDatatableView):
 
         else:
             return super(LiquidationsListApi, self).render_column(row, column)
+
+class CargosListApi(BaseDatatableView):
+    model = Cargos
+    columns = ['id','nombre']
+    order_columns = ['id','nombre']
+
+    def get_initial_queryset(self):
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(nombre__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+        if column == 'id':
+            if self.request.user.has_perm('usuarios.recursos_humanos.cargos.editar'):
+                ret = '<div class="center-align">' \
+                           '<a href="editar/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar liquidacion: {1}">' \
+                                '<i class="material-icons">edit</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">edit</i>' \
+                       '</div>'.format(row.id,row.nombre)
+            return ret
+
+        elif column == 'nombre':
+            return row.nombre
+
+        else:
+            return super(CargosListApi, self).render_column(row, column)
 
 class ContratistaAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):

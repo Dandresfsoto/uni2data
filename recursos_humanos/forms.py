@@ -7,7 +7,7 @@ import datetime
 from django import forms
 from django.db.models import Sum
 
-from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, Certificaciones
+from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, Certificaciones, Cargos
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Hidden
@@ -2479,3 +2479,65 @@ class EditLiquidationForm(forms.Form):
                         ),
                     )
                 )
+
+class CargoForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        nombre = cleaned_data.get("nombre")
+
+        if nombre == None:
+            self.add_error('cargo', 'Campo requerido')
+
+
+    def __init__(self, *args, **kwargs):
+        super(CargoForm, self).__init__(*args, **kwargs)
+        self.fields['obligaciones'].widget = forms.Textarea(attrs={'class': 'materialize-textarea', 'data-length': '1000'})
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información del cargo',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'nombre',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'obligaciones',
+                            css_class='s12'
+                        ),
+                        css_class ="materialize-textarea"
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Cargos
+        fields = ['nombre','obligaciones']
+        labels = {
+            'obligaciones': 'Funciones',
+        }

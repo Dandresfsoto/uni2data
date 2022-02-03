@@ -65,7 +65,6 @@ class RhoptionsView(LoginRequiredMixin,
                 'sican_description': 'Registro y actualización de datos personales, contratos y soportes'
             })
 
-
         if self.request.user.has_perm('usuarios.recursos_humanos.soportes.ver'):
             items.append({
                 'sican_categoria': 'Recursos humanos',
@@ -76,7 +75,6 @@ class RhoptionsView(LoginRequiredMixin,
                 'sican_icon': 'assignment_ind',
                 'sican_description': 'Caracterización de cada uno de los soportes disponibles en el módulo'
             })
-
 
         if self.request.user.has_perm('usuarios.recursos_humanos.soportes.ver'):
             items.append({
@@ -99,7 +97,6 @@ class RhoptionsView(LoginRequiredMixin,
                 'sican_icon': 'group_work',
                 'sican_description': 'Construcción y consolidación de certificaciones emitidas por la entidad'
             })
-
 
         if self.request.user.has_perm('usuarios.recursos_humanos.hv.ver'):
             items.append({
@@ -143,6 +140,17 @@ class RhoptionsView(LoginRequiredMixin,
                 'sican_name': 'Liquidaciones',
                 'sican_icon': 'assignment',
                 'sican_description': 'Listado de contratos para liquidacion'
+            })
+
+        if self.request.user.has_perm('usuarios.recursos_humanos.cargos.ver'):
+            items.append({
+                'sican_categoria': 'Cargos',
+                'sican_color': 'blue-grey darken-3',
+                'sican_order': 9,
+                'sican_url': 'cargos/',
+                'sican_name': 'Cargos',
+                'sican_icon': 'folder',
+                'sican_description': 'Listado de cargos'
             })
 
         return items
@@ -3377,3 +3385,73 @@ class LiquidationsHistorialSeguridad(LoginRequiredMixin,
         kwargs['registros_cantidad'] = len(registers)
         kwargs['breadcrum_active'] = collect_account.contract.nombre
         return super(LiquidationsHistorialSeguridad,self).get_context_data(**kwargs)
+
+
+#----------------------------------------------------------------------------------
+
+#------------------------------------ CARGOS --------------------------------------
+
+class CargosListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": ["usuarios.recursos_humanos.cargos.ver"]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/cargos/lista.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Cargos"
+        kwargs['url_datatable'] = '/rest/v1.0/recursos_humanos/cargos/'
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.recursos_humanos.cargos.crear')
+        return super(CargosListView,self).get_context_data(**kwargs)
+
+class CargosCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.cargos.ver",
+            "usuarios.recursos_humanos.cargos.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/cargos/crear.html'
+    form_class = forms.CargoForm
+    success_url = "../"
+    model = models.Cargos
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CREAR CARGO"
+        return super(CargosCreateView,self).get_context_data(**kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.save()
+        return super(CargosCreateView, self).form_valid(form)
+
+class CargosupdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.cargos.ver",
+            "usuarios.recursos_humanos.cargos.editar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/cargos/editar.html'
+    form_class = forms.CargoForm
+    success_url = "../../"
+    model = models.Cargos
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "ACTUALIZAR CARGO"
+        kwargs['breadcrum_active'] = models.Cargos.objects.get(id=self.kwargs['pk']).nombre
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.recursos_humanos.cargo.crear')
+        return super(CargosupdateView,self).get_context_data(**kwargs)
