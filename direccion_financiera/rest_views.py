@@ -2110,12 +2110,12 @@ class CutsCollectAccountsListApi(BaseDatatableView):
             return super(CutsCollectAccountsListApi, self).render_column(row, column)
 
 class LiquidacionesListApi(BaseDatatableView):
-    model = rh_models.Contratos
-    columns = ['id','nombre','contratista','cargo','valor','creation','tipo_contrato','file','grupo_soportes','estado','inicio','fin']
-    order_columns = ['id','nombre','contratista','cargo','valor','creation','tipo_contrato','file','grupo_soportes','estado','inicio','fin']
+    model = rh_models.Liquidations
+    columns = ['id','contrato','valor_ejecutado','estado_informe','valor','estado_seguridad','file2','file','file3','estado','mes','año']
+    order_columns = ['id','contrato','valor_ejecutado','estado_informe','valor','estado_seguridad','file2','file','file3','estado','mes','año']
 
     def get_initial_queryset(self):
-        return self.model.objects.filter(tipo_contrato='Ops',liquidado=True)
+        return self.model.objects.all()
 
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
@@ -2127,182 +2127,136 @@ class LiquidacionesListApi(BaseDatatableView):
 
     def render_column(self, row, column):
         if column == 'id':
-            liquidacion = row.get_liquidacion()
             ret = '<div class="center-align">' \
                        '<a href="historial/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar liquidacion: {1}">' \
                             '<i class="material-icons">remove_red_eye</i>' \
                        '</a>' \
-                   '</div>'.format(liquidacion.id,row.nombre)
+                   '</div>'.format(row.id,row.contrato.nombre)
             return ret
 
-        elif column == 'contratista':
-            return row.contratista.get_full_name_cedula()
+        elif column == 'contrato':
+            return row.contrato.nombre
 
-        elif column == 'cargo':
-            return row.get_cargo()
+        elif column == 'valor_ejecutado':
+            return row.contrato.contratista.get_full_name_cedula()
+
+        elif column == 'estado_informe':
+            return row.contrato.get_cargo()
 
         elif column == 'valor':
-            liquidacion = row.get_liquidacion()
-            if liquidacion != None:
-                valor = str(liquidacion.valor).replace('COL', '')
-                return valor
-            else:
-                valor = ""
-                return valor
+            valor = str(row.valor).replace('COL', '')
+            return valor
 
-        elif column == 'creation':
-            liquidacion = row.get_liquidacion()
-            if liquidacion != None:
-                if liquidacion.url_file4() != None:
-                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                          '<i class="material-icons">insert_drive_file</i>' \
-                          '</a></div>'.format(liquidacion.url_file4(), 'Descargar archivo')
-                else:
-                    ret = ''
+
+        elif column == 'estado_seguridad':
+            if row.url_file4() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file4(), 'Descargar archivo')
             else:
                 ret = ''
             return ret
 
-        elif column == 'tipo_contrato':
-            liquidacion = row.get_liquidacion()
-            if liquidacion != None:
-                estate = liquidacion.estado_seguridad
-                render = ""
+        elif column == 'file2':
+            estate = row.estado_seguridad
+            render = ""
 
-                if estate == "Aprobado":
-                    render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
-                              '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
-                              '</a>'.format(liquidacion.estado_seguridad)
+            if estate == "Aprobado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
+                          '</a>'.format(row.estado_seguridad)
 
-                if estate == "Rechazado":
-                    render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0}">' \
-                              '<i class="material-icons" style="font-size: 7{2rem;">block</i>' \
-                              '</a>'.format(liquidacion.estado_seguridad)
+            if estate == "Rechazado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0}">' \
+                          '<i class="material-icons" style="font-size: 7{2rem;">block</i>' \
+                          '</a>'.format(row.estado_seguridad)
 
-                return '<div class="center-align">' + render + '</div>'
+            return '<div class="center-align">' + render + '</div>'
 
         elif column == 'file':
-            liquidacion = row.get_liquidacion()
-            if liquidacion != None:
-                if liquidacion.url_file3() != None:
-                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                          '<i class="material-icons">insert_drive_file</i>' \
-                          '</a></div>'.format(liquidacion.url_file3(), 'Descargar archivo')
-                else:
-                    ret = ''
+            if row.url_file3() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file3(), 'Descargar archivo')
             else:
                 ret = ''
             return ret
 
-        elif column == 'grupo_soportes':
-            liquidacion = row.get_liquidacion()
-            if liquidacion != None:
-                estate = liquidacion.estado_informe
-                render = ""
+        elif column == 'file3':
+            estate = row.estado_informe
+            render = ""
 
-                if estate == "Aprobado":
-                    render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
-                              '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
-                              '</a>'.format(liquidacion.estado_informe)
+            if estate == "Aprobado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
+                          '</a>'.format(row.estado_informe)
 
-                if estate == "Rechazado":
-                    render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0}">' \
-                              '<i class="material-icons" style="font-size: 7{2rem;">block</i>' \
-                              '</a>'.format(liquidacion.estado_informe)
+            if estate == "Rechazado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0}">' \
+                          '<i class="material-icons" style="font-size: 7{2rem;">block</i>' \
+                          '</a>'.format(row.estado_informe)
 
-                return '<div class="center-align">' + render + '</div>'
+            return '<div class="center-align">' + render + '</div>'
 
         elif column == 'estado':
-            liquidacion = row.get_liquidacion()
-            if liquidacion != None:
-                if liquidacion.estado != None:
-                    ret=""
-                    if liquidacion.estado == 'Rechazado':
-                        ret = '<div class="center-align">' \
-                              '<a href="estado/{0}/">' \
-                              '<span style="color:red"><b>{1}</b></span>' \
-                              '</a>' \
-                              '</div>'.format(liquidacion.id, liquidacion.estado)
+            ret=""
+            if row.estado == 'Rechazado':
+                ret = '<div class="center-align">' \
+                      '<a href="estado/{0}/">' \
+                      '<span style="color:red"><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estado)
 
-                    elif liquidacion.estado == 'Reportado':
-                        ret = '<div class="center-align">' \
-                              '<a href="estado/{0}/">' \
-                              '<span style="color:green"><b>{1}</b></span>' \
-                              '</a>' \
-                              '</div>'.format(liquidacion.id, liquidacion.estado)
+            elif row.estado == 'Reportado':
+                ret = '<div class="center-align">' \
+                      '<a href="estado/{0}/">' \
+                      '<span style="color:green"><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estado)
 
-                    elif liquidacion.estado == 'Generado':
-                        ret = '<div class="center-align">' \
-                              '<a href="estado/{0}/">' \
-                              '<span><b>{1}</b></span>' \
-                              '</a>' \
-                              '</div>'.format(liquidacion.id, liquidacion.estado)
+            elif row.estado == 'Generado':
+                ret = '<div class="center-align">' \
+                      '<a href="estado/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estado)
 
-                    elif liquidacion.estado == 'Cargado':
-                        ret = '<div class="center-align">' \
-                              '<a href="estado/{0}/">' \
-                              '<span><b>{1}</b></span>' \
-                              '</a>' \
-                              '</div>'.format(liquidacion.id, liquidacion.estado)
+            elif row.estado == 'Generada':
+                ret = '<div class="center-align">' \
+                      '<a href="estado/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estado)
 
-                    else:
-                        ret = '{0}'.format(liquidacion.estado)
+            elif row.estado == 'Cargado':
+                ret = '<div class="center-align">' \
+                      '<a href="estado/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estado)
 
-                    return ret
-                else:
-                    return liquidacion.estado
             else:
-                return ''
+                ret = '{0}'.format(row.estado)
 
-        elif column == 'inicio':
-            liquidacion = row.get_liquidacion()
-            if liquidacion != None:
-                if liquidacion.url_file() != None:
-                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                          '<i class="material-icons">insert_drive_file</i>' \
-                          '</a></div>'.format(liquidacion.url_file(), 'Descargar archivo')
-                else:
-                    ret = ''
+            return ret
+
+
+        elif column == 'mes':
+            if row.url_file() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file(), 'Descargar archivo')
             else:
                 ret = ''
             return ret
 
-        elif column == 'fin':
-            liquidacion = row.get_liquidacion()
-            if liquidacion != None:
-                if liquidacion.url_file2() != None:
-                    ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                          '<i class="material-icons">insert_drive_file</i>' \
-                          '</a></div>'.format(liquidacion.url_file2(), 'Descargar archivo')
-                else:
-                    ret = ''
+        elif column == 'año':
+            if row.url_file2() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file2(), 'Descargar archivo')
             else:
                 ret = ''
-            return ret
-
-        elif column == 'objeto_contrato':
-            liquidacion = row.get_liquidacion()
-            ret = ''
-            if liquidacion != None:
-                if liquidacion.estado_informe == 'Generada':
-                    ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                           '<i class="material-icons">{2}</i>' \
-                           '</a>'.format(liquidacion.id, 'Aprobar', 'check_box')
-
-                    ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                           '<i class="material-icons">{2}</i>' \
-                           '</a>'.format(liquidacion.id, 'Rechazar', 'highlight_off')
-
-                elif liquidacion.estado_informe == 'Rechazado':
-                    ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                           '<i class="material-icons">{2}</i>' \
-                           '</a>'.format(liquidacion.id, 'Aprobar', 'check_box')
-
-                elif liquidacion.estado_informe == 'Aprobado':
-                    ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
-                           '<i class="material-icons">{2}</i>' \
-                           '</a>'.format(liquidacion.id, 'Rechazar', 'highlight_off')
-
             return ret
 
         else:
