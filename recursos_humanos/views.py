@@ -2894,6 +2894,7 @@ class LiquidationsEditView(LoginRequiredMixin,
 
         cuentas = models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        total_valor = float(total_valor) - float(liquidacion.valor)
 
         Valor_pagar = float(contrato.valor) - float(total_valor)
 

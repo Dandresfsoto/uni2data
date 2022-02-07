@@ -2026,6 +2026,20 @@ class CreateLiquidationForm(forms.Form):
         ('2022', '2022'),
     ]))
 
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        mes = cleaned_data.get("mes")
+        año = cleaned_data.get("año")
+
+        if mes == '':
+            self.add_error('mes', 'Campo requerido')
+
+        if año == '':
+            self.add_error('año', 'Campo requerido')
+
+
     def __init__(self, *args, **kwargs):
         super(CreateLiquidationForm, self).__init__(*args, **kwargs)
 
@@ -2036,7 +2050,6 @@ class CreateLiquidationForm(forms.Form):
             total_valor = 0
 
         if float(contrato.valor) <= float(total_valor):
-
             self.helper = FormHelper(self)
             self.helper.layout = Layout(
 
@@ -2223,6 +2236,18 @@ class EditLiquidationForm(forms.Form):
         ('2022', '2022'),
     ]))
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        mes = cleaned_data.get("mes")
+        año = cleaned_data.get("año")
+
+        if mes == '':
+            self.add_error('mes', 'Campo requerido')
+
+        if año == '':
+            self.add_error('año', 'Campo requerido')
+
     def __init__(self, *args, **kwargs):
         super(EditLiquidationForm, self).__init__(*args, **kwargs)
 
@@ -2230,6 +2255,7 @@ class EditLiquidationForm(forms.Form):
         contrato=liquidacion.contrato
         cuentas= models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        total_valor = float(total_valor) - float(liquidacion.valor)
 
 
         if float(contrato.valor) <= float(total_valor):
