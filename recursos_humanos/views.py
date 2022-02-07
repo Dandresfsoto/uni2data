@@ -2480,6 +2480,9 @@ class LiquidationsCreateView(LoginRequiredMixin,
         contrato = models.Contratos.objects.get(id=self.kwargs['pk_contract'])
         cuentas = models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        if total_valor == None:
+            total_valor = 0
+
         valor_pagar = float(contrato.valor) - float(total_valor)
 
         kwargs['title'] = "LIQUIDACION - Contrato: {0}".format(contrato.nombre)
@@ -2500,6 +2503,9 @@ class LiquidationsCreateView(LoginRequiredMixin,
 
         cuentas = models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+
+        if total_valor == None:
+            total_valor=0
 
         Valor_pagar = float(contrato.valor) - float(total_valor)
 
@@ -2864,6 +2870,9 @@ class LiquidationsEditView(LoginRequiredMixin,
         contrato = liquidacion.contrato
         cuentas = models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        if total_valor == None:
+            total_valor = 0
+
         valor_pagar = float(contrato.valor) - float(total_valor)
 
         kwargs['title'] = "LIQUIDACION - Contrato: {0}".format(contrato.nombre)

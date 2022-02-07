@@ -2032,7 +2032,8 @@ class CreateLiquidationForm(forms.Form):
         contrato = models.Contratos.objects.get(id=kwargs['initial']['pk_contract'])
         cuentas= models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
-
+        if total_valor == 0 or total_valor ==None:
+            total_valor = 0
 
         if float(contrato.valor) == float(total_valor):
 
