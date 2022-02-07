@@ -213,7 +213,7 @@ class AccountContractListApi(BaseDatatableView):
     order_columns = ['id','html','html_2','html_3','delta','user_creation','file5','estate','file','file6','estate_inform','file2','estate_report']
 
     def get_initial_queryset(self):
-        return self.model.objects.filter(contract = self.kwargs['pk']).exclude(value_fees=0).order_by('-cut__consecutive')
+        return self.model.objects.filter(contract = self.kwargs['pk']).order_by('-cut__consecutive')
 
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)

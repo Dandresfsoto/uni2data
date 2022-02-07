@@ -2606,6 +2606,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
                 )
                 liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
 
+
             """
             usuario = contrato.get_user_or_none()
 
@@ -2796,18 +2797,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
                 )
                 liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
 
-            cuenta_cobro = Collects_Account.objects.create(
-                contract=contrato,
-                user_creation=self.request.user,
-                value_fees=liquidacion.valor,
-                month=form.cleaned_data['mes'],
-                year=form.cleaned_data['año'],
-                file=liquidacion.file,
-                liquidacion=True,
-                estate="Generado",
-                estate_inform="Generado",
-                estate_report="Generado",
-            )
+
 
             """
             usuario = contrato.get_user_or_none()
@@ -2826,7 +2816,18 @@ class LiquidationsCreateView(LoginRequiredMixin,
                 )
             """
 
-
+        models.Collects_Account.objects.create(
+            contract=contrato,
+            user_creation=self.request.user,
+            value_fees=liquidacion.valor,
+            month=form.cleaned_data['mes'],
+            year=form.cleaned_data['año'],
+            file=liquidacion.file,
+            liquidacion=True,
+            estate="Generado",
+            estate_inform="Generado",
+            estate_report="Generado",
+        )
 
         return super(LiquidationsCreateView,self).form_valid(form)
 
