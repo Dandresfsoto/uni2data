@@ -2032,10 +2032,10 @@ class CreateLiquidationForm(forms.Form):
         contrato = models.Contratos.objects.get(id=kwargs['initial']['pk_contract'])
         cuentas= models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
-        if total_valor == 0 or total_valor ==None:
+        if total_valor == 0 or total_valor == None:
             total_valor = 0
 
-        if float(contrato.valor) == float(total_valor):
+        if float(contrato.valor) <= float(total_valor):
 
             self.helper = FormHelper(self)
             self.helper.layout = Layout(
@@ -2067,6 +2067,16 @@ class CreateLiquidationForm(forms.Form):
                         """
                         <div class="col s12">{{ cuentas| safe }}</div>
                         """
+                    )
+                ),
+                Row(
+                    Column(
+                        'mes',
+                        css_class='s6'
+                    ),
+                    Column(
+                        'año',
+                        css_class='s6'
                     )
                 ),
                 Row(
@@ -2222,7 +2232,7 @@ class EditLiquidationForm(forms.Form):
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
 
 
-        if float(contrato.valor) == float(total_valor):
+        if float(contrato.valor) <= float(total_valor):
 
 
 

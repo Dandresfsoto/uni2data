@@ -2510,7 +2510,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
         Valor_pagar = float(contrato.valor) - float(total_valor)
 
 
-        if float(contrato.valor) == float(total_valor):
+        if float(contrato.valor) <= float(total_valor):
             liquidacion, created = models.Liquidations.objects.get_or_create(
                 contrato=contrato,
                 valor_ejecutado = contrato.valor,
@@ -2898,7 +2898,7 @@ class LiquidationsEditView(LoginRequiredMixin,
         Valor_pagar = float(contrato.valor) - float(total_valor)
 
 
-        if float(contrato.valor) == float(total_valor):
+        if float(contrato.valor) <= float(total_valor):
             liquidacion.valor_ejecutado = float(contrato.valor)
             liquidacion.valor = 0
             liquidacion.estado="Generada"
