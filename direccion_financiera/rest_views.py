@@ -509,7 +509,7 @@ class ReportesListApi(BaseDatatableView):
 
         elif column == 'enterprise':
             ret = ''
-            if self.request.user.is_superuser and (row.estado == "Reportado" or row.estado == "En pagaduria"):
+            if self.request.user.is_superuser and (row.estado == "Reportado" or row.estado == "En pagaduria" or row.estado == "Listo para reportar"):
                 ret = '<div class="center-align">' \
                            '<a href="reset/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Reiniciar reporte: {1}">' \
                                 '<i class="material-icons" style="color:blue">autorenew</i>' \

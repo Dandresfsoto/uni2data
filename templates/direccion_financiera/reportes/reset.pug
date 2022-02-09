@@ -59,11 +59,29 @@ block container_principal
     div(class="container",style="margin-top:40px;")
         |{% crispy form %}
 
+    div(id="modal_reinicio",class="modal modal-fixed-footer")
+        div(class="modal-content")
+            h5
+                b REINICIAR REPORTE!!
+            p(style = "text-align: justify;").
+                Este reporte se reiniciara al estado Carga de pagos, por lo tanto debe informar al area de pagaduria con
+                anterioridad para evitar errores.
+            div(class="row")
+                div(class="col s12 m6 offset-m3")
+                    img(class="responsive-img",src="{% static 'img/atencion.png'%}")
+
+        div(class="modal-footer")
+            a(href="#!",class="modal-action modal-close waves-effect waves-green btn-flat") Cerrar
+
 
 block body_script_auth
     script.
         $(document).ready(function () {
 
-
+            $('#modal_reinicio').modal({
+                dismissible: false,
+                opacity: .9,
+            });
+            $('#modal_reinicio').modal('open');
         });
 
