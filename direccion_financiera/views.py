@@ -815,8 +815,8 @@ class ReportesUpdateView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = reporte.nombre
         kwargs['respaldo_url'] = reporte.pretty_print_respaldo()
         kwargs['firma_url'] = reporte.pretty_print_firma()
-        kwargs['show'] = True if reporte.firma.name != '' and reporte.estado != 'Completo' else False
-        kwargs['show_reportar'] = True if reporte.firma.name != '' and reporte.estado != 'Reportado' and reporte.estado != 'En pagaduria' and reporte.estado != 'Completo' else False
+        kwargs['show'] = True if reporte.firma.name != '' and reporte.estado != 'Completo' and reporte.estado != 'Carga de pagos' else False
+        kwargs['show_reportar'] = True if self.request.user.is_superuser and reporte.estado == 'Listo para reportar' else False
         kwargs['show_reporte_enviado'] = True if self.request.user.is_superuser and reporte.estado == 'Reportado' else False
         kwargs['show_resultado'] = True if reporte.firma.name != '' and reporte.estado == 'En pagaduria' else False
         return super(ReportesUpdateView,self).get_context_data(**kwargs)
@@ -1123,7 +1123,7 @@ class ReportesResetView(LoginRequiredMixin,
         reporte.estado = "Carga de pagos"
         reporte.save()
 
-        template = 'mail/direccion_financiera/reportes/eliminar_reporte.tpl'
+        template = 'mail/direccion_financiera/reportes/cancelar_reporte.tpl'
 
         tasks.send_mail_templated_reporte_delete(
             template,
@@ -1175,7 +1175,30 @@ class PagosListView(LoginRequiredMixin,
         kwargs['show'] = True if reporte.file.name != '' or reporte.plano.name != '' else False
         kwargs['file'] = reporte.url_file()
         kwargs['plano'] = reporte.url_plano()
+        kwargs['show_listo'] = True if reporte.firma.name != '' and reporte.estado != 'Listo para reportar' and reporte.estado != 'Reportado' and reporte.estado != 'En pagaduria' and reporte.estado != 'Completo' else False
+        kwargs['show_general'] = True if reporte.estado == 'Carga de pagos' else False
         return super(PagosListView,self).get_context_data(**kwargs)
+
+
+class PagosListoView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.reportes.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../../../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        if self.request.user.is_superuser:
+            models.Reportes.objects.filter(id = self.kwargs['pk_reporte']).update(estado = 'Listo para reportar')
+            models.Pagos.objects.filter(reporte__id = self.kwargs['pk_reporte']).update(estado='Listo para reportar')
+
+        return HttpResponseRedirect('../../../')
 
 
 class PagosCreateView(LoginRequiredMixin,

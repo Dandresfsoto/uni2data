@@ -43,6 +43,7 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/reportes/reset/<uuid:pk_reporte>/', views.ReportesResetView.as_view()),
 
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/', views.PagosListView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/listo/', views.PagosListoView.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/crear/', views.PagosCreateView.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/editar/<uuid:pk_pago>/', views.PagosUpdateView.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/eliminar/<uuid:pk_pago>/', views.PagosDeleteView.as_view()),
