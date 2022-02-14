@@ -10,6 +10,7 @@ import json
 import os
 from rest_framework.permissions import AllowAny
 from dal import autocomplete
+from recursos_humanos.functions import month_converter
 
 class ContratistasListApi(BaseDatatableView):
     model = Contratistas
@@ -1035,9 +1036,15 @@ class LiquidationsListApi(BaseDatatableView):
             return row.get_cargo()
 
         elif column == 'creation':
-            inicio = row.pretty_print_inicio()
-            fin = row.pretty_print_fin()
-            fechas = inicio +" - "+ fin
+            año_inicio = row.inicio.year
+            mes_inicio = row.inicio.month - 1
+            mes_inicio = month_converter(mes_inicio)
+            dia_inicio = row.inicio.day
+            año_fin = row.fin.year
+            mes_fin = row.fin.month - 1
+            mes_fin = month_converter(mes_fin)
+            dia_fin = row.fin.day
+            fechas = '{0} de {1} del {2} - {3} de {4} del {5}'.format(dia_inicio,mes_inicio,año_inicio,dia_fin,mes_fin,año_fin)
             return fechas
 
         elif column == 'valor':

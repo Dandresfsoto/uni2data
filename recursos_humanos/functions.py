@@ -24,6 +24,13 @@ def certificacion_laboral(contratista):
             mes_fin=contrato.fin.month-1
             mes_fin=month_converter(mes_fin)
             dia_fin=contrato.fin.day
+
+            if contrato.fecha_renuncia != "" or contrato.fecha_renuncia != None:
+                año_fin = contrato.fecha_renuncia.year
+                mes_fin = contrato.fecha_renuncia.month - 1
+                mes_fin = month_converter(mes_fin)
+                dia_fin = contrato.fecha_renuncia.day
+
             contratos.append({
                 'attributes': {'bold': True},
                 'insert': 'CONTRATO {0} N° {1}: '.format(contrato.tipo_contrato.upper(),contrato.nombre.upper())
@@ -480,3 +487,27 @@ def delta_cuenta_cobro_parcial(liquidacion,valor,mes,year):
     }
 
     return ret
+
+def contrato_inicio_español(contrato):
+    contrato = Contratos.objects.get(id=contrato)
+    año_inicio = contrato.inicio.year
+    mes_inicio = contrato.inicio.month - 1
+    mes_inicio = month_converter(mes_inicio)
+    dia_inicio = contrato.inicio.day
+    fechas = '{0} de {1} del {2}'.format(dia_inicio, mes_inicio, año_inicio)
+    return fechas
+
+def contrato_fin_español(contrato):
+    contrato = Contratos.objects.get(id=contrato)
+    if contrato.fecha_renuncia != "" or contrato.fecha_renuncia != None:
+        año_fin = contrato.fecha_renuncia.year
+        mes_fin = contrato.fecha_renuncia.month - 1
+        mes_fin = month_converter(mes_fin)
+        dia_fin = contrato.fecha_renuncia.day
+    else:
+        año_fin = contrato.fin.year
+        mes_fin = contrato.fin.month - 1
+        mes_fin = month_converter(mes_fin)
+        dia_fin = contrato.fin.day
+    fechas = '{0} de {1} del {2}'.format(dia_fin, mes_fin, año_fin)
+    return fechas
