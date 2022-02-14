@@ -7,7 +7,7 @@ import datetime
 from django import forms
 from django.db.models import Sum
 
-from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, Certificaciones
+from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, Certificaciones, Cargos
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Hidden
@@ -2022,9 +2022,23 @@ class CreateLiquidationForm(forms.Form):
 
     año = forms.CharField(required=False,label='Mes', max_length=100, widget=forms.Select(choices=[
         ('', '----------'),
-        ('2020', '2020'),
         ('2021', '2021'),
+        ('2022', '2022'),
     ]))
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        mes = cleaned_data.get("mes")
+        año = cleaned_data.get("año")
+
+        if mes == '':
+            self.add_error('mes', 'Campo requerido')
+
+        if año == '':
+            self.add_error('año', 'Campo requerido')
+
 
     def __init__(self, *args, **kwargs):
         super(CreateLiquidationForm, self).__init__(*args, **kwargs)
@@ -2032,10 +2046,10 @@ class CreateLiquidationForm(forms.Form):
         contrato = models.Contratos.objects.get(id=kwargs['initial']['pk_contract'])
         cuentas= models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        if total_valor == 0 or total_valor == None:
+            total_valor = 0
 
-
-        if float(contrato.valor) == float(total_valor):
-
+        if float(contrato.valor) <= float(total_valor):
             self.helper = FormHelper(self)
             self.helper.layout = Layout(
 
@@ -2066,6 +2080,16 @@ class CreateLiquidationForm(forms.Form):
                         """
                         <div class="col s12">{{ cuentas| safe }}</div>
                         """
+                    )
+                ),
+                Row(
+                    Column(
+                        'mes',
+                        css_class='s6'
+                    ),
+                    Column(
+                        'año',
+                        css_class='s6'
                     )
                 ),
                 Row(
@@ -2208,9 +2232,21 @@ class EditLiquidationForm(forms.Form):
 
     año = forms.CharField(required=False,label='Mes', max_length=100, widget=forms.Select(choices=[
         ('', '----------'),
-        ('2020', '2020'),
         ('2021', '2021'),
+        ('2022', '2022'),
     ]))
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        mes = cleaned_data.get("mes")
+        año = cleaned_data.get("año")
+
+        if mes == '':
+            self.add_error('mes', 'Campo requerido')
+
+        if año == '':
+            self.add_error('año', 'Campo requerido')
 
     def __init__(self, *args, **kwargs):
         super(EditLiquidationForm, self).__init__(*args, **kwargs)
@@ -2219,9 +2255,10 @@ class EditLiquidationForm(forms.Form):
         contrato=liquidacion.contrato
         cuentas= models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        total_valor = float(total_valor) - float(liquidacion.valor)
 
 
-        if float(contrato.valor) == float(total_valor):
+        if float(contrato.valor) <= float(total_valor):
 
 
 
@@ -2479,3 +2516,65 @@ class EditLiquidationForm(forms.Form):
                         ),
                     )
                 )
+
+class CargoForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        nombre = cleaned_data.get("nombre")
+
+        if nombre == None:
+            self.add_error('cargo', 'Campo requerido')
+
+
+    def __init__(self, *args, **kwargs):
+        super(CargoForm, self).__init__(*args, **kwargs)
+        self.fields['obligaciones'].widget = forms.Textarea(attrs={'class': 'materialize-textarea', 'data-length': '1000'})
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información del cargo',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'nombre',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'obligaciones',
+                            css_class='s12'
+                        ),
+                        css_class ="materialize-textarea"
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Cargos
+        fields = ['nombre','obligaciones']
+        labels = {
+            'obligaciones': 'Funciones',
+        }

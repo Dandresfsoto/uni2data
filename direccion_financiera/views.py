@@ -92,7 +92,6 @@ class DireccionFinancieraOptionsView(LoginRequiredMixin,
                 'sican_description': 'Consulta y reportes de pagos a terceros'
             })
 
-
         if self.request.user.has_perm('usuarios.direccion_financiera.solicitudes_desplazamiento.ver'):
             items.append({
                 'sican_categoria': 'Desplazamiento',
@@ -113,6 +112,17 @@ class DireccionFinancieraOptionsView(LoginRequiredMixin,
                 'sican_name': 'Cuentas de cobro',
                 'sican_icon': 'assignment',
                 'sican_description': 'Cuentas de cobro e informacion para reportes'
+            })
+
+        if self.request.user.has_perm('usuarios.direccion_financiera.liquidaciones.ver'):
+            items.append({
+                'sican_categoria': 'Liquidaciones',
+                'sican_color': 'green darken-4',
+                'sican_order': 7,
+                'sican_url': 'liquidaciones/',
+                'sican_name': 'Liquidaciones',
+                'sican_icon': 'account_balance',
+                'sican_description': 'Liquidaciones de contratos'
             })
 
         return items
@@ -805,8 +815,8 @@ class ReportesUpdateView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = reporte.nombre
         kwargs['respaldo_url'] = reporte.pretty_print_respaldo()
         kwargs['firma_url'] = reporte.pretty_print_firma()
-        kwargs['show'] = True if reporte.firma.name != '' and reporte.estado != 'Completo' else False
-        kwargs['show_reportar'] = True if reporte.firma.name != '' and reporte.estado != 'Reportado' and reporte.estado != 'En pagaduria' and reporte.estado != 'Completo' else False
+        kwargs['show'] = True if reporte.firma.name != '' and reporte.estado != 'Completo' and reporte.estado != 'Carga de pagos' else False
+        kwargs['show_reportar'] = True if self.request.user.is_superuser and reporte.estado == 'Listo para reportar' else False
         kwargs['show_reporte_enviado'] = True if self.request.user.is_superuser and reporte.estado == 'Reportado' else False
         kwargs['show_resultado'] = True if reporte.firma.name != '' and reporte.estado == 'En pagaduria' else False
         return super(ReportesUpdateView,self).get_context_data(**kwargs)
@@ -1029,14 +1039,14 @@ class ReportesDeleteView(LoginRequiredMixin,
 
 
         if reporte.estado == 'En pagaduria' or reporte.estado == 'Reportado':
-            template = 'mail/direccion_financiera/reportes/reporte_sin_respaldo.tpl'
+            template = 'mail/direccion_financiera/reportes/eliminar_reporte.tpl'
 
-            send_mail_templated_reporte(
+            tasks.send_mail_templated_reporte_delete(
                 template,
                 {
                     'consecutivo': str(reporte.consecutive),
                     'nombre_reporte': str(reporte.consecutive) + ' - ' + reporte.nombre,
-                    'valor': reporte.pretty_print_valor_descuentos(),
+                    'valor': reporte.pretty_print_valor(),
                     'proyecto': reporte.proyecto.nombre,
                 },
                 DEFAULT_FROM_EMAIL,
@@ -1084,6 +1094,60 @@ class ReportesRecordView(LoginRequiredMixin,
             'pk_reporte': self.kwargs['pk_reporte']
         }
 
+
+class ReportesResetView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.reportes.ver",
+            "usuarios.direccion_financiera.reportes.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/reportes/reset.html'
+    form_class = forms.ReporteResetForm
+    success_url = "../../"
+
+    model = models.Reportes
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+
+    def form_valid(self, form):
+
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
+        pagos = models.Pagos.objects.filter(reporte=reporte).update(estado="Pago creado")
+        reporte.estado = "Carga de pagos"
+        reporte.save()
+
+        template = 'mail/direccion_financiera/reportes/cancelar_reporte.tpl'
+
+        tasks.send_mail_templated_reporte_delete(
+            template,
+            {
+                'consecutivo': str(reporte.consecutive),
+                'nombre_reporte': str(reporte.consecutive) + ' - ' + reporte.nombre,
+                'valor': reporte.pretty_print_valor(),
+                'proyecto': reporte.proyecto.nombre,
+            },
+            DEFAULT_FROM_EMAIL,
+            [self.request.user.email,EMAIL_HOST_USER,EMAIL_DIRECCION_FINANCIERA, EMAIL_CONTABILIDAD, EMAIL_GERENCIA]
+        )
+
+        return super(ReportesResetView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
+        kwargs['breadcrum_1'] = enterprise.name
+        kwargs['consecutivo'] = reporte.consecutive
+        kwargs['title'] = "CREAR REPORTE"
+
+        return super(ReportesResetView,self).get_context_data(**kwargs)
+
 #----------------------------------------------------------------------------------
 
 #-------------------------------------- PAGOS -------------------------------------
@@ -1111,7 +1175,30 @@ class PagosListView(LoginRequiredMixin,
         kwargs['show'] = True if reporte.file.name != '' or reporte.plano.name != '' else False
         kwargs['file'] = reporte.url_file()
         kwargs['plano'] = reporte.url_plano()
+        kwargs['show_listo'] = True if reporte.firma.name != '' and reporte.estado != 'Listo para reportar' and reporte.estado != 'Reportado' and reporte.estado != 'En pagaduria' and reporte.estado != 'Completo' else False
+        kwargs['show_general'] = True if reporte.estado == 'Carga de pagos' else False
         return super(PagosListView,self).get_context_data(**kwargs)
+
+
+class PagosListoView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.reportes.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../../../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        if self.request.user.is_superuser:
+            models.Reportes.objects.filter(id = self.kwargs['pk_reporte']).update(estado = 'Listo para reportar')
+            models.Pagos.objects.filter(reporte__id = self.kwargs['pk_reporte']).update(estado='Listo para reportar')
+
+        return HttpResponseRedirect('../../../')
 
 
 class PagosCreateView(LoginRequiredMixin,
@@ -2463,10 +2550,10 @@ class CollectsAccountsRegisterView(LoginRequiredMixin,
 
     permissions = {
         "all": [
-            "usuarios.recursos_humanos.ver",
-            "usuarios.recursos_humanos.cortes.ver",
-            "usuarios.recursos_humanos.cortes.cuentas_cobro.ver",
-            "usuarios.recursos_humanos.cortes.cuentas_cobro.cargar"
+            "usuarios.direccion_financiera.ver",
+            "usuarios.direccion_financiera.cortes.ver",
+            "usuarios.direccion_financiera.cortes.cuentas_cobro.ver",
+            "usuarios.direccion_financiera.cortes.cuentas_cobro.cargar"
         ]
     }
     login_url = settings.LOGIN_URL
@@ -2496,3 +2583,129 @@ class CollectsAccountsRegisterView(LoginRequiredMixin,
         kwargs['breadcrum_1'] = collect_account.cut.consecutive
         kwargs['breadcrum_active'] = collect_account.contract.nombre
         return super(CollectsAccountsRegisterView,self).get_context_data(**kwargs)
+
+#----------------------------------------------------------------------------------
+
+#---------------------------------- LIQUIDACIONES --------------------------------
+
+class LiquidacionesListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.liquidaciones.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/liquidaciones/lista.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Liquidaciones"
+        kwargs['url_datatable'] = '/rest/v1.0/direccion_financiera/liquidaciones/'
+        return super(LiquidacionesListView,self).get_context_data(**kwargs)
+
+class LiquidacionesHistorialtView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.ver",
+            "usuarios.direccion_financiera.liquidaciones.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/liquidaciones/historial.html'
+
+    def get_items_registers(self):
+
+        list = []
+        liquidacion = rh_models.Liquidations.objects.get(id= self.kwargs['pk_liquidacion'])
+
+        cuenta= rh_models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+
+        registers = rh_models.Registration.objects.filter(collect_account=cuenta).order_by('-creation')
+
+        for register in registers:
+            list.append({
+                'propio': True if register.user == self.request.user else False,
+                'fecha': register.pretty_creation_datetime(),
+                'usuario': register.user.get_full_name_string(),
+                'html': register.delta,
+            })
+
+        return list
+
+    def get_context_data(self, **kwargs):
+        registers = self.get_items_registers()
+        liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        collect_account = rh_models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+        kwargs['title'] = "GESTIÓN"
+        kwargs['registros'] = registers
+        kwargs['registros_cantidad'] = len(registers)
+        kwargs['breadcrum_active'] = collect_account.contract.nombre
+        return super(LiquidacionesHistorialtView,self).get_context_data(**kwargs)
+
+class LiquidacionesEstadoView(UpdateView):
+
+    login_url = settings.LOGIN_URL
+    model = rh_models.Liquidations
+    template_name = 'direccion_financiera/liquidaciones/estado.html'
+    form_class = forms.LiquidacionestadoForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_liquidacion'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.direccion_financiera.ver",
+                "usuarios.direccion_financiera.liquidaciones.ver",
+            ]
+        }
+
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if self.liquidacion.estado == 'Generado' and self.liquidacion.estado == 'Cargado' and self.liquidacion.estado == 'Reportado':
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.fecha_actualizacion = timezone.now()
+        self.object.usuario_actualizacion = self.request.user
+        self.object.save()
+        liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        collect_account = rh_models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+        collect_account.estate_report=liquidacion.estado
+        collect_account.observaciones_report=liquidacion.observaciones
+        collect_account.save()
+        rh_models.Registration.objects.create(
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Cambio de estado a: " + liquidacion.estado
+        )
+
+        return super(LiquidacionesEstadoView, self).form_valid(form)
+
+
+    def get_context_data(self, **kwargs):
+        liquidacion = rh_models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        kwargs['title'] = "ESTADO DE LA CUENTA DE COBRO"
+        kwargs['breadcrum_active'] = liquidacion.contrato.nombre
+        return super(LiquidacionesEstadoView,self).get_context_data(**kwargs)

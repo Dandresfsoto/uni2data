@@ -2133,3 +2133,108 @@ class InformCollectAccountListApi(BaseDatatableView):
 
         else:
             return super(InformCollectAccountListApi, self).render_column(row, column)
+
+class LiquidacionesListApi(BaseDatatableView):
+    model = rh_models.Liquidations
+    columns = ['id','contrato','valor_ejecutado','estado_informe','valor','file','estado','mes','año','file2','estado_seguridad']
+    order_columns = ['id','contrato','valor_ejecutado','estado_informe','valor','file','estado','mes','año','file2','estado_seguridad']
+
+    def get_initial_queryset(self):
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(nombre__icontains=search) | Q(contratista__nombres__icontains=search) | \
+                Q(contratista__apellidos__icontains=search) | Q(contratista__cedula__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+        if column == 'id':
+            ret = '<div class="center-align">' \
+                       '<a href="ver/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar liquidacion: {1}">' \
+                            '<i class="material-icons">remove_red_eye</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id, row.contrato.nombre)
+            return ret
+
+        elif column == 'contrato':
+            return row.contrato.nombre
+
+        elif column == 'valor_ejecutado':
+            return row.contrato.contratista.get_full_name_cedula()
+
+        elif column == 'estado_informe':
+            return row.contrato.get_cargo()
+
+        elif column == 'valor':
+            valor = str(row.valor).replace('COL', '')
+            return valor
+
+
+        elif column == 'estado':
+            if row.estado_informe != None:
+                return '<a><div class="center-align"><b>{0}</b></div></a>'.format(row.estado_informe)
+            else:
+                return row.estado_informe
+
+        elif column == 'file':
+            if row.url_file3() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file3(), 'Descargar archivo')
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'mes':
+            if row.url_file() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file(), 'Descargar archivo')
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'año':
+            if row.url_file2() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file2(), 'Descargar archivo')
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'file2':
+            ret = ""
+            if row.estado_informe == 'Generada':
+                ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+                ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+
+            elif row.estado_informe == 'Rechazado':
+                ret += '<a style="color:green;" href="aprobar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+            elif row.estado_informe == 'Aprobado':
+                ret += '<a style="color:red;margin-left:10px;" href="rechazar/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                       '<i class="material-icons">{2}</i>' \
+                       '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+
+            return ret
+
+        if column == 'estado_seguridad':
+            ret = '<div class="center-align">' \
+                       '<a href="historial/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar liquidacion: {1}">' \
+                            '<i class="material-icons">history</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id,row.contrato.nombre)
+            return ret
+        else:
+            return super(LiquidacionesListApi, self).render_column(row, column)

@@ -61,4 +61,11 @@ urlpatterns = [
     path('liquidations/create/<uuid:pk_contract>/', views.LiquidationsCreateView.as_view()),
     path('liquidations/edit/<uuid:pk_liquidacion>/', views.LiquidationsEditView.as_view()),
     path('liquidations/delete/<uuid:pk_liquidacion>/', views.LiquidationsDelete.as_view()),
+    path('liquidations/aprobar/<uuid:pk_liquidacion>/', views.LiquidationsAporbarSeguridad.as_view()),
+    path('liquidations/rechazar/<uuid:pk_liquidacion>/', views.LiquidationsRechazarSeguridad.as_view()),
+    path('liquidations/historial/<uuid:pk_liquidacion>/', views.LiquidationsHistorialSeguridad.as_view()),
+
+    path('cargos/', views.CargosListView.as_view()),
+    path('cargos/crear/', views.CargosCreateView.as_view()),
+    path('cargos/editar/<uuid:pk>/', views.CargosupdateView.as_view()),
 ]
