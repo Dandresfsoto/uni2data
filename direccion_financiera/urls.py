@@ -40,7 +40,10 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/reportes/eliminar/<uuid:pk_reporte>/', views.ReportesDeleteView.as_view()),
     path('enterprise/<uuid:pk>/reportes/contabilizar/<uuid:pk_reporte>/', views.ReportesRecordView.as_view()),
 
+    path('enterprise/<uuid:pk>/reportes/reset/<uuid:pk_reporte>/', views.ReportesResetView.as_view()),
+
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/', views.PagosListView.as_view()),
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/listo/', views.PagosListoView.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/crear/', views.PagosCreateView.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/editar/<uuid:pk_pago>/', views.PagosUpdateView.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/eliminar/<uuid:pk_pago>/', views.PagosDeleteView.as_view()),
@@ -84,4 +87,7 @@ urlpatterns = [
     path('collects_account/view/<uuid:pk_cut>/estate/<uuid:pk_collect_account>/', views.CollectsAccountsEstateView.as_view()),
     path('collects_account/view/<uuid:pk_cut>/register/<uuid:pk_collect_account>/', views.CollectsAccountsRegisterView.as_view()),
 
+    path('liquidaciones/', views.LiquidacionesListView.as_view()),
+    path('liquidaciones/historial/<uuid:pk_liquidacion>/', views.LiquidacionesHistorialtView.as_view()),
+    path('liquidaciones/estado/<uuid:pk_liquidacion>/', views.LiquidacionesEstadoView.as_view()),
 ]

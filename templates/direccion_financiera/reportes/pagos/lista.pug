@@ -53,7 +53,7 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
-    |{% if permiso_crear %}
+    |{% if show_general %}
 
     ul(class="collapsible",data-collapsible="accordion")
         li(class="bold waves-effect waves-light button-menu")
@@ -65,12 +65,20 @@ block side_nav_container
             div(class="collapsible-body collapsible-body-blue")
                 ul
                     div(class="divider divider-perfil")
-
+                    |{% if permiso_crear %}
                     li(class="bold waves-effect waves-light")
                         a(href="crear/") Añadir pago
                             i(class="material-icons icon-sican") monetization_on
+                    | {% endif %}
+                    div(class="divider divider-perfil")
+
+                    | {% if show_listo %}
+                    li(class="bold waves-effect waves-light")
+                        a(href="listo/") Listo para reportar
+                            i(class="material-icons icon-sican") check
 
                     div(class="divider divider-perfil")
+                    | {% endif %}
 
     |{% endif %}
 

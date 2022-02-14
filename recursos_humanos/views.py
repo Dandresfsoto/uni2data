@@ -65,7 +65,6 @@ class RhoptionsView(LoginRequiredMixin,
                 'sican_description': 'Registro y actualización de datos personales, contratos y soportes'
             })
 
-
         if self.request.user.has_perm('usuarios.recursos_humanos.soportes.ver'):
             items.append({
                 'sican_categoria': 'Recursos humanos',
@@ -76,7 +75,6 @@ class RhoptionsView(LoginRequiredMixin,
                 'sican_icon': 'assignment_ind',
                 'sican_description': 'Caracterización de cada uno de los soportes disponibles en el módulo'
             })
-
 
         if self.request.user.has_perm('usuarios.recursos_humanos.soportes.ver'):
             items.append({
@@ -99,7 +97,6 @@ class RhoptionsView(LoginRequiredMixin,
                 'sican_icon': 'group_work',
                 'sican_description': 'Construcción y consolidación de certificaciones emitidas por la entidad'
             })
-
 
         if self.request.user.has_perm('usuarios.recursos_humanos.hv.ver'):
             items.append({
@@ -143,6 +140,17 @@ class RhoptionsView(LoginRequiredMixin,
                 'sican_name': 'Liquidaciones',
                 'sican_icon': 'assignment',
                 'sican_description': 'Listado de contratos para liquidacion'
+            })
+
+        if self.request.user.has_perm('usuarios.recursos_humanos.cargos.ver'):
+            items.append({
+                'sican_categoria': 'Cargos',
+                'sican_color': 'blue-grey darken-3',
+                'sican_order': 9,
+                'sican_url': 'cargos/',
+                'sican_name': 'Cargos',
+                'sican_icon': 'folder',
+                'sican_description': 'Listado de cargos'
             })
 
         return items
@@ -2012,7 +2020,7 @@ class CollectAccountUpdateView(FormView):
 
     def get_cuentas_fees(self,collect_account):
 
-        accounts = models.Collects_Account.objects.filter(contract=self.collect_account.contract).exclude(value_fees=0)
+        accounts = models.Collects_Account.objects.filter(contract=self.collect_account.contract).exclude(liquidacion=True)
         list= ''
         count= accounts.count()
 
@@ -2455,7 +2463,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
 
     def get_cuentas_fees(self):
         contrato = models.Contratos.objects.get(id=self.kwargs['pk_contract'])
-        accounts = models.Collects_Account.objects.filter(contract=contrato).exclude(value_fees=0)
+        accounts = models.Collects_Account.objects.filter(contract=contrato).exclude(liquidacion=True)
         list= ''
         count= accounts.count()
 
@@ -2472,6 +2480,9 @@ class LiquidationsCreateView(LoginRequiredMixin,
         contrato = models.Contratos.objects.get(id=self.kwargs['pk_contract'])
         cuentas = models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        if total_valor == None:
+            total_valor = 0
+
         valor_pagar = float(contrato.valor) - float(total_valor)
 
         kwargs['title'] = "LIQUIDACION - Contrato: {0}".format(contrato.nombre)
@@ -2493,15 +2504,20 @@ class LiquidationsCreateView(LoginRequiredMixin,
         cuentas = models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
 
+        if total_valor == None:
+            total_valor=0
+
         Valor_pagar = float(contrato.valor) - float(total_valor)
 
 
-        if float(contrato.valor) == float(total_valor):
+        if float(contrato.valor) <= float(total_valor):
             liquidacion, created = models.Liquidations.objects.get_or_create(
                 contrato=contrato,
                 valor_ejecutado = contrato.valor,
                 valor = 0,
                 estado="Generada",
+                estado_seguridad="Generada",
+                estado_informe="Generada",
                 fecha_actualizacion=timezone.now(),
                 usuario_actualizacion=self.request.user,
                 mes = form.cleaned_data['mes'],
@@ -2590,6 +2606,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
                 )
                 liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
 
+
             """
             usuario = contrato.get_user_or_none()
 
@@ -2616,6 +2633,8 @@ class LiquidationsCreateView(LoginRequiredMixin,
                     valor_ejecutado=contrato.valor,
                     valor=Valor_pagar,
                     estado="Generada",
+                    estado_seguridad="Generada",
+                    estado_informe="Generada",
                     fecha_actualizacion=timezone.now(),
                     usuario_actualizacion=self.request.user,
                     mes=form.cleaned_data['mes'],
@@ -2631,6 +2650,8 @@ class LiquidationsCreateView(LoginRequiredMixin,
                     valor_ejecutado=total_ejecutado,
                     valor=valor_pagar,
                     estado="Generada",
+                    estado_seguridad="Generada",
+                    estado_informe="Generada",
                     fecha_actualizacion=timezone.now(),
                     usuario_actualizacion=self.request.user,
                     mes=form.cleaned_data['mes'],
@@ -2776,6 +2797,8 @@ class LiquidationsCreateView(LoginRequiredMixin,
                 )
                 liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
 
+
+
             """
             usuario = contrato.get_user_or_none()
 
@@ -2793,7 +2816,18 @@ class LiquidationsCreateView(LoginRequiredMixin,
                 )
             """
 
-
+        models.Collects_Account.objects.create(
+            contract=contrato,
+            user_creation=self.request.user,
+            value_fees=liquidacion.valor,
+            month=form.cleaned_data['mes'],
+            year=form.cleaned_data['año'],
+            file=liquidacion.file,
+            liquidacion=True,
+            estate="Generado",
+            estate_inform="Generado",
+            estate_report="Generado",
+        )
 
         return super(LiquidationsCreateView,self).form_valid(form)
 
@@ -2818,7 +2852,7 @@ class LiquidationsEditView(LoginRequiredMixin,
     def get_cuentas_fees(self):
         liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
         contrato = liquidacion.contrato
-        accounts = models.Collects_Account.objects.filter(contract=contrato).exclude(value_fees=0)
+        accounts = models.Collects_Account.objects.filter(contract=contrato).exclude(liquidacion=True)
         list= ''
         count= accounts.count()
 
@@ -2827,6 +2861,7 @@ class LiquidationsEditView(LoginRequiredMixin,
             year = account.year
             value = account.value_fees
             cut = account.cut.consecutive
+
             list += '<p><b>Corte: </b>{0}</p><p><b>Fecha: </b>{1} - {2}</p><ul>{3}</ul>'.format(cut,month,year,value)
 
         return list
@@ -2836,6 +2871,9 @@ class LiquidationsEditView(LoginRequiredMixin,
         contrato = liquidacion.contrato
         cuentas = models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        if total_valor == None:
+            total_valor = 0
+
         valor_pagar = float(contrato.valor) - float(total_valor)
 
         kwargs['title'] = "LIQUIDACION - Contrato: {0}".format(contrato.nombre)
@@ -2857,14 +2895,17 @@ class LiquidationsEditView(LoginRequiredMixin,
 
         cuentas = models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
+        total_valor = float(total_valor) - float(liquidacion.valor)
 
         Valor_pagar = float(contrato.valor) - float(total_valor)
 
 
-        if float(contrato.valor) == float(total_valor):
+        if float(contrato.valor) <= float(total_valor):
             liquidacion.valor_ejecutado = float(contrato.valor)
             liquidacion.valor = 0
             liquidacion.estado="Generada"
+            liquidacion.estado_informe="Generada"
+            liquidacion.estado_seguridad="Generada"
             liquidacion.fecha_actualizacion=timezone.now()
             liquidacion.usuario_actualizacion=self.request.user
             liquidacion.save()
@@ -2952,6 +2993,7 @@ class LiquidationsEditView(LoginRequiredMixin,
                 )
                 liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
 
+
             """
             usuario = contrato.get_user_or_none()
 
@@ -2976,6 +3018,8 @@ class LiquidationsEditView(LoginRequiredMixin,
                 liquidacion.valor_ejecutado=float(contrato.valor)
                 liquidacion.valor=float(Valor_pagar)
                 liquidacion.estado="Generada"
+                liquidacion.estado_informe = "Generada"
+                liquidacion.estado_seguridad = "Generada"
                 liquidacion.fecha_actualizacion=timezone.now()
                 liquidacion.usuario_actualizacion=self.request.user
                 liquidacion.mes=form.cleaned_data['mes']
@@ -2988,6 +3032,8 @@ class LiquidationsEditView(LoginRequiredMixin,
                 liquidacion.valor_ejecutado=total_ejecutado
                 liquidacion.valor=valor_pagar
                 liquidacion.estado="Generada"
+                liquidacion.estado_informe = "Generada"
+                liquidacion.estado_seguridad = "Generada"
                 liquidacion.fecha_actualizacion=timezone.now()
                 liquidacion.usuario_actualizacion=self.request.user
                 liquidacion.mes=form.cleaned_data['mes']
@@ -3131,7 +3177,6 @@ class LiquidationsEditView(LoginRequiredMixin,
                         '--page-size': 'Letter'
                     }
                 )
-                liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
 
             """
             usuario = contrato.get_user_or_none()
@@ -3150,13 +3195,21 @@ class LiquidationsEditView(LoginRequiredMixin,
                 )
             """
 
-
+        cuenta_cobro = Collects_Account.objects.get(contract=contrato, liquidacion=True)
+        cuenta_cobro.value_fees = liquidacion.valor
+        cuenta_cobro.month = liquidacion.mes
+        cuenta_cobro.year = liquidacion.año
+        cuenta_cobro.file = liquidacion.file
+        cuenta_cobro.liquidacion = True
+        cuenta_cobro.estate = "Generado"
+        cuenta_cobro.estate_inform = "Generado"
+        cuenta_cobro.estate_report = "Generado"
+        cuenta_cobro.save()
 
         return super(LiquidationsEditView,self).form_valid(form)
 
     def get_initial(self):
         return {'pk_liquidacion':self.kwargs['pk_liquidacion']}
-
 
 class LiquidationsDelete(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
@@ -3175,10 +3228,241 @@ class LiquidationsDelete(LoginRequiredMixin,
     def dispatch(self, request, *args, **kwargs):
         liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
         contrato = liquidacion.contrato
+        cuenta = models.Collects_Account.objects.get(contract=contrato,liquidacion=True)
+        registro=models.Registration.objects.filter(collect_account=cuenta)
+        registro.delete()
+        cuenta.delete()
         contrato.liquidado = False
         contrato.save()
         liquidacion.delete()
 
-
-
         return HttpResponseRedirect('../../')
+
+class LiquidationsAporbarSeguridad(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.liquidaciones.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.liquidacion.estado_seguridad = 'Aprobado'
+                    self.liquidacion.save()
+
+                    liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                    cuenta = models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                    cuenta.estate="Aprobado"
+                    cuenta.save()
+
+                    models.Registration.objects.create(
+                        cut=cuenta.cut,
+                        user=self.request.user,
+                        collect_account=cuenta,
+                        delta="Aprobo la seguridad social de la liquidacion"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.liquidacion.estado_seguridad = 'Aprobado'
+                        self.liquidacion.save()
+
+
+                        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                        cuenta = models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                        cuenta.estate = "Aprobado"
+                        cuenta.save()
+
+                        models.Registration.objects.create(
+                            cut=cuenta.cut,
+                            user=self.request.user,
+                            collect_account=cuenta,
+                            delta="Aprobo la seguridad social de la liquidacion"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class LiquidationsRechazarSeguridad(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.liquidaciones.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.liquidacion.estado_seguridad = 'Rechazado'
+                    self.liquidacion.save()
+
+                    liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                    cuenta = models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                    cuenta.estate="Rechazado"
+                    cuenta.save()
+
+                    models.Registration.objects.create(
+                        cut=cuenta.cut,
+                        user=self.request.user,
+                        collect_account=cuenta,
+                        delta="Rechazo la seguridad social de la liquidacion"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.liquidacion.estado_seguridad = 'Rechazado'
+                        self.liquidacion.save()
+
+
+                        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+                        cuenta = models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+                        cuenta.estate = "Rechazado"
+                        cuenta.save()
+
+                        models.Registration.objects.create(
+                            cut=cuenta.cut,
+                            user=self.request.user,
+                            collect_account=cuenta,
+                            delta="Rechazo la seguridad social de la liquidacion"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class LiquidationsHistorialSeguridad(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.liquidaciones.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/liquidations/historial.html'
+
+    def get_items_registers(self):
+
+        list = []
+        liquidacion = models.Liquidations.objects.get(id= self.kwargs['pk_liquidacion'])
+
+        cuenta= models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+
+        registers = models.Registration.objects.filter(collect_account=cuenta).order_by('-creation')
+
+        for register in registers:
+            list.append({
+                'propio': True if register.user == self.request.user else False,
+                'fecha': register.pretty_creation_datetime(),
+                'usuario': register.user.get_full_name_string(),
+                'html': register.delta,
+            })
+
+        return list
+
+    def get_context_data(self, **kwargs):
+        registers = self.get_items_registers()
+        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        collect_account = models.Collects_Account.objects.get(contract=liquidacion.contrato, liquidacion=True)
+        kwargs['title'] = "GESTIÓN"
+        kwargs['registros'] = registers
+        kwargs['registros_cantidad'] = len(registers)
+        kwargs['breadcrum_active'] = collect_account.contract.nombre
+        return super(LiquidationsHistorialSeguridad,self).get_context_data(**kwargs)
+
+
+#----------------------------------------------------------------------------------
+
+#------------------------------------ CARGOS --------------------------------------
+
+class CargosListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": ["usuarios.recursos_humanos.cargos.ver"]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/cargos/lista.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Cargos"
+        kwargs['url_datatable'] = '/rest/v1.0/recursos_humanos/cargos/'
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.recursos_humanos.cargos.crear')
+        return super(CargosListView,self).get_context_data(**kwargs)
+
+class CargosCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.cargos.ver",
+            "usuarios.recursos_humanos.cargos.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/cargos/crear.html'
+    form_class = forms.CargoForm
+    success_url = "../"
+    model = models.Cargos
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CREAR CARGO"
+        return super(CargosCreateView,self).get_context_data(**kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.save()
+        return super(CargosCreateView, self).form_valid(form)
+
+class CargosupdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.cargos.ver",
+            "usuarios.recursos_humanos.cargos.editar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/cargos/editar.html'
+    form_class = forms.CargoForm
+    success_url = "../../"
+    model = models.Cargos
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "ACTUALIZAR CARGO"
+        kwargs['breadcrum_active'] = models.Cargos.objects.get(id=self.kwargs['pk']).nombre
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.recursos_humanos.cargo.crear')
+        return super(CargosupdateView,self).get_context_data(**kwargs)

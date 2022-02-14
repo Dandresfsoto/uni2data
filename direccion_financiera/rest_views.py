@@ -221,8 +221,6 @@ class TerceroPagosListApi(BaseDatatableView):
         else:
             return super(TerceroPagosListApi, self).render_column(row, column)
 
-
-
 class PagosDinamicaAPI(APIView):
     """
     """
@@ -330,14 +328,13 @@ class PagosDinamicaAPI(APIView):
 
         return Response(response,status=status.HTTP_200_OK)
 
-
 class ReportesListApi(BaseDatatableView):
     model = Reportes
     columns = ['consecutive', 'usuario_actualizacion','usuario_creacion', 'efectivo', 'proyecto','creation', 'nombre',
-               'plano', 'valor', 'estado', 'servicio']
+               'plano', 'valor', 'estado', 'servicio','enterprise']
 
     order_columns = ['consecutive', 'usuario_actualizacion','usuario_creacion', 'efectivo','proyecto','creation', 'nombre',
-               'plano', 'valor', 'estado', 'servicio']
+               'plano', 'valor', 'estado', 'servicio','enterprise']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(enterprise__id=self.kwargs['pk'], activo=True)
@@ -510,6 +507,22 @@ class ReportesListApi(BaseDatatableView):
 
             return ret
 
+        elif column == 'enterprise':
+            ret = ''
+            if self.request.user.is_superuser and (row.estado == "Reportado" or row.estado == "En pagaduria" or row.estado == "Listo para reportar"):
+                ret = '<div class="center-align">' \
+                           '<a href="reset/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Reiniciar reporte: {1}">' \
+                                '<i class="material-icons" style="color:blue">autorenew</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">autorenew</i>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            return ret
+
 
         else:
             return super(ReportesListApi, self).render_column(row, column)
@@ -633,8 +646,6 @@ class PagosListApi(BaseDatatableView):
         else:
             return super(PagosListApi, self).render_column(row, column)
 
-
-
 class AmortizacionesPagosApi(BaseDatatableView):
     model = Amortizaciones
     columns = ['consecutivo','valor','estado','fecha_descontado']
@@ -682,7 +693,6 @@ class AmortizacionesPagosApi(BaseDatatableView):
 
         else:
             return super(AmortizacionesPagosApi, self).render_column(row, column)
-
 
 class ConsultaEnterprisePagosListApi(BaseDatatableView):
     model = Pagos
@@ -796,7 +806,6 @@ class ConsultaEnterprisePagosListApi(BaseDatatableView):
         else:
             return super(ConsultaEnterprisePagosListApi, self).render_column(row, column)
 
-
 class EnterperiseTerceroPagosListApi(BaseDatatableView):
     model = Pagos
     columns = ['reporte', 'creation', 'valor', 'estado', 'id','observacion']
@@ -866,7 +875,6 @@ class EnterperiseTerceroPagosListApi(BaseDatatableView):
         else:
             return super(EnterperiseTerceroPagosListApi, self).render_column(row, column)
 
-
 class EnterpriseProjectsListApi(BaseDatatableView):
     model = Proyecto
     columns = ['id','nombre','cuenta']
@@ -908,8 +916,6 @@ class EnterpriseProjectsListApi(BaseDatatableView):
 
         else:
             return super(EnterpriseProjectsListApi, self).render_column(row, column)
-
-
 
 class TercerosListApiJson(APIView):
     """
@@ -991,7 +997,6 @@ class TercerosListApiJson(APIView):
 
         return Response({'lista':lista,'diccionario':diccionario},status=status.HTTP_200_OK)
 
-
 class TercerosPurchaseOrderListApiJson(APIView):
     """
     """
@@ -1025,8 +1030,6 @@ class TercerosPurchaseOrderListApiJson(APIView):
                 }
 
         return Response({'lista':lista,'diccionario':diccionario},status=status.HTTP_200_OK)
-
-
 
 class PagoApiJson(APIView):
     """
@@ -1859,7 +1862,7 @@ class CollectsAccountListApi(BaseDatatableView):
             "ver": [
                 "usuarios.recursos_humanos.ver",
                 "usuarios.recursos_humanos.cortes.ver",
-                "usuarios.recursos_humanos.cuentas_cobro.ver",
+                "usuarios.direccion.cuentas_cobro.ver",
             ]
         }
         return self.model.objects.all()
@@ -2103,27 +2106,162 @@ class CutsCollectAccountsListApi(BaseDatatableView):
 
             return '<div class="center-align">' + render + '</div>'
 
+        else:
+            return super(CutsCollectAccountsListApi, self).render_column(row, column)
 
-        elif column == 'estate_inform':
-            estate = row.estate_inform
+class LiquidacionesListApi(BaseDatatableView):
+    model = rh_models.Liquidations
+    columns = ['id','contrato','valor_ejecutado','estado_informe','valor','estado_seguridad','file2','file','file3','estado','mes','año']
+    order_columns = ['id','contrato','valor_ejecutado','estado_informe','valor','estado_seguridad','file2','file','file3','estado','mes','año']
 
+    def get_initial_queryset(self):
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(nombre__icontains=search) | Q(contratista__nombres__icontains=search) | \
+                Q(contratista__apellidos__icontains=search) | Q(contratista__cedula__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+        if column == 'id':
+            ret = '<div class="center-align">' \
+                       '<a href="historial/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar liquidacion: {1}">' \
+                            '<i class="material-icons">remove_red_eye</i>' \
+                       '</a>' \
+                   '</div>'.format(row.id,row.contrato.nombre)
+            return ret
+
+        elif column == 'contrato':
+            return row.contrato.nombre
+
+        elif column == 'valor_ejecutado':
+            return row.contrato.contratista.get_full_name_cedula()
+
+        elif column == 'estado_informe':
+            return row.contrato.get_cargo()
+
+        elif column == 'valor':
+            valor = str(row.valor).replace('COL', '')
+            return valor
+
+
+        elif column == 'estado_seguridad':
+            if row.url_file4() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file4(), 'Descargar archivo')
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'file2':
+            estate = row.estado_seguridad
             render = ""
 
             if estate == "Aprobado":
                 render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
                           '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
-                          '</a>'.format(row.estate_inform)
+                          '</a>'.format(row.estado_seguridad)
 
             if estate == "Rechazado":
-                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0} por {1}">' \
-                          '<i class="material-icons" style="font-size: 2rem;">block</i>' \
-                          '</a>'.format(row.estate_inform, row.observaciones_inform)
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0}">' \
+                          '<i class="material-icons" style="font-size: 7{2rem;">block</i>' \
+                          '</a>'.format(row.estado_seguridad)
 
             return '<div class="center-align">' + render + '</div>'
 
+        elif column == 'file':
+            if row.url_file3() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file3(), 'Descargar archivo')
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'file3':
+            estate = row.estado_informe
+            render = ""
+
+            if estate == "Aprobado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
+                          '</a>'.format(row.estado_informe)
+
+            if estate == "Rechazado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0}">' \
+                          '<i class="material-icons" style="font-size: 7{2rem;">block</i>' \
+                          '</a>'.format(row.estado_informe)
+
+            return '<div class="center-align">' + render + '</div>'
+
+        elif column == 'estado':
+            ret=""
+            if row.estado == 'Rechazado':
+                ret = '<div class="center-align">' \
+                      '<a href="estado/{0}/">' \
+                      '<span style="color:red"><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estado)
+
+            elif row.estado == 'Reportado':
+                ret = '<div class="center-align">' \
+                      '<a href="estado/{0}/">' \
+                      '<span style="color:green"><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estado)
+
+            elif row.estado == 'Generado':
+                ret = '<div class="center-align">' \
+                      '<a href="estado/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estado)
+
+            elif row.estado == 'Generada':
+                ret = '<div class="center-align">' \
+                      '<a href="estado/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estado)
+
+            elif row.estado == 'Cargado':
+                ret = '<div class="center-align">' \
+                      '<a href="estado/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estado)
+
+            else:
+                ret = '{0}'.format(row.estado)
+
+            return ret
+
+
+        elif column == 'mes':
+            if row.url_file() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file(), 'Descargar archivo')
+            else:
+                ret = ''
+            return ret
+
+        elif column == 'año':
+            if row.url_file2() != None:
+                ret = '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">insert_drive_file</i>' \
+                      '</a></div>'.format(row.url_file2(), 'Descargar archivo')
+            else:
+                ret = ''
+            return ret
 
         else:
-            return super(CutsCollectAccountsListApi, self).render_column(row, column)
+            return super(LiquidacionesListApi, self).render_column(row, column)
+
 
 
 def cargar_rubro(request):
@@ -2147,9 +2285,6 @@ def cargar_rubro_2(request):
         rubros_level_3 = RubroPresupuestalLevel3.objects.filter(rubro_level_2=rubro_2_id).order_by('nombre')
 
     return render(request, 'direccion_financiera/reportes/load/rubros_2_dropdown_list_options.html', {'rubros_level_3': rubros_level_3})
-
-
-
 
 def cargar_contrato(request):
     contrato_cedula = request.GET.get('contrato')
