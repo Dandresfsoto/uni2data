@@ -2089,6 +2089,23 @@ class CutsCollectAccountsListApi(BaseDatatableView):
 
             return ret
 
+        elif column == 'estate_inform':
+            estate = row.estate_inform
+
+            render = ""
+
+            if estate == "Aprobado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado {0}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">check_circle</i>' \
+                          '</a>'.format(row.estate_inform)
+
+            if estate == "Rechazado":
+                render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0} por {1}">' \
+                          '<i class="material-icons" style="font-size: 2rem;">block</i>' \
+                          '</a>'.format(row.estate_inform, row.observaciones_inform)
+
+            return '<div class="center-align">' + render + '</div>'
+
         elif column == 'estate':
             estate = row.estate
 

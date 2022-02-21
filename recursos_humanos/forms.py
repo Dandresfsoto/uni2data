@@ -2020,7 +2020,7 @@ class CreateLiquidationForm(forms.Form):
         ('Diciembre', 'Diciembre')
     ]))
 
-    año = forms.CharField(required=False,label='Mes', max_length=100, widget=forms.Select(choices=[
+    año = forms.CharField(required=False,label='Año', max_length=100, widget=forms.Select(choices=[
         ('', '----------'),
         ('2021', '2021'),
         ('2022', '2022'),
