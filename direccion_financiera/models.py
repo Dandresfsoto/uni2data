@@ -296,7 +296,7 @@ class Reportes(BaseModel):
         return self.updated_at.astimezone(settings_time_zone).strftime('%d/%m/%Y a las %I:%M:%S %p')
 
     def reporte_update_datetime(self):
-        return self.updated_at.astimezone(settings_time_zone).strftime('%d/%m/%Y')
+        return self.updated_at.astimezone(settings_time_zone).strftime('%d/%m/%Y a las %I:%M:%S %p')
 
     def reporte_inicio_datetime(self):
         return self.inicio.strftime('%d/%m/%Y')

@@ -2525,6 +2525,10 @@ class LiquidationsCreateView(LoginRequiredMixin,
             )
             contrato.liquidado = True
             contrato.save()
+
+            fecha_inicio = functions.contrato_inicio_español(contrato.id)
+            fecha_fin = functions.contrato_fin_español(contrato.id)
+
             template_header = BeautifulSoup(
                 open(settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/liquidacion.html', 'rb'),
                 "html.parser")
@@ -2551,10 +2555,10 @@ class LiquidationsCreateView(LoginRequiredMixin,
             template_header_tag.insert(1, liquidacion.pretty_print_valor())
 
             template_header_tag = template_header.find(class_='contrato_inicio_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_inicio())
+            template_header_tag.insert(1, fecha_inicio)
 
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+            template_header_tag.insert(1, fecha_fin)
 
             template_header_tag = template_header.find(class_='contratista_nombre_span_2')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
@@ -2566,7 +2570,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.nombre))
 
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_2')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+            template_header_tag.insert(1, fecha_fin)
 
             template_header_tag = template_header.find(class_='contratista_nombre_span_3')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
@@ -2661,6 +2665,9 @@ class LiquidationsCreateView(LoginRequiredMixin,
             contrato.liquidado = True
             contrato.save()
 
+            fecha_inicio = functions.contrato_inicio_español(contrato.id)
+            fecha_fin = functions.contrato_fin_español(contrato.id)
+
             template_header = BeautifulSoup(
                 open(settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/liquidacion.html', 'rb'),
                 "html.parser")
@@ -2687,10 +2694,10 @@ class LiquidationsCreateView(LoginRequiredMixin,
             template_header_tag.insert(1, liquidacion.pretty_print_valor())
 
             template_header_tag = template_header.find(class_='contrato_inicio_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_inicio())
+            template_header_tag.insert(1, fecha_inicio)
 
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+            template_header_tag.insert(1, fecha_fin)
 
             template_header_tag = template_header.find(class_='contratista_nombre_span_2')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
@@ -2702,12 +2709,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.nombre))
 
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_2')
-            if contrato.fecha_liquidacion != None:
-                template_header_tag.insert(1, liquidacion.contrato.pretty_print_liquidacion())
-            elif contrato.fecha_liquidacion != None:
-                template_header_tag.insert(1, liquidacion.contrato.pretty_print_renuncia())
-            else:
-                template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+            template_header_tag.insert(1, fecha_fin)
 
             template_header_tag = template_header.find(class_='contratista_nombre_span_3')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
@@ -2912,6 +2914,9 @@ class LiquidationsEditView(LoginRequiredMixin,
 
             liquidacion.file.delete()
 
+            fecha_inicio = functions.contrato_inicio_español(contrato.id)
+            fecha_fin = functions.contrato_fin_español(contrato.id)
+
             template_header = BeautifulSoup(
                 open(settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/liquidacion.html', 'rb'),
                 "html.parser")
@@ -2938,10 +2943,10 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag.insert(1, liquidacion.pretty_print_valor())
 
             template_header_tag = template_header.find(class_='contrato_inicio_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_inicio())
+            template_header_tag.insert(1, fecha_inicio)
 
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+            template_header_tag.insert(1, fecha_fin)
 
             template_header_tag = template_header.find(class_='contratista_nombre_span_2')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
@@ -2953,7 +2958,7 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.nombre))
 
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_2')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+            template_header_tag.insert(1, liquidacion.contrato.fecha_fin)
 
             template_header_tag = template_header.find(class_='contratista_nombre_span_3')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
@@ -3043,6 +3048,10 @@ class LiquidationsEditView(LoginRequiredMixin,
 
 
             liquidacion.file.delete()
+
+            fecha_inicio = functions.contrato_inicio_español(contrato.id)
+            fecha_fin = functions.contrato_fin_español(contrato.id)
+
             template_header = BeautifulSoup(
                 open(settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/liquidacion.html', 'rb'),
                 "html.parser")
@@ -3069,10 +3078,10 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag.insert(1, liquidacion.pretty_print_valor())
 
             template_header_tag = template_header.find(class_='contrato_inicio_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_inicio())
+            template_header_tag.insert(1, fecha_inicio)
 
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+            template_header_tag.insert(1, fecha_fin)
 
             template_header_tag = template_header.find(class_='contratista_nombre_span_2')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
@@ -3084,12 +3093,7 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.nombre))
 
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_2')
-            if contrato.fecha_liquidacion != None:
-                template_header_tag.insert(1, liquidacion.contrato.pretty_print_liquidacion())
-            elif contrato.fecha_liquidacion != None:
-                template_header_tag.insert(1, liquidacion.contrato.pretty_print_renuncia())
-            else:
-                template_header_tag.insert(1, liquidacion.contrato.pretty_print_fin())
+            template_header_tag.insert(1, fecha_fin)
 
             template_header_tag = template_header.find(class_='contratista_nombre_span_3')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
