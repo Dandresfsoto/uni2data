@@ -25,7 +25,7 @@ def certificacion_laboral(contratista):
             mes_fin=month_converter(mes_fin)
             dia_fin=contrato.fin.day
 
-            if contrato.fecha_renuncia != "" or contrato.fecha_renuncia != None:
+            if contrato.fecha_renuncia != None:
                 año_fin = contrato.fecha_renuncia.year
                 mes_fin = contrato.fecha_renuncia.month - 1
                 mes_fin = month_converter(mes_fin)
