@@ -1954,8 +1954,9 @@ class CollectsAccountEstateForm(forms.ModelForm):
 
         self.fields['estate_report'].widget = forms.Select(choices = [
             ('','----------'),
-            ('Reportado', 'Reportado'),
             ('Rechazado', 'Rechazado'),
+            ('Reportado', 'Reportado'),
+            ('En pagaduria', 'En pagaduria'),
             ('Pagado', 'Pagado')
         ])
 

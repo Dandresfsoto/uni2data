@@ -2019,6 +2019,13 @@ class CutsCollectAccountsListApi(BaseDatatableView):
                       '</a>' \
                       '</div>'.format(row.id, row.estate_report)
 
+            elif row.estate_report == 'En pagaduria':
+                ret = '<div class="center-align">' \
+                      '<a href="estate/{0}/">' \
+                      '<span><b>{1}</b></span>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.estate_report)
+
             else:
                 ret = '{0}'.format(row.estate_report)
             return ret
