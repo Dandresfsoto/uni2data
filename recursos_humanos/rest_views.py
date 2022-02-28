@@ -1,6 +1,6 @@
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, \
-    Certificaciones, Hv, TrazabilidadHv, Cuts, Collects_Account, Cargos
+    Certificaciones, Hv, TrazabilidadHv, Cuts, Collects_Account, Cargos, Otros_si
 from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -201,8 +201,8 @@ class HvListApi(BaseDatatableView):
 
 class ContratosListApi(BaseDatatableView):
     model = Contratos
-    columns = ['id','liquidado','nombre','inicio','fin','valor','file','estado','fecha_legalizacion']
-    order_columns = ['id','liquidado','nombre','inicio','fin','valor','file','estado','fecha_legalizacion']
+    columns = ['id','liquidado','nombre','inicio','fin','valor','file','estado','fecha_legalizacion','otro_si_1']
+    order_columns = ['id','liquidado','nombre','inicio','fin','valor','file','estado','fecha_legalizacion','otro_si_1']
 
     def get_initial_queryset(self):
         if self.request.user.is_superuser:
@@ -304,9 +304,89 @@ class ContratosListApi(BaseDatatableView):
 
             return '<div class="center-align">' + render + '</div>'
 
+        elif column == 'otro_si_1':
 
+            if self.request.user.has_perm('usuarios.recursos_humanos.otros_si.ver'):
+                ret = '<div class="center-align">' \
+                      '<a href="otros_si/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver Otros Si del contrato {1}">' \
+                      '<i class="material-icons">content_paste</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">content_paste</i>' \
+                      '</div>'.format(row.id, row.nombre)
+
+            return ret
         else:
             return super(ContratosListApi, self).render_column(row, column)
+
+class OtrossiContratoListApi(BaseDatatableView):
+    model = Otros_si
+    columns = ['id','nombre','inicio','fin','valor','valor_total','file','visible']
+    order_columns = ['id','nombre','inicio','fin','valor','valor_total','file','visible']
+
+    def get_initial_queryset(self):
+        if self.request.user.is_superuser:
+            return self.model.objects.filter(contrato = Contratos.objects.get(id = self.kwargs['pk_contrato']))
+        else:
+            return self.model.objects.filter(contrato = Contratos.objects.get(id = self.kwargs['pk_contrato']), visible = True)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(nombre__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+
+    def render_column(self, row, column):
+        if column == 'id':
+            if self.request.user.has_perm('usuarios.recursos_humanos.otros_si.editar'):
+                ret = '<div class="center-align">' \
+                           '<a href="editar/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar Otros si: {1}">' \
+                                '<i class="material-icons">edit</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">edit</i>' \
+                       '</div>'.format(row.id,row.nombre)
+
+            return ret
+
+        elif column == 'valor':
+            return row.pretty_print_valor()
+
+        elif column == 'valor_total':
+            return row.pretty_print_valor_total()
+
+        elif column == 'file':
+            render = ""
+
+            if row.url_file() != None:
+                render += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Minuta otro si {1}">' \
+                                '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                          '</a>'.format(row.url_file(),row.nombre)
+
+
+            return '<div class="center-align">' + render + '</div>'
+
+        elif column == 'visible':
+
+            ret = '<div class="center-align">' \
+                  '<a href="eliminar/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar Otro si">' \
+                  '<i class="material-icons">delete</i>' \
+                  '</a>' \
+                  '</div>'.format(row.id)
+
+            return ret
+
+
+        else:
+            return super(OtrossiContratoListApi, self).render_column(row, column)
 
 class ContratosEstadoListApi(BaseDatatableView):
     model = Contratos

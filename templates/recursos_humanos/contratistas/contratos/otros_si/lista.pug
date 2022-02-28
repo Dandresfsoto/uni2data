@@ -1,4 +1,4 @@
-extends ../../../base_auth
+extends ../../../../base_auth
 
 block title
     |{{title | upper}}
@@ -35,8 +35,14 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") Contratista: {{breadcrum_active | truncatechars:15}}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Contratos: {{breadcrum_active | truncatechars:15}}
+                        a(href="#") Contrato: {{breadcrum_active_1 | truncatechars:15}}
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -55,7 +61,7 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="crear/") Crear contrato
+                        a(href="crear/") Crear Otro si
                             i(class="material-icons icon-sican") attachment
 
                     div(class="divider divider-perfil")
@@ -69,27 +75,23 @@ block container_principal
             thead
                 tr
                     th Editar
-                    th Soportes
-                    th Código
-                    th Inicio del contrato
-                    th Fin del contrato
-                    th Valor
-                    th Documentos
-                    th Estado
-                    th Legalización
-                    th Otros si
+                    th Numero
+                    th Inicio
+                    th Fin
+                    th Valor del otro si
+                    th Valor total del contrato
+                    th Archivo
+                    th Eliminar
             tbody
                 tr
                     td Editar
-                    td Soportes
-                    td Código
-                    td Inicio del contrato
-                    td Fin del contrato
-                    td Valor
-                    td Documentos
-                    td Estado
-                    td Legalización
-                    td Otros si
+                    td Numero
+                    td Inicio
+                    td Fin
+                    td Valor del otro si
+                    td Valor total del contrato
+                    td Archivo
+                    td Eliminar
 
 
 block body_script_auth
@@ -104,6 +106,7 @@ block body_script_auth
                 processing: true,
                 serverSide: true,
                 ajax: "{{ url_datatable }}",
+                "order": [[ 2, "asc" ]],
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
                 },
