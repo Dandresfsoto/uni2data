@@ -7,7 +7,7 @@ import datetime
 from django import forms
 from django.db.models import Sum
 
-from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, Certificaciones, Cargos
+from recursos_humanos.models import Contratistas, Contratos, Soportes, GruposSoportes, SoportesContratos, Certificaciones, Cargos, Otros_si
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Hidden
@@ -2577,4 +2577,221 @@ class CargoForm(forms.ModelForm):
         fields = ['nombre','obligaciones']
         labels = {
             'obligaciones': 'Funciones',
+        }
+
+class OtrosiForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(OtrosiForm, self).__init__(*args, **kwargs)
+
+        self.fields['valor_char'] = forms.CharField(label="Valor del otro si ($)")
+        self.fields['valor_total_char'] = forms.CharField(label="Valor total del contrato ($)")
+
+        try:
+            valor = kwargs['instance'].valor
+            valor_total = kwargs['instance'].valor_total
+        except:
+            pass
+        else:
+            self.fields['valor_char'].initial = valor.amount
+            self.fields['valor_total_char'].initial = valor_total.amount
+
+
+        self.fields['file'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información contrato:',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'nombre',
+                            css_class='s12 m6 l4'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'valor_char',
+                            css_class='s12 m6 l4'
+                        ),
+                        Column(
+                            'valor_total_char',
+                            css_class='s12 m6 l4'
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'inicio',
+                            css_class='s12 m6 l4'
+                        ),
+                        Column(
+                            'fin',
+                            css_class='s12 m6 l4'
+                        ),
+                    ),
+
+                    css_class="s12"
+                ),
+            ),
+
+            Row(
+                Column(
+                    Row(
+                        Fieldset(
+                            'Minuta del otro si:',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            HTML(
+                                """
+                                <p style="display:inline;"><b>Actualmente:</b>{{ url_file | safe }}</p>
+                                """
+                            ),
+                            'file',
+                            css_class='s12'
+                        )
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Otros_si
+        fields = [
+            'nombre','inicio','fin','file'
+        ]
+
+        labels = {
+            'nombre': 'Código del Otro si',
+            'inicio': 'Fecha de inicio del contrato',
+            'fin': 'Fecha de finalización del contrato',
+        }
+
+class OtrosiFormSuperUser(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(OtrosiFormSuperUser, self).__init__(*args, **kwargs)
+
+        self.fields['valor_char'] = forms.CharField(label="Valor del otro si ($)")
+        self.fields['valor_total_char'] = forms.CharField(label="Valor total del contrato ($)")
+
+        try:
+            valor = kwargs['instance'].valor
+            valor_total = kwargs['instance'].valor_total
+        except:
+            pass
+        else:
+            self.fields['valor_char'].initial = valor.amount
+            self.fields['valor_total_char'].initial = valor_total.amount
+
+        self.fields['file'].widget = forms.FileInput(attrs={'accept':'application/pdf,application/x-pdf'})
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información contrato:',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'nombre',
+                            css_class='s12 m6 l4'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'valor_char',
+                            css_class='s12 m6 l4'
+                        ),
+                        Column(
+                            'valor_total_char',
+                            css_class='s12 m6 l4'
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'inicio',
+                            css_class='s12 m6 l4'
+                        ),
+                        Column(
+                            'fin',
+                            css_class='s12 m6 l4'
+                        ),
+                    ),
+
+                    css_class="s12"
+                ),
+            ),
+
+            Row(
+                Column(
+                    Row(
+                        Fieldset(
+                            'Minuta del otro si:',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            HTML(
+                                """
+                                <p style="display:inline;"><b>Actualmente:</b>{{ url_file | safe }}</p>
+                                """
+                            ),
+                            'file',
+                            css_class='s12'
+                        )
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Otros_si
+        fields = [
+            'nombre','inicio','fin','file'
+        ]
+
+        labels = {
+            'nombre': 'Código del otro si',
+            'inicio': 'Fecha de inicio del contrato',
+            'fin': 'Fecha de finalización del contrato',
         }

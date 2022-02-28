@@ -592,6 +592,280 @@ class ContratosEstadoUpdateView(LoginRequiredMixin,
 
         return super(ContratosEstadoUpdateView,self).get_context_data(**kwargs)
 
+#------------------------------ OTROS SI --------------------------------
+
+class ContratosOtrossiListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.otros_si.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/contratistas/contratos/otros_si/lista.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "Otros Si"
+        kwargs['url_datatable'] = '/rest/v1.0/recursos_humanos/contratistas/contratos/' + str(self.kwargs['pk']) + \
+                                  '/otros_si/' + str(self.kwargs['pk_contrato'])
+
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.recursos_humanos.otros_si.crear')
+        kwargs['breadcrum_active'] = models.Contratistas.objects.get(id=self.kwargs['pk']).fullname()
+        kwargs['breadcrum_active_1'] = models.Contratos.objects.get(id=self.kwargs['pk_contrato']).nombre
+        return super(ContratosOtrossiListView,self).get_context_data(**kwargs)
+
+
+
+class ContratosOtrossiCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.contratistas.ver",
+            "usuarios.recursos_humanos.contratos.ver",
+            "usuarios.recursos_humanos.otros_si.ver",
+            "usuarios.recursos_humanos.otros_si.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/contratistas/contratos/otros_si/crear.html'
+    form_class = forms.OtrosiForm
+    form_class_super_user = forms.OtrosiFormSuperUser
+    success_url = "../"
+    model = models.Otros_si
+    pk_url_kwarg = 'pk_soporte_contrato'
+
+    def get_form_class(self):
+        """Return the form class to use in this view."""
+        if self.fields is not None and self.form_class:
+            raise ImproperlyConfigured(
+                "Specifying both 'fields' and 'form_class' is not permitted."
+            )
+        if self.form_class:
+
+            if self.request.user.is_superuser:
+                return self.form_class_super_user
+            else:
+                return self.form_class
+        else:
+            if self.model is not None:
+                # If a model has been explicitly provided, use it
+                model = self.model
+            elif hasattr(self, 'object') and self.object is not None:
+                # If this view is operating on a single object, use
+                # the class of that object
+                model = self.object.__class__
+            else:
+                # Try to get a queryset and extract the model class
+                # from that
+                model = self.get_queryset().model
+
+            if self.fields is None:
+                raise ImproperlyConfigured(
+                    "Using ModelFormMixin (base class of %s) without "
+                    "the 'fields' attribute is prohibited." % self.__class__.__name__
+                )
+
+            return model_forms.modelform_factory(model, fields=self.fields)
+
+
+
+    def get_context_data(self, **kwargs):
+        contratista = models.Contratistas.objects.get(id=self.kwargs['pk'])
+        contrato = models.Contratos.objects.get(id=self.kwargs['pk_contrato'])
+        kwargs['title'] = "CREAR OTRO SI"
+        kwargs['breadcrum_active'] = models.Contratistas.objects.get(id=self.kwargs['pk']).fullname()
+        kwargs['breadcrum_active_1'] = models.Contratos.objects.get(id=self.kwargs['pk_contrato']).nombre
+        kwargs['url_file'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+
+        return super(ContratosOtrossiCreateView,self).get_context_data(**kwargs)
+
+    def form_valid(self, form):
+        contrato = models.Contratos.objects.get(id=self.kwargs['pk_contrato'])
+        self.object = form.save(commit=False)
+        self.object.contratista = models.Contratistas.objects.get(id=self.kwargs['pk'])
+        self.object.contrato = models.Contratos.objects.get(id=self.kwargs['pk_contrato'])
+        self.object.valor = float(form.cleaned_data['valor_char'].replace('$ ','').replace(',',''))
+        self.object.valor_total = float(form.cleaned_data['valor_total_char'].replace('$ ', '').replace(',', ''))
+        self.object.fin=form.cleaned_data['fin']
+        self.object.fecha_original = contrato.fin
+        self.object.save()
+
+        valor_suma=self.object.valor
+        valor_contrato=contrato.valor
+        Total=valor_suma+valor_contrato
+        contrato.valor = Total
+        fin_anterior= contrato.fin
+        fin_otro_si=self.object.fin
+
+
+        if  fin_anterior <  fin_otro_si:
+            contrato.fin = form.cleaned_data['fin']
+        else:
+            pass
+
+        contrato.save()
+
+
+        return super(ContratosOtrossiCreateView, self).form_valid(form)
+
+
+class ContratosOtrossiUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.contratistas.ver",
+            "usuarios.recursos_humanos.contratos.ver",
+            "usuarios.recursos_humanos.otros_si.ver",
+            "usuarios.recursos_humanos.otros_si.editar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'recursos_humanos/contratistas/contratos/otros_si/editar.html'
+    form_class = forms.OtrosiForm
+    form_class_super_user = forms.OtrosiFormSuperUser
+    success_url = "../../"
+    model = models.Otros_si
+    pk_url_kwarg = 'pk_otro_si'
+
+
+    def get_form_class(self):
+        """Return the form class to use in this view."""
+        if self.fields is not None and self.form_class:
+            raise ImproperlyConfigured(
+                "Specifying both 'fields' and 'form_class' is not permitted."
+            )
+        if self.form_class:
+
+            if self.request.user.is_superuser:
+                return self.form_class_super_user
+            else:
+                return self.form_class
+        else:
+            if self.model is not None:
+                # If a model has been explicitly provided, use it
+                model = self.model
+            elif hasattr(self, 'object') and self.object is not None:
+                # If this view is operating on a single object, use
+                # the class of that object
+                model = self.object.__class__
+            else:
+                # Try to get a queryset and extract the model class
+                # from that
+                model = self.get_queryset().model
+
+            if self.fields is None:
+                raise ImproperlyConfigured(
+                    "Using ModelFormMixin (base class of %s) without "
+                    "the 'fields' attribute is prohibited." % self.__class__.__name__
+                )
+
+            return model_forms.modelform_factory(model, fields=self.fields)
+
+    def get_context_data(self, **kwargs):
+        contratista = models.Contratistas.objects.get(id=self.kwargs['pk'])
+        contrato = models.Contratos.objects.get(id=self.kwargs['pk_contrato'])
+        otros_si= models.Otros_si.objects.get(id=self.kwargs['pk_otro_si'])
+        kwargs['title'] = "EDITAR OTRO SI"
+        kwargs['breadcrum_active'] = models.Contratistas.objects.get(id=self.kwargs['pk']).fullname()
+        kwargs['breadcrum_active_1'] = models.Contratos.objects.get(id=self.kwargs['pk_contrato']).nombre
+        kwargs['breadcrum_active_2'] = models.Otros_si.objects.get(id=self.kwargs['pk_otro_si']).nombre
+        kwargs['url_file'] = otros_si.pretty_print_url_otro_si()
+
+        return super(ContratosOtrossiUpdateView,self).get_context_data(**kwargs)
+
+
+
+
+    def form_valid(self, form):
+        otros_si= models.Otros_si.objects.get(id=self.kwargs['pk_otro_si'])
+        contrato = models.Contratos.objects.get(id=self.kwargs['pk_contrato'])
+        valor_anterior = otros_si.valor
+
+        self.object = form.save(commit=False)
+        self.object.contratista = models.Contratistas.objects.get(id=self.kwargs['pk'])
+        self.object.contrato = models.Contratos.objects.get(id=self.kwargs['pk_contrato'])
+        self.object.valor = float(form.cleaned_data['valor_char'].replace('$ ', '').replace(',', ''))
+        self.object.valor_total = float(form.cleaned_data['valor_total_char'].replace('$ ', '').replace(',', ''))
+        self.object.fin = form.cleaned_data['fin']
+        self.object.fecha_original = contrato.fin
+        self.object.save()
+
+
+
+        valor_contrato = contrato.valor
+        resta = valor_contrato - valor_anterior
+        suma= self.object.valor
+        total = resta + suma
+        contrato.valor = total
+        fin_anterior = contrato.fin
+
+        fin_otro_si = self.object.fin
+
+        if fin_anterior < fin_otro_si:
+            contrato.fin = form.cleaned_data['fin']
+        else:
+            pass
+        contrato.save()
+
+        return super(ContratosOtrossiUpdateView, self).form_valid(form)
+
+    def get_initial(self):
+        return {
+            'pk':self.kwargs['pk'],
+            'pk_contrato': self.kwargs['pk_contrato'],
+            'pk_otros_si': self.kwargs['pk_otro_si'],
+        }
+
+
+class ContratosOtrossiDeleteView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.otro_si = models.Otros_si.objects.get(id=self.kwargs['pk_otro_si'])
+        self.contrato = models.Contratos.objects.get(id=self.kwargs['pk_contrato'])
+        self.contratista = models.Contratistas.objects.get(id=self.kwargs['pk'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.recursos_humanos.contratistas.ver",
+                "usuarios.recursos_humanos.contratos.ver",
+                "usuarios.recursos_humanos.otros_si.ver",
+                "usuarios.recursos_humanos.otros_si.editar"
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions['all']):
+
+                otros_si = models.Otros_si.objects.get(id=self.kwargs['pk_otro_si'])
+                valor_anterior = otros_si.valor
+                contrato = models.Contratos.objects.get(id=self.kwargs['pk_contrato'])
+                valor_contrato = contrato.valor
+                resta = valor_contrato - valor_anterior
+                total = resta
+                contrato.valor = total
+                contrato.fin = otros_si.fecha_original
+                contrato.save()
+                self.otro_si.delete()
+
+
+
+                return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+
 #----------------------------------------------------------------------------------
 
 

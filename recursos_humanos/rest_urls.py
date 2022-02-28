@@ -4,6 +4,8 @@ from recursos_humanos import rest_views
 urlpatterns = [
     path('contratistas/', rest_views.ContratistasListApi.as_view()),
     path('contratistas/contratos/<uuid:pk>/', rest_views.ContratosListApi.as_view()),
+    path('contratistas/contratos/<uuid:pk>/otros_si/<uuid:pk_contrato>', rest_views.OtrossiContratoListApi.as_view()),
+
     path('soportes/tipologia/', rest_views.SoportesListApi.as_view()),
     path('soportes/grupos/', rest_views.GrupoSoportesListApi.as_view()),
     path('contratistas/contratos/<uuid:pk>/soportes/<uuid:pk_soporte>/', rest_views.SoportesContratoListApi.as_view()),

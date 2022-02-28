@@ -14,6 +14,10 @@ urlpatterns = [
     path('contratistas/contratos/<uuid:pk>/crear/', views.ContratosCreateView.as_view()),
     path('contratistas/contratos/<uuid:pk>/editar/<uuid:pk_contrato>/', views.ContratosUpdateView.as_view()),
 
+    path('contratistas/contratos/<uuid:pk>/otros_si/<uuid:pk_contrato>/', views.ContratosOtrossiListView.as_view()),
+    path('contratistas/contratos/<uuid:pk>/otros_si/<uuid:pk_contrato>/crear/',views.ContratosOtrossiCreateView.as_view()),
+    path('contratistas/contratos/<uuid:pk>/otros_si/<uuid:pk_contrato>/editar/<uuid:pk_otro_si>/',views.ContratosOtrossiUpdateView.as_view()),
+    path('contratistas/contratos/<uuid:pk>/otros_si/<uuid:pk_contrato>/eliminar/<uuid:pk_otro_si>/',views.ContratosOtrossiDeleteView.as_view()),
 
     path('contratistas/contratos/<uuid:pk>/soportes/<uuid:pk_soporte>/', views.ContratosSoportesListView.as_view()),
     path('contratistas/contratos/<uuid:pk>/soportes/<uuid:pk_soporte>/crear/', views.ContratosSoportesCreateView.as_view()),
