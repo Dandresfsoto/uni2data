@@ -7,6 +7,7 @@ import uuid
 from phonenumber_field.modelfields import PhoneNumberField
 
 from common.models import BaseModel
+from direccion_financiera import functions
 from usuarios.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -597,6 +598,65 @@ class Contratos(models.Model):
 
         return liquidacion
 
+def upload_dinamic_dir_otro_si(instance, filename):
+    return '/'.join(['Contratos', 'Otros_si',str(instance.contrato.nombre), str(instance.nombre), filename])
+
+class Otros_si(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    nombre = models.CharField(max_length=30)
+    contrato = models.ForeignKey(Contratos, on_delete=models.DO_NOTHING)
+    creation = models.DateTimeField(auto_now_add=True)
+
+    inicio = models.DateField()
+    fin = models.DateField()
+    fecha_original = models.DateField(blank=True, null=True)
+
+
+    valor = MoneyField(max_digits=10,decimal_places=2,default_currency = 'COP')
+    valor_total = MoneyField(max_digits=10, decimal_places=2, default_currency='COP')
+
+    file = PDFFileField(upload_to=upload_dinamic_dir_otro_si,
+                        max_upload_size=20971520,
+                        blank=True, null=True
+    )
+
+
+    visible = models.BooleanField(default=True)
+
+
+    def pretty_creation_datetime(self):
+        return self.creation.astimezone(settings_time_zone).strftime('%d/%m/%Y a las %I:%M:%S %p')
+
+    def url_file(self):
+        url = None
+        try:
+            url = self.file.url
+        except:
+            pass
+        return url
+
+
+    def pretty_print_inicio(self):
+        return self.inicio.strftime('%d de %B del %Y')
+
+    def pretty_print_fin(self):
+        return self.fin.strftime('%d de %B del %Y')
+
+    def pretty_print_valor(self):
+        return str(self.valor).replace('COL','')
+
+    def pretty_print_valor_total(self):
+        return str(self.valor_total).replace('COL','')
+
+    def pretty_print_url_otro_si(self):
+        try:
+            url = self.file.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="'+ url +'"> '+ str(self.file.name) +'</a>'
+
+
 class Cuts(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     consecutive = models.IntegerField(verbose_name="Consecutivo")
@@ -800,6 +860,16 @@ class Collects_Account(models.Model):
 
     class Meta:
         verbose_name_plural = "Cuentas de cobro"
+
+    def get_month(self):
+        month_str = str(self.month)
+        if month_str.isdigit():
+            month = int(self.month)
+            total = str(functions.month_converter(month-1))
+        else:
+            total = str(month_str)
+        return total
+
 
     def pretty_creation_datetime(self):
         return self.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
