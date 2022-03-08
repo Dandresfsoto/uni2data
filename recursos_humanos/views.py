@@ -18,7 +18,7 @@ import os
 from django.utils import timezone
 from PyPDF2 import PdfFileMerger
 from recursos_humanos.functions import numero_to_letras
-from recursos_humanos.models import Collects_Account, Contratos
+from recursos_humanos.models import Collects_Account, Contratos, Cuts
 from recursos_humanos.tasks import send_mail_templated_certificacion
 from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA
 import mimetypes
@@ -2675,6 +2675,33 @@ class CollectAccountDeleteView(LoginRequiredMixin,
 
 
         return HttpResponseRedirect('../../')
+
+
+class CutsCollectsReportAccountView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.recursos_humanos.ver",
+            "usuarios.recursos_humanos.cortes.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        cuts = Cuts.objects.get(id=self.kwargs['pk_cut'])
+        id_cuts = cuts.id
+        reporte = Reportes.objects.create(
+            usuario = self.request.user,
+            nombre = 'Reporte del corte ' + str(cuts.consecutive),
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
+        )
+
+        tasks.build_list_collects_account(reporte.id,id_cuts)
+
+        return HttpResponseRedirect('/reportes/')
+
 
 class CutsReport(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,

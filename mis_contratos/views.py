@@ -289,7 +289,7 @@ class ContractsAccountsActivityUploadView(LoginRequiredMixin,
         template_header_tag.insert(1, date_any)
 
         template_header_tag = template_header.find(class_='charge_span')
-        template_header_tag.insert(1, str(collect_account.contract.contratista.cargo))
+        template_header_tag.insert(1, str(collect_account.contract.cargo.nombre))
 
         template_header_tag = template_header.find(class_='name_span')
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
@@ -420,7 +420,7 @@ class ContractsAccountsActivityUpdateView(LoginRequiredMixin,
         template_header_tag.insert(1, date_any)
 
         template_header_tag = template_header.find(class_='charge_span')
-        template_header_tag.insert(1, str(collect_account.contract.contratista.cargo))
+        template_header_tag.insert(1, str(collect_account.contract.cargo.nombre))
 
         template_header_tag = template_header.find(class_='name_span')
         template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))

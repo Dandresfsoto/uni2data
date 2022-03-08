@@ -59,6 +59,8 @@ urlpatterns = [
     path('cuts/view/<uuid:pk_cut>/rechazar/<uuid:pk_collect_account>/', views.CollectAccountRejectView.as_view()),
     path('cuts/view/<uuid:pk_cut>/delete/<uuid:pk_collect_account>/', views.CollectAccountDeleteView.as_view()),
 
+    path('cuts/view/<uuid:pk_cut>/report/', views.CutsCollectsReportAccountView.as_view()),
+
     path('cuts/report/', views.CutsReport.as_view()),
 
     path('liquidations/', views.LiquidationsListView.as_view()),
