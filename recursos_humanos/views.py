@@ -1600,11 +1600,13 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
         cut = models.Cuts.objects.get(id=self.kwargs['pk_cut'])
         year = int(cut.year)
         month = int(cut.month)
+        days_monht = functions.obtener_dias_del_mes(month, year)
         t_init = datetime.date(year, month, 1)
-        t_end = datetime.date(year,month,28)
+        t_end = datetime.date(year,month,days_monht)
 
         collects_ids = models.Collects_Account.objects.filter(year=year, month=month).values_list('contract__id',flat=True)
-        contracts_ids = Contratos.objects.filter(ejecucion = True, suscrito=True,liquidado = False, fin__gt=t_end).exclude(id__in=collects_ids).values_list('id',flat=True).distinct()
+        contracts_ids = Contratos.objects.filter(ejecucion = True, suscrito=True,liquidado = False, fin__gte=t_init).exclude(id__in=collects_ids).values_list('id',flat=True).distinct()
+
         user = self.request.user
 
         for contract_id in contracts_ids:
