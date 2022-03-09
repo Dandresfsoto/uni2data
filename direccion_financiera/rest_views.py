@@ -343,7 +343,8 @@ class ReportesListApi(BaseDatatableView):
         search = self.request.GET.get(u'search[value]', None)
         if search:
 
-            pagos_q = Q(tercero__nombres__icontains=search) | Q(tercero__apellidos__icontains=search) | Q(tercero__cedula__icontains=search)
+            pagos_q = Q(tercero__nombres__icontains=search) | Q(tercero__apellidos__icontains=search) \
+                      | Q(tercero__cedula__icontains=search) | Q(valor__icontains=search)
 
             ids = Pagos.objects.filter(pagos_q).values_list('reporte__id',flat=True)
 
