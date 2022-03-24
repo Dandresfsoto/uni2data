@@ -17,6 +17,7 @@ urlpatterns = [
     path('terceros/crear/', views.TercerosCreateView.as_view()),
     path('terceros/editar/<uuid:pk>/', views.TercerosUpdateView.as_view()),
 
+
     path('enterprise/', views.EnterpriseListView.as_view()),
     path('enterprise/<uuid:pk>/', views.EnterpriseOptionListView.as_view()),
 
@@ -50,6 +51,7 @@ urlpatterns = [
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/amortizaciones/<uuid:pk_pago>/', views.AmortizacionesPagosListView.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/amortizaciones/<uuid:pk_pago>/editar/<uuid:pk_amortizacion>/', views.AmortizacionesPagosUpdateView.as_view()),
 
+    path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/crear_pago/', views.PagosCuentasCreateView.as_view()),
 
     path('enterprise/<uuid:pk>/reporte_eliminado/', views.ReportsRecycleListView.as_view()),
     path('enterprise/<uuid:pk>/reporte_eliminado/restaurar/<uuid:pk_reporte>', views.ReportsRecycleRestoreListView.as_view()),

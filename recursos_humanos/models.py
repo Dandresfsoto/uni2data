@@ -20,7 +20,7 @@ from recursos_humanos import tasks
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import Permission, Group
-from direccion_financiera.models import Proyecto
+from direccion_financiera.models import Proyecto, Pagos
 from usuarios.models import Municipios
 
 from simple_history.models import HistoricalRecords
@@ -1050,6 +1050,14 @@ class Registration(models.Model):
 
     def pretty_creation_datetime(self):
         return self.creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
+
+class PagosCuentasCobro(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    pago = models.ForeignKey(Pagos,related_name='pago_pagosCuentasCobro', on_delete=models.DO_NOTHING, blank=True, null=True)
+    cuenta = models.ForeignKey(Collects_Account, on_delete=models.DO_NOTHING,related_name='cuenta_pagos',blank=True,null=True)
+
+    def __str__(self):
+        return str(self.id)
 
 def upload_dinamic_dir_liquidation(instance, filename):
     return '/'.join(['Contratos', 'Liquidacion', str(instance.contrato.nombre), filename])

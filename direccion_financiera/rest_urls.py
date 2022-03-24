@@ -13,6 +13,8 @@ urlpatterns = [
     path('terceros/list/', rest_views.TercerosListApiJson.as_view()),
     path('terceros/purchaseorder/list/', rest_views.TercerosPurchaseOrderListApiJson.as_view()),
 
+    path('cuentas/list/', rest_views.CuentasListApiJson.as_view()),
+
     path('enterprise/<uuid:pk>/reportes/', rest_views.ReportesListApi.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/', rest_views.PagosListApi.as_view()),
     path('enterprise/<uuid:pk>/reportes/pagos/<uuid:pk_reporte>/amortizaciones/<uuid:pk_pago>/', rest_views.AmortizacionesPagosApi.as_view()),

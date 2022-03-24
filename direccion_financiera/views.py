@@ -854,6 +854,14 @@ class ReportesResultadoUpdateView(LoginRequiredMixin,
         for pago in models.Pagos.objects.filter(reporte__id = self.kwargs['pk_reporte']):
             estado = form.cleaned_data[str(pago.id)]
 
+            pagocuenta = rh_models.PagosCuentasCobro.objects.get(pago=pago)
+
+            if pagocuenta != None:
+                pagocuenta = rh_models.PagosCuentasCobro.objects.get(pago=pago)
+                cuenta = rh_models.Collects_Account.objects.get(id=pagocuenta.cuenta.id)
+                cuenta.estate_report = "Pagado"
+                cuenta.save()
+
             if pago.estado != estado:
                 pago.estado = estado
                 pago.save()
@@ -981,6 +989,16 @@ class ReporteReportesView(LoginRequiredMixin,
             models.Reportes.objects.filter(id=self.kwargs['pk_reporte']).update(estado='Reportado')
             models.Pagos.objects.filter(reporte=reporte).update(estado='Reportado')
 
+            pagos = models.Pagos.objects.filter(reporte__id=self.kwargs['pk_reporte'])
+
+            for pago in pagos:
+                pagocuenta = rh_models.PagosCuentasCobro.objects.get(pago=pago)
+                if pagocuenta != None:
+                    pagocuenta = rh_models.PagosCuentasCobro.objects.get(pago=pago)
+                    cuenta = rh_models.Collects_Account.objects.get(id=pagocuenta.cuenta.id)
+                    cuenta.estate_report = "Reportado"
+                    cuenta.save()
+
             for amortizacion in models.Amortizaciones.objects.filter(estado = 'Asignada', pago_descontado__in = models.Pagos.objects.filter(reporte = reporte)):
                 amortizacion.estado = 'Descontada'
                 amortizacion.disabled = True
@@ -1014,6 +1032,16 @@ class ReporteEnvioView(LoginRequiredMixin,
         if self.request.user.is_superuser:
             models.Reportes.objects.filter(id = self.kwargs['pk_reporte']).update(estado = 'En pagaduria')
             models.Pagos.objects.filter(reporte__id = self.kwargs['pk_reporte']).update(estado='En pagaduria')
+
+            pagos = models.Pagos.objects.filter(reporte__id=self.kwargs['pk_reporte'])
+
+            for pago in pagos:
+                pagocuenta = rh_models.PagosCuentasCobro.objects.get(pago=pago)
+                if pagocuenta != None:
+                    pagocuenta = rh_models.PagosCuentasCobro.objects.get(pago=pago)
+                    cuenta = rh_models.Collects_Account.objects.get(id=pagocuenta.cuenta.id)
+                    cuenta.estate_report = "En pagaduria"
+                    cuenta.save()
 
         return HttpResponseRedirect('../../../')
 
@@ -1177,6 +1205,7 @@ class PagosListView(LoginRequiredMixin,
         kwargs['plano'] = reporte.url_plano()
         kwargs['show_listo'] = True if reporte.firma.name != '' and reporte.estado != 'Listo para reportar' and reporte.estado != 'Reportado' and reporte.estado != 'En pagaduria' and reporte.estado != 'Completo' else False
         kwargs['show_general'] = True if reporte.estado == 'Carga de pagos' else False
+        kwargs['descuento'] = False if reporte.servicio.descontable else True
         return super(PagosListView,self).get_context_data(**kwargs)
 
 
@@ -1197,6 +1226,15 @@ class PagosListoView(LoginRequiredMixin,
         if self.request.user.is_superuser:
             models.Reportes.objects.filter(id = self.kwargs['pk_reporte']).update(estado = 'Listo para reportar')
             models.Pagos.objects.filter(reporte__id = self.kwargs['pk_reporte']).update(estado='Listo para reportar')
+            pagos = models.Pagos.objects.filter(reporte__id = self.kwargs['pk_reporte'])
+
+            for pago in pagos:
+                pagocuenta = rh_models.PagosCuentasCobro.objects.get(pago=pago)
+                if pagocuenta != None:
+                    pagocuenta = rh_models.PagosCuentasCobro.objects.get(pago=pago)
+                    cuenta = rh_models.Collects_Account.objects.get(id=pagocuenta.cuenta.id)
+                    cuenta.estate_report = "Listo para reportar"
+                    cuenta.save()
 
         return HttpResponseRedirect('../../../')
 
@@ -1581,6 +1619,13 @@ class PagosDeleteView(LoginRequiredMixin,
     def dispatch(self, request, *args, **kwargs):
         reporte = models.Reportes.objects.get(id = self.kwargs['pk_reporte'])
         pago = models.Pagos.objects.get(id = self.kwargs['pk_pago'])
+        pagocuenta = rh_models.PagosCuentasCobro.objects.get(pago=pago)
+
+        if pagocuenta != None:
+            cuenta = rh_models.Collects_Account.objects.get(id=pagocuenta.cuenta.id)
+            cuenta.estate_report = "Generado"
+            cuenta.save()
+            pagocuenta.delete()
 
         models.Amortizaciones.objects.filter(pago_descontado = pago).update(estado = 'Pendiente', pago_descontado = None)
 
@@ -1715,6 +1760,139 @@ class AmortizacionesPagosUpdateView(LoginRequiredMixin,
         kwargs['breadcrum_3'] = enterprise.name
         kwargs['breadcrum_active'] = amortizacion.consecutivo
         return super(AmortizacionesPagosUpdateView,self).get_context_data(**kwargs)
+
+
+class PagosCuentasCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.direccion_financiera.reportes.ver",
+            "usuarios.direccion_financiera.reportes.crear"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'direccion_financiera/reportes/pagos/listar.html'
+    success_url = "../"
+    form_class = forms.PagoCuentaForm
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_reporte': self.kwargs['pk_reporte']
+        }
+
+
+    def form_valid(self, form):
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
+        cuenta_cobro = rh_models.Collects_Account.objects.get(id=form.cleaned_data['cuenta_cobro'])
+
+
+        descuentos_pendientes = json.loads(form.cleaned_data.get("descuentos_pendientes"))
+        descuentos_pendientes_otro_valor = json.loads(form.cleaned_data.get("descuentos_pendientes_otro_valor"))
+
+
+        pago_new = models.Pagos.objects.create(
+            usuario_creacion=self.request.user,
+            usuario_actualizacion=self.request.user,
+            reporte=models.Reportes.objects.get(id=self.kwargs['pk_reporte']),
+            valor=cuenta_cobro.value_fees,
+            tercero=rh_models.Contratistas.objects.get(cedula=form.cleaned_data['cedula']),
+            observacion=cuenta_cobro.cut.name,
+            estado='Pago creado',
+            publico=True,
+            descuentos_pendientes=form.cleaned_data['descuentos_pendientes'],
+            descuentos_pendientes_otro_valor=form.cleaned_data['descuentos_pendientes_otro_valor'],
+        )
+
+        cuenta_pago_new = rh_models.PagosCuentasCobro.objects.create(
+            cuenta = cuenta_cobro,
+            pago = pago_new,
+        )
+
+        cuenta_cobro.estate_report = 'Reporte creado'
+        cuenta_cobro.save()
+
+        if pago_new.tercero.first_active_account == True:
+            try:
+                pago_new.tipo_cuenta = pago_new.tercero.tipo_cuenta
+                pago_new.banco = pago_new.tercero.banco.nombre
+                pago_new.cuenta = pago_new.tercero.cuenta
+                pago_new.cargo = pago_new.tercero.cargo.nombre
+                pago_new.save()
+                pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                pago_new.save()
+            except:
+                pass
+        elif pago_new.tercero.second_active_account == True:
+            try:
+                pago_new.tipo_cuenta = pago_new.tercero.type
+                pago_new.banco = pago_new.tercero.bank.nombre
+                pago_new.cuenta = pago_new.tercero.account
+                pago_new.cargo = pago_new.tercero.cargo.nombre
+                pago_new.save()
+                pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                pago_new.save()
+            except:
+                pass
+
+        for i in range(1,6):
+
+            uuid_descuento = form.cleaned_data.get("uuid_descuento_" + str(i))
+            valor_descuento = form.cleaned_data.get("valor_descuento_" + str(i))
+            concepto_descuento = form.cleaned_data.get("concepto_descuento_" + str(i))
+            observacion_descuento = form.cleaned_data.get("observacion_descuento_" + str(i))
+
+            if valor_descuento != '' and valor_descuento != None:
+                models.Descuentos.objects.create(
+                    usuario_creacion=self.request.user,
+                    usuario_actualizacion=self.request.user,
+                    pago = pago_new,
+                    valor = float(valor_descuento.replace('$ ','').replace(',','')),
+                    concepto = concepto_descuento,
+                    observacion = observacion_descuento
+                )
+
+
+        for key in descuentos_pendientes.keys():
+            pago = models.Pagos.objects.get(id=key)
+            for key2 in descuentos_pendientes[key]:
+                amortizacion = models.Amortizaciones.objects.get(id=key2)
+                if descuentos_pendientes[key][key2]['descontar']:
+                    amortizacion.pago_descontado = pago_new
+                    amortizacion.fecha_descontado = timezone.now()
+                    amortizacion.estado = 'Asignada'
+                    amortizacion.save()
+
+        valor = 0
+        for pago_obj in models.Pagos.objects.filter(reporte=pago_new.reporte):
+            valor += pago_obj.valor
+
+        reporte = pago_new.reporte
+        reporte.valor = valor
+        reporte.save()
+
+        reporte.file.delete(save=True)
+        reporte.plano.delete(save=True)
+
+        tasks.build_reporte_interno(str(reporte.id), reporte.usuario_actualizacion.email)
+
+        if not reporte.efectivo:
+            functions.build_archivo_plano(str(reporte.id), reporte.usuario_actualizacion.email)
+
+        return super(PagosCuentasCreateView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        enterprise = models.Enterprise.objects.get(id=self.kwargs['pk'])
+        reporte = models.Reportes.objects.get(id=self.kwargs['pk_reporte'])
+        kwargs['title'] = "CREAR PAGO"
+        kwargs['breadcrum_1'] = models.Reportes.objects.get(id=self.kwargs['pk_reporte']).nombre
+        kwargs['breadcrum_2'] = enterprise.name
+        kwargs['reporte'] = reporte
+
+        return super(PagosCuentasCreateView,self).get_context_data(**kwargs)
+
 
 # -------------------------------------- REPORTES ELIMINADOS -------------------------------------
 class ReportsRecycleListView(LoginRequiredMixin,

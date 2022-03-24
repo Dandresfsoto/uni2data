@@ -10,6 +10,8 @@ from config.extrafields import ContentTypeRestrictedFileField
 from simple_history.models import HistoricalRecords
 from common.models import BaseModel
 from usuarios.models import User, Departamentos, Municipios
+from recursos_humanos import models as rh_models
+
 
 settings_time_zone = timezone(settings.TIME_ZONE)
 
@@ -818,14 +820,16 @@ class PurchaseOrders(BaseModel):
         subtotal = self.subtotal
         return str(subtotal).replace('COL','')
 
-
 class Products(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=150, verbose_name='Nombre')
-    purchase_order = models.ForeignKey(PurchaseOrders, on_delete=models.DO_NOTHING, blank=True,null=True)
     price = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
     stock = models.IntegerField(default=0, verbose_name='Cantidad')
     total_price = MoneyField(max_digits=20, decimal_places=2, default_currency='COP',blank=True,null=True)
+
+
+
+    purchase_order = models.ForeignKey(PurchaseOrders, on_delete=models.DO_NOTHING, blank=True, null=True)
 
 
     def __str__(self):
@@ -847,12 +851,6 @@ class Products(models.Model):
         total_price = price * stock
 
         return str(total_price).replace('COL','')
-
-
-
-
-
-
 
 #@receiver(post_save, sender=Pagos)
 #@receiver(post_delete, sender=Pagos)

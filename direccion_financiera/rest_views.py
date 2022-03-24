@@ -343,8 +343,8 @@ class ReportesListApi(BaseDatatableView):
         search = self.request.GET.get(u'search[value]', None)
         if search:
 
-            pagos_q = Q(tercero__nombres__icontains=search) | Q(tercero__apellidos__icontains=search) \
-                      | Q(tercero__cedula__icontains=search) | Q(valor__icontains=search)
+            pagos_q = Q(tercero__nombres__icontains=search) | Q(tercero__apellidos__icontains=search) | \
+                      Q(tercero__cedula__icontains=search) | Q(valor__icontains=search)
 
             ids = Pagos.objects.filter(pagos_q).values_list('reporte__id',flat=True)
 
@@ -1861,9 +1861,9 @@ class CollectsAccountListApi(BaseDatatableView):
 
         self.permissions = {
             "ver": [
-                "usuarios.recursos_humanos.ver",
-                "usuarios.recursos_humanos.cortes.ver",
-                "usuarios.direccion.cuentas_cobro.ver",
+                "usuarios.direccion_financiera.ver",
+                "usuarios.direccion_financiera.cortes.ver",
+                "usuarios.direccion_financiera.cuentas_cobro.ver",
             ]
         }
         return self.model.objects.all()
@@ -1991,44 +1991,12 @@ class CutsCollectAccountsListApi(BaseDatatableView):
             return '{0}'.format(row.contract.contratista)
 
         elif column == 'estate_report':
-            ret = ""
-            if row.estate_report == 'Rechazado':
-                ret = '<div class="center-align">' \
-                      '<a href="estate/{0}/">' \
-                      '<span style="color:red"><b>{1}</b></span>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.estate_report)
-
-            elif row.estate_report == 'Reportado':
-                ret = '<div class="center-align">' \
-                      '<a href="estate/{0}/">' \
-                      '<span style="color:green"><b>{1}</b></span>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.estate_report)
-
-            elif row.estate_report == 'Generado':
-                ret = '<div class="center-align">' \
-                      '<a href="estate/{0}/">' \
-                      '<span><b>{1}</b></span>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.estate_report)
-
-            elif row.estate_report == 'Cargado':
-                ret = '<div class="center-align">' \
-                      '<a href="estate/{0}/">' \
-                      '<span><b>{1}</b></span>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.estate_report)
-
-            elif row.estate_report == 'En pagaduria':
-                ret = '<div class="center-align">' \
-                      '<a href="estate/{0}/">' \
-                      '<span><b>{1}</b></span>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.estate_report)
-
-            else:
-                ret = '{0}'.format(row.estate_report)
+            ret = '<div class="center-align">' \
+                  '<a class="tooltipped" data-position="top" data-delay="50">' \
+                  '<a href="estate/{1}/">' \
+                  '<b>{0}</b>' \
+                  '</a>' \
+                  '</div>'.format(row.estate_report, row.id)
             return ret
 
         elif column == 'delta':
@@ -2287,7 +2255,84 @@ class LiquidacionesListApi(BaseDatatableView):
         else:
             return super(LiquidacionesListApi, self).render_column(row, column)
 
+class CuentasListApiJson(APIView):
+    """
+    """
 
+    def get(self, request, format=None):
+        lista = []
+        diccionario = {}
+        name = request.query_params.get('name')
+        pago_query = request.query_params.get('pago')
+        reporte_id = request.query_params.get('reporte')
+
+        reporte = Reportes.objects.get(id=reporte_id)
+
+        if name != None:
+
+            q = Q(contract__contratista__nombres__icontains=name) | Q(contract__contratista__apellidos__icontains=name) | Q(contract__contratista__cedula__icontains=name)
+
+            filtro = Collects_Account.objects.filter(estate_report="Generado")
+
+
+            for cuenta in filtro.filter(q):
+                lista.append({
+                    'name': cuenta.contract.nombre + " - " + cuenta.contract.contratista.fullname() + " - " +
+                            str(cuenta.contract.contratista.cedula) + " - " + str(cuenta.get_month()) + "/" + str(cuenta.year)
+                })
+                if cuenta.contract.contratista.first_active_account == True:
+                    diccionario[str(cuenta.contract.contratista.cedula)] = {
+                        'id': str(cuenta.contract.contratista.id),
+                        'tipo_cuenta': cuenta.contract.contratista.tipo_cuenta,
+                        'banco': cuenta.contract.contratista.get_banco_name(),
+                        'cuenta': cuenta.contract.contratista.cuenta,
+                        'cuenta_cobro': cuenta.id,
+                        'descuentos': {}
+                    }
+                elif cuenta.contract.contratista.second_active_account == True:
+                    diccionario[str(cuenta.contract.contratista.cedula)] = {
+                        'id': str(cuenta.contract.contratista.id),
+                        'tipo_cuenta': cuenta.contract.contratista.type,
+                        'banco': cuenta.contract.contratista.get_bank_name(),
+                        'cuenta': cuenta.contract.contratista.account,
+                        'cuenta_cobro': cuenta.id,
+                        'descuentos': {}
+                    }
+
+                for amortizacion in Amortizaciones.objects.filter(pago__tercero__cedula=cuenta.contract.contratista.cedula).order_by(
+                        'consecutivo'):
+
+                    if not amortizacion.get_pago_completo():
+                        id_pago = str(amortizacion.pago.id)
+
+                        if id_pago not in diccionario[str(cuenta.contract.contratista.cedula)]['descuentos'].keys():
+                            ultimo_descuento = amortizacion.pago.get_fecha_ultimo_descuento()
+                            diccionario[str(cuenta.contract.contratista.cedula)]['descuentos'][id_pago] = {
+                                'amortizaciones': [],
+                                'pago': {
+                                    'id': str(amortizacion.pago.id),
+                                    'reporte': str(amortizacion.pago.reporte.consecutive),
+                                    'cantidad_amortizaciones_pendientes': amortizacion.pago.get_cantidad_amortizaciones_pendientes(),
+                                    'fecha_ultimo_descuento': ultimo_descuento if ultimo_descuento != '' else 'No se ha aplicado ningún descuento',
+                                    'cuotas': amortizacion.pago.cuotas,
+                                    'valor_total': '${:20,.2f}'.format(amortizacion.pago.valor.amount)
+                                }
+                            }
+
+                        diccionario[str(cuenta.contract.contratista.cedula)]['descuentos'][id_pago]['amortizaciones'].append({
+                            'id': str(amortizacion.id),
+                            'id_pago': str(amortizacion.pago.id),
+                            'consecutivo': amortizacion.consecutivo,
+                            'valor': '${:20,.2f}'.format(amortizacion.valor.amount),
+                            'estado': amortizacion.estado,
+                            'pago_descontado': amortizacion.get_dict_pago_descontado(),
+                            'fecha_descontado': amortizacion.pretty_update_datetime_datetime(),
+                            'checked': amortizacion.get_checked(pago_query),
+                            'disabled': amortizacion.get_disabled(pago_query),
+                            'descripcion': amortizacion.get_descripcion(pago_query)
+                        })
+
+        return Response({'lista': lista, 'diccionario': diccionario}, status=status.HTTP_200_OK)
 
 def cargar_rubro(request):
     rubro_id = request.GET.get('rubro')

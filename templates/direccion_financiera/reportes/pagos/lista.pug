@@ -53,32 +53,29 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
-    |{% if show_general %}
+    |{% if permiso_crear %}
 
     ul(class="collapsible",data-collapsible="accordion")
         li(class="bold waves-effect waves-light button-menu")
 
             div(class="collapsible-header active")
                 i(class="material-icons") call_to_action
-                | Acciones
+                | Adicion
 
             div(class="collapsible-body collapsible-body-blue")
                 ul
                     div(class="divider divider-perfil")
-                    |{% if permiso_crear %}
                     li(class="bold waves-effect waves-light")
                         a(href="crear/") Añadir pago
                             i(class="material-icons icon-sican") monetization_on
-                    | {% endif %}
                     div(class="divider divider-perfil")
-
-                    | {% if show_listo %}
+                    |{% if descuento%}
                     li(class="bold waves-effect waves-light")
-                        a(href="listo/") Listo para reportar
-                            i(class="material-icons icon-sican") check
-
+                        a(href="crear_pago/") Añadir cuenta
+                            i(class="material-icons icon-sican") contacts
                     div(class="divider divider-perfil")
-                    | {% endif %}
+                    |{% endif %}
+
 
     |{% endif %}
 
@@ -109,6 +106,26 @@ block side_nav_container
                     div(class="divider divider-perfil")
                     | {% endif %}
     |{% endif %}
+
+    | {% if permiso_crear %}
+
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
+
+            div(class="collapsible-header active")
+                i(class="material-icons") call_to_action
+                | Acciones
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+                    li(class="bold waves-effect waves-light")
+                        a(href="listo/") Listo para reportar
+                            i(class="material-icons icon-sican") check
+
+                    div(class="divider divider-perfil")
+
+    | {% endif %}
 
 block container_principal
     div(class="container-datatable")

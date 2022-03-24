@@ -2152,3 +2152,125 @@ class LiquidacionestadoForm(forms.ModelForm):
         widgets = {
             'observaciones': forms.Textarea(attrs={'class': 'materialize-textarea'})
         }
+
+class PagoCuentaForm(forms.Form):
+    tercero = forms.CharField(max_length=100,label='Nombre',widget=forms.TextInput(attrs={'class':'autocomplete','autocomplete':'off'}))
+    cedula = forms.IntegerField(label="Cédula",widget=forms.HiddenInput())
+    cuenta_cobro = forms.CharField(label="cuenta_cobro",required=False,widget=forms.HiddenInput())
+
+
+    descuentos_pendientes = forms.CharField(max_length=1000,required=False,widget=forms.HiddenInput(), initial='{}')
+    descuentos_pendientes_otro_valor = forms.CharField(max_length=1000, required=False, widget=forms.HiddenInput(), initial='{}')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cedula = cleaned_data.get("cedula")
+        cuenta_cobro = cleaned_data.get("cuenta_cobro")
+        descuentos_pendientes = json.loads(cleaned_data.get("descuentos_pendientes"))
+        descuentos_pendientes_otro_valor = json.loads(cleaned_data.get("descuentos_pendientes_otro_valor"))
+
+        q = Q(reporte__id=self.pk_reporte) & Q(tercero__cedula=cedula)
+
+        pagos = Pagos.objects.filter(q)
+
+        descuentos_amortizaciones = 0
+
+        for key in descuentos_pendientes.keys():
+            pago = Pagos.objects.get(id = key)
+            for key2 in descuentos_pendientes[key]:
+                amortizacion = Amortizaciones.objects.get(id = key2)
+                if descuentos_pendientes[key][key2]['descontar']:
+                    if str(pago.id) in descuentos_pendientes_otro_valor.keys():
+                        descuentos_amortizaciones += float(descuentos_pendientes_otro_valor[str(pago.id)].replace('$ ', '').replace(',', ''))
+                    else:
+                        descuentos_amortizaciones += float(amortizacion.valor.amount)
+
+        if self.pk_pago != None:
+
+            if pagos.exclude(id = self.pk_pago).count() > 0:
+                self.add_error('tercero', 'Existe un pago registrado en el reporte para esta persona.')
+
+        else:
+            if pagos.count() > 0:
+                self.add_error('tercero', 'Existe un pago registrado en el reporte para esta persona.')
+
+            if Pagos.objects.filter(reporte__id = self.pk_reporte).count() > 19:
+                self.add_error('tercero', 'Por reporte solo se permiten 20 pagos.')
+
+    def __init__(self, *args, **kwargs):
+        super(PagoCuentaForm, self).__init__(*args, **kwargs)
+
+        self.pk = kwargs['initial'].get('pk')
+        self.pk_reporte = kwargs['initial'].get('pk_reporte')
+        self.pk_pago = kwargs['initial'].get('pk_pago')
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Column(
+                    Row(
+                        Fieldset(
+                            'Información del tercero',
+                        ),
+                        Column(
+                            'tercero',
+                            css_class='s12'
+                        ),
+                        Column(
+                            'cedula',
+                            css_class='s12'
+                        ),
+                        Column(
+                            'cuenta_cobro',
+                            css_class='s12'
+                        ),
+                        Column(
+                            HTML(
+                                """
+                                <p><b>Tipo cuenta:</b><span id="tipo_cuenta" style="margin-left:5px;">{{tipo_cuenta}}</span></p>
+                                <p><b>Banco:</b><span id="banco" style="margin-left:5px;">{{banco}}</span></p>
+                                <p><b>Número de cuenta:</b><span id="cuenta" style="margin-left:5px;">{{cuenta}}</span></p>
+                                <p><b>Cuenta de cobro:</b><span id="cuenta_cobro" style="margin-left:5px;">{{cuenta_cobro}}</span></p>
+                                """
+                            ),
+                            css_class='s12'
+                        ),
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Fieldset(
+                    'Descuentos',
+                ),
+                Column(
+                    HTML(
+                        """
+                        <div id="descuentos-pendientes">
+                        <p><b>Seleccione un contratista para visualizar los descuentos pendientes.</b></p>
+                        </div>
+                        """
+                    ),
+                    css_class='s12'
+                ),
+                Column(
+                    'descuentos_pendientes',
+                    'descuentos_pendientes_otro_valor',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )

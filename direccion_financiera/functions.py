@@ -153,3 +153,7 @@ def build_desplazamiento_file(id):
         solicitud.file.save(filename, File(output))
 
     return "Archivo generado"
+
+def month_converter(month):
+    months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+    return months[month]
