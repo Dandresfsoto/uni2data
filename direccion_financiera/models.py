@@ -889,3 +889,4 @@ def ReportesUpdate(sender, instance, **kwargs):
         #if instance.file_banco.name != None and instance.file_banco.name != '':
             #Reportes.objects.filter(id=instance.id).update(estado='Completo')
         #else:
+            # Reportes.objects.filter(id=instance.id).update(estado='Completo')
