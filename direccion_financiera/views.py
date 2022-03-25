@@ -2017,7 +2017,7 @@ class ProductsUpdateView(LoginRequiredMixin,
     login_url = settings.LOGIN_URL
     template_name = 'direccion_financiera/purchase_order/products/edit.html'
     success_url = "../../"
-    form_class = forms.ProductForm
+    form_class = forms.ProductEditForm
     model = models.Products
     pk_url_kwarg = "pk_product"
 

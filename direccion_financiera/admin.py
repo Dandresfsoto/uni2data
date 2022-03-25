@@ -15,6 +15,7 @@ admin.site.register(models.Reportes)
 admin.site.register(models.PurchaseOrders)
 admin.site.register(models.Products)
 admin.site.register(models.Projects_order)
+admin.site.register(models.ProductosList)
 
 
 def delete_reporte(modeladmin, request, queryset):

@@ -827,6 +827,7 @@ class Products(models.Model):
     stock = models.IntegerField(default=0, verbose_name='Cantidad')
     total_price = MoneyField(max_digits=20, decimal_places=2, default_currency='COP',blank=True,null=True)
 
+    productlist = models.ForeignKey(to='direccion_financiera.ProductosList', on_delete=models.DO_NOTHING,blank=True,null=True)
 
     def __str__(self):
         return self.name
@@ -850,7 +851,13 @@ class Products(models.Model):
 
 
 
+class ProductosList(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    nombre = models.CharField(max_length=150, verbose_name='Nombre')
+    precio = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
 
+    def __str__(self):
+        return self.nombre
 
 
 

@@ -7,7 +7,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from requests import request
 
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, RubroPresupuestalLevel2, \
-    RubroPresupuestalLevel3, Proyecto, Enterprise, PurchaseOrders, Products
+    RubroPresupuestalLevel3, Proyecto, Enterprise, PurchaseOrders, Products, ProductosList
 from recursos_humanos.models import Contratistas, Contratos, Collects_Account
 from django.db.models import Q
 from rest_framework.views import APIView
@@ -2288,6 +2288,34 @@ class LiquidacionesListApi(BaseDatatableView):
             return super(LiquidacionesListApi, self).render_column(row, column)
 
 
+class ProductsListApiJson(APIView):
+    """
+    """
+
+    def get(self, request, format=None):
+        lista = []
+        diccionario = {}
+        name = request.query_params.get('name')
+
+
+        if name != None:
+
+            q = Q(nombre__icontains = name)
+
+            filtro = ProductosList.objects.all()
+
+
+            for product in filtro.filter(q).exclude():
+                lista.append({
+                    'name': product.nombre + " - " + str(product.precio)
+                })
+                diccionario[str(product.id)] = {
+                    'id': str(product.id),
+                    'name': str(product.nombre),
+                    'precio': float(product.precio),
+                }
+
+        return Response({'lista':lista,'diccionario':diccionario},status=status.HTTP_200_OK)
 
 def cargar_rubro(request):
     rubro_id = request.GET.get('rubro')

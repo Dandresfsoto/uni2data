@@ -53,6 +53,42 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 
 
 });</script><script>$(document).ready(function () {
-    new AutoNumeric('#id_price_char', {currencySymbol: '$ '});
 
+
+    $("#id_productlist").on('keydown', function () {
+        $("#name").text(null);
+        $("#precio").text(null);
+
+
+        $.ajax({
+            type: 'GET',
+            url: '/rest/v1.0/direccion_financiera/products/list/?name=' + $("#id_productlist").val(),
+            success: function (response) {
+                var tercerosArray = response.lista;
+                var dataTerceros = {};
+                for (var i = 0; i < tercerosArray.length; i++) {
+                    dataTerceros[tercerosArray[i].name] = tercerosArray[i].flag;
+                }
+                $('input.autocomplete').autocomplete({
+                    data: dataTerceros,
+                    limit: 5,
+                    onAutocomplete: function (val) {
+
+                        var nombre = val.split(' - ')[0];
+
+                        var precio = parseInt((val.split(' - ')[1]).replace('COL$', '').replace(',', ''));
+
+                        $("label[for='id_name']").addClass('active');
+                        $("#id_name").val(nombre);
+
+
+                        $("label[for='id_price_char']").addClass('active');
+                        $("#id_price_char").val(precio);
+
+                    }
+                });
+            }
+        });
+
+    });
 });</script></body></html>

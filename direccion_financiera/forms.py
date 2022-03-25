@@ -1856,7 +1856,7 @@ class PurchaseOrderForm(forms.ModelForm):
         }
 
 class ProductForm(forms.ModelForm):
-
+    productlist = forms.CharField(max_length=100, required = False, label='Productos',widget=forms.TextInput(attrs={'class': 'autocomplete', 'autocomplete': 'off'}))
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1891,8 +1891,108 @@ class ProductForm(forms.ModelForm):
 
             Row(
                 Fieldset(
-                    'Información del banco',
+                    'Información del producto',
                 )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'productlist',
+                            css_class='s12'
+                        ),
+                    ),
+                ),
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'name',
+                            css_class='s12 m6 l4'
+                        ),
+                        Column(
+                            'price_char',
+                            css_class='s12 m6 l4'
+                        ),
+                        Column(
+                            'stock',
+                            css_class='s12 m6 l4'
+                        )
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Products
+        fields = ['name','stock']
+        labels = {
+            'name': 'Nombre del producto',
+            'stock': 'Cantidad del producto',
+        }
+
+class ProductEditForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+
+
+    def __init__(self, *args, **kwargs):
+        super(ProductEditForm, self).__init__(*args, **kwargs)
+        self.pk = kwargs['initial'].get('pk')
+        self.pk_purchase = kwargs['initial'].get('pk_purchase')
+        self.pk_product = kwargs['initial'].get('pk_product')
+
+
+        self.fields['price_char'] = forms.CharField(label="Valor ($)")
+        try:
+            price = kwargs['instance'].price
+        except:
+            pass
+
+
+        pk_product = kwargs['initial'].get('pk_product')
+        if pk_product != None:
+            product = Products.objects.get(id=pk_product)
+            self.fields['name'].initial = product.name
+            price=str(product.price).replace('COL$','')
+            self.fields['price_char'].initial = price
+            self.fields['stock'].initial = product.stock
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Información del producto',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'productlist',
+                            css_class='s12'
+                        ),
+                    ),
+                ),
             ),
             Row(
                 Column(
