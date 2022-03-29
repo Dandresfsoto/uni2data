@@ -9,7 +9,8 @@ from django.shortcuts import render
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
 from django.forms.fields import Field, FileField
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, Enterprise, Servicios, \
-    Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2, PurchaseOrders, Products, Projects_order
+    Proyecto, TipoSoporte, RubroPresupuestal, RubroPresupuestalLevel2, PurchaseOrders, Products, Projects_order, \
+    Beneficiarios, SubBeneficiarios
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
@@ -1673,12 +1674,12 @@ class ProjectForm(forms.ModelForm):
         fields = ['cuenta','nombre']
 
 class PurchaseOrderForm(forms.ModelForm):
-
-    department = forms.ModelChoiceField(label='Departamento*',queryset=Departamentos.objects.all(), required=False)
+    department = forms.ModelChoiceField(label='Departamento*', queryset=Departamentos.objects.all(), required=False)
     project_order = forms.ModelChoiceField(label='Proyecto*', queryset=Projects_order.objects.all(), required=False)
 
-    third = forms.CharField(max_length=100,label='Cliente',widget=forms.TextInput(attrs={'class':'autocomplete','autocomplete':'off'}))
-    cedula = forms.IntegerField(label="Cédula",widget=forms.HiddenInput())
+    third = forms.CharField(max_length=100, label='Cliente',
+                            widget=forms.TextInput(attrs={'class': 'autocomplete', 'autocomplete': 'off'}))
+    cedula = forms.IntegerField(label="Cédula", widget=forms.HiddenInput())
 
     def clean(self):
         cleaned_data = super().clean()
@@ -1703,10 +1704,7 @@ class PurchaseOrderForm(forms.ModelForm):
         self.fields['project_order'].queryset = Projects_order.objects.filter(enterprise=pk)
 
         enterprise = Enterprise.objects.get(id=pk)
-        nit = enterprise.tax_number
 
-        if nit == "901294654":
-            self.fields['beneficiary'].queryset = Resguards.objects.all()
 
 
 
@@ -1720,6 +1718,7 @@ class PurchaseOrderForm(forms.ModelForm):
             self.fields['municipality'].initial = purchase.municipality.id
             self.fields['project_order'].initial = purchase.project_order.id
             self.fields['beneficiary'].initial = purchase.beneficiary
+            self.fields['subbeneficiary'].initial = purchase.subbeneficiary
             self.fields['date'].initial = purchase.date
             self.fields['observation'].initial = purchase.observation
             self.fields['departure'].initial = purchase.departure
@@ -1772,7 +1771,11 @@ class PurchaseOrderForm(forms.ModelForm):
                     Row(
                         Column(
                             'beneficiary',
-                            css_class='s12'
+                            css_class='s6'
+                        ),
+                        Column(
+                            'subbeneficiary',
+                            css_class='s6'
                         ),
                     ),
                     Row(
@@ -1839,7 +1842,7 @@ class PurchaseOrderForm(forms.ModelForm):
 
     class Meta:
         model = PurchaseOrders
-        fields = ['department','municipality','project_order','beneficiary','observation','date','file_quotation','beneficiary','departure','counterpart']
+        fields = ['department','municipality','project_order','beneficiary','observation','date','file_quotation','departure','counterpart','subbeneficiary']
         labels = {
             'department': 'Departamento',
             'municipality': 'Municipio',
@@ -1850,6 +1853,7 @@ class PurchaseOrderForm(forms.ModelForm):
             'file_quotation': 'Cotizacion',
             'departure': 'Partida',
             'counterpart': 'Contrapartida',
+            'subbeneficiary': 'Beneficiario',
         }
         widgets = {
             'observation': forms.Textarea(attrs={'class': 'materialize-textarea'}),
@@ -1884,6 +1888,7 @@ class ProductForm(forms.ModelForm):
             price=str(product.price).replace('COL$','')
             self.fields['price_char'].initial = price
             self.fields['stock'].initial = product.stock
+            self.fields['codigo'].initial = product.codigo
 
 
         self.helper = FormHelper(self)
@@ -1908,17 +1913,28 @@ class ProductForm(forms.ModelForm):
                 Column(
                     Row(
                         Column(
-                            'name',
-                            css_class='s12 m6 l4'
+                            'codigo',
+                            css_class='s12 m6'
                         ),
                         Column(
+                            'name',
+                            css_class='s12 m6'
+                        ),
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
                             'price_char',
-                            css_class='s12 m6 l4'
+                            css_class='s12 m6'
                         ),
                         Column(
                             'stock',
-                            css_class='s12 m6 l4'
-                        )
+                            css_class='s12 m6'
+                        ),
                     ),
                     css_class="s12"
                 ),
@@ -1940,10 +1956,11 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Products
-        fields = ['name','stock']
+        fields = ['name','stock','codigo']
         labels = {
             'name': 'Nombre del producto',
             'stock': 'Cantidad del producto',
+            'codigo': 'Codigo del producto',
         }
 
 class ProductEditForm(forms.ModelForm):
@@ -1974,6 +1991,7 @@ class ProductEditForm(forms.ModelForm):
             price=str(product.price).replace('COL$','')
             self.fields['price_char'].initial = price
             self.fields['stock'].initial = product.stock
+            self.fields['codigo'].initial = product.codigo
 
 
         self.helper = FormHelper(self)
@@ -1998,17 +2016,38 @@ class ProductEditForm(forms.ModelForm):
                 Column(
                     Row(
                         Column(
-                            'name',
-                            css_class='s12 m6 l4'
+                            'productlist',
+                            css_class='s12'
+                        ),
+                    ),
+                ),
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'codigo',
+                            css_class='s12 m6'
                         ),
                         Column(
+                            'name',
+                            css_class='s12 m6'
+                        ),
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Row(
+                        Column(
                             'price_char',
-                            css_class='s12 m6 l4'
+                            css_class='s12 m6'
                         ),
                         Column(
                             'stock',
-                            css_class='s12 m6 l4'
-                        )
+                            css_class='s12 m6'
+                        ),
                     ),
                     css_class="s12"
                 ),
@@ -2030,10 +2069,11 @@ class ProductEditForm(forms.ModelForm):
 
     class Meta:
         model = Products
-        fields = ['name','stock']
+        fields = ['name','stock','codigo']
         labels = {
             'name': 'Nombre del producto',
             'stock': 'Cantidad del producto',
+            'codigo': 'Codigo del producto',
         }
 
 class CollectsAccountEstateForm(forms.ModelForm):

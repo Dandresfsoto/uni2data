@@ -733,6 +733,27 @@ class Projects_order(models.Model):
     class Meta:
         verbose_name_plural = "Proyectos"
 
+class Beneficiarios(models.Model):
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    nombre = models.CharField(max_length=100,blank=True,null=True)
+
+
+    def __str__(self):
+        return self.nombre
+
+
+class SubBeneficiarios(models.Model):
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    nombre = models.CharField(max_length=100,blank=True,null=True)
+    beneficiario = models.ForeignKey(Beneficiarios, on_delete=models.DO_NOTHING, blank=True, null=True, verbose_name="Beneficiario")
+
+
+    def __str__(self):
+        return self.nombre
+
+
 class PurchaseOrders(BaseModel):
     creation_user = models.ForeignKey(User, related_name="creation_user_purchase_order", on_delete=models.DO_NOTHING)
     update_user = models.ForeignKey(User, related_name="update_user_purchase_order",on_delete=models.DO_NOTHING,blank=True, null=True)
@@ -740,7 +761,9 @@ class PurchaseOrders(BaseModel):
     consecutive = models.IntegerField(null=True, blank=True)
     third = models.ForeignKey(to='recursos_humanos.Contratistas', on_delete=models.DO_NOTHING)
     date = models.DateField()
-    beneficiary = models.CharField(max_length=100)
+    beneficiarys = models.CharField(max_length=100, blank=True, null=True)
+    beneficiary = models.ForeignKey(Beneficiarios, on_delete=models.DO_NOTHING, blank=True, null=True,verbose_name="Beneficiario")
+    subbeneficiary = models.ForeignKey(SubBeneficiarios, on_delete=models.DO_NOTHING, blank=True, null=True,verbose_name="Beneficiario")
     department = models.ForeignKey(Departamentos, on_delete=models.DO_NOTHING,related_name='department_purchase_order',blank=True,null=True)
     municipality = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING,related_name='municipality_purchase_order',blank=True,null=True)
     project = models.ForeignKey(Proyecto, on_delete=models.DO_NOTHING,blank=True, null=True)
@@ -819,9 +842,11 @@ class PurchaseOrders(BaseModel):
         return str(subtotal).replace('COL','')
 
 
+
 class Products(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=150, verbose_name='Nombre')
+    codigo = models.CharField(max_length=150, verbose_name='Codigo', blank=True,null=True)
     purchase_order = models.ForeignKey(PurchaseOrders, on_delete=models.DO_NOTHING, blank=True,null=True)
     price = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
     stock = models.IntegerField(default=0, verbose_name='Cantidad')
@@ -849,10 +874,9 @@ class Products(models.Model):
 
         return str(total_price).replace('COL','')
 
-
-
 class ProductosList(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    codigo = models.CharField(max_length=150, verbose_name='Codigo', blank=True,null=True)
     nombre = models.CharField(max_length=150, verbose_name='Nombre')
     precio = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
 

@@ -65,9 +65,13 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
     $('#id_department').select2();
     $('#id_municipality').select2();
     $('#id_project_order').select2();
+    $('#id_beneficiary').select2();
+    $('#id_subbeneficiary').select2();
 
 
     $("label[for='id_project_order']").addClass('active');
+    $("label[for='id_beneficiary']").addClass('active');
+    $("label[for='id_subbeneficiary']").addClass('active');
     $("label[for='id_department']").addClass('active');
     $("label[for='id_municipality']").addClass('active');
 
@@ -85,6 +89,23 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
             success: function (data) {
                 $("#id_municipality").html(data);
                 $('#id_municipality').select2();
+            }
+        });
+
+    });
+
+    $("#id_beneficiary").change(function () {
+        var url = '/rest/v1.0/direccion_financiera/beneficiarios/'
+        var beneficiario_id = $(this).val();
+
+        $.ajax({
+            url: url,
+            data: {
+                'beneficiario': beneficiario_id
+            },
+            success: function (data) {
+                $("#id_subbeneficiary").html(data);
+                $('#id_subbeneficiary').select2();
             }
         });
 

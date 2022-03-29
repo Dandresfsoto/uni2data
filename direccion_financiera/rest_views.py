@@ -7,7 +7,8 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from requests import request
 
 from direccion_financiera.models import Bancos, Reportes, Pagos, Descuentos, Amortizaciones, RubroPresupuestalLevel2, \
-    RubroPresupuestalLevel3, Proyecto, Enterprise, PurchaseOrders, Products, ProductosList
+    RubroPresupuestalLevel3, Proyecto, Enterprise, PurchaseOrders, Products, ProductosList, Beneficiarios, \
+    SubBeneficiarios
 from recursos_humanos.models import Contratistas, Contratos, Collects_Account
 from django.db.models import Q
 from rest_framework.views import APIView
@@ -2300,19 +2301,20 @@ class ProductsListApiJson(APIView):
 
         if name != None:
 
-            q = Q(nombre__icontains = name)
+            q = Q(nombre__icontains = name) | Q(codigo__icontains = name)
 
             filtro = ProductosList.objects.all()
 
 
             for product in filtro.filter(q).exclude():
                 lista.append({
-                    'name': product.nombre + " - " + str(product.precio)
+                    'name': product.codigo + " - " + product.nombre + " - " + str(product.precio)
                 })
                 diccionario[str(product.id)] = {
                     'id': str(product.id),
                     'name': str(product.nombre),
                     'precio': float(product.precio),
+                    'codigo': str(product.codigo),
                 }
 
         return Response({'lista':lista,'diccionario':diccionario},status=status.HTTP_200_OK)
@@ -2351,3 +2353,15 @@ def cargar_contrato(request):
 
 
     return render(request, 'direccion_financiera/reportes/load/contratos_2_dropdown_list_options.html', {'contratos_cedula': contratos_cedula})
+
+def cargar_beneficiarios(request):
+    beneficiario_id = request.GET.get('beneficiario')
+    try:
+        UUID(beneficiario_id)
+    except:
+        beneficiarios = SubBeneficiarios.objects.none()
+    else:
+        beneficiarios = SubBeneficiarios.objects.filter(beneficiario=beneficiario_id).order_by('nombre')
+
+    return render(request, 'direccion_financiera/purchase_order/load/beneficiarios_dropdown_list_options.html', {'beneficiarios': beneficiarios})
+

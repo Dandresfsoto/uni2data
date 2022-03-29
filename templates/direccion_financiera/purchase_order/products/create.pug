@@ -72,6 +72,7 @@ block body_script_auth
             $("#id_productlist").on('keydown', function () {
                 $("#name").text(null);
                 $("#precio").text(null);
+                $("#codigo").text(null);
 
 
                 $.ajax({
@@ -87,17 +88,18 @@ block body_script_auth
                             data: dataTerceros,
                             limit: 5,
                             onAutocomplete: function (val) {
-
-                                var nombre = val.split(' - ')[0];
-
-                                var precio = parseInt((val.split(' - ')[1]).replace('COL$', '').replace(',', ''));
+                                var codigo = val.split(' - ')[0];
+                                var nombre = val.split(' - ')[1];
+                                var precio = parseInt((val.split(' - ')[2]).replace('COL$', '').replace(',', ''));
 
                                 $("label[for='id_name']").addClass('active');
                                 $("#id_name").val(nombre);
 
-
                                 $("label[for='id_price_char']").addClass('active');
                                 $("#id_price_char").val(precio);
+
+                                $("label[for='id_codigo']").addClass('active');
+                                $("#id_codigo").val(codigo);
 
                             }
                         });

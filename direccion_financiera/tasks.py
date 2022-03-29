@@ -40,7 +40,7 @@ def build_orden_compra(id,email):
 
 
 
-        ws.add_image(logo_sican, 'C3')
+        ws.add_image(logo_sican, 'C2')
         ws['E2'] = str(purchase.enterprise.name)
 
         ws['H6'] = str(purchase.enterprise.code) +'-'+ str(purchase.consecutive)
@@ -53,7 +53,7 @@ def build_orden_compra(id,email):
 
         ws['D10'] = purchase.department.nombre
         ws['D11'] = purchase.municipality.nombre
-        ws['D12'] = purchase.beneficiary
+        ws['D12'] = purchase.beneficiary.nombre
         ws['D13'] = purchase.project_order.name
 
 
@@ -64,10 +64,12 @@ def build_orden_compra(id,email):
         i = 15
 
         for product in products:
-            ws['B' + str(i)] = product.name.upper()
-            ws['F' + str(i)] = product.stock
-            ws['G' + str(i)] = product.pretty_print_price()
-            ws['I' + str(i)] = product.pretty_print_total_price()
+            ws['B' + str(i)] = product.codigo.upper()
+            ws['C' + str(i)] = purchase.subbeneficiary.nombre
+            ws['E' + str(i)] = product.name.upper()
+            ws['G' + str(i)] = product.stock
+            ws['I' + str(i)] = product.pretty_print_price()
+            ws['J' + str(i)] = product.pretty_print_total_price()
             i += 1
 
         ws['I53'] = purchase.pretty_print_subtotal()
@@ -103,7 +105,7 @@ def build_orden_compra(id,email):
         logo_sican_2.height = 80
         logo_sican_2.drawing = 100
 
-        ws.add_image(logo_sican, 'C3')
+        ws.add_image(logo_sican, 'C2')
         ws.add_image(logo_sican_2, 'C67')
 
         ws['E2'] = str(purchase.enterprise.name)
@@ -124,8 +126,8 @@ def build_orden_compra(id,email):
         ws['D75'] = purchase.department.nombre
         ws['D11'] = purchase.municipality.nombre
         ws['D76'] = purchase.municipality.nombre
-        ws['D12'] = purchase.beneficiary
-        ws['D77'] = purchase.beneficiary
+        ws['D12'] = purchase.beneficiary.nombre
+        ws['D77'] = purchase.beneficiary.nombre
         ws['D13'] = purchase.project_order.name
         ws['D78'] = purchase.project_order.name
 
@@ -134,10 +136,12 @@ def build_orden_compra(id,email):
         i = 15
 
         for product in products:
-            ws['B' + str(i)] = product.name.upper()
-            ws['F' + str(i)] = product.stock
-            ws['G' + str(i)] = product.pretty_print_price()
-            ws['I' + str(i)] = product.pretty_print_total_price()
+            ws['B' + str(i)] = product.codigo.upper()
+            ws['C' + str(i)] = purchase.subbeneficiary.nombre
+            ws['E' + str(i)] = product.name.upper()
+            ws['G' + str(i)] = product.stock
+            ws['I' + str(i)] = product.pretty_print_price()
+            ws['J' + str(i)] = product.pretty_print_total_price()
             if i <51 or i>79:
                 i += 1
             else:
@@ -179,7 +183,7 @@ def build_orden_compra(id,email):
         logo_sican_3.height = 80
         logo_sican_3.drawing = 100
 
-        ws.add_image(logo_sican, 'C3')
+        ws.add_image(logo_sican, 'C2')
         ws.add_image(logo_sican_2, 'C67')
         ws.add_image(logo_sican_3, 'C132')
 
@@ -212,9 +216,9 @@ def build_orden_compra(id,email):
         ws['D76'] = purchase.municipality.nombre
         ws['D141'] = purchase.municipality.nombre
 
-        ws['D12'] = purchase.beneficiary
-        ws['D77'] = purchase.beneficiary
-        ws['D142'] = purchase.beneficiary
+        ws['D12'] = purchase.beneficiary.nombre
+        ws['D77'] = purchase.beneficiary.nombre
+        ws['D142'] = purchase.beneficiary.nombre
 
         ws['D13'] = purchase.project_order.name
         ws['D78'] = purchase.project_order.name
@@ -225,10 +229,12 @@ def build_orden_compra(id,email):
         i = 15
 
         for product in products:
-            ws['B' + str(i)] = product.name.upper()
-            ws['F' + str(i)] = product.stock
-            ws['G' + str(i)] = product.pretty_print_price()
-            ws['I' + str(i)] = product.pretty_print_total_price()
+            ws['B' + str(i)] = product.codigo.upper()
+            ws['C' + str(i)] = purchase.subbeneficiary.nombre
+            ws['E' + str(i)] = product.name.upper()
+            ws['G' + str(i)] = product.stock
+            ws['I' + str(i)] = product.pretty_print_price()
+            ws['J' + str(i)] = product.pretty_print_total_price()
             if i <51:
                 i += 1
             elif i == 51:
@@ -281,7 +287,7 @@ def build_orden_compra(id,email):
         logo_sican_4.height = 80
         logo_sican_4.drawing = 100
 
-        ws.add_image(logo_sican, 'C3')
+        ws.add_image(logo_sican, 'C2')
         ws.add_image(logo_sican_2, 'C67')
         ws.add_image(logo_sican_3, 'C132')
         ws.add_image(logo_sican_4, 'C198')
@@ -321,10 +327,10 @@ def build_orden_compra(id,email):
         ws['D141'] = purchase.municipality.nombre
         ws['D207'] = purchase.municipality.nombre
 
-        ws['D12'] = purchase.beneficiary
-        ws['D77'] = purchase.beneficiary
-        ws['D142'] = purchase.beneficiary
-        ws['D208'] = purchase.beneficiary
+        ws['D12'] = purchase.beneficiary.nombre
+        ws['D77'] = purchase.beneficiary.nombre
+        ws['D142'] = purchase.beneficiary.nombre
+        ws['D208'] = purchase.beneficiary.nombre
 
         ws['D13'] = purchase.project_order.name
         ws['D78'] = purchase.project_order.name
@@ -336,10 +342,12 @@ def build_orden_compra(id,email):
         i = 15
 
         for product in products:
-            ws['B' + str(i)] = product.name.upper()
-            ws['F' + str(i)] = product.stock
-            ws['G' + str(i)] = product.pretty_print_price()
-            ws['I' + str(i)] = product.pretty_print_total_price()
+            ws['B' + str(i)] = product.codigo.upper()
+            ws['C' + str(i)] = purchase.subbeneficiary.nombre
+            ws['E' + str(i)] = product.name.upper()
+            ws['G' + str(i)] = product.stock
+            ws['I' + str(i)] = product.pretty_print_price()
+            ws['J' + str(i)] = product.pretty_print_total_price()
             if i < 51:
                 i += 1
             elif i == 51:

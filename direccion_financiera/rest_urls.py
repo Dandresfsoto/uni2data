@@ -50,4 +50,6 @@ urlpatterns = [
     path('liquidaciones/', rest_views.LiquidacionesListApi.as_view()),
 
     path('products/list/', rest_views.ProductsListApiJson.as_view()),
+
+    path('beneficiarios/', rest_views.cargar_beneficiarios),
 ]

@@ -1994,7 +1994,7 @@ class ProductsCreateView(LoginRequiredMixin,
 
         purchase.file_purchase_order.delete(save=True)
 
-        tasks.build_orden_compra(str(purchase.id), purchase.update_user.email)
+        tasks.build_orden_compra.delay(str(purchase.id), purchase.update_user.email)
 
         return super(ProductsCreateView, self).form_valid(form)
 
@@ -2096,7 +2096,7 @@ class ProductsDeleteView(LoginRequiredMixin,
 
         purchase.file_purchase_order.delete(save=True)
 
-        tasks.build_orden_compra(str(purchase.id), purchase.update_user.email)
+        tasks.build_orden_compra.delay(str(purchase.id), purchase.update_user.email)
 
         return HttpResponseRedirect('../../')
 

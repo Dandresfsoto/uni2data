@@ -1,0 +1,4 @@
+<option value="">----------</option>
+{% for beneficiario in beneficiarios %}
+<option value="{{ beneficiario.pk }}">{{ beneficiario.nombre }}</option>
+{% endfor %}
