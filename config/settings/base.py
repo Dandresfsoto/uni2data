@@ -161,6 +161,7 @@ LOCAL_APPS = [
     'fest_2020_',
     'mobile',
     'iraca',
+    'inventario',
 ]
 
 
