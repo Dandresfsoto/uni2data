@@ -7,7 +7,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, FormView,
 from django.shortcuts import render
 
 from inventario import forms
-from inventario.models import Productos, CargarProductos
+from inventario.models import Productos, CargarProductos, Adiciones
 
 
 class InventarioOptionsView(LoginRequiredMixin,
@@ -229,3 +229,122 @@ class SubirEditView(LoginRequiredMixin,
         kwargs['title'] = "EDITAR CARGUE"
         kwargs['respaldo_url'] = cargue.pretty_print_respaldo()
         return super(SubirEditView,self).get_context_data(**kwargs)
+
+
+#----------------------------------------------------------------------------------
+
+#---------------------------- PRODUCTOS ENTRANTES ---------------------------------
+
+class SubirProductosListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": ["usuarios.inventario.subir.ver"]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/subir/productos/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        cargue = CargarProductos.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "PRODUCTOS A AGREGAR"
+        kwargs['url_datatable'] = '/rest/v1.0/inventario/subir/productos/{0}'.format(cargue.id)
+        kwargs['permiso_crear'] = True if cargue.estado == 'Cargando' else False
+        kwargs['permiso_finalizar'] = True if cargue.estado == 'Cargando' else False
+        kwargs['breadcrum_active'] = cargue.consecutivo
+        return super(SubirProductosListView,self).get_context_data(**kwargs)
+
+class SubirProductosCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/subir/productos/create.html'
+    form_class = forms.AdicionalForm
+    success_url = "../"
+    models = CargarProductos
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.subir.ver",
+                "usuarios.inventario.subir.crear"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+    def form_valid(self, form):
+        orden = CargarProductos.objects.get(id=self.kwargs['pk'])
+        self.object = form.save(commit=False)
+        self.object.cargue = orden
+        self.object.producto = Productos.objects.filter(codigo = form.cleaned_data['codigo']).first()
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVO CARGUE"
+        return super(SubirProductosCreateView,self).get_context_data(**kwargs)
+
+
+class SubirProductosEditView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/subir/productos/edit.html'
+    form_class = forms.AdicionalForm
+    success_url = "../../"
+    model = Adiciones
+    pk_url_kwarg = 'pk_adicion'
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.subir.ver",
+                "usuarios.inventario.subir.editar"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_adicion':self.kwargs['pk_adicion']
+        }
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        cargue = CargarProductos.objects.get(id=self.kwargs['pk'])
+        adicion = Adiciones.objects.get(id=self.kwargs['pk_adicion'])
+        kwargs['title'] = "EDITAR PRODUCTO"
+        return super(SubirProductosEditView,self).get_context_data(**kwargs)
+
+class SubirProductosDeleteView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.ver",
+                "usuarios.inventario.subir.ver",
+                "usuarios.inventario.subir.editar"
+                "usuarios.inventario.subir.eliminar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+        Adiciones.objects.get(id = self.kwargs['pk_adicion']).delete()
+
+        return HttpResponseRedirect('../../')

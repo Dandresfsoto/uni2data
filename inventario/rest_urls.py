@@ -8,4 +8,8 @@ urlpatterns = [
 
     path('subir/', rest_views.SubirListApi.as_view()),
 
+    path('subir/productos/<uuid:pk>/', rest_views.SubirProductosListApi.as_view()),
+
+
+    path('productos/list/', rest_views.ProductosListApiJson.as_view()),
     ]

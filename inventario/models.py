@@ -11,9 +11,10 @@ settings_time_zone = timezone(settings.TIME_ZONE)
 def upload_dinamic_dir_repaldo(instance, filename):
     return '/'.join(['Cargue productos', str(instance.id), 'Respaldo', filename])
 
+
 class Productos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    codigo = models.CharField(max_length=150, verbose_name='Codigo')
+    codigo = models.CharField(unique=True, max_length=150, verbose_name='Codigo')
     nombre = models.CharField(max_length=150, verbose_name='Nombre')
     valor = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
     stock = models.IntegerField(default=0, verbose_name='Cantidad')
@@ -32,6 +33,7 @@ class CargarProductos(models.Model):
     consecutivo = models.IntegerField(default=0, verbose_name='Consecutivo')
     creacion = models.DateTimeField(auto_now_add=True)
     observacion = models.TextField(verbose_name='Observacion', blank=True, null=True)
+    estado = models.CharField(default="Cargando", max_length=150, verbose_name='estado', blank=True, null=True)
 
     respaldo = models.FileField(upload_to=upload_dinamic_dir_repaldo, verbose_name='Respaldo',blank=True, null=True)
 
@@ -61,7 +63,7 @@ class Adiciones(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     cargue = models.ForeignKey(CargarProductos, on_delete=models.DO_NOTHING, verbose_name="Cargue")
     producto = models.ForeignKey(Productos, on_delete=models.DO_NOTHING, verbose_name="Producto")
-    cantidad = models.CharField(max_length=150, verbose_name='Cantidad')
+    cantidad = models.IntegerField(verbose_name='Cantidad')
     observacion = models.TextField(verbose_name='Observacion', blank=True, null=True)
 
 

@@ -1,7 +1,12 @@
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.db.models import Q
-from inventario import models
+from rest_framework.views import APIView
 
+from inventario import models
+from inventario.models import Adiciones, CargarProductos, Productos
+
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class ProductosListApi(BaseDatatableView):
@@ -60,8 +65,8 @@ class ProductosListApi(BaseDatatableView):
 
 class SubirListApi(BaseDatatableView):
     model = models.CargarProductos
-    columns = ['id','consecutivo','creacion','observacion','respaldo']
-    order_columns = ['id','consecutivo','creacion','observacion','respaldo']
+    columns = ['id','consecutivo','creacion','observacion','estado','respaldo']
+    order_columns = ['id','consecutivo','creacion','observacion','estado','respaldo']
 
     def get_initial_queryset(self):
         self.permissions = {
@@ -80,7 +85,7 @@ class SubirListApi(BaseDatatableView):
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
-            q = Q(codigo__icontains=search) | Q(nombre__icontains=search)
+            q = Q(consecutivo__icontains=search) | Q(observacion__icontains=search)
             qs = qs.filter(q)
         return qs
 
@@ -125,6 +130,12 @@ class SubirListApi(BaseDatatableView):
         elif column == 'observacion':
             return str(row.observacion)
 
+        elif column == 'estado':
+            if row.estado == "Cargando":
+                return '<b style="color:blue">{0}</b>'.format(row.estado)
+            else:
+                return '<b style="color:green">{0}</b>'.format(row.estado)
+
         elif column == 'respaldo':
 
             url_respaldo = row.url_respaldo()
@@ -142,3 +153,103 @@ class SubirListApi(BaseDatatableView):
 
         else:
             return super(SubirListApi, self).render_column(row, column)
+
+class SubirProductosListApi(BaseDatatableView):
+    model = Adiciones
+    columns = ['id', 'producto', 'cantidad', 'observacion', 'cargue']
+    order_columns = ['id', 'producto', 'cantidad', 'observacion', 'cargue']
+
+
+    def get_initial_queryset(self):
+
+        self.cargue = CargarProductos.objects.get(id = self.kwargs['pk'])
+
+        return self.model.objects.filter(cargue__id = self.kwargs['pk'])
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(producto__nombre__icontains=search) | Q(producto__codigo__icontains=search) | Q(observacion__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            cargue = CargarProductos.objects.get(id=self.kwargs['pk'])
+            if self.request.user.has_perm('usuarios.inventario.subir.editar') and cargue.estado == "Cargando":
+                ret = '<div class="center-align">' \
+                           '<a href="edit/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar producto: {1}">' \
+                                '<i class="material-icons">edit</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.producto.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">edit</i>' \
+                       '</div>'.format(row.id,row.producto.nombre)
+
+            return ret
+
+        elif column == 'producto':
+            return str(str(row.producto.codigo) + " - " + str(row.producto.nombre))
+
+
+        elif column == 'cantidad':
+            return str(row.cantidad)
+
+        elif column == 'observacion':
+            return row.observacion
+
+
+        elif column == 'cargue':
+            ret = ''
+            cargue = CargarProductos.objects.get(id=self.kwargs['pk'])
+            if self.request.user.has_perm('usuarios.inventario.subir.eliminar') and cargue.estado == "Cargando":
+                ret = '<div class="center-align">' \
+                           '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar pago: {1}">' \
+                                '<i class="material-icons">delete</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.producto.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">delete</i>' \
+                       '</div>'.format(row.id,row.producto.nombre)
+
+            return ret
+
+
+        else:
+            return super(SubirProductosListApi, self).render_column(row, column)
+
+class ProductosListApiJson(APIView):
+    """
+    """
+
+    def get(self, request, format=None):
+        lista = []
+        diccionario = {}
+        name = request.query_params.get('name')
+
+        if name != None:
+
+            q = Q(nombre__icontains = name) | Q(codigo__icontains = name)
+
+
+            filtro = Productos.objects.all()
+
+
+            for producto in filtro.filter(q).exclude():
+                lista.append({
+                    'name': str(producto.codigo) + " - " + str(producto.nombre)
+                })
+                diccionario[str(producto.codigo)] = {
+                    'id': str(producto.id),
+                    'nombre': producto.nombre,
+                    'codigo': str(producto.codigo),
+                }
+
+        return Response({'lista':lista,'diccionario':diccionario},status=status.HTTP_200_OK)

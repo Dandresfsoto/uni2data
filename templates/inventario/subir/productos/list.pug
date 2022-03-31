@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -29,8 +29,14 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
+                    li(class="bold waves-effect waves-light")
+                        a(href="/inventario/subir/") Listado
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Productos
+                        a(href="#") Cargue
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -50,14 +56,18 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="create/") Nuevo producto
-                            i(class="material-icons icon-sican") map
+                        a(href="create/") Agregar
+                            i(class="material-icons icon-sican") library_add
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="listo/") Listo
+                            i(class="material-icons icon-sican") assignment_turned_in
 
                     div(class="divider divider-perfil")
 
     | {% endif %}
-
-
 
 
 
@@ -69,17 +79,19 @@ block container_principal
             thead
                 tr
                     th Editar
-                    th Codigo
-                    th Nombre
-                    th Valor
-                    th Stock
+                    th Producto
+                    th Cantidad
+                    th Observacion
+                    th Eliminar
+
             tbody
                 tr
                     td Editar
-                    td Codigo
-                    td Nombre
-                    td Nombre
-                    td Stock
+                    td Producto
+                    td Cantidad
+                    td Observacion
+                    td Eliminar
+
 
 
 block body_script_auth
