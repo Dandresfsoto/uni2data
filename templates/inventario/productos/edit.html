@@ -54,4 +54,7 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 
 });</script><script>$(document).ready(function () {
     new AutoNumeric('#id_valor_char', {currencySymbol: '$ '});
+
+    $("label[for='id_unidad']").addClass('active');
+    $('#id_unidad').select2();
 });</script></body></html>

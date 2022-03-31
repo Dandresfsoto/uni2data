@@ -53,4 +53,7 @@ block body_script_auth
     script.
         $(document).ready(function () {
             new AutoNumeric('#id_valor_char', {currencySymbol: '$ '});
+
+            $("label[for='id_unidad']").addClass('active');
+            $('#id_unidad').select2();
         });

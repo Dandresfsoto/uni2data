@@ -31,13 +31,13 @@ block side_nav_container
 
 
                     li(class="bold waves-effect waves-light")
-                        a(href="/inventario/productos/") Productos
+                        a(href="/inventario/subir/") listado
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Nuevo producto
+                        a(href="#") Nuevo cargue
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -52,8 +52,14 @@ block container_principal
 block body_script_auth
     script.
         $(document).ready(function () {
-            new AutoNumeric('#id_valor_char', {currencySymbol: '$ '});
 
-            $("label[for='id_unidad']").addClass('active');
-            $('#id_unidad').select2();
+
+            $('#id_respaldo').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el archivo de respaldo del reporte',
+                    'replace': 'Arrastra y suelta el archivo de respaldo del reporte',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
         });
