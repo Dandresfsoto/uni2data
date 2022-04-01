@@ -5,7 +5,7 @@ from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
 
 from inventario import choices
-from inventario.models import Productos, CargarProductos, Adiciones
+from inventario.models import Productos, CargarProductos, Adiciones, Despachos
 
 from django.db.models import Q
 
@@ -172,9 +172,6 @@ class AdicionalForm(forms.ModelForm):
             if adiciones.count() > 0:
                 self.add_error('producto', 'Existe un producto registrado para esta reporte.')
 
-            if Adiciones.objects.filter(cargue__id = self.pk).count() > 19:
-                self.add_error('producto', 'Por reporte solo se permiten 20 productos.')
-
 
 
     def __init__(self, *args, **kwargs):
@@ -240,6 +237,156 @@ class AdicionalForm(forms.ModelForm):
     class Meta:
         model = Adiciones
         fields = ['observacion','cantidad']
+        widgets = {
+            'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
+        }
+
+class DespachoForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        nombre_cliente = cleaned_data.get("nombre_cliente")
+        documento = cleaned_data.get("documento")
+        direccion = cleaned_data.get("direccion")
+        ciudad = cleaned_data.get("ciudad")
+
+        if nombre_cliente == None:
+            self.add_error('nombre_cliente', 'Campo requerido')
+
+        if documento == None:
+            self.add_error('documento', 'Campo requerido')
+
+        if direccion == None:
+            self.add_error('direccion', 'Campo requerido')
+
+        if ciudad == None:
+            self.add_error('ciudad', 'Campo requerido')
+
+    def __init__(self, *args, **kwargs):
+        super(DespachoForm, self).__init__(*args, **kwargs)
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Información del cliente',
+                )
+            ),
+            Row(
+                Column(
+                    'nombre_cliente',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    'documento',
+                    css_class="s6"
+                ),
+                Column(
+                    'telefono',
+                    css_class="s6"
+                ),
+            ),
+            Row(
+                Fieldset(
+                    'Información del envio',
+                )
+            ),
+            Row(
+                Column(
+                    'direccion',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    'ciudad',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    'fecha_envio',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Fieldset(
+                    'Información del conductor',
+                )
+            ),
+            Row(
+                Column(
+                    'transportador',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    'conductor',
+                    css_class="s6"
+                ),
+                Column(
+                    'placa',
+                    css_class="s6"
+                ),
+            ),
+            Row(
+                Fieldset(
+                    'Observacion y documentos',
+                )
+            ),
+            Row(
+                Column(
+                    'observacion',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    HTML(
+                        """
+                        <p style="font-size:1.2rem;"><b>Respaldo</b></p>
+                        """
+                    ),
+                    'respaldo',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    HTML(
+                        """
+                        <p style="font-size:1.2rem;"><b>Legalizacion</b></p>
+                        """
+                    ),
+                    'legalizacion',
+                    css_class='s12'
+                )
+            ),
+
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Despachos
+        fields = ['nombre_cliente','documento','telefono','direccion','ciudad','fecha_envio','respaldo','legalizacion',
+                  'transportador','conductor','placa','observacion']
         widgets = {
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
         }

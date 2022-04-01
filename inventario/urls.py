@@ -16,5 +16,9 @@ urlpatterns = [
     path('subir/productos/<uuid:pk>/create/', views.SubirProductosCreateView.as_view()),
     path('subir/productos/<uuid:pk>/edit/<uuid:pk_adicion>/', views.SubirProductosEditView.as_view()),
     path('subir/productos/<uuid:pk>/delete/<uuid:pk_adicion>/', views.SubirProductosDeleteView.as_view()),
+    path('subir/productos/<uuid:pk>/listo/', views.SubirProductosUploadView.as_view()),
 
+    path('despacho/', views.DespachoListView.as_view()),
+    path('despacho/create/', views.DespachoCreateView.as_view()),
+    path('despacho/edit/<uuid:pk_despacho>/', views.DespachoEditView.as_view()),
 ]

@@ -10,6 +10,7 @@ urlpatterns = [
 
     path('subir/productos/<uuid:pk>/', rest_views.SubirProductosListApi.as_view()),
 
+    path('despacho/', rest_views.DespachoListApi.as_view()),
 
     path('productos/list/', rest_views.ProductosListApiJson.as_view()),
     ]

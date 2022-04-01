@@ -173,7 +173,6 @@ class SubirProductosListApi(BaseDatatableView):
             qs = qs.filter(q)
         return qs
 
-
     def render_column(self, row, column):
 
         if column == 'id':
@@ -224,6 +223,106 @@ class SubirProductosListApi(BaseDatatableView):
 
         else:
             return super(SubirProductosListApi, self).render_column(row, column)
+
+class DespachoListApi(BaseDatatableView):
+    model = models.Despachos
+    columns = ['id','consecutivo','creacion','nombre_cliente','ciudad','estado','respaldo']
+    order_columns = ['id','consecutivo','creacion','nombre_cliente','ciudad','estado','respaldo']
+
+    def get_initial_queryset(self):
+        self.permissions = {
+            "ver": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.despacho.ver"
+            ],
+            "editar": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.despacho.ver",
+                "usuarios.inventario.despacho.editar",
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(consecutivo__icontains=search) | Q(nombre_cliente__icontains=search) | Q(documento__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+        if column == 'id':
+            ret = ''
+
+            if self.request.user.has_perms(self.permissions.get('editar')):
+                ret = '<div class="center-align">' \
+                      '<a href="edit/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar reporte: {1}">' \
+                      '<p style="font-weight:bold;">{2}</p>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.consecutivo, row.consecutivo)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">codigo</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'consecutivo':
+
+
+            if self.request.user.has_perm('usuarios.inventario.despacho.editar'):
+                ret = '<div class="center-align">' \
+                      '<a href="productos/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.consecutivo)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</div>'.format(row.id, row.consecutivo)
+
+            return ret
+
+        elif column == 'nombre_cliente':
+            return str(row.get_info_cliente())
+
+        elif column == 'creacion':
+            return str(row.pretty_fecha_envio_datetime())
+
+        elif column == 'ciudad':
+            return str(row.get_info_destino())
+
+        elif column == 'estado':
+            if row.estado == "Cargando":
+                return '<b style="color:blue">{0}</b>'.format(row.estado)
+            else:
+                return '<b style="color:green">{0}</b>'.format(row.estado)
+
+        elif column == 'respaldo':
+
+            url_respaldo = row.url_respaldo()
+            url_legalizacion = row.url_legalizacion()
+
+            ret = '<div class="center-align">'
+
+            if url_respaldo != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Archivo de respaldo: {1}">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_respaldo, row.consecutivo)
+
+            if url_legalizacion != None:
+                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Archivo de respaldo: {1}">' \
+                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                       '</a>'.format(url_legalizacion, row.consecutivo)
+
+            ret += '</div>'
+
+            return ret
+
+        else:
+            return super(DespachoListApi, self).render_column(row, column)
 
 class ProductosListApiJson(APIView):
     """

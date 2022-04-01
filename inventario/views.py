@@ -7,7 +7,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, FormView,
 from django.shortcuts import render
 
 from inventario import forms
-from inventario.models import Productos, CargarProductos, Adiciones
+from inventario.models import Productos, CargarProductos, Adiciones, Despachos
 
 
 class InventarioOptionsView(LoginRequiredMixin,
@@ -50,7 +50,17 @@ class InventarioOptionsView(LoginRequiredMixin,
                 'sican_url': 'subir/',
                 'sican_name': 'Cargue de productos',
                 'sican_icon': 'archive',
-                'sican_description': 'cargar productos'
+                'sican_description': 'Cargue de productos'
+            })
+        if self.request.user.has_perm('usuarios.inventario.despacho.ver'):
+            items.append({
+                'sican_categoria': 'Despacho',
+                'sican_color': 'orange darken-4',
+                'sican_order': 3,
+                'sican_url': 'despacho/',
+                'sican_name': 'Despacho',
+                'sican_icon': 'local_shipping',
+                'sican_description': 'Despacho de productos'
             })
         return items
 
@@ -336,9 +346,9 @@ class SubirProductosDeleteView(LoginRequiredMixin,
     permissions = {
         "all": [
             "usuarios.inventario.ver",
-                "usuarios.inventario.subir.ver",
-                "usuarios.inventario.subir.editar"
-                "usuarios.inventario.subir.eliminar"
+            "usuarios.inventario.subir.ver",
+            "usuarios.inventario.subir.editar"
+            "usuarios.inventario.subir.eliminar"
         ]
     }
     login_url = settings.LOGIN_URL
@@ -348,3 +358,122 @@ class SubirProductosDeleteView(LoginRequiredMixin,
         Adiciones.objects.get(id = self.kwargs['pk_adicion']).delete()
 
         return HttpResponseRedirect('../../')
+
+class SubirProductosUploadView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.ver",
+            "usuarios.inventario.subir.ver",
+            "usuarios.inventario.subir.editar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        if self.request.user.has_perms(self.permissions.get('all')):
+
+            cargue = CargarProductos.objects.get(id = self.kwargs['pk'])
+            cargue.estado = 'Completo'
+            cargue.save()
+
+            for adicion in Adiciones.objects.filter(cargue = cargue.id):
+                producto = Productos.objects.get(id=adicion.producto.id)
+                producto.stock += adicion.cantidad
+                producto.save()
+
+        return HttpResponseRedirect('../../../')
+
+#----------------------------------------------------------------------------------
+
+#-----------------------------DESPACHO--------------------------------------------
+
+class DespachoListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.ver",
+            "usuarios.inventario.despachos.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/despacho/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "DESPARCHAR PRODUCTOS"
+        kwargs['url_datatable'] = '/rest/v1.0/inventario/despacho/'
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.inventario.despacho.crear')
+        return super(DespachoListView,self).get_context_data(**kwargs)
+
+class DespachoCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/despacho/create.html'
+    form_class = forms.DespachoForm
+    success_url = "../"
+    models = Despachos
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.despachos.ver",
+                "usuarios.inventario.despachos.crear"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+        despachos = Despachos.objects.all().count()
+        self.object = form.save(commit=False)
+        self.object.consecutivo = despachos + 1
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVO DESPACHO"
+        return super(DespachoCreateView,self).get_context_data(**kwargs)
+
+class DespachoEditView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/despacho/edit.html'
+    form_class = forms.DespachoForm
+    success_url = "../../"
+    model = Despachos
+    pk_url_kwarg = 'pk_despacho'
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.despachos.ver",
+                "usuarios.inventario.despachos.editar"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {'pk_despacho':self.kwargs['pk_despacho']}
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        despacho = Despachos.objects.get(id=self.kwargs['pk_despacho'])
+        kwargs['title'] = "EDITAR DESPACHO"
+        kwargs['respaldo_url'] = despacho.pretty_print_respaldo()
+        kwargs['legalizacion_url'] = despacho.pretty_print_legalizacion()
+        return super(DespachoEditView,self).get_context_data(**kwargs)
