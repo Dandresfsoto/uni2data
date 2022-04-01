@@ -7,7 +7,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, FormView,
 from django.shortcuts import render
 
 from inventario import forms
-from inventario.models import Productos, CargarProductos, Adiciones, Despachos
+from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones
 
 
 class InventarioOptionsView(LoginRequiredMixin,
@@ -114,7 +114,9 @@ class ProductosCreateView(LoginRequiredMixin,
         return permissions
 
     def form_valid(self, form):
-        self.object = form.save()
+        self.object = form.save(commit=False)
+        self.object.valor = float(form.cleaned_data['valor_char'].replace('$ ', '').replace(',', ''))
+        self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -145,7 +147,14 @@ class ProductosEditView(LoginRequiredMixin,
         return {'pk':self.kwargs['pk']}
 
     def form_valid(self, form):
-        self.object = form.save()
+        producto = Productos.objects.get(id=self.kwargs['pk'])
+        producto.codigo = form.cleaned_data['codigo']
+        producto.nombre = form.cleaned_data['nombre']
+        producto.valor = float(form.cleaned_data['valor_char'].replace('$ ', '').replace(',', ''))
+        producto.stock = form.cleaned_data['stock']
+        producto.unidad = form.cleaned_data['unidad']
+        producto.impuesto = form.cleaned_data['impuesto']
+        producto.save()
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -477,3 +486,145 @@ class DespachoEditView(LoginRequiredMixin,
         kwargs['respaldo_url'] = despacho.pretty_print_respaldo()
         kwargs['legalizacion_url'] = despacho.pretty_print_legalizacion()
         return super(DespachoEditView,self).get_context_data(**kwargs)
+
+class DespachoProductosListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": ["usuarios.inventario.despacho.ver"]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/despacho/productos/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        despacho = Despachos.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "PRODUCTOS A DESPACHAR"
+        kwargs['url_datatable'] = '/rest/v1.0/inventario/despacho/productos/{0}'.format(despacho.id)
+        kwargs['permiso_crear'] = True if despacho.estado == 'Cargando' else False
+        kwargs['permiso_finalizar'] = True if despacho.estado == 'Cargando' else False
+        kwargs['breadcrum_active'] = despacho.consecutivo
+        return super(DespachoProductosListView,self).get_context_data(**kwargs)
+
+class DespachoProductosCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/despacho/productos/create.html'
+    form_class = forms.SustraccionForm
+    success_url = "../"
+    models = Sustracciones
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.despacho.ver",
+                "usuarios.inventario.despacho.crear"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+    def form_valid(self, form):
+        despacho = Despachos.objects.get(id=self.kwargs['pk'])
+        self.object = form.save(commit=False)
+        self.object.despacho = despacho
+        self.object.producto = Productos.objects.filter(codigo = form.cleaned_data['codigo']).first()
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVO CARGUE"
+        return super(DespachoProductosCreateView,self).get_context_data(**kwargs)
+
+class DespachoProductosEditView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/despacho/productos/edit.html'
+    form_class = forms.SustraccionForm
+    success_url = "../../"
+    model = Sustracciones
+    pk_url_kwarg = 'pk_sustracion'
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.despacho.ver",
+                "usuarios.inventario.despacho.editar"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_sustracion':self.kwargs['pk_sustracion']
+        }
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        despacho = Despachos.objects.get(id=self.kwargs['pk'])
+        sustraccion = Sustracciones.objects.get(id=self.kwargs['pk_sustracion'])
+        kwargs['title'] = "EDITAR PRODUCTO"
+        return super(DespachoProductosEditView,self).get_context_data(**kwargs)
+
+class DespachoProductosDeleteView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.ver",
+            "usuarios.inventario.despachos.ver",
+            "usuarios.inventario.despachos.editar"
+            "usuarios.inventario.despachos.eliminar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+        Sustracciones.objects.get(id = self.kwargs['pk_sustracion']).delete()
+
+        return HttpResponseRedirect('../../')
+
+class DespachoProductosUploadView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.ver",
+            "usuarios.inventario.despachos.ver",
+            "usuarios.inventario.despachos.editar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        if self.request.user.has_perms(self.permissions.get('all')):
+
+            despacho = Despachos.objects.get(id = self.kwargs['pk'])
+            despacho.estado = 'Completo'
+            despacho.save()
+
+            for sustraccion in Sustracciones.objects.filter(despacho = despacho.id):
+                producto = Productos.objects.get(id=sustraccion.producto.id)
+                producto.stock -= sustraccion.cantidad
+                producto.save()
+
+        return HttpResponseRedirect('../../../')

@@ -5,7 +5,7 @@ from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
 
 from inventario import choices
-from inventario.models import Productos, CargarProductos, Adiciones, Despachos
+from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones
 
 from django.db.models import Q
 
@@ -86,7 +86,7 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Productos
-        fields = ['codigo','nombre','valor','stock','unidad','impuesto']
+        fields = ['codigo','nombre','stock','unidad','impuesto']
 
 class CargueProductosForm(forms.ModelForm):
 
@@ -387,6 +387,98 @@ class DespachoForm(forms.ModelForm):
         model = Despachos
         fields = ['nombre_cliente','documento','telefono','direccion','ciudad','fecha_envio','respaldo','legalizacion',
                   'transportador','conductor','placa','observacion']
+        widgets = {
+            'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
+        }
+
+class SustraccionForm(forms.ModelForm):
+    producto = forms.CharField(max_length=100,label='Producto',widget=forms.TextInput(attrs={'class':'autocomplete','autocomplete':'off'}))
+    codigo = forms.CharField(label="ID producto",widget=forms.HiddenInput())
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        codigo = cleaned_data.get("codigo")
+
+        q = Q(despacho__id=self.pk) & Q(producto__codigo=codigo)
+
+        sustracciones = Sustracciones.objects.filter(q)
+
+
+        if self.pk_sustracion != None:
+
+            if sustracciones.exclude(id = self.pk_sustracion).count() > 0:
+                self.add_error('producto', 'Existe un producto registrado para esta reporte.')
+
+        else:
+            if sustracciones.count() > 0:
+                self.add_error('producto', 'Existe un producto registrado para esta reporte.')
+
+
+
+    def __init__(self, *args, **kwargs):
+        super(SustraccionForm, self).__init__(*args, **kwargs)
+
+        self.pk = kwargs['initial'].get('pk')
+        self.pk_sustracion = kwargs['initial'].get('pk_sustracion')
+
+        pk_sustracion = kwargs['initial'].get('pk_sustracion')
+        if pk_sustracion != None:
+            sustraccion = Sustracciones.objects.get(id=pk_sustracion)
+            self.fields['producto'].initial = str(sustraccion.producto.codigo) + ' - ' + str(sustraccion.producto.nombre)
+            self.fields['observacion'].initial = sustraccion.observacion
+            self.fields['cantidad'].initial = sustraccion.cantidad
+            self.fields['codigo'].initial = sustraccion.producto.codigo
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Información del producto',
+                )
+            ),
+            Row(
+                Column(
+                    'producto',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    'codigo',
+                    css_class="s6"
+                ),
+            ),
+            Row(
+                Column(
+                    'cantidad',
+                    css_class="s6"
+                ),
+            ),
+            Row(
+                Column(
+                    'observacion',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Sustracciones
+        fields = ['observacion','cantidad']
         widgets = {
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
         }

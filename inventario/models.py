@@ -136,3 +136,14 @@ class Despachos(models.Model):
             return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
         else:
             return '<a href="'+ url +'"> '+ str(self.legalizacion.name) +'</a>'
+
+class Sustracciones(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    despacho = models.ForeignKey(Despachos, on_delete=models.DO_NOTHING, verbose_name="Cargue")
+    producto = models.ForeignKey(Productos, on_delete=models.DO_NOTHING, verbose_name="Producto")
+    cantidad = models.IntegerField(verbose_name='Cantidad')
+    observacion = models.TextField(verbose_name='Observacion', blank=True, null=True)
+
+
+    def __str__(self):
+        return str(str(self.despacho.consecutivo) + " - " + str(self.producto.codigo) + " - " + str(self.producto.nombre))

@@ -2,15 +2,14 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.db.models import Q
 from rest_framework.views import APIView
 
-from inventario import models
-from inventario.models import Adiciones, CargarProductos, Productos
+from inventario.models import Adiciones, CargarProductos, Productos, Despachos, Sustracciones
 
 from rest_framework.response import Response
 from rest_framework import status
 
 
 class ProductosListApi(BaseDatatableView):
-    model = models.Productos
+    model = Productos
     columns = ['id','codigo','nombre','valor','stock']
     order_columns = ['id','codigo','nombre','valor','stock']
 
@@ -64,7 +63,7 @@ class ProductosListApi(BaseDatatableView):
             return super(ProductosListApi, self).render_column(row, column)
 
 class SubirListApi(BaseDatatableView):
-    model = models.CargarProductos
+    model = CargarProductos
     columns = ['id','consecutivo','creacion','observacion','estado','respaldo']
     order_columns = ['id','consecutivo','creacion','observacion','estado','respaldo']
 
@@ -225,7 +224,7 @@ class SubirProductosListApi(BaseDatatableView):
             return super(SubirProductosListApi, self).render_column(row, column)
 
 class DespachoListApi(BaseDatatableView):
-    model = models.Despachos
+    model = Despachos
     columns = ['id','consecutivo','creacion','nombre_cliente','ciudad','estado','respaldo']
     order_columns = ['id','consecutivo','creacion','nombre_cliente','ciudad','estado','respaldo']
 
@@ -323,6 +322,76 @@ class DespachoListApi(BaseDatatableView):
 
         else:
             return super(DespachoListApi, self).render_column(row, column)
+
+class DespachoProductosListApi(BaseDatatableView):
+    model = Sustracciones
+    columns = ['id', 'producto', 'cantidad', 'observacion', 'despacho']
+    order_columns = ['id', 'producto', 'cantidad', 'observacion', 'despacho']
+
+
+    def get_initial_queryset(self):
+
+        self.despacho = Despachos.objects.get(id = self.kwargs['pk'])
+
+        return self.model.objects.filter(despacho__id = self.kwargs['pk'])
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(producto__nombre__icontains=search) | Q(producto__codigo__icontains=search) | Q(observacion__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            despacho = Despachos.objects.get(id=self.kwargs['pk'])
+            if self.request.user.has_perm('usuarios.inventario.subir.editar') and despacho.estado == "Cargando":
+                ret = '<div class="center-align">' \
+                           '<a href="edit/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar producto: {1}">' \
+                                '<i class="material-icons">edit</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.producto.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">edit</i>' \
+                       '</div>'.format(row.id,row.producto.nombre)
+
+            return ret
+
+        elif column == 'producto':
+            return str(str(row.producto.codigo) + " - " + str(row.producto.nombre))
+
+
+        elif column == 'cantidad':
+            return str(row.cantidad)
+
+        elif column == 'observacion':
+            return row.observacion
+
+
+        elif column == 'despacho':
+            ret = ''
+            despacho = Despachos.objects.get(id=self.kwargs['pk'])
+            if self.request.user.has_perm('usuarios.inventario.subir.eliminar') and despacho.estado == "Cargando":
+                ret = '<div class="center-align">' \
+                           '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar pago: {1}">' \
+                                '<i class="material-icons">delete</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id,row.producto.nombre)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">delete</i>' \
+                       '</div>'.format(row.id,row.producto.nombre)
+
+            return ret
+
+
+        else:
+            return super(DespachoProductosListApi, self).render_column(row, column)
 
 class ProductosListApiJson(APIView):
     """
