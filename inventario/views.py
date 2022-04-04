@@ -7,6 +7,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, FormView,
 from django.shortcuts import render
 
 from inventario import forms
+from inventario import tasks
 from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones
 
 
@@ -506,6 +507,7 @@ class DespachoProductosListView(LoginRequiredMixin,
         kwargs['permiso_crear'] = True if despacho.estado == 'Cargando' else False
         kwargs['permiso_finalizar'] = True if despacho.estado == 'Cargando' else False
         kwargs['breadcrum_active'] = despacho.consecutivo
+        kwargs['respaldo'] = despacho.url_respaldo()
         return super(DespachoProductosListView,self).get_context_data(**kwargs)
 
 class DespachoProductosCreateView(LoginRequiredMixin,
@@ -533,10 +535,16 @@ class DespachoProductosCreateView(LoginRequiredMixin,
 
     def form_valid(self, form):
         despacho = Despachos.objects.get(id=self.kwargs['pk'])
+        producto = Productos.objects.filter(codigo = form.cleaned_data['codigo']).first()
         self.object = form.save(commit=False)
         self.object.despacho = despacho
-        self.object.producto = Productos.objects.filter(codigo = form.cleaned_data['codigo']).first()
+        self.object.producto = producto
+        self.object.valor_total = float(producto.valor) * float(form.cleaned_data['cantidad'])
         self.object.save()
+
+        despacho.respaldo.delete(save=True)
+
+        tasks.build_remision(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -571,7 +579,13 @@ class DespachoProductosEditView(LoginRequiredMixin,
         }
 
     def form_valid(self, form):
+        despacho = Despachos.objects.get(id=self.kwargs['pk'])
+        sustraccion = Sustracciones.objects.get(id=self.kwargs['pk_sustracion'])
+        self.object.valor_total = float(sustraccion.producto.valor) * float(form.cleaned_data['cantidad'])
         self.object = form.save()
+        despacho.respaldo.delete(save=True)
+
+        tasks.build_remision(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):

@@ -301,15 +301,9 @@ class DespachoListApi(BaseDatatableView):
 
         elif column == 'respaldo':
 
-            url_respaldo = row.url_respaldo()
             url_legalizacion = row.url_legalizacion()
 
             ret = '<div class="center-align">'
-
-            if url_respaldo != None:
-                ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Archivo de respaldo: {1}">' \
-                       '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
-                       '</a>'.format(url_respaldo, row.consecutivo)
 
             if url_legalizacion != None:
                 ret += '<a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Archivo de respaldo: {1}">' \
@@ -325,8 +319,8 @@ class DespachoListApi(BaseDatatableView):
 
 class DespachoProductosListApi(BaseDatatableView):
     model = Sustracciones
-    columns = ['id', 'producto', 'cantidad', 'observacion', 'despacho']
-    order_columns = ['id', 'producto', 'cantidad', 'observacion', 'despacho']
+    columns = ['id', 'producto', 'cantidad', 'observacion','valor_total', 'despacho']
+    order_columns = ['id', 'producto', 'cantidad', 'observacion','valor_total','despacho']
 
 
     def get_initial_queryset(self):
@@ -371,6 +365,11 @@ class DespachoProductosListApi(BaseDatatableView):
         elif column == 'observacion':
             return row.observacion
 
+        elif column == 'valor_total':
+            if row.valor_total != None and row.valor_total != "":
+                return row.pretty_print_valor_total()
+            else:
+                return "0"
 
         elif column == 'despacho':
             ret = ''

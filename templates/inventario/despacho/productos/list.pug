@@ -70,7 +70,23 @@ block side_nav_container
     | {% endif %}
 
 
+    | {% if respaldo != None %}
+    ul(class="collapsible",data-collapsible="accordion")
+        li(class="bold waves-effect waves-light button-menu")
 
+            div(class="collapsible-header active")
+                i(class="material-icons") call_to_action
+                | Formatos
+
+            div(class="collapsible-body collapsible-body-blue")
+                ul
+                    div(class="divider divider-perfil")
+                    li(class="bold waves-effect waves-light")
+                        a(href="{{ respaldo }}") Remision
+                            i(class="material-icons icon-sican") attach_file
+
+                    div(class="divider divider-perfil")
+    | {% endif %}
 
 
 block container_principal
@@ -82,6 +98,7 @@ block container_principal
                     th Producto
                     th Cantidad
                     th Observacion
+                    th Total
                     th Eliminar
 
             tbody
@@ -90,6 +107,7 @@ block container_principal
                     td Producto
                     td Cantidad
                     td Observacion
+                    td Total
                     td Eliminar
 
 

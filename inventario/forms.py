@@ -157,6 +157,7 @@ class AdicionalForm(forms.ModelForm):
         cleaned_data = super().clean()
 
         codigo = cleaned_data.get("codigo")
+        cantidad = cleaned_data.get("cantidad")
 
         q = Q(cargue__id=self.pk) & Q(producto__codigo=codigo)
 
@@ -173,6 +174,13 @@ class AdicionalForm(forms.ModelForm):
                 self.add_error('producto', 'Existe un producto registrado para esta reporte.')
 
 
+        producto = Productos.objects.get(codigo = codigo)
+
+
+
+        if cantidad >= producto.cantidad:
+            self.add_error('producto', 'No existen suficientes productos, revisar el inventario')
+            self.add_error('cantidad', 'No existen suficientes productos, revisar el inventario')
 
     def __init__(self, *args, **kwargs):
         super(AdicionalForm, self).__init__(*args, **kwargs)

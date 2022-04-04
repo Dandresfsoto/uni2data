@@ -89,6 +89,7 @@ class Despachos(models.Model):
 
     respaldo = models.FileField(upload_to=upload_dinamic_dir_repaldo, verbose_name='Respaldo',blank=True, null=True)
     legalizacion = models.FileField(upload_to=upload_dinamic_dir_repaldo, verbose_name='Legalizacion',blank=True, null=True)
+    remision = models.FileField(upload_to=upload_dinamic_dir_repaldo, verbose_name='Remision',blank=True, null=True)
 
     def __str__(self):
         return str(str(self.consecutivo) + " - " + str(self.observacion))
@@ -137,13 +138,33 @@ class Despachos(models.Model):
         else:
             return '<a href="'+ url +'"> '+ str(self.legalizacion.name) +'</a>'
 
+    def url_remision(self):
+        url = None
+        try:
+            url = self.remision.url
+        except:
+            pass
+        return url
+
+    def pretty_print_remision(self):
+        try:
+            url = self.remision.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="'+ url +'"> '+ str(self.remision.name) +'</a>'
+
 class Sustracciones(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     despacho = models.ForeignKey(Despachos, on_delete=models.DO_NOTHING, verbose_name="Cargue")
     producto = models.ForeignKey(Productos, on_delete=models.DO_NOTHING, verbose_name="Producto")
     cantidad = models.IntegerField(verbose_name='Cantidad')
     observacion = models.TextField(verbose_name='Observacion', blank=True, null=True)
-
+    valor_total = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
 
     def __str__(self):
         return str(str(self.despacho.consecutivo) + " - " + str(self.producto.codigo) + " - " + str(self.producto.nombre))
+
+    def pretty_print_valor_total(self):
+        valor_total = self.valor_total
+        return str(valor_total).replace('COL','')
