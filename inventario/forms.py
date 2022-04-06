@@ -479,7 +479,7 @@ class SustraccionForm(forms.ModelForm):
 
         producto = Productos.objects.get(codigo=codigo)
 
-        if cantidad >= producto.cantidad:
+        if cantidad >= producto.stock:
             self.add_error('producto', 'No existen suficientes productos, revisar el inventario')
             self.add_error('cantidad', 'No existen suficientes productos, revisar el inventario')
 
@@ -642,3 +642,47 @@ class ClienteForm(forms.ModelForm):
             'cedula': 'Documento #',
             'tipo_documento': 'Tipo',
         }
+
+class SustraccionPlusForm(forms.Form):
+
+    file = forms.FileField(widget=forms.FileInput(attrs={'accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        file = cleaned_data.get("file")
+
+        if file.name.split('.')[-1] == 'xlsx':
+            pass
+        else:
+            self.add_error('file', 'El archivo cargado no tiene un formato valido')
+
+    def __init__(self, *args, **kwargs):
+        super(SustraccionPlusForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Archivo XLSX:',
+                )
+            ),
+            Row(
+                Column(
+                    'file',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )

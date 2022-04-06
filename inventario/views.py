@@ -652,7 +652,7 @@ class DespachoProductosCreateView(LoginRequiredMixin,
 
         despacho.respaldo.delete(save=True)
 
-        tasks.build_remision(str(despacho.id))
+        tasks.build_remision.delay(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -693,7 +693,7 @@ class DespachoProductosEditView(LoginRequiredMixin,
         self.object = form.save()
         despacho.respaldo.delete(save=True)
 
-        tasks.build_remision(str(despacho.id))
+        tasks.build_remision.delay(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -718,9 +718,11 @@ class DespachoProductosDeleteView(LoginRequiredMixin,
     success_url = "../../"
 
     def dispatch(self, request, *args, **kwargs):
+        despacho = Despachos.objects.get(id=self.kwargs['pk'])
         Sustracciones.objects.get(id = self.kwargs['pk_sustracion']).delete()
 
-        return HttpResponseRedirect('../../')
+        tasks.build_remision.delay(str(despacho.id))
+        return HttpResponseRedirect(self.get_success_url())
 
 class DespachoProductosUploadView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
@@ -751,6 +753,65 @@ class DespachoProductosUploadView(LoginRequiredMixin,
 
         return HttpResponseRedirect('../../../')
 
+class DespachoMasivoProductosUploadView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/despacho/productos/add.html'
+    form_class = forms.SustraccionPlusForm
+    success_url = "../"
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.despacho.ver",
+                "usuarios.inventario.despacho.editar"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+    def form_valid(self, form):
+        despacho = Despachos.objects.get(id=self.kwargs['pk'])
+        wb = openpyxl.load_workbook(form.cleaned_data['file'])
+        ws = wb.active
+
+        for file in ws.rows:
+            if Productos.objects.filter(codigo = file[0].value).count() > 0:
+                sustraccion = Sustracciones.objects.create(
+                    despacho = despacho,
+                    producto = Productos.objects.get(codigo = file[0].value),
+                    cantidad = file[1].value,
+                )
+                sustraccion.save()
+
+                observacion = file[2].value
+                if observacion != None and observacion != "":
+                    sustraccion.observacion = observacion
+                    sustraccion.save()
+            elif Productos.objects.filter(nombre = file[4].value).count() > 0:
+                sustraccion = Sustracciones.objects.create(
+                    despacho = despacho,
+                    producto = Productos.objects.get(codigo = file[0].value),
+                    cantidad = file[1].value,
+                )
+                sustraccion.save()
+
+                observacion = file[2].value
+                if observacion != None and observacion != "":
+                    sustraccion.observacion = observacion
+                    sustraccion.save()
+
+        tasks.build_remision.delay(str(despacho.id))
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "AGREGAR PRODUCTOS"
+        return super(DespachoMasivoProductosUploadView,self).get_context_data(**kwargs)
 #----------------------------------------------------------------------------------
 
 #-----------------------------PRODUCTOS--------------------------------------------

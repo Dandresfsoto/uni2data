@@ -30,7 +30,9 @@ urlpatterns = [
     path('despacho/productos/<uuid:pk>/create/', views.DespachoProductosCreateView.as_view()),
     path('despacho/productos/<uuid:pk>/edit/<uuid:pk_sustracion>/', views.DespachoProductosEditView.as_view()),
     path('despacho/productos/<uuid:pk>/delete/<uuid:pk_sustracion>/', views.DespachoProductosDeleteView.as_view()),
+
     path('despacho/productos/<uuid:pk>/listo/', views.DespachoProductosUploadView.as_view()),
+    path('despacho/productos/<uuid:pk>/add/', views.DespachoMasivoProductosUploadView.as_view()),
 
     path('clientes/', views.ClientesListView.as_view()),
     path('clientes/create/', views.ClientesCreateView.as_view()),
