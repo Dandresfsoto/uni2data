@@ -2,7 +2,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from django.db.models import Q
 from rest_framework.views import APIView
 
-from inventario.models import Adiciones, CargarProductos, Productos, Despachos, Sustracciones
+from inventario.models import Adiciones, CargarProductos, Productos, Despachos, Sustracciones, Clientes
 
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,8 +10,8 @@ from rest_framework import status
 
 class ProductosListApi(BaseDatatableView):
     model = Productos
-    columns = ['id','codigo','nombre','valor','stock']
-    order_columns = ['id','codigo','nombre','valor','stock']
+    columns = ['id','codigo','nombre','valor','stock','unidad']
+    order_columns = ['id','codigo','nombre','valor','stock','unidad']
 
     def get_initial_queryset(self):
         self.permissions = {
@@ -45,7 +45,7 @@ class ProductosListApi(BaseDatatableView):
 
             else:
                 ret = '<div class="center-align">' \
-                           '<i class="material-icons">codigo</i>' \
+                           '<i class="material-icons">edit</i>' \
                        '</div>'.format(row.id)
 
             return ret
@@ -58,6 +58,21 @@ class ProductosListApi(BaseDatatableView):
 
         elif column == 'stock':
             return '<b style="color:blue">{0}</b>'.format(row.stock)
+
+        elif column == 'unidad':
+            if self.request.user.has_perms(self.permissions.get('editar')):
+                ret = '<div class="center-align">' \
+                      '<a href="add/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Editar producto">' \
+                      '<i class="material-icons" style="color:green">add_box</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">add_box</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
 
         else:
             return super(ProductosListApi, self).render_column(row, column)
@@ -391,6 +406,64 @@ class DespachoProductosListApi(BaseDatatableView):
 
         else:
             return super(DespachoProductosListApi, self).render_column(row, column)
+
+class CientesListApi(BaseDatatableView):
+    model = Clientes
+    columns = ['id','documento','nombre','direccion','telefono']
+    order_columns = ['id','documento','nombre','direccion','telefono']
+
+    def get_initial_queryset(self):
+        self.permissions = {
+            "ver": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.clientes.ver"
+            ],
+            "editar": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.clientes.ver",
+                "usuarios.inventario.clientes.editar",
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(nombre__icontains=search) | Q(apellido__icontains=search) | Q(documento__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('editar')):
+                ret = '<div class="center-align">' \
+                      '<a href="edit/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Editar producto">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">edit</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'documento':
+            return str(row.documento)
+
+        elif column == 'nombre':
+            return row.get_nombre_completo()
+
+        elif column == 'direccion':
+            return row.direccion
+
+
+        elif column == 'telefono':
+            return row.telefono
+
+        else:
+            return super(CientesListApi, self).render_column(row, column)
 
 class ProductosListApiJson(APIView):
     """

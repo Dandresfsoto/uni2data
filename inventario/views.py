@@ -1,3 +1,4 @@
+import openpyxl
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 
@@ -8,7 +9,7 @@ from django.shortcuts import render
 
 from inventario import forms
 from inventario import tasks
-from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones
+from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones, Clientes
 
 
 class InventarioOptionsView(LoginRequiredMixin,
@@ -53,7 +54,7 @@ class InventarioOptionsView(LoginRequiredMixin,
                 'sican_icon': 'archive',
                 'sican_description': 'Cargue de productos'
             })
-        if self.request.user.has_perm('usuarios.inventario.despacho.ver'):
+        if self.request.user.has_perm('usuarios.inventario.despachos.ver'):
             items.append({
                 'sican_categoria': 'Despacho',
                 'sican_color': 'orange darken-4',
@@ -62,6 +63,16 @@ class InventarioOptionsView(LoginRequiredMixin,
                 'sican_name': 'Despacho',
                 'sican_icon': 'local_shipping',
                 'sican_description': 'Despacho de productos'
+            })
+        if self.request.user.has_perm('usuarios.inventario.clientes.ver'):
+            items.append({
+                'sican_categoria': 'Clientes',
+                'sican_color': 'light-green darken-4',
+                'sican_order': 4,
+                'sican_url': 'clientes/',
+                'sican_name': 'Clientes',
+                'sican_icon': 'folder_shared',
+                'sican_description': 'listado de clientes'
             })
         return items
 
@@ -162,9 +173,41 @@ class ProductosEditView(LoginRequiredMixin,
         kwargs['title'] = "EDITAR PRODUCTO"
         return super(ProductosEditView,self).get_context_data(**kwargs)
 
+class ProductosAddView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/productos/edit.html'
+    form_class = forms.AddProductForm
+    success_url = "../../"
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.productos.ver",
+                "usuarios.inventario.productos.editar"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+    def form_valid(self, form):
+        producto = Productos.objects.get(id=self.kwargs['pk'])
+        producto.stock += form.cleaned_data['stock']
+        producto.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "AGREGAR STOCK"
+        return super(ProductosAddView,self).get_context_data(**kwargs)
+
 #----------------------------------------------------------------------------------
 
-#-----------------------------PRODUCTOS--------------------------------------------
+#--------------------- CARGUE DE  PRODUCTOS----------------------------------------
 
 class SubirListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
@@ -273,6 +316,7 @@ class SubirProductosListView(LoginRequiredMixin,
         kwargs['url_datatable'] = '/rest/v1.0/inventario/subir/productos/{0}'.format(cargue.id)
         kwargs['permiso_crear'] = True if cargue.estado == 'Cargando' else False
         kwargs['permiso_finalizar'] = True if cargue.estado == 'Cargando' else False
+        kwargs['permiso_cargar'] = True if cargue.estado == 'Cargando' else False
         kwargs['breadcrum_active'] = cargue.consecutivo
         return super(SubirProductosListView,self).get_context_data(**kwargs)
 
@@ -397,6 +441,67 @@ class SubirProductosUploadView(LoginRequiredMixin,
                 producto.save()
 
         return HttpResponseRedirect('../../../')
+
+class SubirMasivoProductosUploadView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/subir/productos/add.html'
+    form_class = forms.AdicionalPlusForm
+    success_url = "../"
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.subir.ver",
+                "usuarios.inventario.subir.editar"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+    def form_valid(self, form):
+        cargue = CargarProductos.objects.get(id=self.kwargs['pk'])
+        wb = openpyxl.load_workbook(form.cleaned_data['file'])
+        ws = wb.active
+
+        for file in ws.rows:
+            if Productos.objects.filter(codigo = file[0].value).count() > 0:
+                adicion = Adiciones.objects.create(
+                    cargue = cargue,
+                    producto = Productos.objects.get(codigo = file[0].value),
+                    cantidad = file[1].value,
+                )
+                adicion.save()
+
+                observacion = file[2].value
+                if observacion != None and observacion != "":
+                    adicion.observacion = observacion
+                    adicion.save()
+            elif Productos.objects.filter(nombre = file[4].value).count() > 0:
+                adicion = Adiciones.objects.create(
+                    cargue = cargue,
+                    producto = Productos.objects.get(codigo = file[0].value),
+                    cantidad = file[1].value,
+                )
+                adicion.save()
+
+                observacion = file[2].value
+                if observacion != None and observacion != "":
+                    adicion.observacion = observacion
+                    adicion.save()
+
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "AGREGAR PRODUCTOS"
+        return super(SubirMasivoProductosUploadView,self).get_context_data(**kwargs)
 
 #----------------------------------------------------------------------------------
 
@@ -642,3 +747,88 @@ class DespachoProductosUploadView(LoginRequiredMixin,
                 producto.save()
 
         return HttpResponseRedirect('../../../')
+
+#----------------------------------------------------------------------------------
+
+#-----------------------------PRODUCTOS--------------------------------------------
+
+class ClientesListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.ver",
+            "usuarios.inventario.clientes.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/clientes/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CLIENTES"
+        kwargs['url_datatable'] = '/rest/v1.0/inventario/clientes/'
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.inventario.clientes.crear')
+        return super(ClientesListView,self).get_context_data(**kwargs)
+
+class ClientesCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/clientes/create.html'
+    form_class = forms.ClienteForm
+    success_url = "../"
+    models = Clientes
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.clientes.ver",
+                "usuarios.inventario.clientes.crear"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.save()
+        return super(ClientesCreateView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVO CLIENTE"
+        return super(ClientesCreateView,self).get_context_data(**kwargs)
+
+class ClientesupdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/clientes/edit.html'
+    form_class = forms.ClienteForm
+    success_url = "../../"
+    model = Clientes
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.productos.ver",
+                "usuarios.inventario.productos.editar"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.save()
+        return super(ClientesupdateView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "EDITAR CLIENTE"
+        return super(ClientesupdateView,self).get_context_data(**kwargs)

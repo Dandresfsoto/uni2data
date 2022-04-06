@@ -1,4 +1,4 @@
-extends ../../../base_auth
+extends ../../base_auth
 
 block title
     |{{title | upper}}
@@ -29,14 +29,8 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
-                    li(class="bold waves-effect waves-light")
-                        a(href="/inventario/subir/") Listado
-                            i(class="material-icons icon-sican") keyboard_arrow_right
-
-                    div(class="divider divider-perfil")
-
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Cargue
+                        a(href="#") Productos
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -56,20 +50,8 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="create/") Agregar
-                            i(class="material-icons icon-sican") library_add
-
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="listo/") Listo
-                            i(class="material-icons icon-sican") assignment_turned_in
-
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="add/") Cargue masivo
-                            i(class="material-icons icon-sican") file_upload
+                        a(href="create/") Nuevo cliente
+                            i(class="material-icons icon-sican") map
 
                     div(class="divider divider-perfil")
 
@@ -87,19 +69,17 @@ block container_principal
             thead
                 tr
                     th Editar
-                    th Producto
-                    th Cantidad
-                    th Observacion
-                    th Eliminar
-
+                    th Documento
+                    th Nombre completo
+                    th Direccion
+                    th Telefono
             tbody
                 tr
                     td Editar
-                    td Producto
-                    td Cantidad
-                    td Observacion
-                    td Eliminar
-
+                    td Documento
+                    td Nombre completo
+                    td Direccion
+                    td Telefono
 
 
 block body_script_auth

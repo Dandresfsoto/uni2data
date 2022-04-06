@@ -5,7 +5,7 @@ from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
 
 from inventario import choices
-from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones
+from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones, Clientes
 
 from django.db.models import Q
 
@@ -87,6 +87,40 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Productos
         fields = ['codigo','nombre','stock','unidad','impuesto']
+
+class AddProductForm(forms.Form):
+    stock = forms.IntegerField(label="Stock")
+
+    def __init__(self, *args, **kwargs):
+        super(AddProductForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Agregar stock',
+                )
+            ),
+            Row(
+                Column(
+                    'stock',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
 
 class CargueProductosForm(forms.ModelForm):
 
@@ -173,15 +207,6 @@ class AdicionalForm(forms.ModelForm):
             if adiciones.count() > 0:
                 self.add_error('producto', 'Existe un producto registrado para esta reporte.')
 
-
-        producto = Productos.objects.get(codigo = codigo)
-
-
-
-        if cantidad >= producto.cantidad:
-            self.add_error('producto', 'No existen suficientes productos, revisar el inventario')
-            self.add_error('cantidad', 'No existen suficientes productos, revisar el inventario')
-
     def __init__(self, *args, **kwargs):
         super(AdicionalForm, self).__init__(*args, **kwargs)
 
@@ -248,6 +273,50 @@ class AdicionalForm(forms.ModelForm):
         widgets = {
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
         }
+
+class AdicionalPlusForm(forms.Form):
+
+    file = forms.FileField(widget=forms.FileInput(attrs={'accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        file = cleaned_data.get("file")
+
+        if file.name.split('.')[-1] == 'xlsx':
+            pass
+        else:
+            self.add_error('file', 'El archivo cargado no tiene un formato valido')
+
+    def __init__(self, *args, **kwargs):
+        super(AdicionalPlusForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Archivo XLSX:',
+                )
+            ),
+            Row(
+                Column(
+                    'file',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
 
 class DespachoForm(forms.ModelForm):
 
@@ -407,6 +476,7 @@ class SustraccionForm(forms.ModelForm):
         cleaned_data = super().clean()
 
         codigo = cleaned_data.get("codigo")
+        cantidad = cleaned_data.get("cantidad")
 
         q = Q(despacho__id=self.pk) & Q(producto__codigo=codigo)
 
@@ -422,6 +492,11 @@ class SustraccionForm(forms.ModelForm):
             if sustracciones.count() > 0:
                 self.add_error('producto', 'Existe un producto registrado para esta reporte.')
 
+        producto = Productos.objects.get(codigo=codigo)
+
+        if cantidad >= producto.cantidad:
+            self.add_error('producto', 'No existen suficientes productos, revisar el inventario')
+            self.add_error('cantidad', 'No existen suficientes productos, revisar el inventario')
 
 
     def __init__(self, *args, **kwargs):
@@ -489,4 +564,96 @@ class SustraccionForm(forms.ModelForm):
         fields = ['observacion','cantidad']
         widgets = {
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
+        }
+
+class ClienteForm(forms.ModelForm):
+
+
+    def __init__(self, *args, **kwargs):
+        super(ClienteForm, self).__init__(*args, **kwargs)
+
+        self.fields['tipo_documento'].widget = forms.Select(choices=[
+            ('', '----------'),
+            ('1', 'Nit'),
+            ('2', 'Cédula de Ciudadania'),
+            ('3', 'Tarjeta de Identidad'),
+            ('4', 'Cédula de Extranjeria'),
+            ('5', 'Pasaporte'),
+            ('6', 'Tajeta Seguro Social'),
+            ('7', 'Nit Menores'),
+        ])
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Información del cliente',
+                )
+            ),
+            Row(
+                Column(
+                    'nombre',
+                    css_class='s12 m6 l3'
+                ),
+                Column(
+                    'apellido',
+                    css_class='s12 m6 l3'
+                ),
+                Column(
+                    'tipo_documento',
+                    css_class='s12 m6 l3'
+                ),
+                Column(
+                    'documento',
+                    css_class='s12 m6 l3'
+                ),
+            ),
+            Row(
+                Column(
+                    'telefono',
+                    css_class='s12 m6'
+                ),
+                Column(
+                    'email',
+                    css_class='s12 m6'
+                ),
+            ),
+            Row(
+                Fieldset(
+                    'Direccion del cliente',
+                )
+            ),
+            Row(
+                Column(
+                    'ciudad',
+                    css_class='s12'
+                ),
+            ),
+            Row(
+                Column(
+                    'direccion',
+                    css_class='s12'
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Clientes
+        fields = ['nombre','apellido','tipo_documento','documento','ciudad','direccion','telefono','email']
+        labels = {
+            'cedula': 'Documento #',
+            'tipo_documento': 'Tipo',
         }
