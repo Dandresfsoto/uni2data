@@ -13,6 +13,7 @@ urlpatterns = [
     path('despacho/productos/<uuid:pk>/', rest_views.DespachoProductosListApi.as_view()),
 
     path('productos/list/', rest_views.ProductosListApiJson.as_view()),
+    path('cliente/list/', rest_views.ClientesListApi.as_view()),
 
     path('clientes/', rest_views.CientesListApi.as_view()),
     ]

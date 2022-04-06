@@ -30,7 +30,7 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Cargue
+                        a(href="#") Despachos
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -97,7 +97,7 @@ block body_script_auth
                 searching: true,
                 processing: true,
                 serverSide: true,
-                order: [[ 1, "asc" ]],
+                order: [[ 1, "desc" ]],
                 ajax: "{{ url_datatable }}",
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"

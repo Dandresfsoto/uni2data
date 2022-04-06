@@ -31,13 +31,12 @@ def build_remision(id):
         top_left_cell = ws['G3']
         top_left_cell.value = str(despacho.consecutivo)
 
-        ws['B6'] = str(despacho.nombre_cliente)
-        ws['D6'] = str(despacho.ciudad.nombre)
+        ws['B6'] = str(despacho.cliente.get_nombre_completo())
+        ws['D6'] = str(despacho.cliente.ciudad.nombre)
         ws['H6'] = str(despacho.pretty_fecha_envio_datetime())
 
-        ws['B7'] = str(despacho.documento)
-        ws['D7'] = str(despacho.direccion)
-        ws['D7'] = str(despacho.direccion)
+        ws['B7'] = str(despacho.cliente.documento)
+        ws['D7'] = str(despacho.cliente.direccion)
 
         if despacho.transportador != None and despacho.transportador != "":
             ws['B8'] = str(despacho.transportador)

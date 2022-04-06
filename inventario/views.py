@@ -547,9 +547,12 @@ class DespachoCreateView(LoginRequiredMixin,
         }
         return permissions
 
+
     def form_valid(self, form):
         despachos = Despachos.objects.all().count()
+        cliente = Clientes.objects.filter(documento=form.cleaned_data['documento']).first()
         self.object = form.save(commit=False)
+        self.object.cliente = cliente
         self.object.consecutivo = despachos + 1
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())

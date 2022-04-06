@@ -95,13 +95,13 @@ block body_script_auth
                 searching: true,
                 processing: true,
                 serverSide: true,
-                order: [[ 1, "asc" ]],
+                order: [[ 1, "desc" ]],
                 ajax: "{{ url_datatable }}",
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
                 },
                 drawCallback: function (settings) {
-                    $('.tooltipped').tooltip({delay: 50});
+                    $('.tooltipped').tooltip({delay:    50});
                 }
             });
 

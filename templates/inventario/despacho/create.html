@@ -87,4 +87,34 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
             'error': 'Ooops, algo malo paso.'
         }
     });
+    $("#id_cliente").on('keydown', function () {
+
+        $("label[for='id_documento']").removeClass('active');
+        $("#id_documento").val(null);
+
+        $.ajax({
+            type: 'GET',
+            url: '/rest/v1.0/inventario/cliente/list/?name=' + $("#id_cliente").val(),
+            success: function (response) {
+                var tercerosArray = response.lista;
+                var dataTerceros = {};
+                for (var i = 0; i < tercerosArray.length; i++) {
+                    dataTerceros[tercerosArray[i].name] = tercerosArray[i].flag;
+                }
+                $('input.autocomplete').autocomplete({
+                    data: dataTerceros,
+                    limit: 5,
+                    onAutocomplete: function (val) {
+
+                        var documento = parseInt(val.split(' - ')[0]);
+                        var data = response.diccionario[documento];
+
+
+                        $("label[for='id_documento']").addClass('active');
+                        $("#id_documento").val(documento);
+                    }
+                });
+            }
+        });
+    });
 });</script></body></html>

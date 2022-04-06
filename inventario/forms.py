@@ -320,28 +320,19 @@ class AdicionalPlusForm(forms.Form):
 
 class DespachoForm(forms.ModelForm):
 
-    def clean(self):
-        cleaned_data = super().clean()
-
-        nombre_cliente = cleaned_data.get("nombre_cliente")
-        documento = cleaned_data.get("documento")
-        direccion = cleaned_data.get("direccion")
-        ciudad = cleaned_data.get("ciudad")
-
-        if nombre_cliente == None:
-            self.add_error('nombre_cliente', 'Campo requerido')
-
-        if documento == None:
-            self.add_error('documento', 'Campo requerido')
-
-        if direccion == None:
-            self.add_error('direccion', 'Campo requerido')
-
-        if ciudad == None:
-            self.add_error('ciudad', 'Campo requerido')
+    cliente = forms.CharField(max_length=100,label='Cliente',widget=forms.TextInput(attrs={'class':'autocomplete','autocomplete':'off'}))
+    documento = forms.IntegerField(label="Documento",widget=forms.HiddenInput())
 
     def __init__(self, *args, **kwargs):
         super(DespachoForm, self).__init__(*args, **kwargs)
+
+        self.pk = kwargs['initial'].get('pk_despacho')
+
+        pk_despacho = kwargs['initial'].get('pk_despacho')
+        if pk_despacho != None:
+            despacho = Despachos.objects.get(id=pk_despacho)
+            self.fields['cliente'].initial = str(despacho.cliente.documento) + ' - ' + str(despacho.cliente.nombre)+ ' ' + str(despacho.cliente.apellido)
+            self.fields['documento'].initial = despacho.cliente.documento
 
 
         self.helper = FormHelper(self)
@@ -353,18 +344,12 @@ class DespachoForm(forms.ModelForm):
             ),
             Row(
                 Column(
-                    'nombre_cliente',
+                    'cliente',
                     css_class="s12"
                 ),
-            ),
-            Row(
                 Column(
                     'documento',
-                    css_class="s6"
-                ),
-                Column(
-                    'telefono',
-                    css_class="s6"
+                    css_class="s12"
                 ),
             ),
             Row(
@@ -462,7 +447,7 @@ class DespachoForm(forms.ModelForm):
 
     class Meta:
         model = Despachos
-        fields = ['nombre_cliente','documento','telefono','direccion','ciudad','fecha_envio','respaldo','legalizacion',
+        fields = ['fecha_envio','respaldo','legalizacion',
                   'transportador','conductor','placa','observacion']
         widgets = {
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),

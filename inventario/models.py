@@ -71,16 +71,55 @@ class Adiciones(models.Model):
     def __str__(self):
         return str(str(self.cargue.consecutivo) + " - " + str(self.producto.codigo) + " - " + str(self.producto.nombre))
 
+class Clientes(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    nombre = models.CharField(max_length=150, verbose_name='Nombre del cliente', blank=True, null=True)
+    apellido = models.CharField(max_length=150, verbose_name='Apellido del cliente', blank=True, null=True)
+    ciudad = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, verbose_name="Municipio", blank=True, null=True)
+    tipo_documento = models.IntegerField(verbose_name='Tipo de documento', blank=True, null=True)
+    documento = models.IntegerField(unique=True, verbose_name='Documento', blank=True, null=True)
+    direccion = models.CharField(max_length=150, verbose_name='Direccion', blank=True, null=True)
+    telefono = models.BigIntegerField(verbose_name='Telefono', blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+
+    def __str__(self):
+        return str(self.documento) + " - " + str(self.nombre) + " " + str(self.apellido)
+
+    def get_nombre_completo(self):
+        return str(self.nombre + " " + self.apellido)
+
+    def get_tipo_documento(self):
+        tipo = ''
+
+        if self.tipo_documento == 1:
+            tipo = 'Nit'
+
+        if self.tipo_documento == 2:
+            tipo = 'Cédula de Ciudadania'
+
+        if self.tipo_documento == 3:
+            tipo = 'Tarjeta de Identidad'
+
+        if self.tipo_documento == 4:
+            tipo = 'Cédula de Extranjeria'
+
+        if self.tipo_documento == 5:
+            tipo = 'Pasaporte'
+
+        if self.tipo_documento == 6:
+            tipo = 'Tajeta Seguro Social'
+
+        if self.tipo_documento == 7:
+            tipo = 'Nit Menores'
+
+        return tipo
+
 class Despachos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     consecutivo = models.IntegerField(default=0, verbose_name='Consecutivo')
     creacion = models.DateTimeField(auto_now_add=True)
-    nombre_cliente = models.CharField(max_length=150, verbose_name='Nombre del cliente', blank=True, null=True)
-    ciudad = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, verbose_name="Municipio", blank=True, null=True)
+    cliente = models.ForeignKey(Clientes, on_delete=models.DO_NOTHING, verbose_name="Cliente")
     fecha_envio = models.DateField(verbose_name='Fecha de envio', blank=True, null=True)
-    documento = models.IntegerField(verbose_name='Nit o Cedula', blank=True, null=True)
-    direccion = models.CharField(max_length=150, verbose_name='Direccion', blank=True, null=True)
-    telefono = models.BigIntegerField(verbose_name='Telefono', blank=True, null=True)
     transportador = models.CharField(verbose_name='Transportadora', max_length=150, blank=True, null=True)
     conductor = models.CharField(verbose_name='Conductor', max_length=150, blank=True, null=True)
     placa = models.CharField(verbose_name='Placa', max_length=150, blank=True, null=True)
@@ -95,10 +134,10 @@ class Despachos(models.Model):
         return str(str(self.consecutivo) + " - " + str(self.observacion))
 
     def get_info_cliente(self):
-        return str(str(self.documento) + " - " + str(self.nombre_cliente))
+        return str(str(self.cliente.documento) + " - " + str(self.cliente.nombre))
 
     def get_info_destino(self):
-        return str(str(self.direccion) + " - " + str(self.ciudad.nombre) + "/" + str(self.ciudad.departamento.nombre))
+        return str(str(self.cliente.direccion) + " - " + str(self.cliente.ciudad.nombre) + "/" + str(self.cliente.ciudad.departamento.nombre))
 
     def pretty_creation_datetime(self):
         return self.creacion.astimezone(settings_time_zone).strftime('%d/%m/%Y a las %I:%M:%S %p')
@@ -169,45 +208,3 @@ class Sustracciones(models.Model):
         valor_total = self.valor_total
         return str(valor_total).replace('COL','')
 
-class Clientes(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    nombre = models.CharField(max_length=150, verbose_name='Nombre del cliente', blank=True, null=True)
-    apellido = models.CharField(max_length=150, verbose_name='Apellido del cliente', blank=True, null=True)
-    ciudad = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, verbose_name="Municipio", blank=True, null=True)
-    tipo_documento = models.IntegerField(verbose_name='Tipo de documento', blank=True, null=True)
-    documento = models.IntegerField(verbose_name='Documento', blank=True, null=True)
-    direccion = models.CharField(max_length=150, verbose_name='Direccion', blank=True, null=True)
-    telefono = models.BigIntegerField(verbose_name='Telefono', blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-
-    def __str__(self):
-        return str(self.documento) + " - " + str(self.nombre) + " " + str(self.apellido)
-
-    def get_nombre_completo(self):
-        return str(self.nombre + " " + self.apellido)
-
-    def get_tipo_documento(self):
-        tipo = ''
-
-        if self.tipo_documento == 1:
-            tipo = 'Nit'
-
-        if self.tipo_documento == 2:
-            tipo = 'Cédula de Ciudadania'
-
-        if self.tipo_documento == 3:
-            tipo = 'Tarjeta de Identidad'
-
-        if self.tipo_documento == 4:
-            tipo = 'Cédula de Extranjeria'
-
-        if self.tipo_documento == 5:
-            tipo = 'Pasaporte'
-
-        if self.tipo_documento == 6:
-            tipo = 'Tajeta Seguro Social'
-
-        if self.tipo_documento == 7:
-            tipo = 'Nit Menores'
-
-        return tipo

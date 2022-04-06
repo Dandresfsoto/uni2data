@@ -493,3 +493,33 @@ class ProductosListApiJson(APIView):
                 }
 
         return Response({'lista':lista,'diccionario':diccionario},status=status.HTTP_200_OK)
+
+class ClientesListApi(APIView):
+    """
+    """
+
+    def get(self, request, format=None):
+        lista = []
+        diccionario = {}
+        name = request.query_params.get('name')
+
+        if name != None:
+
+            q = Q(nombre__icontains = name) | Q(apellido__icontains = name) | Q(documento__icontains = name)
+
+
+            filtro = Clientes.objects.all()
+
+
+            for cliente in filtro.filter(q).exclude():
+                lista.append({
+                    'name': str(cliente.documento) + " - " + str(cliente.nombre)  + " " + str(cliente.apellido)
+                })
+                diccionario[str(cliente.documento)] = {
+                    'id': str(cliente.id),
+                    'nombre': cliente.nombre,
+                    'apellido': cliente.apellido,
+                    'docuemento': str(cliente.documento),
+                }
+
+        return Response({'lista':lista,'diccionario':diccionario},status=status.HTTP_200_OK)
