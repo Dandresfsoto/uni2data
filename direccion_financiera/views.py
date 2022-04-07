@@ -944,20 +944,40 @@ class ReporteReportesView(LoginRequiredMixin,
 
 
             if reporte.efectivo:
-                adjuntos = [
-                    ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
-                     mimetypes.guess_type(reporte.firma.name)[0])
-                ]
+                if reporte.servicio.nombre == "Servicios publicos":
+                    adjuntos = [
+                        ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
+                         mimetypes.guess_type(reporte.firma.name)[0])
+                    ]
 
+                else:
+
+                    adjuntos = [
+                        ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
+                         mimetypes.guess_type(reporte.firma.name)[0]),
+                        ('PAGO ' + str(reporte.consecutive) + ' - ARCHIVO PLANO.' + str(reporte.plano.name.split('.')[-1]), reporte.plano.read(),
+                         mimetypes.guess_type(reporte.plano.name)[0]),
+                        ('PAGO ' + str(reporte.consecutive) + ' - RESPALDO.' + str(reporte.respaldo.name.split('.')[-1]), reporte.respaldo.read(),
+                         mimetypes.guess_type(reporte.respaldo.name)[0]),
+                    ]
             else:
+                if reporte.servicio.nombre == "Servicios publicos":
+                    adjuntos = [
+                        ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(
+                            reporte.firma.name.split('.')[-1]), reporte.firma.read(),
+                         mimetypes.guess_type(reporte.firma.name)[0])
+                    ]
 
-                adjuntos = [
-                    ('PAGO '+ str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
-                     mimetypes.guess_type(reporte.firma.name)[0]),
-                    ('PAGO ' + str(reporte.consecutive) + ' - ARCHIVO PLANO.' + str(reporte.plano.name.split('.')[-1]), reporte.plano.read(),
-                     mimetypes.guess_type(reporte.plano.name)[0])
-                ]
+                else:
 
+                    adjuntos = [
+                        ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(
+                            reporte.firma.name.split('.')[-1]), reporte.firma.read(),
+                         mimetypes.guess_type(reporte.firma.name)[0]),
+                        ('PAGO ' + str(reporte.consecutive) + ' - ARCHIVO PLANO.' + str(
+                            reporte.plano.name.split('.')[-1]), reporte.plano.read(),
+                         mimetypes.guess_type(reporte.plano.name)[0])
+                    ]
             if reporte.respaldo.name != '':
                 template = 'mail/direccion_financiera/reportes/reporte.tpl'
             else:
