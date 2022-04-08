@@ -2612,6 +2612,15 @@ class CollectAccountRejectView(FormView):
             collect_account.observaciones = form.cleaned_data['observaciones']
             collect_account.save()
 
+            collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+            models.Registration.objects.create(
+                cut=collect_account.cut,
+                user=self.request.user,
+                collect_account=collect_account,
+                delta="Rechazo la seguridad social por: " + collect_account.observaciones
+            )
+
             user = collect_account.contract.get_user_or_none()
 
             if user != None:
@@ -2628,15 +2637,6 @@ class CollectAccountRejectView(FormView):
                     DEFAULT_FROM_EMAIL,
                     [user.email, EMAIL_HOST_USER, settings.EMAIL_DIRECCION_FINANCIERA, settings.EMAIL_GERENCIA]
                 )
-
-            collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
-
-            models.Registration.objects.create(
-                cut=collect_account.cut,
-                user=self.request.user,
-                collect_account=collect_account,
-                delta="Rechazo la seguridad social por: " + collect_account.observaciones
-            )
 
 
         return super(CollectAccountRejectView, self).form_valid(form)
