@@ -2698,7 +2698,7 @@ class CutsCollectsReportAccountView(LoginRequiredMixin,
             consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
         )
 
-        tasks.build_list_collects_account(reporte.id,id_cuts)
+        tasks.build_list_collects_account.delay(reporte.id,id_cuts)
 
         return HttpResponseRedirect('/reportes/')
 
