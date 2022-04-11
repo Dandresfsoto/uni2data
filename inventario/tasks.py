@@ -7,7 +7,8 @@ from django.conf import settings
 from openpyxl.drawing.image import Image
 from django.core.files import File
 
-from inventario.models import Despachos, Sustracciones
+from config.functions import construir_reporte
+from inventario.models import Despachos, Sustracciones, Productos
 from reportes.models import Reportes
 
 
@@ -201,3 +202,44 @@ def build_remision(id):
         despacho.respaldo.save(filename, File(output))
 
     return "Reporte generado"
+
+@app.task
+def build_list_reports(id):
+    reporte = Reportes.objects.get(id=id)
+    productos = Productos.objects.all()
+    proceso = "SICAN-LIST-PRODUCTOS"
+
+
+    titulos = ['Consecutivo', 'Código','Nombre', 'Valor' ,'Stock']
+
+    formatos = ['0', 'General','General', '"$"#,##0_);("$"#,##0)','0']
+
+    ancho_columnas = [20, 30, 30, 40, 30]
+
+    contenidos = []
+    order = []
+
+
+    i = 0
+    for producto in productos:
+        i += 1
+
+
+        lista = [
+            int(i),
+            producto.codigo,
+            producto.nombre,
+            producto.pretty_print_precio(),
+            producto.stock,
+        ]
+
+        contenidos.append(lista)
+
+
+    output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
+
+    filename = str(reporte.id) + '.xlsx'
+    reporte.file.save(filename, File(output))
+
+
+    return "Archivo paquete ID: " + filename

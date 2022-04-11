@@ -10,6 +10,7 @@ from django.shortcuts import render
 from inventario import forms
 from inventario import tasks
 from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones, Clientes
+from reportes.models import Reportes
 
 
 class InventarioOptionsView(LoginRequiredMixin,
@@ -204,6 +205,33 @@ class ProductosAddView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         kwargs['title'] = "AGREGAR STOCK"
         return super(ProductosAddView,self).get_context_data(**kwargs)
+
+
+class ProductosReportView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.ver",
+                "usuarios.inventario.productos.ver",
+                "usuarios.inventario.productos.editar"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+        products = Productos.objects.all()
+        reporte = Reportes.objects.create(
+            usuario = self.request.user,
+            nombre = 'Reporte de productos',
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
+        )
+
+        tasks.build_list_reports.delay(reporte.id)
+
+        return HttpResponseRedirect('/reportes/')
+
 
 #----------------------------------------------------------------------------------
 
