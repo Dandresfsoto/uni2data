@@ -1289,6 +1289,17 @@ class PagosCreateView(LoginRequiredMixin,
                     pago.save()
                 except:
                     pass
+            elif pago.tercero.third_active_account == True:
+                try:
+                    pago.tipo_cuenta = pago.tercero.type_third
+                    pago.banco = pago.tercero.bank_third.nombre
+                    pago.cuenta = pago.tercero.account_third
+                    pago.cargo = pago.tercero.cargo.nombre
+                    pago.save()
+                    pago.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                    pago.save()
+                except:
+                    pass
 
             valor = 0
             for pago_obj in models.Pagos.objects.filter(reporte=pago.reporte):
@@ -1339,6 +1350,17 @@ class PagosCreateView(LoginRequiredMixin,
                     pago_new.tipo_cuenta = pago_new.tercero.type
                     pago_new.banco = pago_new.tercero.bank.nombre
                     pago_new.cuenta = pago_new.tercero.account
+                    pago_new.cargo = pago_new.tercero.cargo.nombre
+                    pago_new.save()
+                    pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                    pago_new.save()
+                except:
+                    pass
+            elif pago_new.tercero.third_active_account == True:
+                try:
+                    pago_new.tipo_cuenta = pago_new.tercero.type_third
+                    pago_new.banco = pago_new.tercero.bank_third.nombre
+                    pago_new.cuenta = pago_new.tercero.account_third
                     pago_new.cargo = pago_new.tercero.cargo.nombre
                     pago_new.save()
                     pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])

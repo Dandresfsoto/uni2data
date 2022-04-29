@@ -81,6 +81,7 @@ class TerceroForm(forms.ModelForm):
 
     first_active_account = forms.BooleanField(required=False, label="Seleccionar esta cuenta bancaria como principal")
     second_active_account = forms.BooleanField(required=False, label="Seleccionar esta cuenta bancaria como principal")
+    third_active_account = forms.BooleanField(required=False, label="Seleccionar esta cuenta bancaria como principal")
 
     def clean(self):
         cleaned_data = super().clean()
@@ -94,8 +95,13 @@ class TerceroForm(forms.ModelForm):
         type = cleaned_data.get("type")
         account = cleaned_data.get("account")
 
+        bank_third = cleaned_data.get("bank_third")
+        type_third = cleaned_data.get("type_third")
+        account_third = cleaned_data.get("account_third")
+
         first_active_account = cleaned_data.get("first_active_account")
         second_active_account = cleaned_data.get("second_active_account")
+        third_active_account = cleaned_data.get("third_active_account")
 
         if cargo == None:
             self.add_error('cargo', 'Campo requerido')
@@ -121,18 +127,50 @@ class TerceroForm(forms.ModelForm):
             if account == None:
                 self.add_error('account', 'Campo requerido')
 
+        if bank_third != None or type_third != None or account_third != None:
+            if bank_third == None:
+                self.add_error('bank_third', 'Campo requerido')
+            if type_third == None:
+                self.add_error('type_third', 'Campo requerido')
+            if account_third == None:
+                self.add_error('account_third', 'Campo requerido')
+
         if bank != None and account != None:
             longitudes = bank.longitud.split(',')
             if str(len(account)) not in longitudes:
                 self.add_error('account', 'La cuenta debe tener {0} digitos.'.format(bank.longitud))
 
+        if bank_third != None and account_third != None:
+            longitudes = bank_third.longitud.split(',')
+            if str(len(account_third)) not in longitudes:
+                self.add_error('account_third', 'La cuenta debe tener {0} digitos.'.format(bank_third.longitud))
+
         if first_active_account == True and second_active_account == True:
             self.add_error('first_active_account', 'Solo debe seleccionar una opcion')
             self.add_error('second_active_account', 'Solo debe seleccionar una opcion')
 
+        elif first_active_account == True and third_active_account == True:
+            self.add_error('first_active_account', 'Solo debe seleccionar una opcion')
+            self.add_error('third_active_account', 'Solo debe seleccionar una opcion')
+
+        elif second_active_account == True and third_active_account == True:
+            self.add_error('second_active_account', 'Solo debe seleccionar una opcion')
+            self.add_error('third_active_account', 'Solo debe seleccionar una opcion')
+
+        elif first_active_account == True and second_active_account == True and third_active_account == True:
+            self.add_error('first_active_account', 'Solo debe seleccionar una opcion')
+            self.add_error('second_active_account', 'Solo debe seleccionar una opcion')
+            self.add_error('third_active_account', 'Solo debe seleccionar una opcion')
+
 
     def __init__(self, *args, **kwargs):
         super(TerceroForm, self).__init__(*args, **kwargs)
+
+        self.fields['type_third'].widget = forms.Select(choices=[
+            ('', '----------'),
+            ('Ahorros', 'Ahorros'),
+            ('Corriente', 'Corriente')
+        ])
 
         self.fields['type'].widget = forms.Select(choices=[
             ('', '----------'),
@@ -277,7 +315,31 @@ class TerceroForm(forms.ModelForm):
                     css_class="s12"
                 ),
             ),
-
+            Row(
+                Column(
+                    Row(
+                        Column(
+                            'third_active_account',
+                            css_class='s12'
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'account_third',
+                            css_class='s12'
+                        ),
+                        Column(
+                            'bank_third',
+                            css_class='s12 m6'
+                        ),
+                        Column(
+                            'type_third',
+                            css_class='s12 m6'
+                        )
+                    ),
+                    css_class="s12"
+                ),
+            ),
             Row(
                 Column(
                     Div(
@@ -295,7 +357,9 @@ class TerceroForm(forms.ModelForm):
 
     class Meta:
         model = Contratistas
-        fields = ['nombres','apellidos','tipo_identificacion','cedula','celular','email','birthday','tipo_cuenta','banco','cuenta','cargo','type','bank','account','first_active_account','second_active_account']
+        fields = ['nombres','apellidos','tipo_identificacion','cedula','celular','email','birthday','tipo_cuenta','banco',
+                  'cuenta','cargo','type','bank','account','first_active_account','second_active_account', 'third_active_account',
+                  'type_third','bank_third','account_third']
         labels = {
             'birthday': 'Fecha de nacimiento',
             'cedula': 'Cédula',
@@ -305,6 +369,9 @@ class TerceroForm(forms.ModelForm):
             'account': 'Número de cuenta',
             'type': 'Tipo de cuenta',
             'bank': 'Banco',
+            'account_third': 'Número de cuenta',
+            'type_third': 'Tipo de cuenta',
+            'bank_third': 'Banco',
         }
 
 class ReporteForm(forms.ModelForm):
