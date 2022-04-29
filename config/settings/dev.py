@@ -10,11 +10,12 @@ DEBUG = True
 
 DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': "uni2data",
-            'USER': "uni2data",
-            'PASSWORD': "uni2data",
-            # 'HOST': env('POSTGRES_HOST'),
-            # 'PORT': env('POSTGRES_PORT'),
+            'NAME': env('POSTGRES_DB'),
+            'USER': env('POSTGRES_USER'),
+            'PASSWORD': env('POSTGRES_PASSWORD'),
+            'HOST': env('POSTGRES_HOST'),
+            'PORT': env('POSTGRES_PORT'),
+            'HOST': env('POSTGRES_HOST'),
+            'PORT': env('POSTGRES_PORT'),
         }
 }
