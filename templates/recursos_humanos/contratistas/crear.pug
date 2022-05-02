@@ -53,11 +53,15 @@ block body_script_auth
         $(document).ready(function () {
 
             $('#id_cargo').select2();
+
             $('#id_banco').select2();
             $('#id_tipo_cuenta').select2();
 
             $('#id_bank').select2();
             $('#id_type').select2();
+
+            $('#id_bank_third').select2();
+            $('#id_type_third').select2();
 
             $('select').material_select();
             $("label[for='id_banco']").addClass('active');
@@ -67,6 +71,9 @@ block body_script_auth
 
             $("label[for='id_bank']").addClass('active');
             $("label[for='id_type']").addClass('active');
+
+            $("label[for='id_bank_third']").addClass('active');
+            $("label[for='id_type_third']").addClass('active');
 
             $('#id_birthday').pickadate({
                 format: 'dd/mm/yyyy',
