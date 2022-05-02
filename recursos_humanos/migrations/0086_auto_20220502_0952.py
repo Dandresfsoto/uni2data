@@ -8,7 +8,6 @@ import djmoney.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('direccion_financiera', '0054_auto_20220428_1941'),
         ('recursos_humanos', '0085_otros_si_fecha_original'),
     ]
 
