@@ -120,7 +120,7 @@ class TerceroForm(forms.ModelForm):
                 self.add_error('type', 'Campo requerido')
             if account == None:
                 self.add_error('account', 'Campo requerido')
-
+        #
         if bank != None and account != None:
             longitudes = bank.longitud.split(',')
             if str(len(account)) not in longitudes:
