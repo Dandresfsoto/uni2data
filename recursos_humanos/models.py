@@ -76,6 +76,10 @@ class Contratistas(models.Model):
     bank = models.ForeignKey(Bancos, blank=True, null=True, on_delete=models.DO_NOTHING, related_name="contractor_bank")
     account = models.CharField(max_length=100, blank=True, null=True)
 
+    third_active_account = models.BooleanField(default=False)
+    type_third = models.CharField(max_length=50, blank=True, null=True)
+    bank_third = models.ForeignKey(Bancos, blank=True, null=True, on_delete=models.DO_NOTHING, related_name="contractor_bank_third")
+    account_third = models.CharField(max_length=100, blank=True, null=True)
 
     usuario_asociado = models.ForeignKey(User, related_name="usuario_asociado", on_delete=models.DO_NOTHING, blank=True, null=True)
 
