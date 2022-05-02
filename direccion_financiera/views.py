@@ -944,20 +944,40 @@ class ReporteReportesView(LoginRequiredMixin,
 
 
             if reporte.efectivo:
-                adjuntos = [
-                    ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
-                     mimetypes.guess_type(reporte.firma.name)[0])
-                ]
+                if reporte.servicio.nombre == "Servicios publicos":
+                    adjuntos = [
+                        ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
+                         mimetypes.guess_type(reporte.firma.name)[0])
+                    ]
 
+                else:
+
+                    adjuntos = [
+                        ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
+                         mimetypes.guess_type(reporte.firma.name)[0]),
+                        ('PAGO ' + str(reporte.consecutive) + ' - ARCHIVO PLANO.' + str(reporte.plano.name.split('.')[-1]), reporte.plano.read(),
+                         mimetypes.guess_type(reporte.plano.name)[0]),
+                        ('PAGO ' + str(reporte.consecutive) + ' - RESPALDO.' + str(reporte.respaldo.name.split('.')[-1]), reporte.respaldo.read(),
+                         mimetypes.guess_type(reporte.respaldo.name)[0]),
+                    ]
             else:
+                if reporte.servicio.nombre == "Servicios publicos":
+                    adjuntos = [
+                        ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(
+                            reporte.firma.name.split('.')[-1]), reporte.firma.read(),
+                         mimetypes.guess_type(reporte.firma.name)[0])
+                    ]
 
-                adjuntos = [
-                    ('PAGO '+ str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
-                     mimetypes.guess_type(reporte.firma.name)[0]),
-                    ('PAGO ' + str(reporte.consecutive) + ' - ARCHIVO PLANO.' + str(reporte.plano.name.split('.')[-1]), reporte.plano.read(),
-                     mimetypes.guess_type(reporte.plano.name)[0])
-                ]
+                else:
 
+                    adjuntos = [
+                        ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(
+                            reporte.firma.name.split('.')[-1]), reporte.firma.read(),
+                         mimetypes.guess_type(reporte.firma.name)[0]),
+                        ('PAGO ' + str(reporte.consecutive) + ' - ARCHIVO PLANO.' + str(
+                            reporte.plano.name.split('.')[-1]), reporte.plano.read(),
+                         mimetypes.guess_type(reporte.plano.name)[0])
+                    ]
             if reporte.respaldo.name != '':
                 template = 'mail/direccion_financiera/reportes/reporte.tpl'
             else:
@@ -1269,6 +1289,17 @@ class PagosCreateView(LoginRequiredMixin,
                     pago.save()
                 except:
                     pass
+            elif pago.tercero.third_active_account == True:
+                try:
+                    pago.tipo_cuenta = pago.tercero.type_third
+                    pago.banco = pago.tercero.bank_third.nombre
+                    pago.cuenta = pago.tercero.account_third
+                    pago.cargo = pago.tercero.cargo.nombre
+                    pago.save()
+                    pago.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                    pago.save()
+                except:
+                    pass
 
             valor = 0
             for pago_obj in models.Pagos.objects.filter(reporte=pago.reporte):
@@ -1319,6 +1350,17 @@ class PagosCreateView(LoginRequiredMixin,
                     pago_new.tipo_cuenta = pago_new.tercero.type
                     pago_new.banco = pago_new.tercero.bank.nombre
                     pago_new.cuenta = pago_new.tercero.account
+                    pago_new.cargo = pago_new.tercero.cargo.nombre
+                    pago_new.save()
+                    pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                    pago_new.save()
+                except:
+                    pass
+            elif pago_new.tercero.third_active_account == True:
+                try:
+                    pago_new.tipo_cuenta = pago_new.tercero.type_third
+                    pago_new.banco = pago_new.tercero.bank_third.nombre
+                    pago_new.cuenta = pago_new.tercero.account_third
                     pago_new.cargo = pago_new.tercero.cargo.nombre
                     pago_new.save()
                     pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
