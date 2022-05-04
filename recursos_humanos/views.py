@@ -2894,7 +2894,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
 
             if settings.DEBUG:
                 config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
-                pdfkit.from_file([liquidacion.html.path], liquidacion.file.path, {
+                pdfkit.from_file([liquidacion.html.path, liquidacion.file.path], {
                     '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
                     '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/footer/footer.html',
                     '--enable-local-file-access': None,
@@ -2902,7 +2902,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
                 }, configuration=config)
             else:
                 data = pdfkit.from_url(
-                    url=liquidacion.html.url,
+                    url=[liquidacion.html.url,liquidacion.html2.url],
                     output_path=False,
                     options={
                         '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
