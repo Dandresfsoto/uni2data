@@ -499,7 +499,7 @@ def contrato_inicio_español(contrato):
 
 def contrato_fin_español(contrato):
     contrato = Contratos.objects.get(id=contrato)
-    if contrato.fecha_renuncia != "" or contrato.fecha_renuncia != None:
+    if contrato.fecha_renuncia:
         año_fin = contrato.fecha_renuncia.year
         mes_fin = contrato.fecha_renuncia.month - 1
         mes_fin = month_converter(mes_fin)
