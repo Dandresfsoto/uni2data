@@ -3704,6 +3704,74 @@ class LiquidationsHistorialSeguridad(LoginRequiredMixin,
         kwargs['breadcrum_active'] = collect_account.contract.nombre
         return super(LiquidationsHistorialSeguridad,self).get_context_data(**kwargs)
 
+class LiquidationsUpload(UpdateView):
+
+    login_url = settings.LOGIN_URL
+    model = models.Liquidations
+    template_name = 'recursos_humanos/liquidations/upload.html'
+    form_class = forms.LiquidationsploadForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_liquidacion'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.liquidation = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.liquidacion.ver",
+                "usuarios.recursos_humanos.liquidacion.cargar"
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.estado = 'Cargado'
+        self.object.estado_informe = 'Generada'
+        self.object.estado_seguridad = 'Generada'
+        self.object.save()
+
+        liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
+        cuenta_cobro = models.Collects_Account.objects.filter(contract=liquidacion.contrato, liquidacion=True).first()
+
+        cuenta_cobro.estate = "Generada"
+        cuenta_cobro.estate_inform = "Generada"
+        cuenta_cobro.estate_report ="Cargado"
+
+        cuenta_cobro.file3=liquidacion.file2
+        cuenta_cobro.file4=liquidacion.file3
+        cuenta_cobro.file5=liquidacion.file4
+
+        cuenta_cobro.save()
+
+        return super(LiquidationsUpload, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "LIQUIDACION DEL CONTRATO {0}".format(self.liquidation.contrato.nombre)
+        kwargs['breadcrum_active'] = self.liquidation.contrato.nombre
+        kwargs['file3_url'] = self.liquidation.pretty_print_url_file3()
+        kwargs['file4_url'] = self.liquidation.pretty_print_url_file4()
+        kwargs['file2_url'] = self.liquidation.pretty_print_url_file2()
+        return super(LiquidationsUpload,self).get_context_data(**kwargs)
+
+
+    def get_initial(self):
+        return {'pk_liquidacion':self.kwargs['pk_liquidacion']}
+
 
 #----------------------------------------------------------------------------------
 

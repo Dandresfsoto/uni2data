@@ -1170,6 +1170,30 @@ class Liquidations(models.Model):
             pass
         return url
 
+    def pretty_print_url_file2(self):
+        try:
+            url = self.file2.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file2.name) + '</a>'
+
+    def pretty_print_url_file3(self):
+        try:
+            url = self.file3.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file3.name) + '</a>'
+
+    def pretty_print_url_file4(self):
+        try:
+            url = self.file4.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file4.name) + '</a>'
+
     def pretty_creation_datetime(self):
         return self.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
 

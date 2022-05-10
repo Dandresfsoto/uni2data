@@ -70,6 +70,7 @@ urlpatterns = [
     path('liquidations/aprobar/<uuid:pk_liquidacion>/', views.LiquidationsAporbarSeguridad.as_view()),
     path('liquidations/rechazar/<uuid:pk_liquidacion>/', views.LiquidationsRechazarSeguridad.as_view()),
     path('liquidations/historial/<uuid:pk_liquidacion>/', views.LiquidationsHistorialSeguridad.as_view()),
+    path('liquidations/upload/<uuid:pk_liquidacion>/', views.LiquidationsUpload.as_view()),
 
     path('cargos/', views.CargosListView.as_view()),
     path('cargos/crear/', views.CargosCreateView.as_view()),

@@ -2587,6 +2587,95 @@ class EditLiquidationForm(forms.Form):
                     )
                 )
 
+class LiquidationsploadForm(forms.ModelForm):
+
+
+    def __init__(self, *args, **kwargs):
+        super(LiquidationsploadForm, self).__init__(*args, **kwargs)
+        liquidation = models.Liquidations.objects.get(id=kwargs['initial']['pk_liquidacion'])
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Cargar seguridad social',
+                )
+            ),
+            Row(
+                HTML(
+                    """
+                    <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file4_url | safe }}</p>
+                    """
+                )
+            ),
+            Row(
+                Column(
+                    'file4',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Fieldset(
+                    'Cargar informe de actividades firmado',
+                )
+            ),
+            Row(
+                HTML(
+                    """
+                    <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file3_url | safe }}</p>
+                    """
+                )
+            ),
+            Row(
+                Column(
+                    'file3',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Fieldset(
+                    'Cargar cuenta de cobro de honorarios profesionales',
+                )
+            ),
+            Row(
+                HTML(
+                    """
+                    <p style="display:inline;margin-left: 10px;"><b>Actualmente:</b>{{ file2_url | safe }}</p>
+                    """
+                )
+            ),
+            Row(
+                Column(
+                    'file2',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+
+
+    class Meta:
+        model = models.Collects_Account
+        fields = ['file2','file3','file4']
+        widgets = {
+            'file2': forms.FileInput(attrs={'data-max-file-size': "50M",'accept': 'application/pdf'}),
+            'file3': forms.FileInput(attrs={'data-max-file-size': "50M",'accept': 'application/pdf'}),
+            'file4': forms.FileInput(attrs={'data-max-file-size': "50M",'accept': 'application/pdf'}),
+        }
+
 class CargoForm(forms.ModelForm):
 
     def clean(self):
