@@ -2,6 +2,7 @@ from django import forms
 
 from iraca import models
 from iraca.models import Types, Households
+from recursos_humanos.models import Collects_Account
 from usuarios.models import Municipios
 from django.forms.fields import Field, FileField
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
@@ -699,6 +700,65 @@ class CollectsAccountInformsRejectForm(forms.Form):
                     'observaciones_inform',
                     css_class='s12'
                 )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+class AccountActivityForm(forms.Form):
+    contenido = forms.CharField(widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        super(AccountActivityForm, self).__init__(*args, **kwargs)
+
+        account = Collects_Account.objects.get(id=kwargs['initial']['pk_collect_account'])
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Actividades realizadas durante el mes',
+                )
+            ),
+            Row(
+                Column(
+                    Row(
+                        HTML(
+                            """
+                            <div id="contenido" style="min-height:300px;"></div>
+                            """
+                        ),
+                        css_class='s12'
+                    )
+                ),
+                Column(
+                    Row(
+                        Column(
+                            'contenido',
+                            css_class='s12'
+                        ),
+                    ),
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                HTML(
+                    """
+                    <p style="display:inline; color:red"><b>Despues de presionar guardar, debe descargar, firmar y cargar el documento generado por el sistema</b></p>
+                    """
+                ),
             ),
             Row(
                 Column(

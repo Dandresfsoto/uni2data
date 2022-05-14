@@ -1,22 +1,29 @@
+import io
 import json
 
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect
+import pdfkit
+from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
+from bs4 import BeautifulSoup
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.messages import get_messages
+from django.core.files import File
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.utils import timezone
-from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
-from django.conf import settings
 from django.views.generic import TemplateView, CreateView, UpdateView, FormView, View
-from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA
 
-#------------------------------- SELECTION ----------------------------------------
+from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER
+from delta import html
+# ------------------------------- SELECTION ----------------------------------------
 from iraca import forms, models, models_instruments, tasks
 from iraca.models import Certificates
+from mis_contratos import functions
 from mobile.models import FormMobile
+from recursos_humanos import models as rh_models
 from reportes.models import Reportes
 from usuarios.models import Municipios
-from recursos_humanos import models as rh_models
+
 
 class IracaOptionsView(LoginRequiredMixin,
                           MultiplePermissionsRequiredMixin,
@@ -3890,6 +3897,131 @@ class HistorialCollectsAccountView(LoginRequiredMixin,
         kwargs['breadcrum_active'] = collect_account.contract.nombre
         return super(HistorialCollectsAccountView,self).get_context_data(**kwargs)
 
+class InformCollectsAccountgenerateListView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    model = rh_models.Collects_Account
+    template_name = 'iraca/inform/collect_account/activity.html'
+    form_class = forms.AccountActivityForm
+    success_url = "../../"
+    pk_url_kwarg = 'pk_accounts'
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.informes.ver",
+            "usuarios.iraca.informes.cortes.ver",
+        ]
+    }
+
+    def form_valid(self, form):
+
+        day = timezone.now()
+        date = day.strftime("%Y/%m/%d")
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        date_any= str(collect_account.contract.inicio)
+
+
+        collect_account.delta = form.cleaned_data['contenido']
+        collect_account.save()
+        delta = json.loads(form.cleaned_data['contenido'])
+
+        delta_2 = BeautifulSoup(html.render(delta['ops']),"html.parser",from_encoding='utf-8')
+
+        collect_account.file6.delete()
+
+        collect_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+        if collect_account.liquidacion==True:
+            month_inform = collect_account.month
+        else:
+            month = int(collect_account.month) - 1
+            month_inform = functions.month_converter(month)
+
+        template_header = BeautifulSoup(
+            open(settings.TEMPLATES[0]['DIRS'][0] + '/pdfkit/informe_actividades/inform.html', 'rb'), "html.parser")
+
+        template_header_tag = template_header.find(class_='date_span')
+        template_header_tag.insert(1, date_any)
+
+        template_header_tag = template_header.find(class_='charge_span')
+        template_header_tag.insert(1, str(collect_account.contract.cargo.nombre))
+
+        template_header_tag = template_header.find(class_='name_span')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
+
+        template_header_tag = template_header.find(class_='document_span')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_cedula()))
+
+        template_header_tag = template_header.find(class_='month_span')
+        template_header_tag.insert(1, month_inform)
+
+        template_header_tag = template_header.find(class_='name_span_1')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
+
+        template_header_tag = template_header.find(class_='document_span_1')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.cedula))
+
+        template_header_tag = template_header.find(class_='content_span_1')
+        template_header_tag.insert(1, delta_2)
+
+        template_header_tag = template_header.find(class_='name_span_2')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_full_name()))
+
+        template_header_tag = template_header.find(class_='document_span_2')
+        template_header_tag.insert(1, str(collect_account.contract.contratista.get_cedula()))
+
+
+        collect_account.html_3.save('informe_actividades.html',
+                                    File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
+
+        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+        collect_account.file6.save('informe_actividades.pdf',
+                                   File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
+
+        if settings.DEBUG:
+            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+            pdfkit.from_file([collect_account.html_3.path], collect_account.file6.path, {
+                '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/header/header.html',
+                '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/footer/footer.html',
+                '--enable-local-file-access': None,
+                '--page-size': 'Letter'
+            }, configuration=config)
+        else:
+            data = pdfkit.from_url(
+                url=collect_account.html_3.url,
+                output_path=False,
+                options={
+                    '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/header/header.html',
+                    '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/informe_actividades/footer/footer.html',
+                    '--enable-local-file-access': None,
+                    '--page-size': 'Letter'
+                }
+            )
+            collect_account.file6.save('informe_actividades.pdf', File(io.BytesIO(data)))
+
+        rh_models.Registration.objects.create(
+            cut=collect_account.cut,
+            user=self.request.user,
+            collect_account=collect_account,
+            delta="Genero el informe de actividades"
+        )
+
+
+        return super(InformCollectsAccountgenerateListView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        collec_account = rh_models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        kwargs['title'] = "CREAR INFORME DE ACTIVIDADES"
+        kwargs['breadcrum_active'] = collec_account.contract.nombre
+        return super(InformCollectsAccountgenerateListView,self).get_context_data(**kwargs)
+
+
+    def get_initial(self):
+        return {'pk_cut':self.kwargs['pk_cut'],
+                'pk_collect_account':self.kwargs['pk_collect_account']}
 #----------------------------------------------------------------------------------
 
 #-------------------------------Liquidaciones--------------------------------------
