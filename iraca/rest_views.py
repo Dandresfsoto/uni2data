@@ -1948,8 +1948,8 @@ class InformListApi(BaseDatatableView):
 
 class InformCollectAccountListApi(BaseDatatableView):
     model = rh_models.Collects_Account
-    columns = ['id','contract','date_creation','estate_inform','delta','user_creation','data_json','valores_json','file','file5','file3','estate','estate_report','date_update']
-    order_columns = ['id','contract','date_creation','estate_inform','delta','user_creation','data_json','valores_json','file','file5','estate','estate_report','date_update']
+    columns = ['id','contract','date_creation','estate_inform','delta','user_creation','data_json','valores_json','file','file5','file3','estate','estate_report','date_update','user_update']
+    order_columns = ['id','contract','date_creation','estate_inform','delta','user_creation','data_json','valores_json','file','file5','estate','estate_report','date_update','user_update']
 
     def get_initial_queryset(self):
         self.cut = rh_models.Cuts.objects.get(id=self.kwargs['pk_cut'])
@@ -1973,10 +1973,6 @@ class InformCollectAccountListApi(BaseDatatableView):
         return qs
 
     def render_column(self, row, column):
-
-        if column == 'contract':
-            return '<div class="center-align"><b>' + str(row.contract.nombre) + '</b></div>'
-
         if column == 'id':
             ret = '<div class="center-align">' \
                        '<a href="view/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver cuentas de cobro corte {1}">' \
@@ -1985,6 +1981,10 @@ class InformCollectAccountListApi(BaseDatatableView):
                    '</div>'.format(row.id,row.contract.nombre)
 
             return ret
+
+        elif column == 'contract':
+            return '<div class="center-align"><b>' + str(row.contract.nombre) + '</b></div>'
+
         elif column == 'date_creation':
             return '{0}'.format(row.contract.contratista)
 
@@ -2123,12 +2123,27 @@ class InformCollectAccountListApi(BaseDatatableView):
             return ret
 
         elif column == 'date_update':
+            ret = ""
             if self.request.user.has_perms(self.permissions.get('ver')):
                 ret = '<div class="center-align">' \
                            '<a href="historial/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver historial">' \
                                 '<i class="material-icons">message</i>' \
                            '</a>' \
                        '</div>'.format(row.id)
+            return ret
+
+        elif column == 'user_update':
+            url_file6 = row.url_file6()
+            if url_file6:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">assignment</i>' \
+                      '</div>'
+            else:
+                ret = '<div class="center-align">' \
+                      '<a  style="color:green" href="generate/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Generar informe de actividades del contrato {1}">' \
+                      '<i class="material-icons">assignment</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.contract.nombre)
             return ret
 
         else:
