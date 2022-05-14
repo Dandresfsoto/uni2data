@@ -1,22 +1,21 @@
-import json
-
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.messages import get_messages
-from django.utils import timezone
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.messages import get_messages
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
+from django.utils import timezone
 from django.views.generic import TemplateView, CreateView, UpdateView, FormView, View
-from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA
 
-#------------------------------- SELECTION ----------------------------------------
+from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER
+# ------------------------------- SELECTION ----------------------------------------
 from iraca import forms, models, models_instruments, tasks
 from iraca.models import Certificates
 from mobile.models import FormMobile
+from recursos_humanos import models as rh_models
 from reportes.models import Reportes
 from usuarios.models import Municipios
-from recursos_humanos import models as rh_models
+
 
 class IracaOptionsView(LoginRequiredMixin,
                           MultiplePermissionsRequiredMixin,
