@@ -5,7 +5,7 @@ from crispy_forms.layout import Div, Fieldset
 from crispy_forms_materialize.layout import Layout, Row, Column, Submit, HTML, Button
 
 from inventario import choices
-from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones, Clientes
+from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones, Clientes, Proyectos
 
 from django.db.models import Q
 
@@ -454,7 +454,23 @@ class DespachoForm(forms.ModelForm):
                     css_class='s12'
                 )
             ),
-
+            Row(
+                Fieldset(
+                    'Información del proyectos',
+                )
+            ),
+            Row(
+                Column(
+                    'visible',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    'proyectos',
+                    css_class='s12',
+                ),
+            ),
             Row(
                 Column(
                     Div(
@@ -473,7 +489,7 @@ class DespachoForm(forms.ModelForm):
     class Meta:
         model = Despachos
         fields = ['fecha_envio','respaldo','legalizacion',
-                  'transportador','conductor','placa','observacion']
+                  'transportador','conductor','placa','observacion', 'visible','proyectos']
         widgets = {
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
         }
@@ -711,3 +727,47 @@ class SustraccionPlusForm(forms.Form):
                 ),
             )
         )
+
+class ProyectoForm(forms.ModelForm):
+
+
+    def __init__(self, *args, **kwargs):
+        super(ProyectoForm, self).__init__(*args, **kwargs)
+
+        pk = kwargs['initial'].get('pk')
+        if pk != None:
+            proyecto = Proyectos.objects.get(id=pk)
+            self.fields['nombre'].initial = proyecto.nombre
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Información del proyecto',
+                )
+            ),
+            Row(
+                Column(
+                    'nombre',
+                    css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = Proyectos
+        fields = ['nombre']

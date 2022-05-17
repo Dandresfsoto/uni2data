@@ -9,7 +9,7 @@ from django.shortcuts import render
 
 from inventario import forms
 from inventario import tasks
-from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones, Clientes
+from inventario.models import Productos, CargarProductos, Adiciones, Despachos, Sustracciones, Clientes, Proyectos
 from reportes.models import Reportes
 
 
@@ -75,8 +75,7 @@ class InventarioOptionsView(LoginRequiredMixin,
                 'sican_icon': 'folder_shared',
                 'sican_description': 'listado de clientes'
             })
-
-        if self.request.user.has_perm('usuarios.inventario.vendedor.ver'):
+        if self.request.user.has_perm('usuarios.inventario.insumos.ver'):
             items.append({
                 'sican_categoria': 'Insumos',
                 'sican_color': 'purple',
@@ -85,6 +84,16 @@ class InventarioOptionsView(LoginRequiredMixin,
                 'sican_name': 'insumos',
                 'sican_icon': 'folder_special',
                 'sican_description': 'listado de insumos'
+            })
+        if self.request.user.has_perm('usuarios.inventario.proyectos.ver'):
+            items.append({
+                'sican_categoria': 'Proyectos',
+                'sican_color': 'blue-grey',
+                'sican_order': 6,
+                'sican_url': 'proyectos/',
+                'sican_name': 'proyectos',
+                'sican_icon': 'account_balance',
+                'sican_description': 'listado de proyectos'
             })
         return items
 
@@ -953,7 +962,7 @@ class InsumosListView(LoginRequiredMixin,
     permissions = {
         "all": [
             "usuarios.inventario.ver",
-            "usuarios.inventario.productos.ver"
+            "usuarios.inventario.insumos.ver"
         ]
     }
     login_url = settings.LOGIN_URL
@@ -964,3 +973,89 @@ class InsumosListView(LoginRequiredMixin,
         kwargs['title'] = "INSUMOS"
         kwargs['url_datatable'] = '/rest/v1.0/inventario/insumos/'
         return super(InsumosListView,self).get_context_data(**kwargs)
+
+#----------------------------------------------------------------------------------
+
+#-----------------------------PRODUCTOS--------------------------------------------
+
+class ProyectosListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.ver",
+            "usuarios.inventario.proyectos.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/proyectos/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "PROYECTOS"
+        kwargs['url_datatable'] = '/rest/v1.0/inventario/proyectos/'
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.inventario.proyectos.crear')
+        return super(ProyectosListView,self).get_context_data(**kwargs)
+
+
+class ProyectosCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/proyectos/create.html'
+    form_class = forms.ProyectoForm
+    success_url = "../"
+    models = Productos
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.proyectos.ver",
+                "usuarios.inventario.proyectos.crear"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVO PROYECTO"
+        return super(ProyectosCreateView,self).get_context_data(**kwargs)
+
+class ProyectosEditView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/proyectos/edit.html'
+    form_class = forms.ProyectoForm
+    success_url = "../../"
+    model = Proyectos
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.proyectos.ver",
+                "usuarios.inventario.proyectos.editar"
+            ]
+        }
+        return permissions
+
+    def get_initial(self):
+        return {'pk':self.kwargs['pk']}
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "EDITAR PROYECTO"
+        return super(ProyectosEditView,self).get_context_data(**kwargs)

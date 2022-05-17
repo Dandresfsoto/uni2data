@@ -13,6 +13,13 @@ settings_time_zone = timezone(settings.TIME_ZONE)
 def upload_dinamic_dir_repaldo(instance, filename):
     return '/'.join(['Cargue productos', str(instance.id), 'Respaldo', filename])
 
+class Proyectos(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    nombre = models.CharField(max_length=150, verbose_name='Nombre')
+
+    def __str__(self):
+        return str(self.nombre)
+
 class Productos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     codigo = models.CharField(unique=True, max_length=150, verbose_name='Codigo')
@@ -24,8 +31,6 @@ class Productos(models.Model):
     impuesto = models.IntegerField(default=19, verbose_name='IVA', blank=True, null=True)
     descripcion = models.TextField(verbose_name='Descripcion', blank=True, null=True)
     marca = models.CharField(max_length=150, verbose_name='Marca', blank=True, null=True)
-
-
 
     def __str__(self):
         return str(self.codigo + " - " + self.nombre)
@@ -139,6 +144,9 @@ class Despachos(models.Model):
     legalizacion = models.FileField(upload_to=upload_dinamic_dir_repaldo, verbose_name='Legalizacion',blank=True, null=True)
     remision = models.FileField(upload_to=upload_dinamic_dir_repaldo, verbose_name='Remision',blank=True, null=True)
 
+    visible = models.BooleanField(default=False)
+    proyectos = models.ForeignKey(Proyectos, on_delete=models.DO_NOTHING, verbose_name="Proyectos", blank=True,null=True)
+
     def __str__(self):
         return str(str(self.consecutivo) + " - " + str(self.observacion))
 
@@ -216,4 +224,3 @@ class Sustracciones(models.Model):
     def pretty_print_valor_total(self):
         valor_total = self.valor_total
         return str(valor_total).replace('COL','')
-

@@ -53,6 +53,7 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 
 
 });</script><script>$(document).ready(function () {
+    $('select').material_select();
 
     $('#id_ciudad').select2();
 
@@ -117,4 +118,14 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
             }
         });
     });
+    $("label[for='id_proyectos']").addClass('active');
+
+
+    $('#id_visible').on('change', function () {
+        if (this.checked) {
+            $("#valor_pagar").show();
+        } else {
+            $("#valor_pagar").hide();
+        }
+    })
 });</script></body></html>
