@@ -16,4 +16,6 @@ urlpatterns = [
     path('cliente/list/', rest_views.ClientesListApi.as_view()),
 
     path('clientes/', rest_views.CientesListApi.as_view()),
+
+    path('insumos/', rest_views.InsumosListApi.as_view()),
     ]

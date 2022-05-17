@@ -75,7 +75,20 @@ class InventarioOptionsView(LoginRequiredMixin,
                 'sican_icon': 'folder_shared',
                 'sican_description': 'listado de clientes'
             })
+
+        if self.request.user.has_perm('usuarios.inventario.vendedor.ver'):
+            items.append({
+                'sican_categoria': 'Insumos',
+                'sican_color': 'purple',
+                'sican_order': 5,
+                'sican_url': 'insumos/',
+                'sican_name': 'insumos',
+                'sican_icon': 'folder_special',
+                'sican_description': 'listado de insumos'
+            })
         return items
+
+
 
     def get_context_data(self, **kwargs):
         kwargs['title'] = "INVENTARIO"
@@ -129,6 +142,7 @@ class ProductosCreateView(LoginRequiredMixin,
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.valor = float(form.cleaned_data['valor_char'].replace('$ ', '').replace(',', ''))
+        self.object.valor_compra = float(form.cleaned_data['valor_compra_char'].replace('$ ', '').replace(',', ''))
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
@@ -163,10 +177,13 @@ class ProductosEditView(LoginRequiredMixin,
         producto = Productos.objects.get(id=self.kwargs['pk'])
         producto.codigo = form.cleaned_data['codigo']
         producto.nombre = form.cleaned_data['nombre']
+        producto.marca = form.cleaned_data['marca']
         producto.valor = float(form.cleaned_data['valor_char'].replace('$ ', '').replace(',', ''))
+        producto.valor_compra = float(form.cleaned_data['valor_compra_char'].replace('$ ', '').replace(',', ''))
         producto.stock = form.cleaned_data['stock']
         producto.unidad = form.cleaned_data['unidad']
         producto.impuesto = form.cleaned_data['impuesto']
+        producto.descripcion = form.cleaned_data['descripcion']
         producto.save()
         return HttpResponseRedirect(self.get_success_url())
 
@@ -680,7 +697,7 @@ class DespachoProductosCreateView(LoginRequiredMixin,
 
         despacho.respaldo.delete(save=True)
 
-        tasks.build_remision.delay(str(despacho.id))
+        tasks.build_remision(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -721,7 +738,7 @@ class DespachoProductosEditView(LoginRequiredMixin,
         self.object = form.save()
         despacho.respaldo.delete(save=True)
 
-        tasks.build_remision.delay(str(despacho.id))
+        tasks.build_remision(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -749,7 +766,7 @@ class DespachoProductosDeleteView(LoginRequiredMixin,
         despacho = Despachos.objects.get(id=self.kwargs['pk'])
         Sustracciones.objects.get(id = self.kwargs['pk_sustracion']).delete()
 
-        tasks.build_remision.delay(str(despacho.id))
+        tasks.build_remision(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
 class DespachoProductosUploadView(LoginRequiredMixin,
@@ -924,3 +941,26 @@ class ClientesupdateView(LoginRequiredMixin,
     def get_context_data(self, **kwargs):
         kwargs['title'] = "EDITAR CLIENTE"
         return super(ClientesupdateView,self).get_context_data(**kwargs)
+
+#----------------------------------------------------------------------------------
+
+#-----------------------------PRODUCTOS--------------------------------------------
+
+class InsumosListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.ver",
+            "usuarios.inventario.productos.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/insumos/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "INSUMOS"
+        kwargs['url_datatable'] = '/rest/v1.0/inventario/insumos/'
+        return super(InsumosListView,self).get_context_data(**kwargs)

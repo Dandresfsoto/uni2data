@@ -17,16 +17,25 @@ class Productos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     codigo = models.CharField(unique=True, max_length=150, verbose_name='Codigo')
     nombre = models.CharField(max_length=150, verbose_name='Nombre')
-    valor = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
+    valor = MoneyField(max_digits=20, decimal_places=2, default_currency='COP', verbose_name="Valor de venta")
+    valor_compra = MoneyField(max_digits=20, decimal_places=2, default_currency='COP', blank=True, null=True, verbose_name="Valor de compra")
     stock = models.IntegerField(default=0, verbose_name='Cantidad')
     unidad = models.CharField(max_length=150, verbose_name='Unidad de medida', blank=True, null=True)
     impuesto = models.IntegerField(default=19, verbose_name='IVA', blank=True, null=True)
+    descripcion = models.TextField(verbose_name='Descripcion', blank=True, null=True)
+    marca = models.CharField(max_length=150, verbose_name='Marca', blank=True, null=True)
+
+
 
     def __str__(self):
         return str(self.codigo + " - " + self.nombre)
 
     def pretty_print_precio(self):
         precio = self.valor
+        return str(precio).replace('COL','')
+
+    def pretty_print_precio_compra(self):
+        precio = self.valor_compra
         return str(precio).replace('COL','')
 
 class CargarProductos(models.Model):

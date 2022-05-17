@@ -30,46 +30,10 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Productos
+                        a(href="#") Insumos
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
-
-
-    | {% if permiso_crear %}
-
-    ul(class="collapsible",data-collapsible="accordion")
-        li(class="bold waves-effect waves-light button-menu")
-
-            div(class="collapsible-header active")
-                i(class="material-icons") call_to_action
-                | Acciones
-
-            div(class="collapsible-body collapsible-body-blue")
-                ul
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="create/") Nuevo producto
-                            i(class="material-icons icon-sican") map
-
-                    div(class="divider divider-perfil")
-
-            div(class="collapsible-body collapsible-body-blue")
-                ul
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="report/") Reporte
-                            i(class="material-icons icon-sican") map
-
-                    div(class="divider divider-perfil")
-
-    | {% endif %}
-
-
-
-
 
 
 
@@ -82,21 +46,16 @@ block container_principal
                     th Codigo
                     th Nombre
                     th Marca
-                    th Valor de compra
                     th Valor de venta
                     th Stock
-                    th Agregar
             tbody
                 tr
                     td Editar
                     td Codigo
                     td Nombre
                     td Marca
-                    td Valor de compra
                     td Valor de venta
                     td Stock
-                    th Agregar
-
 
 block body_script_auth
     script.

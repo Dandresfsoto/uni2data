@@ -16,7 +16,8 @@ class ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ProductForm, self).__init__(*args, **kwargs)
 
-        self.fields['valor_char'] = forms.CharField(label="Valor ($)")
+        self.fields['valor_char'] = forms.CharField(label="Valor de venta($)")
+        self.fields['valor_compra_char'] = forms.CharField(label="Valor de compra($)")
 
         self.fields['unidad'].widget = forms.Select(choices=choices.UNIDAD)
 
@@ -26,10 +27,14 @@ class ProductForm(forms.ModelForm):
             self.fields['codigo'].initial = producto.codigo
             self.fields['nombre'].initial = producto.nombre
             valor=str(producto.valor).replace('COL$','')
+            valor_compra=str(producto.valor_compra).replace('COL$','')
             self.fields['valor_char'].initial = valor
+            self.fields['valor_compra_char'].initial = valor_compra
             self.fields['stock'].initial = producto.stock
             self.fields['unidad'].initial = producto.unidad
             self.fields['impuesto'].initial = producto.impuesto
+            self.fields['marca'].initial = producto.marca
+            self.fields['descripcion'].initial = producto.descripcion
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -54,6 +59,16 @@ class ProductForm(forms.ModelForm):
                     css_class="s12 m6"
                 ),
                 Column(
+                    'valor_compra_char',
+                    css_class="s12 m6"
+                ),
+            ),
+            Row(
+                Column(
+                    'marca',
+                    css_class="s12 m6"
+                ),
+                Column(
                     'stock',
                     css_class="s12 m6"
                 ),
@@ -66,6 +81,13 @@ class ProductForm(forms.ModelForm):
                 Column(
                     'unidad',
                     css_class="s12 m6"
+                ),
+            ),
+
+            Row(
+                Column(
+                    'descripcion',
+                    css_class="s12"
                 ),
             ),
 
@@ -86,7 +108,10 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Productos
-        fields = ['codigo','nombre','stock','unidad','impuesto']
+        fields = ['codigo','nombre','stock','unidad','impuesto','marca','descripcion']
+        widgets = {
+            'descripcion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
+        }
 
 class AddProductForm(forms.Form):
     stock = forms.IntegerField(label="Stock")

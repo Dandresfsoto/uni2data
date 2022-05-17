@@ -10,8 +10,8 @@ from rest_framework import status
 
 class ProductosListApi(BaseDatatableView):
     model = Productos
-    columns = ['id','codigo','nombre','valor','stock','unidad']
-    order_columns = ['id','codigo','nombre','valor','stock','unidad']
+    columns = ['id','codigo','nombre','marca','valor','valor_compra','stock','unidad']
+    order_columns = ['id','codigo','nombre','marca','valor','valor_compra','stock','unidad']
 
     def get_initial_queryset(self):
         self.permissions = {
@@ -30,7 +30,7 @@ class ProductosListApi(BaseDatatableView):
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
-            q = Q(codigo__icontains=search) | Q(nombre__icontains=search)
+            q = Q(codigo__icontains=search) | Q(nombre__icontains=search) | Q(descripcion__icontains=search) | Q(marca__icontains=search)
             qs = qs.filter(q)
         return qs
 
@@ -55,6 +55,9 @@ class ProductosListApi(BaseDatatableView):
 
         elif column == 'valor':
             return '<b>{0}</b>'.format(row.pretty_print_precio())
+
+        elif column == 'valor_compra':
+            return '<b>{0}</b>'.format(row.pretty_print_precio_compra())
 
         elif column == 'stock':
             return '<b style="color:blue">{0}</b>'.format(row.stock)
@@ -523,3 +526,58 @@ class ClientesListApi(APIView):
                 }
 
         return Response({'lista':lista,'diccionario':diccionario},status=status.HTTP_200_OK)
+
+class InsumosListApi(BaseDatatableView):
+    model = Productos
+    columns = ['id','codigo','nombre','marca','valor','stock']
+    order_columns = ['id','codigo','nombre','marca','valor','stock']
+
+    def get_initial_queryset(self):
+        self.permissions = {
+            "ver": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.productos.ver"
+            ],
+            "editar": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.productos.ver",
+                "usuarios.inventario.productos.editar",
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(codigo__icontains=search) | Q(nombre__icontains=search) | Q(descripcion__icontains=search) | Q(marca__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+        if column == 'id':
+            if self.request.user.has_perms(self.permissions.get('editar')):
+                ret = '<div class="center-align">' \
+                      '<a href="edit/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Editar producto">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">edit</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'codigo':
+            return str(row.codigo)
+
+        elif column == 'valor':
+            return '<b>{0}</b>'.format(row.pretty_print_precio())
+
+        elif column == 'stock':
+            return '<b style="color:blue">{0}</b>'.format(row.stock)
+
+
+        else:
+            return super(InsumosListApi, self).render_column(row, column)

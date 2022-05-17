@@ -38,4 +38,6 @@ urlpatterns = [
     path('clientes/', views.ClientesListView.as_view()),
     path('clientes/create/', views.ClientesCreateView.as_view()),
     path('clientes/edit/<uuid:pk>/', views.ClientesupdateView.as_view()),
+
+    path('insumos/', views.InsumosListView.as_view()),
 ]
