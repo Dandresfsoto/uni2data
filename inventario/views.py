@@ -697,7 +697,7 @@ class InformeDespachoView(LoginRequiredMixin,
         reporte_id = reporte.id
 
 
-        tasks.build_reporte_despacho(reporte_id)
+        tasks.build_reporte_despacho.delay(reporte_id)
 
         return HttpResponseRedirect('/reportes/')
 
