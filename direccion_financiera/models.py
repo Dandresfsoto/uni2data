@@ -13,8 +13,6 @@ from usuarios.models import User, Departamentos, Municipios
 
 settings_time_zone = timezone(settings.TIME_ZONE)
 
-# Create your models here.
-
 def upload_dinamic_dir_soporte_reporte(instance, filename):
     return '/'.join(['Reportes', str(instance.id), 'Formato interno', filename])
 
