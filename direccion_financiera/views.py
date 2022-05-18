@@ -1,29 +1,31 @@
+import json
 import mimetypes
 
-from django.core.mail.backends import console
-from django.views.generic import TemplateView, CreateView, UpdateView, FormView, View
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from django.conf import settings
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
+from django.utils import timezone
+from django.views.generic import TemplateView, CreateView, UpdateView, FormView, View
 from sequences import get_next_value
-from direccion_financiera import utils
-from direccion_financiera import forms, models
-from direccion_financiera.forms import ProductForm
-from direccion_financiera.models import Enterprise, RubroPresupuestalLevel2, RubroPresupuestal, Products
-from recursos_humanos import models as rh_models
-from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render
-from direccion_financiera.tasks import send_mail_templated_pago, send_mail_templated_reporte
-from direccion_financiera import tasks
+
 from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_DIRECCION_FINANCIERA, EMAIL_CONTABILIDAD, \
     EMAIL_GERENCIA
-from recursos_humanos.models import Contratos, Contratistas
-from reportes.models import Reportes
-import json
-from delta import html
+from desplazamiento.forms import FinancieraSolicitudForm
 from desplazamiento.models import Desplazamiento, Solicitudes
-from desplazamiento.forms import DesplazamientoForm, FinancieraSolicitudForm
+from direccion_financiera import forms, models
 from direccion_financiera import functions
-from django.utils import timezone
+from direccion_financiera import tasks
+from direccion_financiera import utils
+from direccion_financiera.forms import ProductForm
+from direccion_financiera.models import Enterprise, Products
+from direccion_financiera.tasks import send_mail_templated_pago, send_mail_templated_reporte, \
+    send_mail_templated_reporte_delete
+from recursos_humanos import models as rh_models
+from recursos_humanos.models import Contratos
+from reportes.models import Reportes
+
+
 # Create your views here.
 
 #------------------------------- SELECCIÓN ----------------------------------------
@@ -947,7 +949,11 @@ class ReporteReportesView(LoginRequiredMixin,
                 if reporte.servicio.nombre == "Servicios publicos":
                     adjuntos = [
                         ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
-                         mimetypes.guess_type(reporte.firma.name)[0])
+
+                         mimetypes.guess_type(reporte.firma.name)[0]),
+                        (
+                        'PAGO ' + str(reporte.consecutive) + ' - RESPALDO.' + str(reporte.respaldo.name.split('.')[-1]),reporte.respaldo.read(),
+                        mimetypes.guess_type(reporte.respaldo.name)[0]),
                     ]
 
                 else:
@@ -955,17 +961,23 @@ class ReporteReportesView(LoginRequiredMixin,
                     adjuntos = [
                         ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(reporte.firma.name.split('.')[-1]), reporte.firma.read(),
                          mimetypes.guess_type(reporte.firma.name)[0]),
-                        ('PAGO ' + str(reporte.consecutive) + ' - ARCHIVO PLANO.' + str(reporte.plano.name.split('.')[-1]), reporte.plano.read(),
-                         mimetypes.guess_type(reporte.plano.name)[0]),
-                        ('PAGO ' + str(reporte.consecutive) + ' - RESPALDO.' + str(reporte.respaldo.name.split('.')[-1]), reporte.respaldo.read(),
-                         mimetypes.guess_type(reporte.respaldo.name)[0]),
+
                     ]
             else:
                 if reporte.servicio.nombre == "Servicios publicos":
                     adjuntos = [
                         ('PAGO ' + str(reporte.consecutive) + ' - REPORTE FIRMADO.' + str(
                             reporte.firma.name.split('.')[-1]), reporte.firma.read(),
-                         mimetypes.guess_type(reporte.firma.name)[0])
+
+
+                         mimetypes.guess_type(reporte.firma.name)[0]),
+                        ('PAGO ' + str(reporte.consecutive) + ' - ARCHIVO PLANO.' + str(
+                            reporte.plano.name.split('.')[-1]), reporte.plano.read(),
+                         mimetypes.guess_type(reporte.plano.name)[0]),
+                        (
+                        'PAGO ' + str(reporte.consecutive) + ' - RESPALDO.' + str(reporte.respaldo.name.split('.')[-1]),
+                        reporte.respaldo.read(),
+                        mimetypes.guess_type(reporte.respaldo.name)[0]),
                     ]
 
                 else:
@@ -1059,20 +1071,21 @@ class ReportesDeleteView(LoginRequiredMixin,
 
 
         if reporte.estado == 'En pagaduria' or reporte.estado == 'Reportado':
-            template = 'mail/direccion_financiera/reportes/eliminar_reporte.tpl'
+            template = 'mail/direccion_financiera/reportes/Eliminar_reporte.tpl'
 
-            tasks.send_mail_templated_reporte_delete(
+            send_mail_templated_reporte_delete(
                 template,
                 {
+                    'url_base': 'http://' + self.request.META['HTTP_HOST'],
                     'consecutivo': str(reporte.consecutive),
                     'nombre_reporte': str(reporte.consecutive) + ' - ' + reporte.nombre,
                     'valor': reporte.pretty_print_valor(),
                     'proyecto': reporte.proyecto.nombre,
+                    'usuario': reporte.usuario_actualizacion.get_full_name_string()
                 },
                 DEFAULT_FROM_EMAIL,
-                [self.request.user.email, EMAIL_HOST_USER,EMAIL_DIRECCION_FINANCIERA,EMAIL_CONTABILIDAD,EMAIL_GERENCIA]
+                [self.request.user.email, EMAIL_DIRECCION_FINANCIERA,EMAIL_GERENCIA]
             )
-
         return HttpResponseRedirect('../../')
 
 
@@ -1289,6 +1302,17 @@ class PagosCreateView(LoginRequiredMixin,
                     pago.save()
                 except:
                     pass
+            elif pago.tercero.third_active_account == True:
+                try:
+                    pago.tipo_cuenta = pago.tercero.type_third
+                    pago.banco = pago.tercero.bank_third.nombre
+                    pago.cuenta = pago.tercero.account_third
+                    pago.cargo = pago.tercero.cargo.nombre
+                    pago.save()
+                    pago.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                    pago.save()
+                except:
+                    pass
 
             valor = 0
             for pago_obj in models.Pagos.objects.filter(reporte=pago.reporte):
@@ -1339,6 +1363,17 @@ class PagosCreateView(LoginRequiredMixin,
                     pago_new.tipo_cuenta = pago_new.tercero.type
                     pago_new.banco = pago_new.tercero.bank.nombre
                     pago_new.cuenta = pago_new.tercero.account
+                    pago_new.cargo = pago_new.tercero.cargo.nombre
+                    pago_new.save()
+                    pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])
+                    pago_new.save()
+                except:
+                    pass
+            elif pago_new.tercero.third_active_account == True:
+                try:
+                    pago_new.tipo_cuenta = pago_new.tercero.type_third
+                    pago_new.banco = pago_new.tercero.bank_third.nombre
+                    pago_new.cuenta = pago_new.tercero.account_third
                     pago_new.cargo = pago_new.tercero.cargo.nombre
                     pago_new.save()
                     pago_new.contrato = Contratos.objects.get(id=form.cleaned_data['contrato'])

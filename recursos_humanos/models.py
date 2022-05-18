@@ -76,6 +76,10 @@ class Contratistas(models.Model):
     bank = models.ForeignKey(Bancos, blank=True, null=True, on_delete=models.DO_NOTHING, related_name="contractor_bank")
     account = models.CharField(max_length=100, blank=True, null=True)
 
+    third_active_account = models.BooleanField(default=False)
+    type_third = models.CharField(max_length=50, blank=True, null=True)
+    bank_third = models.ForeignKey(Bancos, blank=True, null=True, on_delete=models.DO_NOTHING, related_name="contractor_bank_third")
+    account_third = models.CharField(max_length=100, blank=True, null=True)
 
     usuario_asociado = models.ForeignKey(User, related_name="usuario_asociado", on_delete=models.DO_NOTHING, blank=True, null=True)
 
@@ -1165,6 +1169,30 @@ class Liquidations(models.Model):
         except:
             pass
         return url
+
+    def pretty_print_url_file2(self):
+        try:
+            url = self.file2.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file2.name) + '</a>'
+
+    def pretty_print_url_file3(self):
+        try:
+            url = self.file3.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file3.name) + '</a>'
+
+    def pretty_print_url_file4(self):
+        try:
+            url = self.file4.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="' + url + '"> ' + str(self.file4.name) + '</a>'
 
     def pretty_creation_datetime(self):
         return self.date_creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')

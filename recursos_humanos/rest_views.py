@@ -1066,8 +1066,8 @@ class CutsCollectAccountListApi(BaseDatatableView):
 
 class LiquidationsListApi(BaseDatatableView):
     model = Contratos
-    columns = ['id','nombre','contratista','cargo','creation','valor','file','estado','inicio','fin','objeto_contrato','tipo_contrato','visible']
-    order_columns = ['id','nombre','contratista','cargo','creation','valor','estado','file','estado','inicio','fin','objeto_contrato','tipo_contrato','visible']
+    columns = ['id','grupo_soportes','nombre','contratista','cargo','creation','valor','file','estado','inicio','fin','objeto_contrato','tipo_contrato','visible']
+    order_columns = ['id','grupo_soportes','nombre','contratista','cargo','creation','valor','estado','file','estado','inicio','fin','objeto_contrato','tipo_contrato','visible']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(tipo_contrato='Ops')
@@ -1107,6 +1107,26 @@ class LiquidationsListApi(BaseDatatableView):
                     ret = '<div class="center-align">' \
                           '<i class="material-icons">add_box</i>' \
                           '</div>'.format(row.id, row.nombre)
+            return ret
+
+        if column == 'grupo_soportes':
+            liquidacion = row.get_liquidacion()
+            if liquidacion:
+                if self.request.user.has_perm('usuarios.recursos_humanos.contratos.editar'):
+                    ret = '<div class="center-align">' \
+                               '<a href="upload/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Cargar liquidacion: {1}">' \
+                                    '<i class="material-icons">backup</i>' \
+                               '</a>' \
+                           '</div>'.format(liquidacion.id,row.nombre)
+
+                else:
+                    ret = '<div class="center-align">' \
+                               '<i class="material-icons">add_box</i>' \
+                           '</div>'.format(liquidacion.id,row.nombre)
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">backup</i>' \
+                      '</div>'.format(row.id, row.nombre)
             return ret
 
         elif column == 'contratista':

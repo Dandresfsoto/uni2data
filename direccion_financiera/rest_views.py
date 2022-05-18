@@ -344,12 +344,12 @@ class ReportesListApi(BaseDatatableView):
         if search:
 
             pagos_q = Q(tercero__nombres__icontains=search) | Q(tercero__apellidos__icontains=search) \
-                      | Q(tercero__cedula__icontains=search) | Q(valor__icontains=search)
+                      | Q(tercero__cedula__icontains=search)
 
             ids = Pagos.objects.filter(pagos_q).values_list('reporte__id',flat=True)
 
             q = Q(id__icontains=search) | Q(nombre__icontains=search) | \
-                Q(id__in = ids)
+                Q(id__in = ids) | Q(valor__icontains=search)
             qs = qs.filter(q)
         return qs
 

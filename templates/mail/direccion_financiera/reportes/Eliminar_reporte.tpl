@@ -1,3 +1,11 @@
+{% extends "mail_templated/base.tpl" %}
+
+{% block subject %}
+reporte de pago eliminado: {{ nombre_reporte }}
+{% endblock %}
+
+
+{% block html %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -25,7 +33,7 @@
 								</tr>
 								<tr>
 									<td style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
-										Se notifico un reporte de pago con la siguiente información.
+										Se notifico la elimicacion del reporte de pago con la siguiente información.
 									</td>
 								</tr>
 								<tr>
@@ -82,3 +90,4 @@
 	</table>
 </body>
 </html>
+{% endblock %}
