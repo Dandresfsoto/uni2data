@@ -706,7 +706,7 @@ class DespachoProductosCreateView(LoginRequiredMixin,
 
         despacho.respaldo.delete(save=True)
 
-        tasks.build_remision(str(despacho.id))
+        tasks.build_remision.delay(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -747,7 +747,7 @@ class DespachoProductosEditView(LoginRequiredMixin,
         self.object = form.save()
         despacho.respaldo.delete(save=True)
 
-        tasks.build_remision(str(despacho.id))
+        tasks.build_remision.delay(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -759,7 +759,6 @@ class DespachoProductosEditView(LoginRequiredMixin,
 class DespachoProductosDeleteView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
                         View):
-
     permissions = {
         "all": [
             "usuarios.inventario.ver",
@@ -771,12 +770,16 @@ class DespachoProductosDeleteView(LoginRequiredMixin,
     login_url = settings.LOGIN_URL
     success_url = "../../"
 
+
     def dispatch(self, request, *args, **kwargs):
         despacho = Despachos.objects.get(id=self.kwargs['pk'])
         Sustracciones.objects.get(id = self.kwargs['pk_sustracion']).delete()
 
-        tasks.build_remision(str(despacho.id))
-        return HttpResponseRedirect(self.get_success_url())
+        tasks.build_remision.delay(str(despacho.id))
+        return HttpResponseRedirect('../../')
+
+
+
 
 class DespachoProductosUploadView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
