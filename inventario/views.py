@@ -347,6 +347,31 @@ class SubirEditView(LoginRequiredMixin,
         kwargs['respaldo_url'] = cargue.pretty_print_respaldo()
         return super(SubirEditView,self).get_context_data(**kwargs)
 
+class InformeCarguesView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.subir.informe",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        reporte = Reportes.objects.create(
+            usuario = self.request.user,
+            nombre = 'Informe acumulativo de cargue',
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
+        )
+        reporte_id = reporte.id
+
+
+        tasks.build_reporte_pagos(reporte_id)
+
+        return HttpResponseRedirect('/reportes/')
+
 
 #----------------------------------------------------------------------------------
 

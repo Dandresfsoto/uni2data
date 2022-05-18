@@ -80,6 +80,7 @@ class Adiciones(models.Model):
     producto = models.ForeignKey(Productos, on_delete=models.DO_NOTHING, verbose_name="Producto")
     cantidad = models.IntegerField(verbose_name='Cantidad')
     observacion = models.TextField(verbose_name='Observacion', blank=True, null=True)
+    creacion = models.DateTimeField(auto_now_add=True,blank=True, null=True)
 
 
     def __str__(self):

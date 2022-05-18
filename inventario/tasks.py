@@ -1,14 +1,14 @@
+from io import BytesIO
+
+import openpyxl
+from django.conf import settings
+from django.core.files import File
 from django.db.models import Sum
 
 from config.celery import app
-import openpyxl
-from io import BytesIO
-from django.conf import settings
-from openpyxl.drawing.image import Image
-from django.core.files import File
-
 from config.functions import construir_reporte
-from inventario.models import Despachos, Sustracciones, Productos
+from inventario.models import Despachos, Sustracciones, Productos, Adiciones
+from reportes import models as models_reportes
 from reportes.models import Reportes
 
 
@@ -417,6 +417,47 @@ def build_list_reports(id):
 
         contenidos.append(lista)
 
+
+    output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
+
+    filename = str(reporte.id) + '.xlsx'
+    reporte.file.save(filename, File(output))
+
+
+    return "Archivo paquete ID: " + filename
+
+@app.task
+def build_reporte_pagos(reporte_id):
+    reporte = models_reportes.Reportes.objects.get(id = reporte_id)
+
+    proceso = "UNI2DATA-REPORTE-CARGUES"
+
+
+    titulos = ['Consecutivo', 'Fecha creación', 'Cargue','Observacion general', 'Producto', 'Codigo', 'Valor Compra', 'Cantidad',
+               'Estado','Observacion']
+
+    formatos = ['0', 'dd/mm/yy', '0','General', 'General', 'General', '"$"#,##0.00_);[Red]("$"#,##0.00)', '0',
+                 'General','General']
+
+    ancho_columnas = [20, 30, 30, 40, 30, 30, 30, 30, 30, 30]
+
+    contenidos = []
+
+    i = 0
+    for adicion in Adiciones.objects.all().order_by('creacion'):
+        i += 1
+        contenidos.append([
+            int(i),
+            adicion.creacion,
+            adicion.cargue.consecutivo,
+            adicion.cargue.observacion,
+            adicion.producto.nombre,
+            adicion.producto.codigo,
+            adicion.producto.valor_compra.amount,
+            adicion.cantidad,
+            adicion.cargue.estado,
+            adicion.observacion,
+        ])
 
     output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
 
