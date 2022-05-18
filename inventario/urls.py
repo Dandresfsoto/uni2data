@@ -29,6 +29,8 @@ urlpatterns = [
     path('despacho/create/', views.DespachoCreateView.as_view()),
     path('despacho/edit/<uuid:pk_despacho>/', views.DespachoEditView.as_view()),
 
+    path('despacho/informe/', views.InformeDespachoView.as_view()),
+
     path('despacho/productos/<uuid:pk>/', views.DespachoProductosListView.as_view()),
     path('despacho/productos/<uuid:pk>/create/', views.DespachoProductosCreateView.as_view()),
     path('despacho/productos/<uuid:pk>/edit/<uuid:pk_sustracion>/', views.DespachoProductosEditView.as_view()),

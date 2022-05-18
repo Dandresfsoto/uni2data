@@ -427,7 +427,7 @@ def build_list_reports(id):
     return "Archivo paquete ID: " + filename
 
 @app.task
-def build_reporte_pagos(reporte_id):
+def build_reporte_cargue(reporte_id):
     reporte = models_reportes.Reportes.objects.get(id = reporte_id)
 
     proceso = "UNI2DATA-REPORTE-CARGUES"
@@ -457,6 +457,51 @@ def build_reporte_pagos(reporte_id):
             adicion.cantidad,
             adicion.cargue.estado,
             adicion.observacion,
+        ])
+
+    output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)
+
+    filename = str(reporte.id) + '.xlsx'
+    reporte.file.save(filename, File(output))
+
+
+    return "Archivo paquete ID: " + filename
+
+@app.task
+def build_reporte_despacho(reporte_id):
+    reporte = models_reportes.Reportes.objects.get(id = reporte_id)
+
+    proceso = "UNI2DATA-REPORTE-DESPACHO"
+
+
+    titulos = ['Consecutivo', 'Fecha creación', 'Cargue','Observacion general', 'Producto', 'Codigo', 'Valor Compra','Marca', 'Cantidad',
+               'Estado','Observacion','Fecha de envio','Proyecto']
+
+    formatos = ['0', 'dd/mm/yy', '0','General', 'General', 'General', '"$"#,##0.00_);[Red]("$"#,##0.00)','General','0',
+                 'General','General','dd/mm/yy','General']
+
+    ancho_columnas = [20, 30, 30, 40, 30, 30, 30, 30, 30, 30, 30, 30, 30]
+
+    contenidos = []
+
+    i = 0
+    for sustraccion in Sustracciones.objects.all().order_by('creacion'):
+        i += 1
+        contenidos.append([
+            int(i),
+            sustraccion.creacion,
+            sustraccion.despacho.consecutivo,
+            sustraccion.despacho.observacion,
+            sustraccion.producto.nombre,
+            sustraccion.producto.codigo,
+            sustraccion.producto.valor_compra.amount,
+            sustraccion.producto.marca,
+            sustraccion.cantidad,
+            sustraccion.despacho.estado,
+            sustraccion.observacion,
+            sustraccion.despacho.fecha_envio,
+            sustraccion.despacho.get_proyect(),
+
         ])
 
     output = construir_reporte(titulos, contenidos, formatos, ancho_columnas, reporte.nombre, reporte.creation, reporte.usuario, proceso)

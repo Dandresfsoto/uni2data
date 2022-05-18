@@ -368,7 +368,7 @@ class InformeCarguesView(LoginRequiredMixin,
         reporte_id = reporte.id
 
 
-        tasks.build_reporte_pagos(reporte_id)
+        tasks.build_reporte_cargue.delay(reporte_id)
 
         return HttpResponseRedirect('/reportes/')
 
@@ -674,6 +674,32 @@ class DespachoEditView(LoginRequiredMixin,
         kwargs['respaldo_url'] = despacho.pretty_print_respaldo()
         kwargs['legalizacion_url'] = despacho.pretty_print_legalizacion()
         return super(DespachoEditView,self).get_context_data(**kwargs)
+
+
+class InformeDespachoView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.despachos.informe",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        reporte = Reportes.objects.create(
+            usuario = self.request.user,
+            nombre = 'Informe acumulativo de despachos',
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
+        )
+        reporte_id = reporte.id
+
+
+        tasks.build_reporte_despacho(reporte_id)
+
+        return HttpResponseRedirect('/reportes/')
 
 class DespachoProductosListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
