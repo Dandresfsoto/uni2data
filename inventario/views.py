@@ -706,7 +706,10 @@ class DespachoProductosCreateView(LoginRequiredMixin,
 
         despacho.respaldo.delete(save=True)
 
-        tasks.build_remision.delay(str(despacho.id))
+        if despacho.visible == True and despacho.proyectos:
+            tasks.build_remision_proyect.delay(str(despacho.id))
+        else:
+            tasks.build_remision.delay(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -747,7 +750,10 @@ class DespachoProductosEditView(LoginRequiredMixin,
         self.object = form.save()
         despacho.respaldo.delete(save=True)
 
-        tasks.build_remision.delay(str(despacho.id))
+        if despacho.visible == True and despacho.proyectos:
+            tasks.build_remision_proyect.delay(str(despacho.id))
+        else:
+            tasks.build_remision.delay(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -775,7 +781,10 @@ class DespachoProductosDeleteView(LoginRequiredMixin,
         despacho = Despachos.objects.get(id=self.kwargs['pk'])
         Sustracciones.objects.get(id = self.kwargs['pk_sustracion']).delete()
 
-        tasks.build_remision.delay(str(despacho.id))
+        if despacho.visible == True and despacho.proyectos:
+            tasks.build_remision_proyect.delay(str(despacho.id))
+        else:
+            tasks.build_remision.delay(str(despacho.id))
         return HttpResponseRedirect('../../')
 
 
