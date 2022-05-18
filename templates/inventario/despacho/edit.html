@@ -53,10 +53,11 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 
 
 });</script><script>$(document).ready(function () {
-
+    $('select').material_select();
     $('#id_ciudad').select2();
 
-    $("label[for='id_ciudad']").addClass('active');
+    $("label[for='id_ciudad']").addClass('active')
+    $("label[for='id_proyectos']").addClass('active');
 
     $('#id_fecha_envio').pickadate({
         format: 'dd/mm/yyyy',
@@ -87,4 +88,11 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
             'error': 'Ooops, algo malo paso.'
         }
     });
+    $('#id_visible').on('change', function () {
+        if (this.checked) {
+            $("#valor_proyect").show();
+        } else {
+            $("#valor_proyect").hide();
+        }
+    })
 });</script></body></html>

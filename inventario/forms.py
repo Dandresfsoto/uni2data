@@ -358,133 +358,396 @@ class DespachoForm(forms.ModelForm):
             despacho = Despachos.objects.get(id=pk_despacho)
             self.fields['cliente'].initial = str(despacho.cliente.documento) + ' - ' + str(despacho.cliente.nombre)+ ' ' + str(despacho.cliente.apellido)
             self.fields['documento'].initial = despacho.cliente.documento
-
-
-        self.helper = FormHelper(self)
-        self.helper.layout = Layout(
-            Row(
-                Fieldset(
-                    'Información del cliente',
-                )
-            ),
-            Row(
-                Column(
-                    'cliente',
-                    css_class="s12"
-                ),
-                Column(
-                    'documento',
-                    css_class="s12"
-                ),
-            ),
-            Row(
-                Fieldset(
-                    'Información del envio',
-                )
-            ),
-            Row(
-                Column(
-                    'direccion',
-                    css_class="s12"
-                ),
-            ),
-            Row(
-                Column(
-                    'ciudad',
-                    css_class="s12"
-                ),
-            ),
-            Row(
-                Column(
-                    'fecha_envio',
-                    css_class="s12"
-                ),
-            ),
-            Row(
-                Fieldset(
-                    'Información del conductor',
-                )
-            ),
-            Row(
-                Column(
-                    'transportador',
-                    css_class="s12"
-                ),
-            ),
-            Row(
-                Column(
-                    'conductor',
-                    css_class="s6"
-                ),
-                Column(
-                    'placa',
-                    css_class="s6"
-                ),
-            ),
-            Row(
-                Fieldset(
-                    'Observacion y documentos',
-                )
-            ),
-            Row(
-                Column(
-                    'observacion',
-                    css_class="s12"
-                ),
-            ),
-            Row(
-                Column(
-                    HTML(
-                        """
-                        <p style="font-size:1.2rem;"><b>Respaldo</b></p>
-                        """
+            self.fields['visible'].initial = despacho.visible
+            if despacho.visible == True:
+                self.helper = FormHelper(self)
+                self.helper.layout = Layout(
+                    Row(
+                        Fieldset(
+                            'Información del cliente',
+                        )
                     ),
-                    'respaldo',
-                    css_class='s12'
-                )
-            ),
-            Row(
-                Column(
-                    HTML(
-                        """
-                        <p style="font-size:1.2rem;"><b>Legalizacion</b></p>
-                        """
-                    ),
-                    'legalizacion',
-                    css_class='s12'
-                )
-            ),
-            Row(
-                Fieldset(
-                    'Información del proyectos',
-                )
-            ),
-            Row(
-                Column(
-                    'visible',
-                    css_class="s12"
-                ),
-            ),
-            Row(
-                Column(
-                    'proyectos',
-                    css_class='s12',
-                ),
-            ),
-            Row(
-                Column(
-                    Div(
-                        Submit(
-                            'submit',
-                            'Guardar',
-                            css_class='button-submit'
+                    Row(
+                        Column(
+                            'cliente',
+                            css_class="s12"
                         ),
-                        css_class="right-align"
+                        Column(
+                            'documento',
+                            css_class="s12"
+                        ),
                     ),
-                    css_class="s12"
+                    Row(
+                        Fieldset(
+                            'Información del envio',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'direccion',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'ciudad',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'fecha_envio',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Fieldset(
+                            'Información del conductor',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'transportador',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'conductor',
+                            css_class="s6"
+                        ),
+                        Column(
+                            'placa',
+                            css_class="s6"
+                        ),
+                    ),
+                    Row(
+                        Fieldset(
+                            'Observacion y documentos',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'observacion',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            HTML(
+                                """
+                                <p style="font-size:1.2rem;"><b>Respaldo</b></p>
+                                """
+                            ),
+                            'respaldo',
+                            css_class='s12'
+                        )
+                    ),
+                    Row(
+                        Column(
+                            HTML(
+                                """
+                                <p style="font-size:1.2rem;"><b>Legalizacion</b></p>
+                                """
+                            ),
+                            'legalizacion',
+                            css_class='s12'
+                        )
+                    ),
+                    Row(
+                        Fieldset(
+                            'Información del proyectos',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'visible',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(),
+                    Row(
+                        Column(
+                            'proyectos',
+                            css_class='s12',
+                        ),
+                        id='valor_proyect',
+                    ),
+
+                    Row(
+                        Column(
+                            Div(
+                                Submit(
+                                    'submit',
+                                    'Guardar',
+                                    css_class='button-submit'
+                                ),
+                                css_class="right-align"
+                            ),
+                            css_class="s12"
+                        ),
+                    )
+                )
+            else:
+                self.helper = FormHelper(self)
+                self.helper.layout = Layout(
+                    Row(
+                        Fieldset(
+                            'Información del cliente',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'cliente',
+                            css_class="s12"
+                        ),
+                        Column(
+                            'documento',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Fieldset(
+                            'Información del envio',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'direccion',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'ciudad',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'fecha_envio',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Fieldset(
+                            'Información del conductor',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'transportador',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            'conductor',
+                            css_class="s6"
+                        ),
+                        Column(
+                            'placa',
+                            css_class="s6"
+                        ),
+                    ),
+                    Row(
+                        Fieldset(
+                            'Observacion y documentos',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'observacion',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            HTML(
+                                """
+                                <p style="font-size:1.2rem;"><b>Respaldo</b></p>
+                                """
+                            ),
+                            'respaldo',
+                            css_class='s12'
+                        )
+                    ),
+                    Row(
+                        Column(
+                            HTML(
+                                """
+                                <p style="font-size:1.2rem;"><b>Legalizacion</b></p>
+                                """
+                            ),
+                            'legalizacion',
+                            css_class='s12'
+                        )
+                    ),
+                    Row(
+                        Fieldset(
+                            'Información del proyectos',
+                        )
+                    ),
+                    Row(
+                        Column(
+                            'visible',
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(),
+                    Row(
+                        Column(
+                            'proyectos',
+                            css_class='s12',
+                        ),
+                        id='valor_proyect',
+                        style="display:none"
+                    ),
+
+                    Row(
+                        Column(
+                            Div(
+                                Submit(
+                                    'submit',
+                                    'Guardar',
+                                    css_class='button-submit'
+                                ),
+                                css_class="right-align"
+                            ),
+                            css_class="s12"
+                        ),
+                    )
+                )
+        else:
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+                Row(
+                    Fieldset(
+                        'Información del cliente',
+                    )
                 ),
+                Row(
+                    Column(
+                        'cliente',
+                        css_class="s12"
+                    ),
+                    Column(
+                        'documento',
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Fieldset(
+                        'Información del envio',
+                    )
+                ),
+                Row(
+                    Column(
+                        'direccion',
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Column(
+                        'ciudad',
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Column(
+                        'fecha_envio',
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Fieldset(
+                        'Información del conductor',
+                    )
+                ),
+                Row(
+                    Column(
+                        'transportador',
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Column(
+                        'conductor',
+                        css_class="s6"
+                    ),
+                    Column(
+                        'placa',
+                        css_class="s6"
+                    ),
+                ),
+                Row(
+                    Fieldset(
+                        'Observacion y documentos',
+                    )
+                ),
+                Row(
+                    Column(
+                        'observacion',
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Column(
+                        HTML(
+                            """
+                            <p style="font-size:1.2rem;"><b>Respaldo</b></p>
+                            """
+                        ),
+                        'respaldo',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Column(
+                        HTML(
+                            """
+                            <p style="font-size:1.2rem;"><b>Legalizacion</b></p>
+                            """
+                        ),
+                        'legalizacion',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Fieldset(
+                        'Información del proyectos',
+                    )
+                ),
+                Row(
+                    Column(
+                        'visible',
+                        css_class="s12"
+                    ),
+                ),
+                Row(),
+                Row(
+                    Column(
+                        'proyectos',
+                        css_class='s12',
+                    ),
+                    id='valor_proyect',
+                    style="display:none"
+                ),
+
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
             )
-        )
 
     class Meta:
         model = Despachos
