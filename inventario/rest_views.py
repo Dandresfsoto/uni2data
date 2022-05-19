@@ -10,8 +10,8 @@ from rest_framework import status
 
 class ProductosListApi(BaseDatatableView):
     model = Productos
-    columns = ['id','codigo','nombre','marca','valor','valor_compra','stock','unidad']
-    order_columns = ['id','codigo','nombre','marca','valor','valor_compra','stock','unidad']
+    columns = ['id','codigo','nombre','marca','valor_compra','valor','stock','unidad']
+    order_columns = ['id','codigo','nombre','marca','valor_compra','valor','stock','unidad']
 
     def get_initial_queryset(self):
         self.permissions = {
