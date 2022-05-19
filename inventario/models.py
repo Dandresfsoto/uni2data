@@ -15,7 +15,7 @@ def upload_dinamic_dir_repaldo(instance, filename):
 
 class Proyectos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    nombre = models.CharField(max_length=150, verbose_name='Nombre')
+    nombre = models.CharField(max_length=150, verbose_name='Nombre',blank=True, null=True)
 
     def __str__(self):
         return str(self.nombre)
@@ -80,6 +80,7 @@ class Adiciones(models.Model):
     producto = models.ForeignKey(Productos, on_delete=models.DO_NOTHING, verbose_name="Producto")
     cantidad = models.IntegerField(verbose_name='Cantidad')
     observacion = models.TextField(verbose_name='Observacion', blank=True, null=True)
+    creacion = models.DateTimeField(auto_now_add=True,blank=True, null=True)
 
 
     def __str__(self):
@@ -210,6 +211,13 @@ class Despachos(models.Model):
         else:
             return '<a href="'+ url +'"> '+ str(self.remision.name) +'</a>'
 
+    def get_proyect(self):
+        if self.proyectos:
+            return str(self.proyectos.nombre)
+        else:
+            return ""
+
+
 class Sustracciones(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     despacho = models.ForeignKey(Despachos, on_delete=models.DO_NOTHING, verbose_name="Cargue")
@@ -217,6 +225,7 @@ class Sustracciones(models.Model):
     cantidad = models.IntegerField(verbose_name='Cantidad')
     observacion = models.TextField(verbose_name='Observacion', blank=True, null=True)
     valor_total = MoneyField(max_digits=20, decimal_places=2, default_currency='COP')
+    creacion = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return str(str(self.despacho.consecutivo) + " - " + str(self.producto.codigo) + " - " + str(self.producto.nombre))

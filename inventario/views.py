@@ -347,10 +347,31 @@ class SubirEditView(LoginRequiredMixin,
         kwargs['respaldo_url'] = cargue.pretty_print_respaldo()
         return super(SubirEditView,self).get_context_data(**kwargs)
 
+class InformeCarguesView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
 
-#----------------------------------------------------------------------------------
+    permissions = {
+        "all": [
+            "usuarios.inventario.subir.informe",
+        ]
+    }
+    login_url = settings.LOGIN_URL
 
-#---------------------------- PRODUCTOS ENTRANTES ---------------------------------
+    def dispatch(self, request, *args, **kwargs):
+
+        reporte = Reportes.objects.create(
+            usuario = self.request.user,
+            nombre = 'Informe acumulativo de cargue',
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
+        )
+        reporte_id = reporte.id
+
+
+        tasks.build_reporte_cargue.delay(reporte_id)
+
+        return HttpResponseRedirect('/reportes/')
+
 
 class SubirProductosListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
@@ -650,6 +671,32 @@ class DespachoEditView(LoginRequiredMixin,
         kwargs['legalizacion_url'] = despacho.pretty_print_legalizacion()
         return super(DespachoEditView,self).get_context_data(**kwargs)
 
+
+class InformeDespachoView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+
+    permissions = {
+        "all": [
+            "usuarios.inventario.despachos.informe",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        reporte = Reportes.objects.create(
+            usuario = self.request.user,
+            nombre = 'Informe acumulativo de despachos',
+            consecutivo = Reportes.objects.filter(usuario = self.request.user).count()+1
+        )
+        reporte_id = reporte.id
+
+
+        tasks.build_reporte_despacho.delay(reporte_id)
+
+        return HttpResponseRedirect('/reportes/')
+
 class DespachoProductosListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
                       TemplateView):
@@ -706,7 +753,10 @@ class DespachoProductosCreateView(LoginRequiredMixin,
 
         despacho.respaldo.delete(save=True)
 
-        tasks.build_remision.delay(str(despacho.id))
+        if despacho.visible == True and despacho.proyectos:
+            tasks.build_remision_proyect.delay(str(despacho.id))
+        else:
+            tasks.build_remision.delay(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -747,7 +797,10 @@ class DespachoProductosEditView(LoginRequiredMixin,
         self.object = form.save()
         despacho.respaldo.delete(save=True)
 
-        tasks.build_remision.delay(str(despacho.id))
+        if despacho.visible == True and despacho.proyectos:
+            tasks.build_remision_proyect.delay(str(despacho.id))
+        else:
+            tasks.build_remision.delay(str(despacho.id))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -775,7 +828,10 @@ class DespachoProductosDeleteView(LoginRequiredMixin,
         despacho = Despachos.objects.get(id=self.kwargs['pk'])
         Sustracciones.objects.get(id = self.kwargs['pk_sustracion']).delete()
 
-        tasks.build_remision.delay(str(despacho.id))
+        if despacho.visible == True and despacho.proyectos:
+            tasks.build_remision_proyect.delay(str(despacho.id))
+        else:
+            tasks.build_remision.delay(str(despacho.id))
         return HttpResponseRedirect('../../')
 
 
@@ -871,7 +927,7 @@ class DespachoMasivoProductosUploadView(LoginRequiredMixin,
         return super(DespachoMasivoProductosUploadView,self).get_context_data(**kwargs)
 #----------------------------------------------------------------------------------
 
-#-----------------------------PRODUCTOS--------------------------------------------
+#-----------------------------CLIENTES--------------------------------------------
 
 class ClientesListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
@@ -936,8 +992,8 @@ class ClientesupdateView(LoginRequiredMixin,
         permissions = {
             "all": [
                 "usuarios.inventario.ver",
-                "usuarios.inventario.productos.ver",
-                "usuarios.inventario.productos.editar"
+                "usuarios.inventario.clientes.ver",
+                "usuarios.inventario.clientes.editar"
             ]
         }
         return permissions
@@ -956,7 +1012,7 @@ class ClientesupdateView(LoginRequiredMixin,
 
 #----------------------------------------------------------------------------------
 
-#-----------------------------PRODUCTOS--------------------------------------------
+#-----------------------------INSUMOS--------------------------------------------
 
 class InsumosListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
@@ -979,7 +1035,7 @@ class InsumosListView(LoginRequiredMixin,
 
 #----------------------------------------------------------------------------------
 
-#-----------------------------PRODUCTOS--------------------------------------------
+#-----------------------------PROYECTOS--------------------------------------------
 
 class ProyectosListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,

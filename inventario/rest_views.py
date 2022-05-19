@@ -529,8 +529,8 @@ class ClientesListApi(APIView):
 
 class InsumosListApi(BaseDatatableView):
     model = Productos
-    columns = ['id','codigo','nombre','marca','valor','stock']
-    order_columns = ['id','codigo','nombre','marca','valor','stock']
+    columns = ['codigo','nombre','marca','valor','stock']
+    order_columns = ['codigo','nombre','marca','valor','stock']
 
     def get_initial_queryset(self):
         self.permissions = {
@@ -554,23 +554,8 @@ class InsumosListApi(BaseDatatableView):
         return qs
 
     def render_column(self, row, column):
-        if column == 'id':
-            if self.request.user.has_perms(self.permissions.get('editar')):
-                ret = '<div class="center-align">' \
-                      '<a href="edit/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Editar producto">' \
-                      '<i class="material-icons">edit</i>' \
-                      '</a>' \
-                      '</div>'.format(row.id)
-
-            else:
-                ret = '<div class="center-align">' \
-                           '<i class="material-icons">edit</i>' \
-                       '</div>'.format(row.id)
-
-            return ret
-
-        elif column == 'codigo':
-            return str(row.codigo)
+        if column == 'codigo':
+            return '<b>{0}</b>'.format(str(row.codigo))
 
         elif column == 'valor':
             return '<b>{0}</b>'.format(row.pretty_print_precio())
