@@ -373,10 +373,6 @@ class InformeCarguesView(LoginRequiredMixin,
         return HttpResponseRedirect('/reportes/')
 
 
-#----------------------------------------------------------------------------------
-
-#---------------------------- PRODUCTOS ENTRANTES ---------------------------------
-
 class SubirProductosListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
                       TemplateView):
@@ -931,7 +927,7 @@ class DespachoMasivoProductosUploadView(LoginRequiredMixin,
         return super(DespachoMasivoProductosUploadView,self).get_context_data(**kwargs)
 #----------------------------------------------------------------------------------
 
-#-----------------------------PRODUCTOS--------------------------------------------
+#-----------------------------CLIENTES--------------------------------------------
 
 class ClientesListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
@@ -996,8 +992,8 @@ class ClientesupdateView(LoginRequiredMixin,
         permissions = {
             "all": [
                 "usuarios.inventario.ver",
-                "usuarios.inventario.productos.ver",
-                "usuarios.inventario.productos.editar"
+                "usuarios.inventario.clientes.ver",
+                "usuarios.inventario.clientes.editar"
             ]
         }
         return permissions
@@ -1016,7 +1012,7 @@ class ClientesupdateView(LoginRequiredMixin,
 
 #----------------------------------------------------------------------------------
 
-#-----------------------------PRODUCTOS--------------------------------------------
+#-----------------------------INSUMOS--------------------------------------------
 
 class InsumosListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
@@ -1039,7 +1035,7 @@ class InsumosListView(LoginRequiredMixin,
 
 #----------------------------------------------------------------------------------
 
-#-----------------------------PRODUCTOS--------------------------------------------
+#-----------------------------PROYECTOS--------------------------------------------
 
 class ProyectosListView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
