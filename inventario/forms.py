@@ -208,6 +208,50 @@ class CargueProductosForm(forms.ModelForm):
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
         }
 
+class AdicionalPlusForm(forms.Form):
+
+    file = forms.FileField(widget=forms.FileInput(attrs={'accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        file = cleaned_data.get("file")
+
+        if file.name.split('.')[-1] == 'xlsx':
+            pass
+        else:
+            self.add_error('file', 'El archivo cargado no tiene un formato valido')
+
+    def __init__(self, *args, **kwargs):
+        super(AdicionalPlusForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Archivo XLSX:',
+                )
+            ),
+            Row(
+                Column(
+                    'file',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
 class AdicionalForm(forms.ModelForm):
     producto = forms.CharField(max_length=100,label='Producto',widget=forms.TextInput(attrs={'class':'autocomplete','autocomplete':'off'}))
     codigo = forms.CharField(label="ID producto",widget=forms.HiddenInput())
@@ -299,7 +343,7 @@ class AdicionalForm(forms.ModelForm):
             'observacion': forms.Textarea(attrs={'class': 'materialize-textarea'}),
         }
 
-class AdicionalPlusForm(forms.Form):
+class ProductoMasivoForm(forms.Form):
 
     file = forms.FileField(widget=forms.FileInput(attrs={'accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}))
 
@@ -313,7 +357,7 @@ class AdicionalPlusForm(forms.Form):
             self.add_error('file', 'El archivo cargado no tiene un formato valido')
 
     def __init__(self, *args, **kwargs):
-        super(AdicionalPlusForm, self).__init__(*args, **kwargs)
+        super(ProductoMasivoForm, self).__init__(*args, **kwargs)
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(

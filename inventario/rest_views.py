@@ -529,8 +529,8 @@ class ClientesListApi(APIView):
 
 class InsumosListApi(BaseDatatableView):
     model = Productos
-    columns = ['codigo','nombre','marca','valor','stock']
-    order_columns = ['codigo','nombre','marca','valor','stock']
+    columns = ['codigo','nombre','marca','valor','stock','descripcion']
+    order_columns = ['codigo','nombre','marca','valor','descripcion']
 
     def get_initial_queryset(self):
         self.permissions = {
@@ -563,6 +563,8 @@ class InsumosListApi(BaseDatatableView):
         elif column == 'stock':
             return '<b style="color:blue">{0}</b>'.format(row.stock)
 
+        elif column == 'descripcion':
+            return row.get_descripcion()
 
         else:
             return super(InsumosListApi, self).render_column(row, column)
