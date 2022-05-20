@@ -200,6 +200,73 @@ class ProductosEditView(LoginRequiredMixin,
         kwargs['title'] = "EDITAR PRODUCTO"
         return super(ProductosEditView,self).get_context_data(**kwargs)
 
+
+class ProductosMasivoView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'inventario/productos/masivo.html'
+    form_class = forms.ProductoMasivoForm
+    success_url = "../"
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.inventario.ver",
+                "usuarios.inventario.productos.ver",
+                "usuarios.inventario.productos.editar"
+            ]
+        }
+        return permissions
+
+
+    def form_valid(self, form):
+        wb = openpyxl.load_workbook(form.cleaned_data['file'])
+        ws = wb.active
+
+        for file in ws.rows:
+            if Productos.objects.filter(codigo = file[0].value).count() == 0:
+                producto = Productos.objects.create(
+                    codigo = file[0].value,
+                    nombre = file[1].value,
+                    valor = file[2].value,
+                    valor_compra = file[3].value,
+                    stock = file[4].value,
+                    unidad = file[5].value,
+                    impuesto = file[6].value,
+                    marca = file[7].value,
+                )
+                producto.save()
+
+                if len(file)==9:
+                    producto.descripcion = file[8].value
+                    producto.save()
+
+            elif Productos.objects.filter(codigo = file[0].value).count() > 0:
+                Productos.objects.filter(codigo = file[0].value).update(
+                    nombre=file[1].value,
+                    valor=file[2].value,
+                    valor_compra=file[3].value,
+                    stock=file[4].value,
+                    unidad=file[5].value,
+                    impuesto=file[6].value,
+                    marca=file[7].value,
+                )
+                if len(file)==9:
+                    Productos.objects.filter(codigo = file[0].value).update(descripcion=file[8].value)
+                else:
+                    Productos.objects.filter(codigo=file[0].value).update(descripcion="")
+
+
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "AGREGAR PRODUCTOS"
+        return super(ProductosMasivoView,self).get_context_data(**kwargs)
+
 class ProductosAddView(LoginRequiredMixin,
                         MultiplePermissionsRequiredMixin,
                         FormView):

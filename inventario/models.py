@@ -48,6 +48,11 @@ class Productos(models.Model):
             return str(self.marca)
         else:
             return ""
+    def get_descripcion(self):
+        if self.descripcion:
+            return str(self.descripcion)
+        else:
+            return ""
 
 class CargarProductos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
