@@ -43,6 +43,12 @@ class Productos(models.Model):
         precio = self.valor_compra
         return str(precio).replace('COL','')
 
+    def get_marca(self):
+        if self.marca:
+            return str(self.marca)
+        else:
+            return ""
+
 class CargarProductos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     consecutivo = models.IntegerField(default=0, verbose_name='Consecutivo')

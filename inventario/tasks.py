@@ -54,6 +54,7 @@ def build_remision(id):
 
             ws['A' + str(i)] = contador
             ws['B' + str(i)] = sustraccion.producto.nombre
+            ws['F' + str(i)] = sustraccion.producto.get_marca()
             ws['G' + str(i)] = sustraccion.cantidad
             ws['H' + str(i)] = str(str(sustraccion.producto.valor).replace('COL',''))
             ws['I' + str(i)] = str(str(sustraccion.producto.impuesto) + "%")
@@ -114,6 +115,7 @@ def build_remision(id):
 
             ws['A' + str(i)] = contador
             ws['B' + str(i)] = sustraccion.producto.nombre
+            ws['F' + str(i)] = sustraccion.producto.get_marca()
             ws['G' + str(i)] = sustraccion.cantidad
             ws['H' + str(i)] = str(str(sustraccion.producto.valor).replace('COL',''))
             ws['I' + str(i)] = str(str(sustraccion.producto.impuesto) + "%")
@@ -178,6 +180,7 @@ def build_remision(id):
 
             ws['A' + str(i)] = contador
             ws['B' + str(i)] = sustraccion.producto.nombre
+            ws['F' + str(i)] = sustraccion.producto.get_marca()
             ws['G' + str(i)] = sustraccion.cantidad
             ws['H' + str(i)] = str(str(sustraccion.producto.valor).replace('COL',''))
             ws['I' + str(i)] = str(str(sustraccion.producto.impuesto) + "%")
@@ -245,7 +248,8 @@ def build_remision_proyect(id):
 
             ws['A' + str(i)] = contador
             ws['B' + str(i)] = sustraccion.producto.nombre
-            ws['H' + str(i)] = sustraccion.cantidad
+            ws['H' + str(i)] = sustraccion.producto.nombre
+            ws['J' + str(i)] = sustraccion.cantidad
 
             i += 1
             contador += 1
@@ -302,8 +306,8 @@ def build_remision_proyect(id):
 
             ws['A' + str(i)] = contador
             ws['B' + str(i)] = sustraccion.producto.nombre
-            ws['H' + str(i)] = sustraccion.cantidad
-
+            ws['H' + str(i)] = sustraccion.producto.nombre
+            ws['J' + str(i)] = sustraccion.cantidad
             i += 1
             contador += 1
             if contador == 20:
@@ -363,7 +367,8 @@ def build_remision_proyect(id):
 
             ws['A' + str(i)] = contador
             ws['B' + str(i)] = sustraccion.producto.nombre
-            ws['H' + str(i)] = sustraccion.cantidad
+            ws['H' + str(i)] = sustraccion.producto.nombre
+            ws['J' + str(i)] = sustraccion.cantidad
 
             i += 1
             contador += 1
