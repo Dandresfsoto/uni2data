@@ -3485,6 +3485,11 @@ class LiquidationsEditView(LoginRequiredMixin,
                     }
                 )
 
+
+            liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
+
+
+
             """
             usuario = contrato.get_user_or_none()
 
