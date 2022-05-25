@@ -3484,9 +3484,7 @@ class LiquidationsEditView(LoginRequiredMixin,
                         '--page-size': 'Letter'
                     }
                 )
-
-
-            liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
+                liquidacion.file.save('liquidacion.pdf', File(io.BytesIO(data)))
 
 
 
