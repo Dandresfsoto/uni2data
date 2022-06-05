@@ -2438,7 +2438,7 @@ class IndividualMunicipioComunidadHogaresListApi(BaseDatatableView):
         if column == 'id':
             if self.request.user.has_perms(self.permissions.get('ver')):
                 ret = '<div class="center-align">' \
-                      '<a href="edit/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Editar hogar">' \
+                      '<a href="hogar/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Editar hogar">' \
                       '<i class="material-icons">remove_red_eye</i>' \
                       '</a>' \
                       '</div>'.format(row.id)
@@ -2465,3 +2465,228 @@ class IndividualMunicipioComunidadHogaresListApi(BaseDatatableView):
 
         else:
             return super(IndividualMunicipioComunidadHogaresListApi, self).render_column(row, column)
+
+class IndividualMunicipioComunidadHogaresActivitysListApi(BaseDatatableView):
+    model = models.Moments
+    columns = ['id', 'consecutive', 'name', 'progress']
+    order_columns = ['id', 'consecutive', 'name', 'progress']
+
+    def get_initial_queryset(self):
+        self.route = models.Routes.objects.get(id = self.kwargs['pk_ruta'])
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver"
+            ]
+        }
+        return self.model.objects.all()
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search) | Q(consecutive__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                           '<a href="momento/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver instrumentos">' \
+                                '<i class="material-icons">remove_red_eye</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">remove_red_eye</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'consecutive':
+            return '<div class="center-align"><b>{0}</b></div>'.format(row.consecutive)
+
+
+        elif column == 'progress':
+
+            progress = row.get_progress_moment(self.route)
+
+            progress = '{:20,.2f}%'.format(progress)
+
+
+            return '<div class="center-align">' \
+                   '<a class="" data-position="left" data-html="true" data-delay="50" ' \
+                   'data-tooltip="{1}">' \
+                   '<b>{0}</b>' \
+                   '</a>' \
+                   '</div>'.format(progress,progress)
+
+        else:
+            return super(IndividualMunicipioComunidadHogaresActivitysListApi, self).render_column(row, column)
+
+class IndividualMunicipioComunidadHogaresActivitysMomentoListApi(BaseDatatableView):
+    model = models.ObjectRouteInstrument
+    columns = ['creation', 'creacion_user', 'id', 'name','update_user']
+    order_columns = ['creacion', 'creacion_user', 'id', 'name','update_user']
+
+    def get_initial_queryset(self):
+        self.route = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        self.hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca_.ver",
+                "usuarios.iraca.individual.ver"
+            ]
+        }
+        return self.model.objects.filter(moment=self.moment.id,households__id=self.hogar.id)
+
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(households__document__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'creation':
+            ret = ''
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                from iraca import utils
+                ret = '<div class="center-align">' \
+                      '<a href="view/{0}" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, utils.pretty_datetime(timezone.localtime(row.update_date)))
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'id':
+            ret = ''
+
+            if self.request.user.has_perms(self.permissions.get('ver')):
+                ret = '<div class="center-align">' \
+                      '<a href="traceability/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                      '<i class="material-icons">class</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, 'Ver la trazabilidad')
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">class</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'creacion_user':
+            ret = ''
+            if self.request.user.has_perms(self.permissions.get('ver')):
+               ret = '<div class="center-align">' \
+                      '<a href="edit/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Actualizar el soporte">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'name':
+            return row.name
+
+        elif column == 'update_user':
+            ret = ''
+
+            if self.request.user.is_superuser:
+                if row.estate in ['cargado']:
+
+                    ret = '<div class="center-align">' \
+                          '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar soporte">' \
+                          '<i class="material-icons">delete</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id)
+
+                elif row.estate in ['rechazado']:
+
+                    ret = '<div class="center-align">' \
+                          '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar soporte">' \
+                          '<i class="material-icons">delete</i>' \
+                          '</a>' \
+                          '</div>'.format(row.id)
+                else:
+
+                    ret = '<div class="center-align">' \
+                          '<i class="material-icons">delete</i>' \
+                          '</div>'.format(row.id)
+
+                return ret
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">delete</i>' \
+                      '</div>'.format(row.id)
+
+                return ret
+
+        else:
+            return super(IndividualMunicipioComunidadHogaresActivitysMomentoListApi, self).render_column(row, column)
+
+class IndividualMunicipioComunidadHogaresActivitysMomentoTrazabilidadListApi(BaseDatatableView):
+    model = models.InstrumentTraceabilityRouteObject
+    columns = ['creacion','user','observation']
+    order_columns = ['creacion','user','observation']
+
+    def get_initial_queryset(self):
+        self.route = models.Routes.objects.get(id = self.kwargs['pk_ruta'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.implementation.ver"
+            ]
+        }
+
+        if self.request.user.is_superuser:
+            return self.model.objects.filter(instrument=self.instrument_object)
+        else:
+            return self.model.objects.filter(instrument=self.instrument_object)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(observacion__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+
+        if column == 'creacion':
+            return timezone.localtime(row.creacion).strftime('%d de %B del %Y a las %I:%M:%S %p')
+
+
+        elif column == 'user':
+            return row.user.get_full_name()
+
+
+        else:
+            return super(IndividualMunicipioComunidadHogaresActivitysMomentoTrazabilidadListApi, self).render_column(row, column)

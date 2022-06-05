@@ -1,6 +1,7 @@
 import io
 import json
 
+import openpyxl
 import pdfkit
 from braces.views import LoginRequiredMixin, MultiplePermissionsRequiredMixin
 from bs4 import BeautifulSoup
@@ -4581,3 +4582,490 @@ class RutaHogaresListView(LoginRequiredMixin,
         kwargs['url_datatable'] = '/rest/v1.0/iraca_new/individual/territorio/{0}/resguardo/{1}/activities/{2}'.format(territorio.id,resguardo.id,ruta.id)
         kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.iraca.individual.editar')
         return super(RutaHogaresListView,self).get_context_data(**kwargs)
+
+class RutaUploadHogaresListView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/individual/territorios/comunity/ruta/masivo.html'
+    form_class = forms.HogarVinculacionMasivoForm
+    success_url = "../"
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.individual.ver",
+                "usuarios.individual.editar"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+        wb = openpyxl.load_workbook(form.cleaned_data['file'])
+        ws = wb.active
+        ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+
+        for file in ws.rows:
+            if models.Households.objects.filter(document = file[0].value).count() > 0:
+                hogar = models.Households.objects.get(document = file[0].value)
+                hogar.routes.add(ruta)
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        kwargs['title'] = "AGREGAR HOGARES"
+        kwargs['breadcrum_active'] = ruta.comunity.name
+        return super(RutaUploadHogaresListView,self).get_context_data(**kwargs)
+
+class RutaHogaresactivitysListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/individual/territorios/comunity/ruta/hogares/list.html'
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.implementacion.ver",
+            ]
+        }
+        return permissions
+
+    def get_context_data(self, **kwargs):
+        ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        territorio = models.Certificates.objects.get(id=self.kwargs['pk_territorio'])
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguardo'])
+        hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+        kwargs['title'] = "ACTIVIDADES"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/individual/territorio/{0}/resguardo/{1}/activities/{2}/hogar/{3}/'.format(territorio.id,resguardo.id,ruta.id,hogar.id)
+        kwargs['breadcrum_active'] = hogar.document
+        kwargs['breadcrum_1'] = ruta.comunity.name
+        return super(RutaHogaresactivitysListView,self).get_context_data(**kwargs)
+
+class RutaHogaresActivitysMomentoListView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/individual/territorios/comunity/ruta/hogares/momento/list.html'
+
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+                "usuarios.iraca.individual.crear",
+            ]
+        }
+        return permissions
+
+    def get_context_data(self, **kwargs):
+        ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        territorio = models.Certificates.objects.get(id=self.kwargs['pk_territorio'])
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguardo'])
+        hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+        momento = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        kwargs['title'] = "MOMENTO"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/individual/territorio/{0}/resguardo/{1}/activities/{2}/hogar/{3}/momento/{4}/'.format(
+            territorio.id,
+            resguardo.id,
+            ruta.id,
+            hogar.id,
+            momento.id,
+        )
+        kwargs['breadcrum_1'] = ruta.comunity.name
+        kwargs['breadcrum_active'] = momento.name
+        kwargs['breadcrum_2'] = hogar.document
+        kwargs['instruments'] = ruta.get_instruments_list(momento)
+        return super(RutaHogaresActivitysMomentoListView,self).get_context_data(**kwargs)
+
+class RutaHogaresActivitysMomentoInstrumentCreateView(CreateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        self.momento = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        self.instrument = models.Instruments.objects.get(id=self.kwargs['pk_instrument'])
+
+        try:
+            self.models = models_instruments.get_model(self.instrument.model)
+        except:
+            pass
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+                "usuarios.iraca.individual.crear",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def get_template_names(self):
+        return self.models.get('template')
+
+    def get_form_class(self):
+        self.model = self.models.get('model')
+        return self.models.get('form')
+
+    def update_objet_instrument(self,id,model,creation):
+
+        instrument = models.ObjectRouteInstrument.objects.get(id = id)
+
+        if creation:
+            models.ObjectRouteInstrument.objects.filter(id = id).update(
+                creacion_user=self.request.user
+            )
+
+            models.InstrumentTraceabilityRouteObject.objects.create(
+                instrument = instrument,
+                user = self.request.user,
+                observation = 'Creación del soporte'
+            )
+
+        else:
+            models.InstrumentTraceabilityRouteObject.objects.create(
+                instrument = instrument,
+                user=self.request.user,
+                observation='Actualización del soporte'
+            )
+
+        models.ObjectRouteInstrument.objects.filter(id=id).update(
+            model = self.instrument.name,
+            support = model.id,
+            update_date = timezone.now(),
+            update_user = self.request.user,
+            consecutive = self.instrument.consecutive,
+            name = self.instrument.short_name,
+            estate = 'cargado'
+        )
+
+        self.ruta.update_novelties_form()
+
+        return 'Ok'
+
+    def form_valid(self, form):
+
+        self.object = form.save(commit=False)
+        self.object.route = self.ruta
+        self.object.instrument = self.instrument
+        self.object.name = self.instrument.short_name
+        self.object.save()
+
+        self.object.households.clear()
+
+        if self.instrument.level == 'individual':
+            hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+            self.object.households.add(hogar.id)
+
+        elif self.instrument.level == 'route':
+            pass
+
+        else:
+            self.object.households.add(*form.cleaned_data['households'])
+
+
+        object = models.ObjectRouteInstrument.objects.create(route=self.ruta, moment=self.momento, instrument=self.instrument)
+        ids = self.object.households.all().values_list('id',flat = True)
+        object.households.add(*ids)
+        models.ObservationsInstrumentRouteObject.objects.create(instrument = object,user_creation = self.request.user,observation = "Creación del instrumento")
+
+        self.update_objet_instrument(object.id, self.object, True)
+        #objeto.clean_similares()
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        momento = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+        instrument = models.Instruments.objects.get(id=self.kwargs['pk_instrument'])
+        kwargs['title'] = "AGREGAR"
+        kwargs['breadcrum_1'] = ruta.comunity.name
+        kwargs['breadcrum_2'] = momento.name
+        kwargs['breadcrum_3'] = hogar.document
+        kwargs['breadcrum_active'] = self.instrument.short_name
+        kwargs['url'] = 'Formulacion'
+        return super(RutaHogaresActivitysMomentoInstrumentCreateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {'pk_ruta': self.ruta.id, 'short_name': self.instrument.short_name, 'pk_instrument': self.instrument.id}
+
+class RutaHogaresActivitysMomentoInstrumentView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        self.instrument = self.instrument_object.instrument
+        self.models = models_instruments.get_model(self.instrument.model)
+        self.object = self.models.get('model').objects.get(id=self.instrument_object.support)
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def get_template_names(self):
+        return self.models.get('template_view')
+
+    def get_context_data(self, **kwargs):
+        ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        momento = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+        kwargs['title'] = "VER"
+        kwargs['breadcrum_1'] = ruta.comunity.name
+        kwargs['breadcrum_2'] = momento.name
+        kwargs['breadcrum_3'] = hogar.document
+        kwargs['breadcrum_active'] = self.instrument.short_name
+        kwargs['objeto'] = self.object
+        return super(RutaHogaresActivitysMomentoInstrumentView,self).get_context_data(**kwargs)
+
+class RutaHogaresActivitysMomentoInstrumentTraceabilityView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+    template_name = 'iraca/individual/territorios/comunity/ruta/hogares/momento/traceability/traceability.html'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        self.instrument = self.instrument_object.instrument
+        self.models = models_instruments.get_model(self.instrument.model)
+        self.object = self.models.get('model').objects.get(id=self.instrument_object.support)
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        territorio = models.Certificates.objects.get(id=self.kwargs['pk_territorio'])
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguardo'])
+        hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+        momento = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        instrumento = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        kwargs['title'] = "TRAZABILIDAD"
+        kwargs['breadcrum_1'] = ruta.comunity.name
+        kwargs['breadcrum_2'] = momento.name
+        kwargs['breadcrum_3'] = hogar.document
+        kwargs['breadcrum_active'] = self.instrument.short_name
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/individual/territorio/{0}/resguardo/{1}/activities/{2}/hogar/{3}/momento/{4}/traceability/{5}/'.format(
+            territorio.id,
+            resguardo.id,
+            ruta.id,
+            hogar.id,
+            momento.id,
+            instrumento.id
+        )
+        return super(RutaHogaresActivitysMomentoInstrumentTraceabilityView,self).get_context_data(**kwargs)
+
+class RutaHogaresActivitysMomentoInstrumentObjectView(UpdateView):
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+
+    def get_object(self, queryset=None):
+        self.model = self.models.get('model')
+        return self.model.objects.get(id=self.instrument_object.support)
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.route = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        self.moment = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        self.instrument = self.instrument_object.instrument
+
+        try:
+            self.models = models_instruments.get_model(self.instrument.model)
+        except:
+            return HttpResponseRedirect('../../')
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.formulacion.ver"
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if self.instrument_object.estate in ['cargado', 'rechazado']:
+
+                if request.method.lower() in self.http_method_names:
+                    handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                else:
+                    handler = self.http_method_not_allowed
+                return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def get_template_names(self):
+        return self.models.get('template')
+
+    def get_form_class(self):
+        self.model = self.models.get('model')
+        return self.models.get('form')
+
+    def update_objet_instrument(self, id, model, creation):
+
+        instrument = models.ObjectRouteInstrument.objects.get(id=id)
+
+        if creation:
+            models.ObjectRouteInstrument.objects.filter(id=id).update(
+                creacion_user=self.request.user
+            )
+
+            models.InstrumentTraceabilityRouteObject.objects.create(
+                instrument=instrument,
+                user=self.request.user,
+                observation='Creación del soporte'
+            )
+
+        else:
+            models.InstrumentTraceabilityRouteObject.objects.create(
+                instrument=instrument,
+                user=self.request.user,
+                observation='Actualización del soporte'
+            )
+
+        models.ObjectRouteInstrument.objects.filter(id=id).update(
+            model=self.instrument.name,
+            support=model.id,
+            update_date=timezone.now(),
+            update_user=self.request.user,
+            consecutive=self.instrument.consecutive,
+            name=self.instrument.short_name,
+            estate='cargado'
+        )
+
+        self.route.update_novelties_form()
+
+        return 'Ok'
+
+    def form_valid(self, form):
+
+        self.object = form.save(commit=False)
+        self.object.route = self.route
+        self.object.instrument = self.instrument
+        self.object.name = self.instrument.short_name
+        self.object.save()
+
+        self.object.households.clear()
+        if self.instrument.level == 'individual':
+            hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+            self.object.households.add(hogar.id)
+
+        elif self.instrument.level == 'ruta':
+            pass
+
+        else:
+            self.object.households.add(*form.cleaned_data['households'])
+
+        object = self.instrument_object
+
+        ids = self.object.households.all().values_list('id', flat=True)
+        object.households.clear()
+        object.households.add(*ids)
+
+        models.ObservationsInstrumentRouteObject.objects.create(instrument=object, user_creation=self.request.user,
+                                                                 observation="Actualización del instrumento")
+
+        self.update_objet_instrument(object.id, self.object, False)
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        momento = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+        kwargs['title'] = "EDITAR"
+        kwargs['breadcrum_1'] = ruta.comunity.name
+        kwargs['breadcrum_2'] = momento.name
+        kwargs['breadcrum_3'] = hogar.document
+        kwargs['breadcrum_active'] = self.instrument.short_name
+        kwargs['url'] = 'Formulacion'
+        return super(RutaHogaresActivitysMomentoInstrumentObjectView, self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {'pk_ruta': self.route.id, 'short_name': self.instrument.short_name,
+                'pk_instrument': self.instrument.pk, 'pk_instrument_object': self.instrument_object.pk}
+
+class RutaHogaresActivitysMomentoInstrumentObjectDeleteView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+        self.route = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        self.models = models_instruments.get_model(self.instrument_object.instrument.model)
+
+        self.permissions = {
+            "eliminar": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+                "usuarios.iraca.individual.editar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions['eliminar']):
+                self.models.get('model').objects.get(id = self.instrument_object.support).delete()
+                models.InstrumentTraceabilityRouteObject.objects.filter(instrument = self.instrument_object).delete()
+                models.ObservationsInstrumentRouteObject.objects.filter(instrument = self.instrument_object).delete()
+                self.instrument_object.delete()
+                self.route.update_novedades()
+                return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')

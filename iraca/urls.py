@@ -139,5 +139,13 @@ urlpatterns = [
 
     path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/',views.RutaHogaresListView.as_view()),
     path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/upload/',views.RutaUploadHogaresListView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/',views.RutaHogaresactivitysListView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/',views.RutaHogaresActivitysMomentoListView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/add/<uuid:pk_instrument>/',views.RutaHogaresActivitysMomentoInstrumentCreateView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/view/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/traceability/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentTraceabilityView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/edit/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentObjectView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/delete/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentObjectDeleteView.as_view()),
+
 
 ]

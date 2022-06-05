@@ -918,6 +918,50 @@ class InidividualRouteForm(forms.Form):
             )
         )
 
+class HogarVinculacionMasivoForm(forms.Form):
+
+    file = forms.FileField(widget=forms.FileInput(attrs={'accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        file = cleaned_data.get("file")
+
+        if file.name.split('.')[-1] == 'xlsx':
+            pass
+        else:
+            self.add_error('file', 'El archivo cargado no tiene un formato valido')
+
+    def __init__(self, *args, **kwargs):
+        super(HogarVinculacionMasivoForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Archivo XLSX:',
+                )
+            ),
+            Row(
+                Column(
+                    'file',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
 #----------------------------------------------------------------------------------
 
 #---------------------------- FORMS OBJECTS  -------------------------------------
@@ -1003,6 +1047,144 @@ class DocumentoForm(forms.ModelForm):
                 Row(
                     Column(
                         'households',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+        else:
+            self.fields['households'] = forms.ModelMultipleChoiceField(queryset=models.Households.objects.filter(routes=kwargs['initial']['pk']))
+
+            if 'pk_instrument_object' in kwargs['initial']:
+                instrument_object = models.ObjectRouteInstrument.objects.get(id=kwargs['initial']['pk_instrument_object'])
+
+                self.fields['households'].initial = instrument_object.households.all()
+
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+                Row(
+                    Fieldset(
+                        kwargs['initial'].get('short_name'),
+                    )
+                ),
+                Row(
+                    Column(
+                        'file',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Column(
+                        'households',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+
+    class Meta:
+        model = models.Documento
+        fields = ['file']
+        widgets = {
+            'file': forms.ClearableFileInput(attrs={
+                'data-max-file-size': "10M",
+                'accept': 'application/pdf,application/x-pdf'}
+            ),
+        }
+
+class DocumentoHogarForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+        file = cleaned_data.get("file")
+
+        if file.name.split('.')[-1] == 'pdf' or file.name.split('.')[-1] == 'PDF':
+            pass
+        else:
+            self.add_error('file', 'El archivo cargado no tiene un formato valido')
+
+
+    def __init__(self, *args, **kwargs):
+        super(DocumentoHogarForm, self).__init__(*args, **kwargs)
+
+
+        instrument = models.Instruments.objects.get(id = kwargs['initial']['pk_instrument'])
+
+
+
+        if instrument.level == 'ruta':
+
+
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+                Row(
+                    Fieldset(
+                        kwargs['initial'].get('short_name'),
+                    )
+                ),
+                Row(
+                    Column(
+                        'file',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
+
+        elif instrument.level == 'individual':
+
+
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+
+                Row(
+                    Fieldset(
+                        kwargs['initial'].get('short_name'),
+                    )
+                ),
+                Row(
+                    Column(
+                        'file',
                         css_class='s12'
                     )
                 ),

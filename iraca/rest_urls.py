@@ -55,4 +55,7 @@ urlpatterns = [
 
     path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/', rest_views.IndividualMunicipioComunidadListApi.as_view()),
     path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/', rest_views.IndividualMunicipioComunidadHogaresListApi.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/', rest_views.IndividualMunicipioComunidadHogaresActivitysListApi.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/', rest_views.IndividualMunicipioComunidadHogaresActivitysMomentoListApi.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/traceability/<uuid:pk_instrument_object>/', rest_views.IndividualMunicipioComunidadHogaresActivitysMomentoTrazabilidadListApi.as_view()),
 ]

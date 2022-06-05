@@ -374,6 +374,7 @@ class Routes(models.Model):
 
         instruments_return = []
 
+
         for instrument in Instruments.objects.filter(moment = moment).order_by('consecutive'):
             instruments_return.append({
                 'id': instrument.id,
