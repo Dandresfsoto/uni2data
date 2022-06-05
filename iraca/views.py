@@ -70,27 +70,27 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_description': 'Estructura de entregables por cada uno de los componentes.'
             })
 
-        if self.request.user.has_perm('usuarios.iraca.actas.ver'):
-            items.append({
-                'sican_categoria': 'Actas',
-                'sican_color': 'brown darken-4',
-                'sican_order': 3,
-                'sican_url': 'certificate/',
-                'sican_name': 'Actas',
-                'sican_icon': 'assignment',
-                'sican_description': 'Actas diligenciadas para el proyecto Iraca 2021'
-            })
+        # if self.request.user.has_perm('usuarios.iraca.actas.ver'):
+        #     items.append({
+        #         'sican_categoria': 'Actas',
+        #         'sican_color': 'brown darken-4',
+        #         'sican_order': 3,
+        #         'sican_url': 'certificate/',
+        #         'sican_name': 'Actas',
+        #         'sican_icon': 'assignment',
+        #         'sican_description': 'Actas diligenciadas para el proyecto Iraca 2021'
+        #     })
 
-        if self.request.user.has_perm('usuarios.iraca.socializacion.ver'):
-            items.append({
-                'sican_categoria': 'Socializacion y concertacion',
-                'sican_color': 'green darken-4',
-                'sican_order': 4,
-                'sican_url': 'socialization/',
-                'sican_name': 'Socializacion',
-                'sican_icon': 'assignment_ind',
-                'sican_description': 'Actas de socializacion y concertacion para el proyecto Iraca 2021'
-            })
+        # if self.request.user.has_perm('usuarios.iraca.socializacion.ver'):
+        #     items.append({
+        #         'sican_categoria': 'Socializacion y concertacion',
+        #         'sican_color': 'green darken-4',
+        #         'sican_order': 4,
+        #         'sican_url': 'socialization/',
+        #         'sican_name': 'Socializacion',
+        #         'sican_icon': 'assignment_ind',
+        #         'sican_description': 'Actas de socializacion y concertacion para el proyecto Iraca 2021'
+        #     })
 
         if self.request.user.has_perm('usuarios.iraca.vinculacion.ver'):
             items.append({
@@ -103,27 +103,27 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_description': 'Informacion de Vinculacion y caracterizacion proyecto Iraca 2021'
             })
 
-        if self.request.user.has_perm('usuarios.iraca.formulacion.ver'):
-            items.append({
-                'sican_categoria': 'Formulacion y convalidacion',
-                'sican_color': 'orange darken-4',
-                'sican_order': 6,
-                'sican_url': 'formulation/',
-                'sican_name': 'Formulacion',
-                'sican_icon': 'pie_chart',
-                'sican_description': 'Informacion de Formulacion y convalidacion proyecto Iraca 2021'
-            })
-
-        if self.request.user.has_perm('usuarios.iraca.implementacion.ver'):
-            items.append({
-                'sican_categoria': 'Implementacion',
-                'sican_color': 'purple darken-4',
-                'sican_order': 7,
-                'sican_url': 'implementation/',
-                'sican_name': 'Implementacion',
-                'sican_icon': 'work',
-                'sican_description': 'Informacion de implementacion del proyecto Iraca 2021'
-            })
+        # if self.request.user.has_perm('usuarios.iraca.formulacion.ver'):
+        #     items.append({
+        #         'sican_categoria': 'Formulacion y convalidacion',
+        #         'sican_color': 'orange darken-4',
+        #         'sican_order': 6,
+        #         'sican_url': 'formulation/',
+        #         'sican_name': 'Formulacion',
+        #         'sican_icon': 'pie_chart',
+        #         'sican_description': 'Informacion de Formulacion y convalidacion proyecto Iraca 2021'
+        #     })
+        #
+        # if self.request.user.has_perm('usuarios.iraca.implementacion.ver'):
+        #     items.append({
+        #         'sican_categoria': 'Implementacion',
+        #         'sican_color': 'purple darken-4',
+        #         'sican_order': 7,
+        #         'sican_url': 'implementation/',
+        #         'sican_name': 'Implementacion',
+        #         'sican_icon': 'work',
+        #         'sican_description': 'Informacion de implementacion del proyecto Iraca 2021'
+        #     })
 
         if self.request.user.has_perm('usuarios.iraca.soportes.ver'):
             items.append({
@@ -4663,6 +4663,23 @@ class RutaHogaresActivitysMomentoListView(TemplateView):
         }
         return permissions
 
+    def get_instruments_list(self):
+        hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+        momento = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+
+        instruments_return = []
+
+        for instrument in models.Instruments.objects.filter(moment = momento).order_by('consecutive'):
+            if models.ObjectRouteInstrument.objects.filter(instrument=instrument, households=hogar).count() == 0:
+                instruments_return.append({
+                    'id': instrument.id,
+                    'short_name': instrument.short_name,
+                    'icon': instrument.icon,
+                    'color': instrument.color
+                })
+
+        return instruments_return
+
     def get_context_data(self, **kwargs):
         ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
         territorio = models.Certificates.objects.get(id=self.kwargs['pk_territorio'])
@@ -4680,7 +4697,7 @@ class RutaHogaresActivitysMomentoListView(TemplateView):
         kwargs['breadcrum_1'] = ruta.comunity.name
         kwargs['breadcrum_active'] = momento.name
         kwargs['breadcrum_2'] = hogar.document
-        kwargs['instruments'] = ruta.get_instruments_list(momento)
+        kwargs['instruments'] = self.get_instruments_list()
         return super(RutaHogaresActivitysMomentoListView,self).get_context_data(**kwargs)
 
 class RutaHogaresActivitysMomentoInstrumentCreateView(CreateView):
