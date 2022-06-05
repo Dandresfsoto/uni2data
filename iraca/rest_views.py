@@ -2461,7 +2461,16 @@ class IndividualMunicipioComunidadHogaresListApi(BaseDatatableView):
             return '{0}, {1}'.format(row.municipality_attention.nombre,row.municipality_attention.departamento.nombre)
 
         elif column == 'routes':
-            return row.get_routes()
+            progress = row.get_progress_hogar()
+
+            progress = '{:20,.2f}%'.format(progress)
+
+            return '<div class="center-align">' \
+                   '<a class="" data-position="left" data-html="true" data-delay="50" ' \
+                   'data-tooltip="{1}">' \
+                   '<b>{0}</b>' \
+                   '</a>' \
+                   '</div>'.format(progress, progress)
 
         else:
             return super(IndividualMunicipioComunidadHogaresListApi, self).render_column(row, column)
@@ -2473,6 +2482,7 @@ class IndividualMunicipioComunidadHogaresActivitysListApi(BaseDatatableView):
 
     def get_initial_queryset(self):
         self.route = models.Routes.objects.get(id = self.kwargs['pk_ruta'])
+        self.hogar = models.Households.objects.get(id = self.kwargs['pk_hogar'])
         self.permissions = {
             "ver": [
                 "usuarios.iraca.ver",
@@ -2512,7 +2522,7 @@ class IndividualMunicipioComunidadHogaresActivitysListApi(BaseDatatableView):
 
         elif column == 'progress':
 
-            progress = row.get_progress_moment(self.route)
+            progress = row.get_progress_moment_hogar(self.route, self.hogar)
 
             progress = '{:20,.2f}%'.format(progress)
 

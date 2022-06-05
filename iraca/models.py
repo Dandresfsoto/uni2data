@@ -246,6 +246,20 @@ class Moments(models.Model):
 
         return progress
 
+    def get_progress_moment_hogar(self,route,hogar):
+
+        query = ObjectRouteInstrument.objects.filter(route=route, moment=self, households=hogar).count()
+
+        instrument = Instruments.objects.filter(moment=self).count()
+
+        try:
+            progress = int((query / instrument)*100)
+        except:
+            progress = 0
+
+
+        return progress
+
 class Instruments(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     moment = models.ForeignKey(Moments,on_delete=models.DO_NOTHING,related_name='instrument_moment_iraca_2021', verbose_name="Momento")
@@ -456,6 +470,20 @@ class Households(models.Model):
             estate = ''
 
         return estate
+
+    def get_progress_hogar(self):
+
+        query = ObjectRouteInstrument.objects.filter(households=self).count()
+
+        instrument = Instruments.objects.all().count()
+
+        try:
+            progress = int((query / instrument)*100)
+        except:
+            progress = 0
+
+
+        return progress
 
 class QuotasRouteObject(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
