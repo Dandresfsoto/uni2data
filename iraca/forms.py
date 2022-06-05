@@ -652,7 +652,12 @@ class ResguardCreateForm(forms.ModelForm):
             ),
             Row(
                 Column(
-                    'municipality', css_class="s12"
+                    'certificate', css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    'color', css_class="s12"
                 ),
             ),
             Row(
@@ -672,10 +677,52 @@ class ResguardCreateForm(forms.ModelForm):
 
     class Meta:
         model = models.Resguards
-        fields = ['name','municipality']
+        fields = ['name','certificate','color']
         labels = {
             'name':'Nombre',
-            'municipality':'Municipio',
+            'certificate':'Municipio',
+            'color': 'Color en ingles',
+        }
+
+class ComunityForm(forms.ModelForm):
+
+
+    def __init__(self, *args, **kwargs):
+        super(ComunityForm, self).__init__(*args, **kwargs)
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Información de la comunidad',
+                )
+            ),
+            Row(
+                Column(
+                    'name',css_class="s12"
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+    class Meta:
+        model = models.Comunity
+        fields = ['name']
+        labels = {
+            'name':'Nombre',
         }
 
 class CollectsAccountInformsRejectForm(forms.Form):
@@ -775,10 +822,105 @@ class AccountActivityForm(forms.Form):
             )
         )
 
+class InidividualRouteForm(forms.Form):
+
+    comunity = forms.ModelChoiceField(label='Comunidad', queryset=models.Comunity.objects.all())
+    name = forms.CharField(label='Nombre de la ruta', max_length=100)
+    visible = forms.BooleanField(required=False)
+    goal = forms.IntegerField(label="Meta hogares")
+
+    def _clean_fields(self):
+        for name, field in self.fields.items():
+            # value_from_datadict() gets the data from the data dictionaries.
+            # Each widget type knows how to retrieve its own data, because some
+            # widgets split data over several HTML fields.
+            if name not in ['name']:
+                if field.disabled:
+                    value = self.get_initial_for_field(field, name)
+                else:
+                    value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
+                try:
+                    if isinstance(field, FileField):
+                        initial = self.get_initial_for_field(field, name)
+                        value = field.clean(value, initial)
+                    else:
+                        value = field.clean(value)
+
+                        if name == 'nombre':
+                            try:
+                                models.Routes.objects.get(nombre = value)
+                            except:
+                                pass
+                            else:
+                                self.add_error(name, 'El nombre de la ruta ya existe')
+
+                    self.cleaned_data[name] = value
+                    if hasattr(self, 'clean_%s' % name):
+                        value = getattr(self, 'clean_%s' % name)()
+                        self.cleaned_data[name] = value
+                except ValidationError as e:
+                    self.add_error(name, e)
+            else:
+                value = field.widget.value_from_datadict(self.data, self.files, self.add_prefix(name))
+                self.cleaned_data[name] = value
+
+
+    def __init__(self, *args, **kwargs):
+        super(InidividualRouteForm, self).__init__(*args, **kwargs)
+
+        self.fields['comunity'] = forms.ModelChoiceField(queryset=models.Comunity.objects.filter(resguard__id=kwargs['initial']['pk_resguardo']))
+
+        if 'pk_ruta' in kwargs['initial']:
+            ruta = models.Routes.objects.get(id = kwargs['initial']['pk_ruta'])
+            self.fields['comunity'].initial = ruta.comunity
+            self.fields['visible'].initial = ruta.visible
+            self.fields['goal'].initial = ruta.goal
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+
+            Row(
+                Fieldset(
+                    'Información de la ruta:',
+                )
+            ),
+            Row(
+                Column(
+                    'comunity',
+                    css_class='s12 m12'
+                ),
+            ),
+            Row(
+                Column(
+                    'goal',
+                    css_class='s12'
+                ),
+            ),
+            Row(
+                Column(
+                    'visible',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
 #----------------------------------------------------------------------------------
 
 #---------------------------- FORMS OBJECTS  -------------------------------------
-
 
 class DocumentoForm(forms.ModelForm):
 

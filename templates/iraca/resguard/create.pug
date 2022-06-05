@@ -37,7 +37,7 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Nueva comunidad
+                        a(href="#") Nuevo resguardo
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -52,8 +52,8 @@ block container_principal
 block body_script_auth
     script.
         $(document).ready(function () {
-            $("label[for='id_municipality']").addClass('active');
+            $("label[for='id_certificate']").addClass('active');
 
-            $('#id_municipality').select2();
+            $('#id_certificate').select2();
 
         });

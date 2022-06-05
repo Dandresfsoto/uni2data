@@ -46,9 +46,13 @@ urlpatterns = [
 
     path('resguard/', rest_views.ResguardListApi.as_view()),
 
+    path('resguard/comunity/<uuid:pk>/', rest_views.ResguardComunityListApi.as_view()),
 
     path('inform/', rest_views.InformListApi.as_view()),
     path('inform/view/<uuid:pk_cut>/', rest_views.InformCollectAccountListApi.as_view()),
 
-    path('liquidaciones/', rest_views.LiquidacionesListApi.as_view())
+    path('liquidaciones/', rest_views.LiquidacionesListApi.as_view()),
+
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/', rest_views.IndividualMunicipioComunidadListApi.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/', rest_views.IndividualMunicipioComunidadHogaresListApi.as_view()),
 ]

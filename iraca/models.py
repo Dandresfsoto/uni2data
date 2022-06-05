@@ -16,9 +16,11 @@ settings_time_zone = timezone(settings.TIME_ZONE)
 class Certificates(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, blank=True,null=True)
     code = models.IntegerField()
     color = models.CharField(max_length=100)
+    municipio = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, related_name='certificate_municipality_iraca_2021', blank=True,null=True)
+
 
 
     def __str__(self):
@@ -264,9 +266,19 @@ class Instruments(models.Model):
 class Resguards(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    municipality = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, related_name='resguard_municipality_iraca_2021', blank=True,null=True)
+    certificate = models.ForeignKey(Certificates, on_delete=models.DO_NOTHING, related_name='certificate_municipality_iraca_2021', blank=True,null=True)
+    color = models.CharField(max_length=100,blank=True,null=True)
+    name = models.CharField(max_length=100,blank=True,null=True)
 
-    municipality = models.ForeignKey(Municipios, on_delete=models.DO_NOTHING, related_name='resguard_municipality_iraca_2021')
 
+    def __str__(self):
+        return self.name
+
+class Comunity(models.Model):
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    resguard = models.ForeignKey(Resguards, on_delete=models.DO_NOTHING, related_name='resguard_certificate_iraca_2021', blank=True,null=True)
     name = models.CharField(max_length=100,blank=True,null=True)
 
 
@@ -275,9 +287,10 @@ class Resguards(models.Model):
 
 class Routes(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    creation = models.DateTimeField(auto_now_add=True)
+    creation = models.DateTimeField(auto_now_add=True,blank=True, null=True)
     name = models.CharField(unique=True, max_length=100,blank=True, null=True)
     resguard = models.ForeignKey(Resguards, related_name="resguard_route_iraca_2021", on_delete=models.DO_NOTHING,blank=True, null=True)
+    comunity = models.ForeignKey(Comunity, related_name="comunity_route_iraca_2021", on_delete=models.DO_NOTHING,blank=True, null=True)
 
     novelties = models.IntegerField(default=0)
     progress = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
@@ -297,12 +310,19 @@ class Routes(models.Model):
     progress_form = models.DecimalField(max_digits=10, decimal_places=2,default=0.0)
 
     def __str__(self):
-        return self.name
+        name = self.name
+        if name:
+            return self.name
+        else:
+            return self.comunity.name
 
     def get_resguard_name(self):
         resguard = self.resguard.name
         return resguard
 
+    def get_comunity_name(self):
+        comunity = self.comunity.name
+        return comunity
 
     def update_progreso(self):
 
@@ -415,7 +435,10 @@ class Households(models.Model):
     def get_routes(self):
         routes = ''
         for route in self.routes.all():
-            routes += route.name + ', '
+            if route.name:
+                routes += route.name + ', '
+            else:
+                routes += route.comunity.name + ', '
 
         if routes != '':
             routes = routes[:-2]
@@ -516,7 +539,6 @@ class Documento(models.Model):
     def get_extension(self):
         return self.file.name.split('.')[-1]
 
-
 def upload_dinamic_dir_carga_masiva_hogares(instance, filename):
     return '/'.join(['Carga Masiva Hogares', filename])
 
@@ -527,3 +549,10 @@ class CargaMasivaHogares(models.Model):
 
     def __str__(self):
         return self.nombre
+
+
+#----------------------------------------------------------------------------------
+
+#----------------------------CARPETA INDIVIDUAL------------------------------------
+
+

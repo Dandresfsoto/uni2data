@@ -9,6 +9,8 @@ admin.site.register(models.Moments)
 admin.site.register(models.Types)
 admin.site.register(models.Instruments)
 admin.site.register(models.Routes)
+admin.site.register(models.Resguards)
+admin.site.register(models.Comunity)
 
 
 def actualizar_hogares(modeladmin, request, queryset):

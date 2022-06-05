@@ -17,7 +17,7 @@ from config.settings.base import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER
 from delta import html
 # ------------------------------- SELECTION ----------------------------------------
 from iraca import forms, models, models_instruments, tasks
-from iraca.models import Certificates
+from iraca.models import Certificates, Resguards
 from mis_contratos import functions
 from mobile.models import FormMobile
 from recursos_humanos import models as rh_models
@@ -167,6 +167,18 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_icon': 'account_balance',
                 'sican_description': 'Informes de actividades y liquidaciones'
             })
+
+        if self.request.user.has_perm('usuarios.iraca.individual.ver'):
+            items.append({
+                'sican_categoria': 'Individual',
+                'sican_color': 'green darken-4',
+                'sican_order': 10,
+                'sican_url': 'individual/',
+                'sican_name': 'Individual',
+                'sican_icon': 'folder',
+                'sican_description': 'Carpeta individual'
+            })
+
         return items
 
     def get_context_data(self, **kwargs):
@@ -3586,12 +3598,12 @@ class ResguardCreateView(LoginRequiredMixin,
 
     def form_valid(self, form):
         self.object = form.save()
-        message = 'Se creó la comunidad: {0}'.format(form.cleaned_data['name'])
+        message = 'Se creó el resguardo : {0}'.format(form.cleaned_data['name'])
         messages.add_message(self.request, messages.INFO, message)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
-        kwargs['title'] = "NUEVA COMUNIDAD"
+        kwargs['title'] = "NUEVA RESGUARDO"
         return super(ResguardCreateView,self).get_context_data(**kwargs)
 
 class ResguardUpdateView(LoginRequiredMixin,
@@ -3624,8 +3636,100 @@ class ResguardUpdateView(LoginRequiredMixin,
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
-        kwargs['title'] = "EDITAR COMUNIDAD"
+        kwargs['title'] = "EDITAR RESGUERDO"
         return super(ResguardUpdateView,self).get_context_data(**kwargs)
+
+class ResguardComunityListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.resguardos.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/resguard/comunity/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        resguardo = Resguards.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "COMUNIDADES"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/resguard/comunity/{0}/'.format(resguardo.id)
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.iraca.resguardo.crear')
+        return super(ResguardComunityListView,self).get_context_data(**kwargs)
+
+class ResguardComunityCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        CreateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/resguard/comunity/create.html'
+    form_class = forms.ComunityForm
+    success_url = "../"
+    models = models.Comunity
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.resguardo.ver",
+                "usuarios.iraca.resguardo.crear"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+        resguardo = Resguards.objects.get(id=self.kwargs['pk'])
+        self.object = form.save(commit=False)
+        self.object.resguard = resguardo
+        self.object = form.save()
+        message = 'Se creó la comunidad: {0}'.format(form.cleaned_data['name'])
+        messages.add_message(self.request, messages.INFO, message)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVA COMUNIDAD"
+        return super(ResguardComunityCreateView,self).get_context_data(**kwargs)
+
+class ResguardComunityUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        UpdateView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/resguard/comunity/edit.html'
+    form_class = forms.ComunityForm
+    success_url = "../../"
+    model = models.Comunity
+    pk_url_kwarg = 'pk_comunity'
+
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.resguardo.ver",
+                "usuarios.iraca.resguardo.editar"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+        self.object = form.save()
+        message = 'Se edito la comunidad: {0}'.format(form.cleaned_data['name'])
+        messages.add_message(self.request, messages.INFO, message)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "EDITAR COMUNIDAD"
+        return super(ResguardComunityUpdateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_comunity': self.kwargs['pk_comunity'],
+        }
 
 #---------------------------------------------------------------------------------
 
@@ -4229,3 +4333,251 @@ class LiquidationsHistorialInforme(LoginRequiredMixin,
         kwargs['registros_cantidad'] = len(registers)
         kwargs['breadcrum_active'] = collect_account.contract.nombre
         return super(LiquidationsHistorialInforme,self).get_context_data(**kwargs)
+
+
+
+#----------------------------------------------------------------------------------
+
+#------------------------------- CERTIFICATES -------------------------------------
+
+
+class IndividualOptionsView(TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/individual/list.html'
+
+    def get_items(self):
+        items = []
+
+        for certificate in Certificates.objects.all().filter(code=3).order_by('name'):
+            if self.request.user.has_perm('usuarios.individual.ver'):
+                items.append({
+                    'sican_categoria': '{0}'.format(certificate.municipio.get_nombre()),
+                    'sican_color': certificate.color,
+                    'sican_order': certificate.code,
+                    'sican_url': 'territorio/{0}/'.format(str(certificate.id)),
+                    'sican_name': '{0}'.format(certificate.municipio.get_nombre()),
+                    'sican_description': 'Actas de {0}.'.format(certificate.municipio.get_nombre()).lower()
+                })
+
+
+        return items
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.permissions = {
+            "all": [
+                "usuarios.individual.ver",
+            ]
+        }
+
+        items = self.get_items()
+        if len(items) == 0:
+            return HttpResponseRedirect('../')
+
+        else:
+            if not request.user.is_authenticated:
+                return HttpResponseRedirect(self.login_url)
+            else:
+                if request.user.has_perms(self.permissions.get('all')):
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+                else:
+                    return HttpResponseRedirect('../')
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "CARPETA INDIVIDUAL"
+        kwargs['items'] = self.get_items()
+        return super(IndividualOptionsView,self).get_context_data(**kwargs)
+
+class IndividualMunicipioOptionsView(TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/individual/territorios/list.html'
+
+    def get_items(self):
+        certificate = Certificates.objects.get(id=self.kwargs['pk_territorio'])
+        items = []
+
+        for resguardo in Resguards.objects.all().filter(certificate=certificate).order_by('name'):
+            if self.request.user.has_perm('usuarios.individual.ver'):
+                items.append({
+                    'sican_categoria': '{0}'.format(resguardo.name),
+                    'sican_color': resguardo.color,
+                    'sican_url': 'resguardo/{0}/'.format(str(resguardo.id)),
+                    'sican_name': '{0}'.format(resguardo.name),
+                    'sican_description': 'Actas de {0}.'.format(resguardo.name).lower()
+                })
+
+
+        return items
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.permissions = {
+            "all": [
+                "usuarios.individual.ver",
+            ]
+        }
+
+        items = self.get_items()
+        if len(items) == 0:
+            return HttpResponseRedirect('../')
+
+        else:
+            if not request.user.is_authenticated:
+                return HttpResponseRedirect(self.login_url)
+            else:
+                if request.user.has_perms(self.permissions.get('all')):
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+                else:
+                    return HttpResponseRedirect('../')
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "TERRITORIOS COLECTIVOS"
+        kwargs['items'] = self.get_items()
+        return super(IndividualMunicipioOptionsView,self).get_context_data(**kwargs)
+
+class IndividualMunicipioComunidadListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.individual.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/individual/territorios/comunity/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        territorio = Certificates.objects.get(id=self.kwargs['pk_territorio'])
+        resguardo = Resguards.objects.get(id=self.kwargs['pk_resguardo'])
+        kwargs['title'] = "COMUNIDADES"
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/individual/territorio/{0}/resguardo/{1}/'.format(territorio.id,resguardo.id)
+        kwargs['permiso_crear'] = self.request.user.has_perm("usuarios.iraca.individual.crear")
+        storage = get_messages(self.request)
+        for message in storage:
+            kwargs['success'] = message
+        return super(IndividualMunicipioComunidadListView,self).get_context_data(**kwargs)
+
+class IndividualMunicipioComunidadCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/individual/territorios/comunity/create.html'
+    form_class = forms.InidividualRouteForm
+    success_url = "../"
+
+
+    def get_initial(self):
+        return {'pk_territorio':self.kwargs['pk_territorio'],
+                'pk_resguardo':self.kwargs['pk_resguardo']}
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+                "usuarios.iraca.individual.crear"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+
+
+        self.object = models.Routes.objects.create(
+            comunity=form.cleaned_data['comunity'],
+            name=form.cleaned_data['name'],
+            creation_user=self.request.user,
+            user_update=self.request.user,
+        )
+        message = 'Se creó la ruta: {0}'.format(form.cleaned_data['name'])
+        messages.add_message(self.request, messages.INFO, message)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "NUEVA RUTA"
+        kwargs['url_resguard'] = '/rest/v1.0/iraca_new/implementation/autocomplete/resguard/'
+        return super(IndividualMunicipioComunidadCreateView,self).get_context_data(**kwargs)
+
+class IndividualMunicipioComunidadupdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/individual/territorios/comunity/edit.html'
+    form_class = forms.InidividualRouteForm
+    success_url = "../../"
+
+    def get_permission_required(self, request=None):
+        permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+                "usuarios.iraca.individual.editar"
+            ]
+        }
+        return permissions
+
+    def form_valid(self, form):
+
+        models.Routes.objects.filter(id = self.kwargs['pk_ruta']).update(
+            comunity=form.cleaned_data['comunity'],
+            visible=form.cleaned_data['visible'],
+            goal=form.cleaned_data['goal']
+        )
+
+        message = 'Se actualizo la ruta: {0}'.format(form.cleaned_data['name'])
+        messages.add_message(self.request, messages.INFO, message)
+
+        models.Routes.objects.get(id=self.kwargs['pk_ruta']).update_progreso()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "EDITAR RUTA"
+        kwargs['url_resguard'] = '/rest/v1.0/iraca_new/implementation/autocomplete/resguard/'
+        return super(IndividualMunicipioComunidadupdateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {'pk_territorio': self.kwargs['pk_territorio'],
+                'pk_resguardo': self.kwargs['pk_resguardo'],
+                'pk_ruta': self.kwargs['pk_ruta']}
+
+class RutaHogaresListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.ver",
+            "usuarios.iraca.individual.ver"
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/individual/territorios/comunity/ruta/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        territorio = models.Certificates.objects.get(id=self.kwargs['pk_territorio'])
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguardo'])
+        kwargs['title'] = "HOGARES DE {0}".format(ruta.comunity.name)
+        kwargs['breadcrum_active'] = "{0}".format(ruta.comunity.name)
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/individual/territorio/{0}/resguardo/{1}/activities/{2}'.format(territorio.id,resguardo.id,ruta.id)
+        kwargs['permiso_crear'] = self.request.user.has_perm('usuarios.iraca.individual.editar')
+        return super(RutaHogaresListView,self).get_context_data(**kwargs)
