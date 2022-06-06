@@ -110,6 +110,10 @@ urlpatterns = [
     path('resguard/create/', views.ResguardCreateView.as_view()),
     path('resguard/edit/<uuid:pk>/', views.ResguardUpdateView.as_view()),
 
+    path('resguard/comunity/<uuid:pk>/', views.ResguardComunityListView.as_view()),
+    path('resguard/comunity/<uuid:pk>/create/', views.ResguardComunityCreateView.as_view()),
+    path('resguard/comunity/<uuid:pk>/edit/<uuid:pk_comunity>/', views.ResguardComunityUpdateView.as_view()),
+
 
     path('inform/', views.InformListView.as_view()),
     path('inform/view/<uuid:pk_cut>/', views.InformCollectsAccountListView.as_view()),
@@ -125,4 +129,23 @@ urlpatterns = [
     path('liquidaciones/rechazar/<uuid:pk_liquidacion>/', views.LiquidacionesRechazarInforme.as_view()),
     path('liquidaciones/ver/<uuid:pk_liquidacion>/', views.LiquidacionesVerInforme.as_view()),
     path('liquidaciones/historial/<uuid:pk_liquidacion>/', views.LiquidationsHistorialInforme.as_view()),
+
+
+    path('individual/', views.IndividualOptionsView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/', views.IndividualMunicipioOptionsView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/', views.IndividualMunicipioComunidadListView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/create/', views.IndividualMunicipioComunidadCreateView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/edit/<uuid:pk_ruta>/', views.IndividualMunicipioComunidadupdateView.as_view()),
+
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/',views.RutaHogaresListView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/upload/',views.RutaUploadHogaresListView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/',views.RutaHogaresactivitysListView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/',views.RutaHogaresActivitysMomentoListView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/add/<uuid:pk_instrument>/',views.RutaHogaresActivitysMomentoInstrumentCreateView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/view/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/traceability/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentTraceabilityView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/edit/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentObjectView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/delete/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentObjectDeleteView.as_view()),
+
+
 ]

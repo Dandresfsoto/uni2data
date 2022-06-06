@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../../../../../../base_auth
 
 block title
     |{{title | upper}}
@@ -29,53 +29,61 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
-                    li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Resguardos
-                            i(class="material-icons icon-sican") check_circle
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca_new/individual/") Listado de municipios
+                            i(class="material-icons icon-sican") keyboard_arrow_right
 
-                    div(class="divider divider-perfil")
-
-
-    | {% if permiso_crear %}
-
-    ul(class="collapsible",data-collapsible="accordion")
-        li(class="bold waves-effect waves-light button-menu")
-
-            div(class="collapsible-header active")
-                i(class="material-icons") call_to_action
-                | Acciones
-
-            div(class="collapsible-body collapsible-body-blue")
-                ul
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="create/") Nuevo
-                            i(class="material-icons icon-sican") map
+                        a(href="../../../../../../../../../../") Listado de resguardos
+                            i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
-    | {% endif %}
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../../../../") Listado de comunidades
+                            i(class="material-icons icon-sican") keyboard_arrow_right
 
+                    div(class="divider divider-perfil")
 
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../../../") {{ breadcrum_1 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
 
+                    div(class="divider divider-perfil")
 
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../../../") {{ breadcrum_3 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") {{ breadcrum_2 | truncatechars:15 }}
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light breadcrum-active")
+                        a(href="#") {{ breadcrum_active | truncatechars:15 }}
+                            i(class="material-icons icon-sican") check_circle
+
+                    div(class="divider divider-perfil")
 
 block container_principal
     div(class="container-datatable")
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
             thead
                 tr
-                    td Editar
-                    td Comunidades
-                    th Nombre
-                    th Municipio
+                    th Fecha
+                    th Usuario
+                    th Observación
             tbody
                 tr
-                    td Editar
-                    td Comunidades
-                    td Nombre
-                    td Municipio
+                    td Fecha
+                    td Usuario
+                    td Observación
 
 
 block body_script_auth
@@ -90,6 +98,7 @@ block body_script_auth
                 processing: true,
                 serverSide: true,
                 order: [[ 0, "asc" ]],
+                columnDefs: [{"orderable": false, "targets": [1,2]}],
                 ajax: "{{ url_datatable }}",
                 language: {
                     url: "//cdn.datatables.net/plug-ins/1.10.8/i18n/Spanish.json"
@@ -102,5 +111,6 @@ block body_script_auth
             table.on('responsive-display', function (e, datatable, row, showHide, update) {
                 $('.tooltipped').tooltip({delay: 50});
             });
+
 
         });

@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -29,8 +29,14 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
+                    li(class="bold waves-effect waves-light")
+                        a(href="/iraca_new/resguard/") Resguardos
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Resguardos
+                        a(href="#") Comunidades
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -67,15 +73,13 @@ block container_principal
             thead
                 tr
                     td Editar
-                    td Comunidades
                     th Nombre
-                    th Municipio
+                    th Resguardo
             tbody
                 tr
                     td Editar
-                    td Comunidades
                     td Nombre
-                    td Municipio
+                    td Resguardo
 
 
 block body_script_auth

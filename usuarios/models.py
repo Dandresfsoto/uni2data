@@ -89,6 +89,9 @@ class Municipios(models.Model):
     def __str__(self):
         return '{0}, {1}'.format(self.nombre,self.departamento.nombre)
 
+    def get_nombre(self):
+        return '{0} - {1}'.format(self.nombre, self.departamento.nombre)
+
 class Corregimientos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     municipio = models.ForeignKey(Municipios,on_delete=models.DO_NOTHING)
