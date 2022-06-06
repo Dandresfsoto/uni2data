@@ -1,4 +1,4 @@
-extends ../../base_auth
+extends ../../../base_auth
 
 block title
     |{{title | upper}}
@@ -31,7 +31,13 @@ block side_nav_container
 
 
                     li(class="bold waves-effect waves-light")
-                        a(href="/iraca_new/resguard/") Comunidades
+                        a(href="/iraca_new/resguard/") Resguardos
+                            i(class="material-icons icon-sican") keyboard_arrow_right
+
+                    div(class="divider divider-perfil")
+
+                    li(class="bold waves-effect waves-light")
+                        a(href="../../") Comunidades
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
@@ -52,9 +58,4 @@ block container_principal
 block body_script_auth
     script.
         $(document).ready(function () {
-            $("label[for='id_certificate']").addClass('active')
-
-            $('#id_certificate').select2();
-
-
         });
