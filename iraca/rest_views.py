@@ -1830,7 +1830,7 @@ class MunicipiosAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 class ResguardListApi(BaseDatatableView):
-    model = models.Routes
+    model = models.Resguards
     columns = ['id','color','name','municipality']
     order_columns = ['id','color','name','municipality']
 
