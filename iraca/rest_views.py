@@ -1851,7 +1851,7 @@ class ResguardListApi(BaseDatatableView):
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
-            q = Q(name__icontains=search) | Q(municipality__icontains=search)
+            q = Q(name__icontains=search) | Q(municipality__nombre__icontains=search)
             qs = qs.filter(q)
         return qs
 
@@ -2345,7 +2345,7 @@ class IndividualMunicipioComunidadListApi(BaseDatatableView):
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
-            q = Q(nombre__icontains=search)
+            q = Q(comunity__name__icontains=search)
             qs = qs.filter(q)
         return qs
 
@@ -2393,12 +2393,12 @@ class IndividualMunicipioComunidadListApi(BaseDatatableView):
                    'data-tooltip="Progreso general de la ruta">' \
                    '<b>{0}%</b>' \
                    '</a>' \
-                   '</div>'.format(row.progress_form)
+                   '</div>'.format(row.get_progreso())
 
         elif column == 'regitered_household':
             ret = '<div class="center-align">' \
-                       '<b>{1}</b>' \
-                   '</div>'.format(row.id,row.regitered_household)
+                       '<b>{0}</b>' \
+                   '</div>'.format(row.get_household_count())
             return ret
 
         else:
