@@ -4631,7 +4631,7 @@ class RutaHogaresactivitysListView(LoginRequiredMixin,
         permissions = {
             "all": [
                 "usuarios.iraca.ver",
-                "usuarios.iraca.implementacion.ver",
+                "usuarios.iraca.individual.ver",
             ]
         }
         return permissions
