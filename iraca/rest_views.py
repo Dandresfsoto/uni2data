@@ -2550,8 +2550,13 @@ class IndividualMunicipioComunidadHogaresActivitysMomentoListApi(BaseDatatableVi
 
         self.permissions = {
             "ver": [
-                "usuarios.iraca_.ver",
+                "usuarios.iraca.ver",
                 "usuarios.iraca.individual.ver"
+            ],
+            "eliminar": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+                "usuarios.iraca.individual.eliminar"
             ]
         }
         return self.model.objects.filter(moment=self.moment.id,households__id=self.hogar.id)
@@ -2622,30 +2627,12 @@ class IndividualMunicipioComunidadHogaresActivitysMomentoListApi(BaseDatatableVi
 
         elif column == 'update_user':
             ret = ''
-
-            if self.request.user.is_superuser:
-                if row.estate in ['cargado']:
-
-                    ret = '<div class="center-align">' \
-                          '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar soporte">' \
-                          '<i class="material-icons">delete</i>' \
-                          '</a>' \
-                          '</div>'.format(row.id)
-
-                elif row.estate in ['rechazado']:
-
-                    ret = '<div class="center-align">' \
-                          '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar soporte">' \
-                          '<i class="material-icons">delete</i>' \
-                          '</a>' \
-                          '</div>'.format(row.id)
-                else:
-
-                    ret = '<div class="center-align">' \
-                          '<i class="material-icons">delete</i>' \
-                          '</div>'.format(row.id)
-
-                return ret
+            if self.request.user.has_perms(self.permissions.get('eliminar')):
+                ret = '<div class="center-align">' \
+                      '<a href="delete/{0}" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar soporte">' \
+                      '<i class="material-icons">delete</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
 
             else:
                 ret = '<div class="center-align">' \
