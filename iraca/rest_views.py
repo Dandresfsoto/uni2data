@@ -2362,7 +2362,7 @@ class IndividualMunicipioComunidadListApi(BaseDatatableView):
 
             else:
                 ret = '<div class="center-align">' \
-                           '<i class="material-icons">remove_red_eye</i>' \
+                           '<i class="material-icons">edit</i>' \
                        '</div>'.format(row.id,row.name)
 
             return ret
@@ -2639,7 +2639,7 @@ class IndividualMunicipioComunidadHogaresActivitysMomentoListApi(BaseDatatableVi
                       '<i class="material-icons">delete</i>' \
                       '</div>'.format(row.id)
 
-                return ret
+            return ret
 
         else:
             return super(IndividualMunicipioComunidadHogaresActivitysMomentoListApi, self).render_column(row, column)
