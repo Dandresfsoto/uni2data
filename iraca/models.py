@@ -407,6 +407,20 @@ class Routes(models.Model):
             pass
         return count
 
+    def get_progreso(self):
+
+        query = Households.objects.filter(routes=self).count()
+        objects = ObjectRouteInstrument.objects.filter(route=self).count()
+        instrument = Instruments.objects.all().count()
+
+        try:
+            progress = int((objects / (query*instrument)) * 100)
+        except:
+            progress = 0
+
+        return progress
+
+
 class Households(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)

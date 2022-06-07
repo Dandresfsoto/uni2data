@@ -13,14 +13,13 @@ admin.site.register(models.Resguards)
 admin.site.register(models.Comunity)
 
 
-def actualizar_hogares(modeladmin, request, queryset):
+def cargar_hogares(modeladmin, request, queryset):
 
     for data in queryset:
         wb = openpyxl.load_workbook(data.file)
         ws = wb.active
 
         for file in ws.rows:
-
             if models.Households.objects.filter(document=file[1].value).count() == 0:
                 models.Households.objects.create(
                     document=file[1].value,
@@ -33,8 +32,27 @@ def actualizar_hogares(modeladmin, request, queryset):
                     municipality_residence=Municipios.objects.get(codigo = file[8].value),
                 )
 
+def actualizar_hogares(modeladmin, request, queryset):
+
+    for data in queryset:
+        wb = openpyxl.load_workbook(data.file)
+        ws = wb.active
+
+        for file in ws.rows:
+            if models.Households.objects.filter(document=file[1].value).count() != 0:
+                house = models.Households.objects.get(document=file[1].value)
+                house.first_surname=file[2].value
+                house.second_surname=file[3].value
+                house.first_name=file[4].value
+                house.second_name=file[5].value
+                house.birth_date=file[6].value
+                house.municipality_attention=Municipios.objects.get(codigo=file[7].value)
+                house.municipality_residence=Municipios.objects.get(codigo=file[8].value)
+                house.save()
+
 
 class CargaMasivaHogaresAdmin(admin.ModelAdmin):
     list_display = ['nombre']
-    actions = [actualizar_hogares]
+    actions = [cargar_hogares,actualizar_hogares]
+
 admin.site.register(models.CargaMasivaHogares, CargaMasivaHogaresAdmin)
