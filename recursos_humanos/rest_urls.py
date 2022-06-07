@@ -17,7 +17,6 @@ urlpatterns = [
     path('hv/autocomplete/contratistas/',rest_views.ContratistaAutocomplete.as_view()),
     path('contratos/', rest_views.ContratosEstadoListApi.as_view()),
 
-
     path('cuts/', rest_views.CutsListApi.as_view()),
     path('cuts/view/<uuid:pk_cut>/', rest_views.CutsCollectAccountListApi.as_view()),
 
