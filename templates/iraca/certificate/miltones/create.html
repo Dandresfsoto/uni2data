@@ -60,18 +60,6 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
 
     $("label[for='id_clase']").addClass('active');
 
-    $('#id_date').pickadate({
-        format: 'dd/mm/yyyy',
-        selectMonths: true,
-        selectYears: 5,
-        monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
-            'Octubre', 'Noviembre', 'Diciembre'],
-        weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
-        today: 'Hoy',
-        clear: 'Borrar',
-        close: 'Ok',
-        closeOnSelect: false
-    });
 
     var toolbarOptions = [
         [{'header': []}],
@@ -103,24 +91,6 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
     });
 
     $('#id_file').dropify({
-        messages: {
-            'default': 'Arrastra y suelta el soporte',
-            'replace': 'Arrastra y suelta el soporte',
-            'remove': 'Eliminar',
-            'error': 'Ooops, algo malo paso.'
-        }
-    });
-
-    $('#id_file2').dropify({
-        messages: {
-            'default': 'Arrastra y suelta el soporte',
-            'replace': 'Arrastra y suelta el soporte',
-            'remove': 'Eliminar',
-            'error': 'Ooops, algo malo paso.'
-        }
-    });
-
-    $('#id_file3').dropify({
         messages: {
             'default': 'Arrastra y suelta el soporte',
             'replace': 'Arrastra y suelta el soporte',

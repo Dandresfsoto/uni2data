@@ -11,6 +11,9 @@ admin.site.register(models.Instruments)
 admin.site.register(models.Routes)
 admin.site.register(models.Resguards)
 admin.site.register(models.Comunity)
+admin.site.register(models.Actas)
+admin.site.register(models.Meetings)
+admin.site.register(models.Milestones)
 
 
 def cargar_hogares(modeladmin, request, queryset):
