@@ -1,7 +1,7 @@
 from django import forms
 
 from iraca import models
-from iraca.models import Types, Households
+from iraca.models import Types, Households, Actas
 from recursos_humanos.models import Collects_Account
 from usuarios.models import Municipios
 from django.forms.fields import Field, FileField
@@ -89,20 +89,11 @@ class CertificateForm(forms.Form):
 class MiltonesForm(forms.Form):
 
 
-    type = forms.ModelChoiceField(label='Tipo de hito', queryset=Types.objects.all(),
-                                  required=False)
-
-    date = forms.DateField(label = 'Fecha del acta')
-
     observation = forms.CharField(label="Observación",max_length=500,widget=forms.Textarea(attrs={'class':'materialize-textarea'}),required=False)
 
 
     file = forms.FileField(max_length=255,widget= forms.FileInput(attrs={'data-max-file-size': '10M',
                                                                          'accept': 'application/pdf'}))
-    file2 = forms.FileField(max_length=255,widget= forms.FileInput(attrs={'data-max-file-size': '10M',
-                                                                         'accept': 'application/pdf'}),required=False)
-    file3 = forms.FileField(max_length=255,widget= forms.FileInput(attrs={'data-max-file-size': '10M',
-                                                                         'accept': 'application/pdf'}),required=False)
 
     foto_1 = forms.ImageField(max_length=255,required=False,widget= forms.FileInput(attrs={'data-max-file-size': '5M',
                                                                          'accept': 'image/jpg,image/jpeg,image/png'}))
@@ -117,19 +108,23 @@ class MiltonesForm(forms.Form):
         super(MiltonesForm, self).__init__(*args, **kwargs)
 
         certificate = models.Certificates.objects.get(id=kwargs['initial']['pk'])
+        meeting = models.Meetings.objects.get(id=kwargs['initial']['pk_meeting'])
+        type = models.Milestones.objects.filter(meeting=meeting).values_list("type", flat=True)
 
-        self.fields['type'].queryset = Types.objects.filter(certificate=certificate)
+        self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.all().exclude(id__in=type))
+
 
         if 'pk_milestone' in kwargs['initial'].keys():
             milestone = models.Milestones.objects.get(id=kwargs['initial']['pk_milestone'])
 
+            type = models.Milestones.objects.filter(meeting=meeting).exclude(id=milestone.id).values_list("type",flat=True)
+
+            self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.all().exclude(id__in=type))
+
             self.fields['type'].initial = milestone.type
-            self.fields['date'].initial = milestone.date
             self.fields['observation'].initial = milestone.observation
 
             self.fields['file'].required = False
-            self.fields['file2'].required = False
-            self.fields['file3'].required = False
 
             if milestone.url_foto_1() != None:
                 self.fields['foto_1'].widget.attrs['data-default-file'] = milestone.url_foto_1()
@@ -144,8 +139,6 @@ class MiltonesForm(forms.Form):
                 self.fields['foto_4'].widget.attrs['data-default-file'] = milestone.url_foto_4()
 
         self.fields['file'].widget = forms.FileInput()
-        self.fields['file2'].widget = forms.FileInput()
-        self.fields['file3'].widget = forms.FileInput()
 
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -157,12 +150,8 @@ class MiltonesForm(forms.Form):
             Row(
                 Column(
                     'type',
-                    css_class='s12 m6 l6'
+                    css_class='s12'
                 ),
-                Column(
-                    'date',
-                    css_class='s12 m6 l6'
-                )
             ),
             Row(
                 Fieldset(
@@ -179,38 +168,6 @@ class MiltonesForm(forms.Form):
                         """
                     ),
                     'file',
-                    css_class='s12'
-                )
-            ),
-            Row(
-                Fieldset(
-                    'Lista de asistencia'
-                )
-            ),
-            Row(
-                Column(
-                    HTML(
-                        """
-                        <p style="display:inline;"><b>Actualmente:</b>{{ file2_url | safe }}</p>
-                        """
-                    ),
-                    'file2',
-                    css_class='s12'
-                )
-            ),
-            Row(
-                Fieldset(
-                    'Otros'
-                )
-            ),
-            Row(
-                Column(
-                    HTML(
-                        """
-                        <p style="display:inline;"><b>Actualmente:</b>{{ file3_url | safe }}</p>
-                        """
-                    ),
-                    'file3',
                     css_class='s12'
                 )
             ),
@@ -962,6 +919,138 @@ class HogarVinculacionMasivoForm(forms.Form):
             )
         )
 
+class ResguardMiltonesForm(forms.Form):
+
+
+    observation = forms.CharField(label="Observación", max_length=500,
+                                  widget=forms.Textarea(attrs={'class': 'materialize-textarea'}), required=False)
+
+    file = forms.FileField(max_length=255, widget=forms.FileInput(attrs={'data-max-file-size': '10M',
+                                                                         'accept': 'application/pdf'}))
+
+    foto_1 = forms.ImageField(max_length=255, required=False, widget=forms.FileInput(attrs={'data-max-file-size': '5M',
+                                                                                            'accept': 'image/jpg,image/jpeg,image/png'}))
+    foto_2 = forms.ImageField(max_length=255, required=False, widget=forms.FileInput(attrs={'data-max-file-size': '5M',
+                                                                                            'accept': 'image/jpg,image/jpeg,image/png'}))
+    foto_3 = forms.ImageField(max_length=255, required=False, widget=forms.FileInput(attrs={'data-max-file-size': '5M',
+                                                                                            'accept': 'image/jpg,image/jpeg,image/png'}))
+    foto_4 = forms.ImageField(max_length=255, required=False, widget=forms.FileInput(attrs={'data-max-file-size': '5M',
+                                                                                            'accept': 'image/jpg,image/jpeg,image/png'}))
+
+    def __init__(self, *args, **kwargs):
+        super(ResguardMiltonesForm, self).__init__(*args, **kwargs)
+
+        certificate = models.Certificates.objects.get(id=kwargs['initial']['pk'])
+        resguard= models.Resguards.objects.get(id=kwargs['initial']['pk_resguard'])
+        actas = models.Milestones.objects.filter(resguard=resguard).values_list("acta", flat=True)
+
+        self.fields['acta'] = forms.ModelChoiceField(queryset=models.Actas.objects.all().exclude(id__in=actas))
+
+        if 'pk_milestone' in kwargs['initial'].keys():
+            milestone = models.Milestones.objects.get(id=kwargs['initial']['pk_milestone'])
+
+            actas = models.Milestones.objects.filter(resguard=resguard).exclude(id=milestone.id).values_list("acta", flat=True)
+
+            self.fields['acta'] = forms.ModelChoiceField(queryset=models.Actas.objects.all().exclude(id__in=actas))
+
+            self.fields['acta'].initial = milestone.acta
+            self.fields['observation'].initial = milestone.observation
+
+            self.fields['file'].required = False
+
+            if milestone.url_foto_1() != None:
+                self.fields['foto_1'].widget.attrs['data-default-file'] = milestone.url_foto_1()
+
+            if milestone.url_foto_2() != None:
+                self.fields['foto_2'].widget.attrs['data-default-file'] = milestone.url_foto_2()
+
+            if milestone.url_foto_3() != None:
+                self.fields['foto_3'].widget.attrs['data-default-file'] = milestone.url_foto_3()
+
+            if milestone.url_foto_4() != None:
+                self.fields['foto_4'].widget.attrs['data-default-file'] = milestone.url_foto_4()
+
+        self.fields['file'].widget = forms.FileInput()
+
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Row(
+                Fieldset(
+                    'Información del acta:'
+                )
+            ),
+            Row(
+                Column(
+                    'acta',
+                    css_class='s12'
+                ),
+            ),
+            Row(
+                Fieldset(
+                    'Formato del acta'
+                )
+            ),
+            Row(
+                Column(
+                    HTML(
+                        """
+                        <p style="font-size:1.2rem;"><b>Formato del acta</b></p>
+                        <p style="display:inline;"><b>Actualmente:</b>{{ file_url | safe }}</p>
+
+                        """
+                    ),
+                    'file',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Fieldset(
+                    'Registro fotográfico'
+                )
+            ),
+            Row(
+                Column(
+                    'foto_1',
+                    css_class='s12 m6 l3'
+                ),
+                Column(
+                    'foto_2',
+                    css_class='s12 m6 l3'
+                ),
+                Column(
+                    'foto_3',
+                    css_class='s12 m6 l3'
+                ),
+                Column(
+                    'foto_4',
+                    css_class='s12 m6 l3'
+                )
+            ),
+            Row(
+                Fieldset(
+                    'Observación'
+                ),
+                Column(
+                    'observation',
+                    css_class='s12'
+                ),
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
 #----------------------------------------------------------------------------------
 
 #---------------------------- FORMS OBJECTS  -------------------------------------
@@ -1252,7 +1341,7 @@ class DocumentoHogarForm(forms.ModelForm):
         fields = ['file']
         widgets = {
             'file': forms.ClearableFileInput(attrs={
-                'data-max-file-size': "10M",
+                'data-max-file-size': "50M",
                 'accept': 'application/pdf,application/x-pdf'}
             ),
         }

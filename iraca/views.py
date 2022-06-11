@@ -70,16 +70,16 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_description': 'Estructura de entregables por cada uno de los componentes.'
             })
 
-        # if self.request.user.has_perm('usuarios.iraca.actas.ver'):
-        #     items.append({
-        #         'sican_categoria': 'Actas',
-        #         'sican_color': 'brown darken-4',
-        #         'sican_order': 3,
-        #         'sican_url': 'certificate/',
-        #         'sican_name': 'Actas',
-        #         'sican_icon': 'assignment',
-        #         'sican_description': 'Actas diligenciadas para el proyecto Iraca 2021'
-        #     })
+        if self.request.user.has_perm('usuarios.iraca.actas.ver'):
+            items.append({
+                'sican_categoria': 'Transversales',
+                'sican_color': 'brown darken-4',
+                'sican_order': 3,
+                'sican_url': 'certificate/',
+                'sican_name': 'Tranversales',
+                'sican_icon': 'assignment',
+                'sican_description': 'Actas transversales del proyecto Iraca 2021'
+            })
 
         # if self.request.user.has_perm('usuarios.iraca.socializacion.ver'):
         #     items.append({
@@ -180,6 +180,16 @@ class IracaOptionsView(LoginRequiredMixin,
                 'sican_description': 'Carpeta individual'
             })
 
+        if self.request.user.has_perm('usuarios.iraca.grupal.ver'):
+            items.append({
+                'sican_categoria': 'Grupal',
+                'sican_color': 'orange darken-4',
+                'sican_order': 11,
+                'sican_url': 'grupal/',
+                'sican_name': 'Grupal',
+                'sican_icon': 'featured_video',
+                'sican_description': 'Carpeta grupal'
+            })
         return items
 
     def get_context_data(self, **kwargs):
@@ -568,7 +578,7 @@ class CerticateOptionsView(TemplateView):
 
         self.permissions = {
             "all": [
-                "usuarios.actas.ver",
+                "usuarios.iraca.actas.ver",
             ]
         }
 
@@ -619,6 +629,7 @@ class CerticateListView(LoginRequiredMixin,
         kwargs['title'] = str(certificate.name).upper()
         kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/'.format(certificate.id)
         kwargs['breadcrum_1'] = certificate.name
+        kwargs['permiso_crear'] = self.request.user.has_perm("usuarios.iraca.actas.crear")
         return super(CerticateListView,self).get_context_data(**kwargs)
 
 
@@ -681,7 +692,6 @@ class MiltoneslistView(LoginRequiredMixin,
     permissions = {
         "all": [
             "usuarios.iraca.actas.ver",
-            "usuarios.iraca.actas.hitos.ver",
         ]
     }
     login_url = settings.LOGIN_URL
@@ -703,8 +713,6 @@ class MiltonescreateView(LoginRequiredMixin,
     permissions = {
         "all": [
             "usuarios.iraca.actas.ver",
-            "usuarios.iraca.actas.hitos.ver",
-            "usuarios.iraca.actas.hitos.crear",
         ]
     }
     login_url = settings.LOGIN_URL
@@ -715,10 +723,7 @@ class MiltonescreateView(LoginRequiredMixin,
     def form_valid(self, form):
 
         type = form.cleaned_data['type']
-        date = form.cleaned_data['date']
         file = form.cleaned_data['file']
-        file2 = form.cleaned_data['file2']
-        file3 = form.cleaned_data['file3']
         foto_1 = form.cleaned_data['foto_1']
         foto_2 = form.cleaned_data['foto_2']
         foto_3 = form.cleaned_data['foto_3']
@@ -728,9 +733,6 @@ class MiltonescreateView(LoginRequiredMixin,
             meeting=models.Meetings.objects.get(id=self.kwargs['pk_meeting']),
             type = type,
             file = file,
-            file2 = file2,
-            file3 = file3,
-            date = date,
             foto_1 = foto_1,
             foto_2 = foto_2,
             foto_3 = foto_3,
@@ -764,8 +766,6 @@ class MilestonesUpdateView(LoginRequiredMixin,
     permissions = {
         "all": [
             "usuarios.iraca.actas.ver",
-            "usuarios.iraca.actas.hitos.ver",
-            "usuarios.iraca.actas.hitos.editar",
         ]
     }
     login_url = settings.LOGIN_URL
@@ -846,7 +846,6 @@ class MilestonesView(LoginRequiredMixin,
     permissions = {
         "all": [
             "usuarios.iraca.actas.ver",
-            "usuarios.iraca.actas.hitos.ver",
         ]
     }
     login_url = settings.LOGIN_URL
@@ -870,8 +869,6 @@ class MilestonesDeleteView(LoginRequiredMixin,
     permissions = {
         "all": [
             "usuarios.iraca.actas.ver",
-            "usuarios.iraca.actas.hitos.ver",
-            "usuarios.iraca.actas.hitos.eliminar",
         ]
     }
     login_url = settings.LOGIN_URL
@@ -5086,3 +5083,268 @@ class RutaHogaresActivitysMomentoInstrumentObjectDeleteView(View):
                 return HttpResponseRedirect('../../')
             else:
                 return HttpResponseRedirect('../../')
+
+
+#----------------------------------------------------------------------------
+
+#------------------------------- GRUPAL -------------------------------------
+
+
+class GrupalOptionsView(TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/grupal/list.html'
+
+    def get_items(self):
+        items = []
+
+        for certificate in Certificates.objects.all().filter(code=3).order_by('name'):
+            if self.request.user.has_perm('usuarios.iraca.grupal.ver'):
+                items.append({
+                    'sican_categoria': '{0}'.format(certificate.name),
+                    'sican_color': certificate.color,
+                    'sican_order': certificate.code,
+                    'sican_url': '{0}/'.format(str(certificate.id)),
+                    'sican_name': '{0}'.format(certificate.name),
+                    'sican_description': 'Actas de {0}.'.format(certificate.name).lower()
+                })
+
+
+        return items
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.grupal.ver",
+            ]
+        }
+
+        items = self.get_items()
+        if len(items) == 0:
+            return HttpResponseRedirect('../')
+
+        else:
+            if not request.user.is_authenticated:
+                return HttpResponseRedirect(self.login_url)
+            else:
+                if request.user.has_perms(self.permissions.get('all')):
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+                else:
+                    return HttpResponseRedirect('../')
+
+    def get_context_data(self, **kwargs):
+        kwargs['title'] = "GRUPAL"
+        kwargs['items'] = self.get_items()
+        return super(GrupalOptionsView,self).get_context_data(**kwargs)
+
+class GrupalListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.grupal.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/grupal/territory.html'
+
+
+    def get_context_data(self, **kwargs):
+        certificate = Certificates.objects.get(id = self.kwargs['pk'])
+        kwargs['title'] = str(certificate.municipio.nombre).upper()
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/grupal/{0}/'.format(certificate.id)
+        kwargs['breadcrum_1'] = certificate.municipio.nombre
+        return super(GrupalListView,self).get_context_data(**kwargs)
+
+class GrupalResguardListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.grupal.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/grupal/resguardo/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        kwargs['title'] = "{0}".format(resguardo.name)
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/grupal/{0}/resguard/{1}/'.format(certificate.id,resguardo.id)
+        kwargs['breadcrum_1'] = certificate.municipio.nombre
+        kwargs['breadcrum_active'] = resguardo.name
+        return super(GrupalResguardListView,self).get_context_data(**kwargs)
+
+class GrupalResguardCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.grupal.ver",
+
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/grupal/resguardo/milestones/create.html'
+    form_class = forms.ResguardMiltonesForm
+    success_url = "../"
+
+    def form_valid(self, form):
+
+        acta = form.cleaned_data['acta']
+        file = form.cleaned_data['file']
+        foto_1 = form.cleaned_data['foto_1']
+        foto_2 = form.cleaned_data['foto_2']
+        foto_3 = form.cleaned_data['foto_3']
+        foto_4 = form.cleaned_data['foto_4']
+
+        miltone = models.Milestones.objects.create(
+            resguard=models.Resguards.objects.get(id=self.kwargs['pk_resguard']),
+            acta = acta,
+            file = file,
+            foto_1 = foto_1,
+            foto_2 = foto_2,
+            foto_3 = foto_3,
+            foto_4 = foto_4,
+        )
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "AÑADIR ACTA"
+        kwargs['breadcrum_2'] = str(resguardo.name)
+        kwargs['file_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        kwargs['file2_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        kwargs['file3_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        kwargs['breadcrum_1'] = str(certificate.name)
+        return super(GrupalResguardCreateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk':self.kwargs['pk'],
+            'pk_resguard':self.kwargs['pk_resguard'],
+        }
+
+class GrupalResguardUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.grupal.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/grupal/resguardo/milestones/edit.html'
+    form_class = forms.ResguardMiltonesForm
+    success_url = "../../"
+
+
+    def form_valid(self, form):
+
+        acta = form.cleaned_data['acta']
+        observation = form.cleaned_data['observation']
+        file = form.cleaned_data['file']
+        foto_1 = form.cleaned_data['foto_1']
+        foto_2 = form.cleaned_data['foto_2']
+        foto_3 = form.cleaned_data['foto_3']
+        foto_4 = form.cleaned_data['foto_4']
+
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        milestone.acta = acta
+        milestone.observation = observation
+
+        if file != None:
+            milestone.file = file
+
+        if foto_1 != None:
+            milestone.foto_1 = foto_1
+
+        if foto_2 != None:
+            milestone.foto_2 = foto_2
+
+        if foto_3 != None:
+            milestone.foto_3 = foto_3
+
+        if foto_4 != None:
+            milestone.foto_4 = foto_4
+
+        milestone.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "EDITAR ACTA"
+        kwargs['breadcrum_2'] = str(resguardo.name)
+        kwargs['breadcrum_1'] = str(certificate.name)
+        kwargs['file_url'] = milestone.pretty_print_url_file()
+        return super(GrupalResguardUpdateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_resguard': self.kwargs['pk_resguard'],
+            'pk_milestone': self.kwargs['pk_milestone'],
+        }
+
+class GrupalResguardView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.grupal.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/grupal/resguardo/milestones/view.html'
+
+
+    def get_context_data(self, **kwargs):
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "VER ACTAS"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['breadcrum_2'] = resguardo.name
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        return super(GrupalResguardView,self).get_context_data(**kwargs)
+
+class GrupalResguardDeleteView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+    permissions = {
+        "all": [
+            "usuarios.iraca.grupal.ver",
+            "usuarios.iraca.grupal.eliminar",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+        milestone = models.Milestones.objects.get(id = self.kwargs['pk_milestone'])
+        milestone.delete()
+
+        return HttpResponseRedirect('../../')

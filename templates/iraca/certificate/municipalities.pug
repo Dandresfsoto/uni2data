@@ -42,6 +42,8 @@ block side_nav_container
 
                     div(class="divider divider-perfil")
 
+    |{% if permiso_crear %}
+
     ul(class="collapsible",data-collapsible="accordion")
         li(class="bold waves-effect waves-light button-menu")
 
@@ -59,7 +61,7 @@ block side_nav_container
                             i(class="material-icons icon-sican") file_upload
 
                     div(class="divider divider-perfil")
-
+    |{% endif %}
 
 block container_principal
     div(class="container-datatable")
@@ -67,18 +69,14 @@ block container_principal
             thead
                 tr
                     th Actas
-                    th Contactos
                     th Departamento
                     th Municipio
-                    th Usuario
 
             tbody
                 tr
                     td Actas
-                    td Contactos
                     td Departamento
                     td Municipio
-                    td Usuario
 
 
 block body_script_auth

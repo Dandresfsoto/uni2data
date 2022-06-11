@@ -264,8 +264,8 @@ class FormulationInstrumentsListApi(BaseDatatableView):
 
 class MeetingsListApi(BaseDatatableView):
     model = Meetings
-    columns = ['id','user_update','creation','municipality','update_datetime']
-    order_columns = ['id','user_update','creation','municipality','update_datetime']
+    columns = ['id','creation','municipality']
+    order_columns = ['id','creation','municipality']
 
     def get_initial_queryset(self):
 
@@ -285,7 +285,7 @@ class MeetingsListApi(BaseDatatableView):
 
         if column == 'id':
             ret = ''
-            if self.request.user.has_perm('usuarios.iraca.reuniones.ver'):
+            if self.request.user.has_perm('usuarios.iraca.actas.ver'):
                 ret = '<div class="center-align">' \
                       '<a href="milestones/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Ver hitos {1}, {2}">' \
                       '<i class="material-icons">flag</i>' \
@@ -294,24 +294,7 @@ class MeetingsListApi(BaseDatatableView):
 
             else:
                 ret = '<div class="center-align">' \
-                      '<i class="material-icons">flag</i>' \
-                      '</div>'.format(row.id, row.municipality.nombre, row.municipality.departamento.nombre)
-
-            return ret
-
-        elif column == 'user_update':
-
-            ret = ''
-            if self.request.user.has_perm('usuarios.iraca.reuniones.ver'):
-                ret = '<div class="center-align">' \
-                      '<a href="contacts/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Ver contactos en {1}, {2}">' \
-                      '<i class="material-icons">contacts</i>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.municipality.nombre, row.municipality.departamento.nombre)
-
-            else:
-                ret = '<div class="center-align">' \
-                      '<i class="material-icons">contacts</i>' \
+                      '<i class="material-icons">remove_red_eye</i>' \
                       '</div>'.format(row.id, row.municipality.nombre, row.municipality.departamento.nombre)
 
             return ret
@@ -319,21 +302,15 @@ class MeetingsListApi(BaseDatatableView):
         elif column == 'creation':
             return str(row.municipality.departamento.nombre)
 
-
-
         elif column == 'municipality':
             return str(row.municipality.nombre)
-
-        elif column == 'update_datetime':
-            return str(row.creation_user.get_full_name_string())
-
         else:
             return super(MeetingsListApi, self).render_column(row, column)
 
 class MilestonesListApi(BaseDatatableView):
     model = Milestones
-    columns = ['id','meeting','type','creation','file','file2','file3','estate','observation','date']
-    order_columns = ['id','meeting','type','creation','file','file2','file3','estate','observation','date']
+    columns = ['id','meeting','type','file','observation','date']
+    order_columns = ['id','meeting','type','file','observation','date']
 
 
     def get_initial_queryset(self):
@@ -352,7 +329,7 @@ class MilestonesListApi(BaseDatatableView):
         if column == 'id':
             meeting = models.Meetings.objects.get(id = self.kwargs['pk_meeting'])
             ret = ''
-            if self.request.user.has_perm('usuarios.iraca.actas.hitos.ver'):
+            if self.request.user.has_perm('usuarios.iraca.actas.editar'):
 
                 ret = '<div class="center-align">' \
                       '<a href="edit/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar">' \
@@ -368,7 +345,7 @@ class MilestonesListApi(BaseDatatableView):
             return ret
 
         elif column == 'meeting':
-            if self.request.user.has_perm('usuarios.iraca.actas.hitos.ver'):
+            if self.request.user.has_perm('usuarios.iraca.actas.ver'):
 
                 ret = '<div class="center-align">' \
                       '<a href="view/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver">' \
@@ -403,47 +380,13 @@ class MilestonesListApi(BaseDatatableView):
             else:
                 return ''
 
-        elif column == 'file2':
-            if row.url_file2() != None:
-                return '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Listado de asistencia">' \
-                           '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
-                        '</a></div>'.format(row.url_file2())
-            else:
-                return ''
-
-        elif column == 'file3':
-            if row.url_file3() != None:
-                return '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Otro">' \
-                           '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
-                        '</a></div>'.format(row.url_file3())
-            else:
-                return ''
-
-        elif column == 'creation':
-            return row.date.strftime('%d/%m/%Y - %I:%M:%S %p')
 
         elif column == 'type':
             return row.type.name
 
-        elif column == 'estate':
-            if self.request.user.has_perm('usuarios.iraca.actas.hitos.ver'):
-
-                ret = '<div class="center-align">' \
-                      '<a href="estate/{0}/" class="tooltipped" data-position="top" data-delay="50" data-tooltip="Actualizar estado">' \
-                      '<b>{1}</b>' \
-                      '</a>' \
-                      '</div>'.format(row.id, row.estate, row.observation)
-
-            else:
-                ret = '<div class="center-align">' \
-                      '<b>{1}</b>' \
-                      '</div>'.format(row.id, row.estate)
-
-            return ret
-
         elif column == 'date':
             ret = ''
-            if self.request.user.has_perm('usuarios.iraca.actas.hitos.eliminar') and row.estate == "Esperando aprobación":
+            if self.request.user.has_perm('usuarios.iraca.actas.eliminar'):
                 ret = '<div class="center-align">' \
                            '<a href="delete/{0}/" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar hito">' \
                                 '<i class="material-icons">delete</i>' \
@@ -2553,6 +2496,11 @@ class IndividualMunicipioComunidadHogaresActivitysMomentoListApi(BaseDatatableVi
                 "usuarios.iraca.ver",
                 "usuarios.iraca.individual.ver"
             ],
+            "editar": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+                "usuarios.iraca.individual.editar"
+            ],
             "eliminar": [
                 "usuarios.iraca.ver",
                 "usuarios.iraca.individual.ver",
@@ -2607,7 +2555,7 @@ class IndividualMunicipioComunidadHogaresActivitysMomentoListApi(BaseDatatableVi
 
         elif column == 'creacion_user':
             ret = ''
-            if self.request.user.has_perms(self.permissions.get('ver')):
+            if self.request.user.has_perms(self.permissions.get('editar')):
                ret = '<div class="center-align">' \
                       '<a href="edit/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Actualizar el soporte">' \
                       '<i class="material-icons">edit</i>' \
@@ -2687,3 +2635,141 @@ class IndividualMunicipioComunidadHogaresActivitysMomentoTrazabilidadListApi(Bas
 
         else:
             return super(IndividualMunicipioComunidadHogaresActivitysMomentoTrazabilidadListApi, self).render_column(row, column)
+
+class GrupalListApi(BaseDatatableView):
+    model = Resguards
+    columns = ['id','name','color']
+    order_columns = ['id','name','color']
+
+    def get_initial_queryset(self):
+
+        self.certificate = Certificates.objects.get(id = self.kwargs['pk'])
+
+        return self.model.objects.filter(certificate__id = self.kwargs['pk'])
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            if self.request.user.has_perm('usuarios.iraca.grupal.ver'):
+                ret = '<div class="center-align">' \
+                      '<a href="resguard/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Ver documentos de {1}">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.name)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">flag</i>' \
+                      '</div>'
+
+            return ret
+
+        elif column == 'name':
+            return str(row.name)
+
+        elif column == 'color':
+            return '<div class="center-align"><b>{0}</b></div>'.format(row.get_milestones())
+
+        else:
+            return super(GrupalListApi, self).render_column(row, column)
+
+class GrupaResguardlListApi(BaseDatatableView):
+    model = Milestones
+    columns = ['id','grupal','acta','file','observation','date']
+    order_columns = ['id','grupal','acta','file','observation','date']
+
+    def get_initial_queryset(self):
+        return self.model.objects.filter(resguard__id = self.kwargs['pk_resguard'])
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(type__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            if self.request.user.has_perm('usuarios.iraca.grupal.editar'):
+
+                ret = '<div class="center-align">' \
+                      '<a href="edit/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'grupal':
+            if self.request.user.has_perm('usuarios.iraca.grupal.ver'):
+
+                ret = '<div class="center-align">' \
+                      '<a href="view/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'observation':
+            ret = ''
+
+            if row.observation != '' and row.observation != None:
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0}">' \
+                      '<i class="material-icons">chat</i>' \
+                      '</a>' \
+                      '</div>'.format(row.observation)
+
+            return ret
+
+        elif column == 'file':
+            if row.url_file() != None:
+                return '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Acta">' \
+                           '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                        '</a></div>'.format(row.url_file())
+            else:
+                return ''
+
+        elif column == 'acta':
+            return row.acta.name
+
+        elif column == 'date':
+            ret = ''
+            if self.request.user.has_perm('usuarios.iraca.grupal.eliminar'):
+                ret = '<div class="center-align">' \
+                           '<a href="delete/{0}/" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar hito">' \
+                                '<i class="material-icons">delete</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">delete</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        else:
+            return super(GrupaResguardlListApi, self).render_column(row, column)
