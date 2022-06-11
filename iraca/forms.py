@@ -89,9 +89,6 @@ class CertificateForm(forms.Form):
 class MiltonesForm(forms.Form):
 
 
-    type = forms.ModelChoiceField(label='Tipo de hito', queryset=Types.objects.all(),
-                                  required=False)
-
     observation = forms.CharField(label="Observación",max_length=500,widget=forms.Textarea(attrs={'class':'materialize-textarea'}),required=False)
 
 
@@ -111,11 +108,18 @@ class MiltonesForm(forms.Form):
         super(MiltonesForm, self).__init__(*args, **kwargs)
 
         certificate = models.Certificates.objects.get(id=kwargs['initial']['pk'])
+        meeting = models.Meetings.objects.get(id=kwargs['initial']['pk_meeting'])
+        type = models.Milestones.objects.filter(meeting=meeting).values_list("type", flat=True)
 
-        self.fields['type'].queryset = Types.objects.filter(certificate=certificate)
+        self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.all().exclude(id__in=type))
+
 
         if 'pk_milestone' in kwargs['initial'].keys():
             milestone = models.Milestones.objects.get(id=kwargs['initial']['pk_milestone'])
+
+            type = models.Milestones.objects.filter(meeting=meeting).exclude(id=milestone.id).values_list("type",flat=True)
+
+            self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.all().exclude(id__in=type))
 
             self.fields['type'].initial = milestone.type
             self.fields['observation'].initial = milestone.observation
@@ -917,8 +921,6 @@ class HogarVinculacionMasivoForm(forms.Form):
 
 class ResguardMiltonesForm(forms.Form):
 
-    acta = forms.ModelChoiceField(label='Tipo de Acta', queryset=Actas.objects.all(),
-                                  required=False)
 
     observation = forms.CharField(label="Observación", max_length=500,
                                   widget=forms.Textarea(attrs={'class': 'materialize-textarea'}), required=False)
@@ -939,11 +941,17 @@ class ResguardMiltonesForm(forms.Form):
         super(ResguardMiltonesForm, self).__init__(*args, **kwargs)
 
         certificate = models.Certificates.objects.get(id=kwargs['initial']['pk'])
+        resguard= models.Resguards.objects.get(id=kwargs['initial']['pk_resguard'])
+        actas = models.Milestones.objects.filter(resguard=resguard).values_list("acta", flat=True)
 
-        self.fields['acta'].queryset = Actas.objects.all()
+        self.fields['acta'] = forms.ModelChoiceField(queryset=models.Actas.objects.all().exclude(id__in=actas))
 
         if 'pk_milestone' in kwargs['initial'].keys():
             milestone = models.Milestones.objects.get(id=kwargs['initial']['pk_milestone'])
+
+            actas = models.Milestones.objects.filter(resguard=resguard).exclude(id=milestone.id).values_list("acta", flat=True)
+
+            self.fields['acta'] = forms.ModelChoiceField(queryset=models.Actas.objects.all().exclude(id__in=actas))
 
             self.fields['acta'].initial = milestone.acta
             self.fields['observation'].initial = milestone.observation
