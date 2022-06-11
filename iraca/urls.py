@@ -147,5 +147,11 @@ urlpatterns = [
     path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/edit/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentObjectView.as_view()),
     path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/delete/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentObjectDeleteView.as_view()),
 
-
+    path('grupal/', views.GrupalOptionsView.as_view()),
+    path('grupal/<uuid:pk>/', views.GrupalListView.as_view()),
+    path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/', views.GrupalResguardListView.as_view()),
+    path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/create/', views.GrupalResguardCreateView.as_view()),
+    path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/edit/<uuid:pk_milestone>/', views.GrupalResguardUpdateView.as_view()),
+    path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/view/<uuid:pk_milestone>/', views.GrupalResguardView.as_view()),
+    path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/delete/<uuid:pk_milestone>/', views.GrupalResguardDeleteView.as_view()),
 ]

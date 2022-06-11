@@ -1,4 +1,4 @@
-extends ../../../base_auth
+extends ../../../../base_auth
 
 block title
     |{{title | upper}}
@@ -30,7 +30,7 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../../../../") Actas
+                        a(href="../../../../") listado de Municipios
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
@@ -48,7 +48,7 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Crear hito
+                        a(href="#") Crear acta
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -65,10 +65,9 @@ block body_script_auth
 
             $('select').material_select();
 
-            $("label[for='id_type']").addClass('active');
+            $("label[for='id_acta']").addClass('active');
 
             $("label[for='id_clase']").addClass('active');
-
 
             var toolbarOptions = [
                 [{'header': []}],
@@ -100,6 +99,24 @@ block body_script_auth
             });
 
             $('#id_file').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el soporte',
+                    'replace': 'Arrastra y suelta el soporte',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+            $('#id_file2').dropify({
+                messages: {
+                    'default': 'Arrastra y suelta el soporte',
+                    'replace': 'Arrastra y suelta el soporte',
+                    'remove': 'Eliminar',
+                    'error': 'Ooops, algo malo paso.'
+                }
+            });
+
+            $('#id_file3').dropify({
                 messages: {
                     'default': 'Arrastra y suelta el soporte',
                     'replace': 'Arrastra y suelta el soporte',

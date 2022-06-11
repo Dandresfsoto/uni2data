@@ -1,4 +1,4 @@
-extends ../../../base_auth
+extends ../../base_auth
 
 block title
     |{{title | upper}}
@@ -30,48 +30,33 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../../../") Actas
+                        a(href="../") Listado de Municipios
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
-                    li(class="bold waves-effect waves-light")
-                        a(href="../../") {{ breadcrum_1 | truncatechars:15 }}
-                            i(class="material-icons icon-sican") keyboard_arrow_right
-
-                    div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Hitos
+                        a(href="#") {{ breadcrum_1 | truncatechars:15 }}
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
-
-
 
 block container_principal
     div(class="container-datatable")
         table(id="table",class="display responsive no-wrap table table-striped table-bordered",width="100%")
             thead
                 tr
-                    th Editar
                     th Ver
                     th Nombre
-                    th Acta
-                    th Observación
-                    th Eliminar
+                    th Documentos
+
             tbody
                 tr
-                    td Editar
                     td Ver
                     td Nombre
-                    td Acta
-                    td Observación
-                    td Eliminar
+                    td Documentos
 
-    div(class="fixed-action-btn")
-        a(class="btn-floating btn-large red" href="create/")
-            i(class="large material-icons") add
 
 block body_script_auth
     script.

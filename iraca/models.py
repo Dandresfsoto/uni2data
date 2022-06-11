@@ -51,141 +51,6 @@ class Types(models.Model):
     def __str__(self):
         return self.name
 
-def upload_dinamic_miltone(instance, filename):
-    return '/'.join(['Iraca 2021',str(instance.meeting.certificate.name),str(instance.meeting.municipality.nombre),str(instance.type), filename])
-
-class Milestones(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
-    creation = models.DateTimeField(auto_now_add=True)
-    meeting = models.ForeignKey(Meetings, on_delete=models.DO_NOTHING)
-    type = models.ForeignKey(Types, on_delete=models.DO_NOTHING, verbose_name="Tipo de Acta")
-    date = models.DateField()
-    estate = models.CharField(max_length=100,default='Esperando aprobación')
-    observation = models.CharField(max_length=500, blank=True, null=True)
-    file = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
-    file2 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
-    file3 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
-    foto_1 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
-    foto_2 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
-    foto_3 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
-    foto_4 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
-
-    def __str__(self):
-        return self.type.name
-
-    def get_fotos(self):
-        fotos = []
-
-        if self.foto_1 != '':
-            fotos.append(self.foto_1.url)
-
-        if self.foto_2 != '':
-            fotos.append(self.foto_2.url)
-
-        if self.foto_3 != '':
-            fotos.append(self.foto_3.url)
-
-        if self.foto_4 != '':
-            fotos.append(self.foto_4.url)
-
-
-        return fotos
-
-    def url_file(self):
-        url = None
-        try:
-            url = self.file.url
-        except:
-            pass
-        return url
-
-    def url_file2(self):
-        url = None
-        try:
-            url = self.file2.url
-        except:
-            pass
-        return url
-
-    def url_file3(self):
-        url = None
-        try:
-            url = self.file3.url
-        except:
-            pass
-        return url
-
-    def get_extension(self):
-        return str(self.file.path).split('.')[-1]
-
-    def get_extension2(self):
-        return str(self.file2.path).split('.')[-1]
-
-    def get_extension3(self):
-        return str(self.file3.path).split('.')[-1]
-
-
-
-    def url_foto_1(self):
-        url = None
-        try:
-            url = self.foto_1.url
-        except:
-            pass
-        return url
-
-    def url_foto_2(self):
-        url = None
-        try:
-            url = self.foto_2.url
-        except:
-            pass
-        return url
-
-    def url_foto_3(self):
-        url = None
-        try:
-            url = self.foto_3.url
-        except:
-            pass
-        return url
-
-    def url_foto_4(self):
-        url = None
-        try:
-            url = self.foto_4.url
-        except:
-            pass
-        return url
-
-    def pretty_print_url_file(self):
-        try:
-            url = self.file.url
-        except:
-            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
-        else:
-            return '<a href="'+ url +'"> '+ str(self.file.name) +'</a>'
-
-    def pretty_print_url_file2(self):
-        try:
-            url = self.file2.url
-        except:
-            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
-        else:
-            return '<a href="'+ url +'"> '+ str(self.file2.name) +'</a>'
-
-    def pretty_print_url_file3(self):
-        try:
-            url = self.file3.url
-        except:
-            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
-        else:
-            return '<a href="'+ url +'"> '+ str(self.file3.name) +'</a>'
-
-
-    def pretty_creation_datetime(self):
-        return self.creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
-
 class Contacts(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     meting = models.ForeignKey(Meetings,on_delete=models.DO_NOTHING)
@@ -207,6 +72,13 @@ class Contacts(models.Model):
 #----------------------------------------------------------------------------------
 
 #------------------------------- ROUTES  ------------------------------------------
+
+class Actas(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 class Moments(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
@@ -288,6 +160,10 @@ class Resguards(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_milestones(self):
+        milestones = Milestones.objects.filter(resguard=self.id).count()
+        return milestones
 
 class Comunity(models.Model):
 
@@ -420,6 +296,140 @@ class Routes(models.Model):
 
         return progress
 
+def upload_dinamic_miltone(instance, filename):
+    return '/'.join(['Iraca 2021','Actas', filename])
+
+
+class Milestones(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    creation = models.DateTimeField(auto_now_add=True)
+    meeting = models.ForeignKey(Meetings, on_delete=models.DO_NOTHING, blank=True, null=True)
+    resguard = models.ForeignKey(Resguards, on_delete=models.DO_NOTHING, blank=True, null=True)
+    type = models.ForeignKey(Types, on_delete=models.DO_NOTHING, verbose_name="Tipo de Acta", blank=True, null=True)
+    acta = models.ForeignKey(Actas, on_delete=models.DO_NOTHING, verbose_name="Tipo de Acta", blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    estate = models.CharField(max_length=100,default='Esperando aprobación')
+    observation = models.CharField(max_length=500, blank=True, null=True)
+    file = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
+    file2 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
+    file3 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
+    foto_1 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
+    foto_2 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
+    foto_3 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
+    foto_4 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
+
+    def __str__(self):
+        return str(self.id)
+
+    def get_fotos(self):
+        fotos = []
+
+        if self.foto_1 != '':
+            fotos.append(self.foto_1.url)
+
+        if self.foto_2 != '':
+            fotos.append(self.foto_2.url)
+
+        if self.foto_3 != '':
+            fotos.append(self.foto_3.url)
+
+        if self.foto_4 != '':
+            fotos.append(self.foto_4.url)
+
+
+        return fotos
+
+    def url_file(self):
+        url = None
+        try:
+            url = self.file.url
+        except:
+            pass
+        return url
+
+    def url_file2(self):
+        url = None
+        try:
+            url = self.file2.url
+        except:
+            pass
+        return url
+
+    def url_file3(self):
+        url = None
+        try:
+            url = self.file3.url
+        except:
+            pass
+        return url
+
+    def get_extension(self):
+        return str(self.file.path).split('.')[-1]
+
+    def get_extension2(self):
+        return str(self.file2.path).split('.')[-1]
+
+    def get_extension3(self):
+        return str(self.file3.path).split('.')[-1]
+
+    def url_foto_1(self):
+        url = None
+        try:
+            url = self.foto_1.url
+        except:
+            pass
+        return url
+
+    def url_foto_2(self):
+        url = None
+        try:
+            url = self.foto_2.url
+        except:
+            pass
+        return url
+
+    def url_foto_3(self):
+        url = None
+        try:
+            url = self.foto_3.url
+        except:
+            pass
+        return url
+
+    def url_foto_4(self):
+        url = None
+        try:
+            url = self.foto_4.url
+        except:
+            pass
+        return url
+
+    def pretty_print_url_file(self):
+        try:
+            url = self.file.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="'+ url +'"> '+ str(self.file.name) +'</a>'
+
+    def pretty_print_url_file2(self):
+        try:
+            url = self.file2.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="'+ url +'"> '+ str(self.file2.name) +'</a>'
+
+    def pretty_print_url_file3(self):
+        try:
+            url = self.file3.url
+        except:
+            return '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        else:
+            return '<a href="'+ url +'"> '+ str(self.file3.name) +'</a>'
+
+    def pretty_creation_datetime(self):
+        return self.creation.astimezone(settings_time_zone).strftime('%d/%m/%Y - %I:%M:%S %p')
 
 class Households(models.Model):
 
@@ -543,7 +553,6 @@ class InstrumentTraceabilityRouteObject(models.Model):
     creacion = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='traceability_instrument_user_iraca_2021')
     observation = models.TextField()
-
 
 #----------------------------------------------------------------------------------
 
