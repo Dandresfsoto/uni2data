@@ -297,7 +297,12 @@ class Routes(models.Model):
         return progress
 
 def upload_dinamic_miltone(instance, filename):
-    return '/'.join(['Iraca 2021','Actas', filename])
+    if instance.type:
+        return '/'.join(['Iraca 2021', 'Transversales', str(instance.meeting.municipality.nombre), str(instance.type.name), filename])
+    elif instance.acta:
+        return '/'.join(['Iraca 2021', 'Grupal', str(instance.resguard.name),str(instance.acta.name), filename])
+    else:
+        return '/'.join(['Iraca 2021', 'Actas', filename])
 
 
 class Milestones(models.Model):
