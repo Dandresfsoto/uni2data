@@ -46,7 +46,7 @@ class Meetings(models.Model):
 class Types(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=100)
-    certificate = models.ForeignKey(Certificates, on_delete=models.DO_NOTHING)
+    certificate = models.ForeignKey(Certificates, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
         return self.name
