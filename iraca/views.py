@@ -560,17 +560,26 @@ class CerticateOptionsView(TemplateView):
     def get_items(self):
         items = []
 
-        for certificate in Certificates.objects.all().filter(code=1).order_by('name'):
+        for certificate in Certificates.objects.all().filter(code__in =[1,4]).order_by('name'):
             if self.request.user.has_perm('usuarios.certificate.ver'):
-                items.append({
-                    'sican_categoria': '{0}'.format(certificate.name),
-                    'sican_color': certificate.color,
-                    'sican_order': certificate.code,
-                    'sican_url': '{0}/'.format(str(certificate.id)),
-                    'sican_name': '{0}'.format(certificate.name),
-                    'sican_description': 'Actas de {0}.'.format(certificate.name).lower()
-                })
-
+                if certificate.code == 1:
+                    items.append({
+                        'sican_categoria': '{0}'.format(certificate.name),
+                        'sican_color': certificate.color,
+                        'sican_order': certificate.code,
+                        'sican_url': '{0}/'.format(str(certificate.id)),
+                        'sican_name': '{0}'.format(certificate.name),
+                        'sican_description': 'Actas de {0}.'.format(certificate.name).lower()
+                    })
+                elif certificate.code == 4:
+                    items.append({
+                        'sican_categoria': '{0}'.format(certificate.name),
+                        'sican_color': certificate.color,
+                        'sican_order': certificate.code,
+                        'sican_url': '{0}/unit/'.format(str(certificate.id)),
+                        'sican_name': '{0}'.format(certificate.name),
+                        'sican_description': 'Actas de {0}.'.format(certificate.name).lower()
+                    })
 
         return items
 
@@ -777,11 +786,8 @@ class MilestonesUpdateView(LoginRequiredMixin,
     def form_valid(self, form):
 
         type = form.cleaned_data['type']
-        date = form.cleaned_data['date']
         observation = form.cleaned_data['observation']
         file = form.cleaned_data['file']
-        file2 = form.cleaned_data['file2']
-        file3 = form.cleaned_data['file3']
         foto_1 = form.cleaned_data['foto_1']
         foto_2 = form.cleaned_data['foto_2']
         foto_3 = form.cleaned_data['foto_3']
@@ -791,17 +797,10 @@ class MilestonesUpdateView(LoginRequiredMixin,
         #registro = models.Registro.objects.filter(hito=hito)
 
         milestone.type = type
-        milestone.date = date
         milestone.observation = observation
 
         if file != None:
             milestone.file = file
-
-        if file2 != None:
-            milestone.file2 = file2
-
-        if file3 != None:
-            milestone.file3 = file3
 
         if foto_1 != None:
             milestone.foto_1 = foto_1
@@ -877,12 +876,187 @@ class MilestonesDeleteView(LoginRequiredMixin,
     def dispatch(self, request, *args, **kwargs):
         milestone = models.Milestones.objects.get(id = self.kwargs['pk_milestone'])
 
-        if milestone.estate == 'Esperando aprobación':
-
-            milestone.delete()
+        milestone.delete()
 
         return HttpResponseRedirect('../../')
 
+
+
+class CertificateUnitMiltoneslistView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/unit/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "{0}".format(certificate.name)
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/unit/'.format(certificate.id)
+        kwargs['breadcrum_1'] = certificate.name
+        return super(CertificateUnitMiltoneslistView,self).get_context_data(**kwargs)
+
+
+class CertificateUnitMiltonesCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/unit/create.html'
+    form_class = forms.MiltonesUnitForm
+    success_url = "../"
+
+    def form_valid(self, form):
+
+        transversal = form.cleaned_data['transversal']
+        file = form.cleaned_data['file']
+        foto_1 = form.cleaned_data['foto_1']
+        foto_2 = form.cleaned_data['foto_2']
+        foto_3 = form.cleaned_data['foto_3']
+        foto_4 = form.cleaned_data['foto_4']
+
+        miltone = models.Milestones.objects.create(
+            transversal = transversal,
+            file = file,
+            foto_1 = foto_1,
+            foto_2 = foto_2,
+            foto_3 = foto_3,
+            foto_4 = foto_4,
+        )
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "AÑADIR ACTA"
+        kwargs['file_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        kwargs['file2_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        kwargs['file3_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        kwargs['breadcrum_1'] = str(certificate.name)
+        return super(CertificateUnitMiltonesCreateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk':self.kwargs['pk'],
+        }
+
+class CertificateUnitMiltonesUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/unit/edit.html'
+    form_class = forms.MiltonesUnitForm
+    success_url = "../../"
+
+
+    def form_valid(self, form):
+
+        transversal = form.cleaned_data['transversal']
+        observation = form.cleaned_data['observation']
+        file = form.cleaned_data['file']
+        foto_1 = form.cleaned_data['foto_1']
+        foto_2 = form.cleaned_data['foto_2']
+        foto_3 = form.cleaned_data['foto_3']
+        foto_4 = form.cleaned_data['foto_4']
+
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        #registro = models.Registro.objects.filter(hito=hito)
+
+        milestone.transversal = transversal
+        milestone.observation = observation
+
+        if file != None:
+            milestone.file = file
+
+        if foto_1 != None:
+            milestone.foto_1 = foto_1
+
+        if foto_2 != None:
+            milestone.foto_2 = foto_2
+
+        if foto_3 != None:
+            milestone.foto_3 = foto_3
+
+        if foto_4 != None:
+            milestone.foto_4 = foto_4
+
+        milestone.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "EDITAR ACTA"
+        kwargs['breadcrum_1'] = str(certificate.name)
+        kwargs['file_url'] = milestone.pretty_print_url_file()
+        return super(CertificateUnitMiltonesUpdateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_milestone': self.kwargs['pk_milestone'],
+        }
+
+
+class CertificateUnitMiltonesView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/unit/view.html'
+
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "VER ACTAS"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        return super(CertificateUnitMiltonesView,self).get_context_data(**kwargs)
+
+
+class CertificateUnitMiltonesDeleteView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+    permissions = {
+        "all": [
+            "usuarios.iraca.actas.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+        milestone = models.Milestones.objects.get(id = self.kwargs['pk_milestone'])
+        milestone.delete()
+
+        return HttpResponseRedirect('../../')
 
 #----------------------------------------------------------------------------------
 
@@ -1017,6 +1191,8 @@ class MilestonesEstateUpdateView(LoginRequiredMixin,
         self.object = form.save()
 
         return super().form_valid(form)
+
+
 
 
 #----------------------------------------------------------------------------------
@@ -5348,3 +5524,4 @@ class GrupalResguardDeleteView(LoginRequiredMixin,
         milestone.delete()
 
         return HttpResponseRedirect('../../')
+

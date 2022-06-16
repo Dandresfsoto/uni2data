@@ -30,25 +30,19 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../../../../../") Actas
+                        a(href="../../../") Actas transversales
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../../../../") {{ breadcrum_1 | truncatechars:15 }}
-                            i(class="material-icons icon-sican") keyboard_arrow_right
-
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="../../") {{ breadcrum_2 | truncatechars:15 }}
+                        a(href="../") {{ breadcrum_1 | truncatechars:15 }}
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Editar acta
+                        a(href="#") Crear acta
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -65,22 +59,10 @@ block body_script_auth
 
             $('select').material_select();
 
-            $("label[for='id_type']").addClass('active');
+            $("label[for='id_transversal']").addClass('active');
 
             $("label[for='id_clase']").addClass('active');
 
-            $('#id_date').pickadate({
-                format: 'dd/mm/yyyy',
-                selectMonths: true,
-                selectYears: 5,
-                monthsFull: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre',
-                    'Octubre', 'Noviembre', 'Diciembre'],
-                weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
-                today: 'Hoy',
-                clear: 'Borrar',
-                close: 'Ok',
-                closeOnSelect: false
-            });
 
             var toolbarOptions = [
                 [{'header': []}],
@@ -112,24 +94,6 @@ block body_script_auth
             });
 
             $('#id_file').dropify({
-                messages: {
-                    'default': 'Arrastra y suelta el soporte',
-                    'replace': 'Arrastra y suelta el soporte',
-                    'remove': 'Eliminar',
-                    'error': 'Ooops, algo malo paso.'
-                }
-            });
-
-            $('#id_file2').dropify({
-                messages: {
-                    'default': 'Arrastra y suelta el soporte',
-                    'replace': 'Arrastra y suelta el soporte',
-                    'remove': 'Eliminar',
-                    'error': 'Ooops, algo malo paso.'
-                }
-            });
-
-            $('#id_file3').dropify({
                 messages: {
                     'default': 'Arrastra y suelta el soporte',
                     'replace': 'Arrastra y suelta el soporte',
