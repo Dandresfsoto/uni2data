@@ -14,6 +14,7 @@ admin.site.register(models.Comunity)
 admin.site.register(models.Actas)
 admin.site.register(models.Meetings)
 admin.site.register(models.Milestones)
+admin.site.register(models.Actas_Individual)
 
 
 def cargar_hogares(modeladmin, request, queryset):

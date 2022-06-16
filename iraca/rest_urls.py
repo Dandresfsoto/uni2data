@@ -14,6 +14,8 @@ urlpatterns = [
     path('certificate/<uuid:pk>/', rest_views.MeetingsListApi.as_view()),
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/', rest_views.MilestonesListApi.as_view()),
 
+    path('certificate/<uuid:pk>/unit/', rest_views.MilestonesUnitListApi.as_view()),
+
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/', rest_views.ContactsListApi.as_view()),
 
     path('implementation/', rest_views.ImplementationListApi.as_view()),
