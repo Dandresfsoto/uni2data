@@ -30,19 +30,13 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../../../../../") Actas
+                        a(href="../../../../") Listado de actas
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../../../../") {{ breadcrum_1 | truncatechars:15 }}
-                            i(class="material-icons icon-sican") keyboard_arrow_right
-
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="../../") {{ breadcrum_2 | truncatechars:15 }}
+                        a(href="../../") {{ breadcrum_1 | truncatechars:15 }}
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
@@ -84,6 +78,7 @@ block container_principal
                 a(href="{{ milestone.url_file }}")
                     b Link
                 |{% endif %}
+
 
 
 

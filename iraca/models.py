@@ -80,6 +80,14 @@ class Actas(models.Model):
     def __str__(self):
         return self.name
 
+class Actas_Individual(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    name = models.CharField(max_length=100)
+    type = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 class Moments(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     name = models.CharField(max_length=100)
@@ -312,6 +320,7 @@ class Milestones(models.Model):
     resguard = models.ForeignKey(Resguards, on_delete=models.DO_NOTHING, blank=True, null=True)
     type = models.ForeignKey(Types, on_delete=models.DO_NOTHING, verbose_name="Tipo de Acta", blank=True, null=True)
     acta = models.ForeignKey(Actas, on_delete=models.DO_NOTHING, verbose_name="Tipo de Acta", blank=True, null=True)
+    transversal = models.ForeignKey(Actas_Individual, on_delete=models.DO_NOTHING, verbose_name="Tipo de Acta", blank=True, null=True)
     date = models.DateField(blank=True, null=True)
     estate = models.CharField(max_length=100,default='Esperando aprobación')
     observation = models.CharField(max_length=500, blank=True, null=True)

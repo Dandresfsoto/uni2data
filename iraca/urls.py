@@ -31,6 +31,12 @@ urlpatterns = [
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/view/<uuid:pk_milestone>/', views.MilestonesView.as_view()),
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/delete/<uuid:pk_milestone>/', views.MilestonesDeleteView.as_view()),
 
+    path('certificate/<uuid:pk>/unit/', views.CertificateUnitMiltoneslistView.as_view()),
+    path('certificate/<uuid:pk>/unit/create/', views.CertificateUnitMiltonesCreateView.as_view()),
+    path('certificate/<uuid:pk>/unit/edit/<uuid:pk_milestone>/', views.CertificateUnitMiltonesUpdateView.as_view()),
+    path('certificate/<uuid:pk>/unit/view/<uuid:pk_milestone>/', views.CertificateUnitMiltonesView.as_view()),
+    path('certificate/<uuid:pk>/unit/delete/<uuid:pk_milestone>/', views.CertificateUnitMiltonesDeleteView.as_view()),
+
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/', views.ContactslistView.as_view()),
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/create/', views.ContactsCreateView.as_view()),
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/edit/<uuid:pk_contact>/', views.ContactsUpdateView.as_view()),
@@ -154,4 +160,6 @@ urlpatterns = [
     path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/edit/<uuid:pk_milestone>/', views.GrupalResguardUpdateView.as_view()),
     path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/view/<uuid:pk_milestone>/', views.GrupalResguardView.as_view()),
     path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/delete/<uuid:pk_milestone>/', views.GrupalResguardDeleteView.as_view()),
+
+
 ]

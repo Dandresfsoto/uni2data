@@ -403,6 +403,102 @@ class MilestonesListApi(BaseDatatableView):
         else:
             return super(MilestonesListApi, self).render_column(row, column)
 
+class MilestonesUnitListApi(BaseDatatableView):
+    model = Milestones
+    columns = ['id','meeting','transversal','file','observation','date']
+    order_columns = ['id','meeting','transversal','file','observation','date']
+
+
+    def get_initial_queryset(self):
+        transversal = self.model.objects.filter(transversal__type="cnt")
+        return transversal
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(type__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            if self.request.user.has_perm('usuarios.iraca.actas.editar'):
+
+                ret = '<div class="center-align">' \
+                      '<a href="edit/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'meeting':
+            if self.request.user.has_perm('usuarios.iraca.actas.ver'):
+
+                ret = '<div class="center-align">' \
+                      '<a href="view/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'observation':
+            ret = ''
+
+            if row.observation != '' and row.observation != None:
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0}">' \
+                      '<i class="material-icons">chat</i>' \
+                      '</a>' \
+                      '</div>'.format(row.observation)
+
+            return ret
+
+        elif column == 'file':
+            if row.url_file() != None:
+                return '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Acta">' \
+                           '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                        '</a></div>'.format(row.url_file())
+            else:
+                return ''
+
+
+        elif column == 'transversal':
+            return row.transversal.name
+
+        elif column == 'date':
+            ret = ''
+            if self.request.user.has_perm('usuarios.iraca.actas.eliminar'):
+                ret = '<div class="center-align">' \
+                           '<a href="delete/{0}/" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar hito">' \
+                                '<i class="material-icons">delete</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">delete</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        else:
+            return super(MilestonesUnitListApi, self).render_column(row, column)
+
 class ContactsListApi(BaseDatatableView):
     model = models.Contacts
     columns = ['id','name','surname','charge','movil','email','reservation','community','languahe','observation']

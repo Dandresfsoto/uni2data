@@ -30,19 +30,13 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../../../../../") Actas
+                        a(href="../../../../") Actas transversales
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light")
-                        a(href="../../../../") {{ breadcrum_1 | truncatechars:15 }}
-                            i(class="material-icons icon-sican") keyboard_arrow_right
-
-                    div(class="divider divider-perfil")
-
-                    li(class="bold waves-effect waves-light")
-                        a(href="../../") {{ breadcrum_2 | truncatechars:15 }}
+                        a(href="../../") {{ breadcrum_1 | truncatechars:15 }}
                             i(class="material-icons icon-sican") keyboard_arrow_right
 
                     div(class="divider divider-perfil")
@@ -65,7 +59,7 @@ block body_script_auth
 
             $('select').material_select();
 
-            $("label[for='id_type']").addClass('active');
+            $("label[for='id_transversal']").addClass('active');
 
             $("label[for='id_clase']").addClass('active');
 
