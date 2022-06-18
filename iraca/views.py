@@ -560,7 +560,7 @@ class CerticateOptionsView(TemplateView):
     def get_items(self):
         items = []
 
-        for certificate in Certificates.objects.all().filter(code__in =[1,4,5]).order_by('name'):
+        for certificate in Certificates.objects.all().filter(code__in =[1,4,5,6]).order_by('name'):
             if self.request.user.has_perm('usuarios.certificate.ver'):
                 if certificate.code == 1:
                     items.append({
@@ -577,6 +577,15 @@ class CerticateOptionsView(TemplateView):
                         'sican_color': certificate.color,
                         'sican_order': certificate.code,
                         'sican_url': '{0}/unit/'.format(str(certificate.id)),
+                        'sican_name': '{0}'.format(certificate.name),
+                        'sican_description': 'Actas de {0}.'.format(certificate.name).lower()
+                    })
+                elif certificate.code == 6:
+                    items.append({
+                        'sican_categoria': '{0}'.format(certificate.name),
+                        'sican_color': certificate.color,
+                        'sican_order': certificate.code,
+                        'sican_url': '{0}/resguard/'.format(str(certificate.id)),
                         'sican_name': '{0}'.format(certificate.name),
                         'sican_description': 'Actas de {0}.'.format(certificate.name).lower()
                     })
@@ -1047,6 +1056,278 @@ class CertificateUnitMiltonesDeleteView(LoginRequiredMixin,
     permissions = {
         "all": [
             "usuarios.iraca.actas.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+        milestone = models.Milestones.objects.get(id = self.kwargs['pk_milestone'])
+        milestone.delete()
+
+        return HttpResponseRedirect('../../')
+
+class CertificateMunicipiOptionsView(TemplateView):
+    """
+    """
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/municipy/list.html'
+
+    def get_items(self):
+        items = []
+
+        for certificate in Certificates.objects.all().filter(code=3).order_by('name'):
+            if self.request.user.has_perm('usuarios.iraca.transversal.ver'):
+                items.append({
+                    'sican_categoria': '{0}'.format(certificate.name),
+                    'sican_color': certificate.color,
+                    'sican_order': certificate.code,
+                    'sican_url': '{0}/'.format(str(certificate.id)),
+                    'sican_name': '{0}'.format(certificate.name),
+                    'sican_description': 'Actas de {0}.'.format(certificate.name).lower()
+                })
+
+
+        return items
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.transversal.ver",
+            ]
+        }
+
+        items = self.get_items()
+        if len(items) == 0:
+            return HttpResponseRedirect('../')
+
+        else:
+            if not request.user.is_authenticated:
+                return HttpResponseRedirect(self.login_url)
+            else:
+                if request.user.has_perms(self.permissions.get('all')):
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+                else:
+                    return HttpResponseRedirect('../')
+
+    def get_context_data(self, **kwargs):
+        certicate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        kwargs['title'] = "{0}".format(certicate.name)
+        kwargs['breadcrum_active'] = certicate.name
+        kwargs['items'] = self.get_items()
+        return super(CertificateMunicipiOptionsView,self).get_context_data(**kwargs)
+
+class CertificateResguardOptionsView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.transversal.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/municipy/territory.html'
+
+
+    def get_context_data(self, **kwargs):
+        certificate = Certificates.objects.get(id = self.kwargs['pk'])
+        municipio = Certificates.objects.get(id = self.kwargs['pk_municipity'])
+        kwargs['title'] = str(municipio.municipio.nombre).upper()
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/resguard/{1}/'.format(certificate.id, municipio.id)
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['breadcrum_active'] = municipio.municipio.nombre
+        return super(CertificateResguardOptionsView,self).get_context_data(**kwargs)
+
+class CertificateRComunityListView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.transversal.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/municipy/comunity/list.html'
+
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        municipio = Certificates.objects.get(id=self.kwargs['pk_municipity'])
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        kwargs['title'] = "{0}".format(resguardo.name)
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/resguard/{1}/comunity/{2}'.format(certificate.id,municipio.id,resguardo.id)
+        kwargs['breadcrum_2'] = certificate.name
+        kwargs['breadcrum_1'] = municipio.municipio.nombre
+        kwargs['breadcrum_active'] = resguardo.name
+        return super(CertificateRComunityListView,self).get_context_data(**kwargs)
+
+class CertificateComunityCreateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.transversal.ver",
+
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/municipy/comunity/milestones/create.html'
+    form_class = forms.MiltonesUnitForm
+    success_url = "../"
+
+    def form_valid(self, form):
+
+        transversal = form.cleaned_data['transversal']
+        file = form.cleaned_data['file']
+        foto_1 = form.cleaned_data['foto_1']
+        foto_2 = form.cleaned_data['foto_2']
+        foto_3 = form.cleaned_data['foto_3']
+        foto_4 = form.cleaned_data['foto_4']
+
+        miltone = models.Milestones.objects.create(
+            resguard=models.Resguards.objects.get(id=self.kwargs['pk_resguard']),
+            transversal = transversal,
+            file = file,
+            foto_1 = foto_1,
+            foto_2 = foto_2,
+            foto_3 = foto_3,
+            foto_4 = foto_4,
+            type_transversar = True,
+        )
+
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        municipio = Certificates.objects.get(id=self.kwargs['pk_municipity'])
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        kwargs['title'] = "AÑADIR ACTA"
+        kwargs['file_url'] = '<p style="display:inline;margin-left:5px;">No hay archivos cargados.</p>'
+        kwargs['breadcrum_3'] = certificate.name
+        kwargs['breadcrum_2'] = municipio.municipio.nombre
+        kwargs['breadcrum_1'] = resguardo.name
+        return super(CertificateComunityCreateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk':self.kwargs['pk'],
+            'pk_resguard':self.kwargs['pk_resguard'],
+            'pk_municipity':self.kwargs['pk_municipity'],
+        }
+
+class CertificateComunityUpdateView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        FormView):
+
+    permissions = {
+        "all": [
+            "usuarios.iraca.transversal.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/municipy/comunity/milestones/edit.html'
+    form_class = forms.MiltonesUnitForm
+    success_url = "../../"
+
+
+    def form_valid(self, form):
+
+        transversal = form.cleaned_data['transversal']
+        observation = form.cleaned_data['observation']
+        file = form.cleaned_data['file']
+        foto_1 = form.cleaned_data['foto_1']
+        foto_2 = form.cleaned_data['foto_2']
+        foto_3 = form.cleaned_data['foto_3']
+        foto_4 = form.cleaned_data['foto_4']
+
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        milestone.transversal = transversal
+        milestone.observation = observation
+
+        if file != None:
+            milestone.file = file
+
+        if foto_1 != None:
+            milestone.foto_1 = foto_1
+
+        if foto_2 != None:
+            milestone.foto_2 = foto_2
+
+        if foto_3 != None:
+            milestone.foto_3 = foto_3
+
+        if foto_4 != None:
+            milestone.foto_4 = foto_4
+
+        milestone.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        municipity = models.Certificates.objects.get(id=self.kwargs['pk_municipity'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "EDITAR ACTA"
+        kwargs['breadcrum_3'] = certificate.name
+        kwargs['breadcrum_2'] = municipity.municipio.nombre
+        kwargs['breadcrum_1'] = resguardo.name
+        kwargs['file_url'] = milestone.pretty_print_url_file()
+        return super(CertificateComunityUpdateView,self).get_context_data(**kwargs)
+
+    def get_initial(self):
+        return {
+            'pk': self.kwargs['pk'],
+            'pk_resguard': self.kwargs['pk_resguard'],
+            'pk_municipity': self.kwargs['pk_municipity'],
+            'pk_milestone': self.kwargs['pk_milestone'],
+        }
+
+
+class CertificateComunityView(LoginRequiredMixin,
+                      MultiplePermissionsRequiredMixin,
+                      TemplateView):
+    """
+    """
+    permissions = {
+        "all": [
+            "usuarios.iraca.transversal.ver",
+        ]
+    }
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/municipy/comunity/milestones/view.html'
+
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        municipio = Certificates.objects.get(id=self.kwargs['pk_municipity'])
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        kwargs['title'] = "VER ACTAS"
+        kwargs['breadcrum_3'] = certificate.name
+        kwargs['breadcrum_2'] = municipio.municipio.nombre
+        kwargs['breadcrum_1'] = resguardo.name
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        return super(CertificateComunityView,self).get_context_data(**kwargs)
+
+class CertificateComunityDeleteView(LoginRequiredMixin,
+                        MultiplePermissionsRequiredMixin,
+                        View):
+    permissions = {
+        "all": [
+            "usuarios.iraca.transversal.ver",
+            "usuarios.iraca.transversal.eliminar",
         ]
     }
     login_url = settings.LOGIN_URL

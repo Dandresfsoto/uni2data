@@ -504,6 +504,144 @@ class MilestonesUnitListApi(BaseDatatableView):
         else:
             return super(MilestonesUnitListApi, self).render_column(row, column)
 
+class CertificateMunicipialityListApi(BaseDatatableView):
+    model = Resguards
+    columns = ['id','name','color']
+    order_columns = ['id','name','color']
+
+    def get_initial_queryset(self):
+
+        self.certificate = Certificates.objects.get(id = self.kwargs['pk_municipity'])
+
+        return self.model.objects.filter(certificate__id = self.kwargs['pk_municipity'])
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(name__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            if self.request.user.has_perm('usuarios.iraca.transversal.ver'):
+                ret = '<div class="center-align">' \
+                      '<a href="comunity/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Ver documentos de {1}">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id, row.name)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">flag</i>' \
+                      '</div>'
+
+            return ret
+
+        elif column == 'name':
+            return str(row.name)
+
+        elif column == 'color':
+            return '<div class="center-align"><b>{0}</b></div>'.format(row.get_milestones())
+
+        else:
+            return super(CertificateMunicipialityListApi, self).render_column(row, column)
+
+class CertificateCertificate(BaseDatatableView):
+    model = Milestones
+    columns = ['id','grupal','acta','file','observation','date']
+    order_columns = ['id','grupal','acta','file','observation','date']
+
+    def get_initial_queryset(self):
+        return self.model.objects.filter(resguard__id = self.kwargs['pk_resguard'], type_transversar=True)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(type__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'id':
+            ret = ''
+            if self.request.user.has_perm('usuarios.iraca.transversal.editar'):
+
+                ret = '<div class="center-align">' \
+                      '<a href="edit/{0}/" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Editar">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">edit</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'grupal':
+            if self.request.user.has_perm('usuarios.iraca.transversal.ver'):
+
+                ret = '<div class="center-align">' \
+                      '<a href="view/{0}/" class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="Ver">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</a>' \
+                      '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                      '<i class="material-icons">remove_red_eye</i>' \
+                      '</div>'.format(row.id)
+
+            return ret
+
+        elif column == 'observation':
+            ret = ''
+
+            if row.observation != '' and row.observation != None:
+                ret = '<div class="center-align">' \
+                      '<a class="tooltipped link-sec" data-position="top" data-delay="50" data-tooltip="{0}">' \
+                      '<i class="material-icons">chat</i>' \
+                      '</a>' \
+                      '</div>'.format(row.observation)
+
+            return ret
+
+        elif column == 'file':
+            if row.url_file() != None:
+                return '<div class="center-align"><a href="{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Acta">' \
+                           '<i class="material-icons" style="font-size: 2rem;">insert_drive_file</i>' \
+                        '</a></div>'.format(row.url_file())
+            else:
+                return ''
+
+        elif column == 'acta':
+            return row.transversal.name
+
+        elif column == 'date':
+            ret = ''
+            if self.request.user.has_perm('usuarios.iraca.transversal.eliminar'):
+                ret = '<div class="center-align">' \
+                           '<a href="delete/{0}/" class="tooltipped delete-table" data-position="top" data-delay="50" data-tooltip="Eliminar hito">' \
+                                '<i class="material-icons">delete</i>' \
+                           '</a>' \
+                       '</div>'.format(row.id)
+
+            else:
+                ret = '<div class="center-align">' \
+                           '<i class="material-icons">delete</i>' \
+                       '</div>'.format(row.id)
+
+            return ret
+
+        else:
+            return super(CertificateCertificate, self).render_column(row, column)
+
 class ContactsListApi(BaseDatatableView):
     model = models.Contacts
     columns = ['id','name','surname','charge','movil','email','reservation','community','languahe','observation']
@@ -2789,7 +2927,7 @@ class GrupaResguardlListApi(BaseDatatableView):
     order_columns = ['id','grupal','acta','file','observation','date']
 
     def get_initial_queryset(self):
-        return self.model.objects.filter(resguard__id = self.kwargs['pk_resguard'])
+        return self.model.objects.filter(resguard__id = self.kwargs['pk_resguard'], type_transversar=False)
 
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)

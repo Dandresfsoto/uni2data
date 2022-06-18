@@ -347,7 +347,7 @@ class MiltonesUnitForm(forms.Form):
                     ),
                 )
             )
-        if certificate.code == 5:
+        elif certificate.code == 5:
             transversal = models.Milestones.objects.all().exclude(transversal__id=None,).values_list("transversal",
                                                                                                     flat=True)
 
@@ -459,7 +459,118 @@ class MiltonesUnitForm(forms.Form):
                     ),
                 )
             )
+        elif certificate.code == 6:
+            transversal = models.Milestones.objects.all().exclude(transversal__id=None,).values_list("transversal",
+                                                                                                    flat=True)
 
+            self.fields['transversal'] = forms.ModelChoiceField(
+                queryset=models.Actas_Individual.objects.filter(type="css").exclude(id__in=transversal))
+
+            if 'pk_milestone' in kwargs['initial'].keys():
+                milestone = models.Milestones.objects.get(id=kwargs['initial']['pk_milestone'])
+
+                transversal = models.Milestones.objects.all().exclude(transversal__id=None).values_list("transversal",
+                                                                                                        flat=True)
+
+                self.fields['transversal'] = forms.ModelChoiceField(
+                    queryset=models.Actas_Individual.objects.filter(type="css").exclude(id=milestone.id, id__in=transversal))
+
+                self.fields['transversal'].initial = milestone.transversal
+                self.fields['observation'].initial = milestone.observation
+
+                self.fields['file'].required = False
+
+                if milestone.url_foto_1() != None:
+                    self.fields['foto_1'].widget.attrs['data-default-file'] = milestone.url_foto_1()
+
+                if milestone.url_foto_2() != None:
+                    self.fields['foto_2'].widget.attrs['data-default-file'] = milestone.url_foto_2()
+
+                if milestone.url_foto_3() != None:
+                    self.fields['foto_3'].widget.attrs['data-default-file'] = milestone.url_foto_3()
+
+                if milestone.url_foto_4() != None:
+                    self.fields['foto_4'].widget.attrs['data-default-file'] = milestone.url_foto_4()
+
+            self.fields['file'].widget = forms.FileInput()
+
+            self.helper = FormHelper(self)
+            self.helper.layout = Layout(
+                Row(
+                    Fieldset(
+                        'Información del acta:'
+                    )
+                ),
+                Row(
+                    Column(
+                        'transversal',
+                        css_class='s12'
+                    ),
+                ),
+                Row(
+                    Fieldset(
+                        'Formato del acta'
+                    )
+                ),
+                Row(
+                    Column(
+                        HTML(
+                            """
+                            <p style="font-size:1.2rem;"><b>Formato del acta</b></p>
+                            <p style="display:inline;"><b>Actualmente:</b>{{ file_url | safe }}</p>
+
+                            """
+                        ),
+                        'file',
+                        css_class='s12'
+                    )
+                ),
+                Row(
+                    Fieldset(
+                        'Registro fotográfico'
+                    )
+                ),
+                Row(
+                    Column(
+                        'foto_1',
+                        css_class='s12 m6 l3'
+                    ),
+                    Column(
+                        'foto_2',
+                        css_class='s12 m6 l3'
+                    ),
+                    Column(
+                        'foto_3',
+                        css_class='s12 m6 l3'
+                    ),
+                    Column(
+                        'foto_4',
+                        css_class='s12 m6 l3'
+                    )
+                ),
+                Row(
+                    Fieldset(
+                        'Observación'
+                    ),
+                    Column(
+                        'observation',
+                        css_class='s12'
+                    ),
+                ),
+                Row(
+                    Column(
+                        Div(
+                            Submit(
+                                'submit',
+                                'Guardar',
+                                css_class='button-submit'
+                            ),
+                            css_class="right-align"
+                        ),
+                        css_class="s12"
+                    ),
+                )
+            )
 
 class ContactForm(forms.ModelForm):
 
@@ -1293,6 +1404,7 @@ class ResguardMiltonesForm(forms.Form):
                 ),
             )
         )
+
 
 #----------------------------------------------------------------------------------
 

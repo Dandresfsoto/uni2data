@@ -37,6 +37,15 @@ urlpatterns = [
     path('certificate/<uuid:pk>/unit/view/<uuid:pk_milestone>/', views.CertificateUnitMiltonesView.as_view()),
     path('certificate/<uuid:pk>/unit/delete/<uuid:pk_milestone>/', views.CertificateUnitMiltonesDeleteView.as_view()),
 
+    path('certificate/<uuid:pk>/resguard/', views.CertificateMunicipiOptionsView.as_view()),
+    path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/', views.CertificateResguardOptionsView.as_view()),
+    path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/', views.CertificateRComunityListView.as_view()),
+    path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/create/', views.CertificateComunityCreateView.as_view()),
+    path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/edit/<uuid:pk_milestone>/', views.CertificateComunityUpdateView.as_view()),
+    path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/view/<uuid:pk_milestone>/', views.CertificateComunityView.as_view()),
+    path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/delete/<uuid:pk_milestone>/', views.CertificateComunityDeleteView.as_view()),
+
+
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/', views.ContactslistView.as_view()),
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/create/', views.ContactsCreateView.as_view()),
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/edit/<uuid:pk_contact>/', views.ContactsUpdateView.as_view()),

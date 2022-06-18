@@ -331,6 +331,7 @@ class Milestones(models.Model):
     foto_2 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
     foto_3 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
     foto_4 = models.FileField(upload_to=upload_dinamic_miltone, blank=True, null=True, max_length=255)
+    type_transversar = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.id)
