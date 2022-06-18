@@ -13,11 +13,14 @@ urlpatterns = [
 
     path('certificate/<uuid:pk>/', rest_views.MeetingsListApi.as_view()),
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/', rest_views.MilestonesListApi.as_view()),
+    path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/traceability/<uuid:pk_milestone>/',rest_views.MilestonesTraceabilityApi.as_view()),
 
     path('certificate/<uuid:pk>/unit/', rest_views.MilestonesUnitListApi.as_view()),
+    path('certificate/<uuid:pk>/unit/traceability/<uuid:pk_milestone>/',rest_views.MilestonesUniTraceabilityApi.as_view()),
 
     path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/', rest_views.CertificateMunicipialityListApi.as_view()),
     path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/', rest_views.CertificateCertificate.as_view()),
+    path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/traceability/<uuid:pk_milestone>/', rest_views.CertificateMunicipialityMilestonesUniTraceabilityApi.as_view()),
 
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/', rest_views.ContactsListApi.as_view()),
 
@@ -66,4 +69,5 @@ urlpatterns = [
 
     path('grupal/<uuid:pk>/', rest_views.GrupalListApi.as_view()),
     path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/', rest_views.GrupaResguardlListApi.as_view()),
+    path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/traceability/<uuid:pk_milestone>/', rest_views.GrupaResguardTraceabilityApi.as_view()),
 ]
