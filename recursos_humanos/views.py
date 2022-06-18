@@ -2575,7 +2575,7 @@ class CollectAccountApprobView(View):
 class CollectAccountRejectView(FormView):
 
     login_url = settings.LOGIN_URL
-    template_name = 'recursos_humanos/cuts/collects/reject.html'
+    template_name = 'iraca/individual/territorios/comunity/ruta/hogares/momento/reject.html'
     form_class = forms.CollectsAccountRejectForm
     success_url = "../../"
 

@@ -569,6 +569,13 @@ class InstrumentTraceabilityRouteObject(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='traceability_instrument_user_iraca_2021')
     observation = models.TextField()
 
+class MiltonesTraceabilityObject(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
+    miltone = models.ForeignKey(Milestones,on_delete=models.DO_NOTHING,related_name="traceability_milestone_iraca_2022")
+    creacion = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='traceability_milestone_user_iraca_2022')
+    observation = models.TextField()
+
 #----------------------------------------------------------------------------------
 
 #---------------------------- MODELS OBJECTS  -------------------------------------
