@@ -66,4 +66,5 @@ urlpatterns = [
 
     path('grupal/<uuid:pk>/', rest_views.GrupalListApi.as_view()),
     path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/', rest_views.GrupaResguardlListApi.as_view()),
+    path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/traceability/<uuid:pk_milestone>/', rest_views.GrupaResguardTraceabilityApi.as_view()),
 ]

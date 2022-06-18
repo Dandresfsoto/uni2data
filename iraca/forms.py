@@ -1405,6 +1405,81 @@ class ResguardMiltonesForm(forms.Form):
             )
         )
 
+class IndividualRejectForm(forms.Form):
+
+    observation = forms.CharField(widget=forms.Textarea(attrs={'class':'materialize-textarea'}))
+
+
+
+    def __init__(self, *args, **kwargs):
+        super(IndividualRejectForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Observación de rechazo',
+                )
+            ),
+            Row(
+                Column(
+                    'observation',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
+
+class GrupalRejectForm(forms.Form):
+
+    observation = forms.CharField(widget=forms.Textarea(attrs={'class':'materialize-textarea'}))
+
+
+
+    def __init__(self, *args, **kwargs):
+        super(GrupalRejectForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+
+            Row(
+                Fieldset(
+                    'Observación de rechazo',
+                )
+            ),
+            Row(
+                Column(
+                    'observation',
+                    css_class='s12'
+                )
+            ),
+            Row(
+                Column(
+                    Div(
+                        Submit(
+                            'submit',
+                            'Guardar',
+                            css_class='button-submit'
+                        ),
+                        css_class="right-align"
+                    ),
+                    css_class="s12"
+                ),
+            )
+        )
 
 #----------------------------------------------------------------------------------
 

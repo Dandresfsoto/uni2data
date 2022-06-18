@@ -15,6 +15,7 @@ admin.site.register(models.Actas)
 admin.site.register(models.Meetings)
 admin.site.register(models.Milestones)
 admin.site.register(models.Actas_Individual)
+admin.site.register(models.InstrumentTraceabilityRouteObject)
 
 
 def cargar_hogares(modeladmin, request, queryset):

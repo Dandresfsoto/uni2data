@@ -161,6 +161,8 @@ urlpatterns = [
     path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/traceability/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentTraceabilityView.as_view()),
     path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/edit/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentObjectView.as_view()),
     path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/delete/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentObjectDeleteView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/aprobe/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentObjectAprobeView.as_view()),
+    path('individual/territorio/<uuid:pk_territorio>/resguardo/<uuid:pk_resguardo>/activities/<uuid:pk_ruta>/hogar/<uuid:pk_hogar>/momento/<uuid:pk_momento>/reject/<uuid:pk_instrument_object>/',views.RutaHogaresActivitysMomentoInstrumentObjectRejectView.as_view()),
 
     path('grupal/', views.GrupalOptionsView.as_view()),
     path('grupal/<uuid:pk>/', views.GrupalListView.as_view()),
@@ -169,6 +171,9 @@ urlpatterns = [
     path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/edit/<uuid:pk_milestone>/', views.GrupalResguardUpdateView.as_view()),
     path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/view/<uuid:pk_milestone>/', views.GrupalResguardView.as_view()),
     path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/delete/<uuid:pk_milestone>/', views.GrupalResguardDeleteView.as_view()),
+    path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/aprobe/<uuid:pk_milestone>/', views.GrupalResguardAprobeView.as_view()),
+    path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/reject/<uuid:pk_milestone>/', views.GrupalResguardrejectView.as_view()),
+    path('grupal/<uuid:pk>/resguard/<uuid:pk_resguard>/traceability/<uuid:pk_milestone>/', views.GrupalResguardTraceabilityView.as_view()),
 
 
 ]

@@ -1339,6 +1339,58 @@ class CertificateComunityDeleteView(LoginRequiredMixin,
 
         return HttpResponseRedirect('../../')
 
+class CertificateComunityAprobeView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.object = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.recursos_humanos.ver",
+                "usuarios.recursos_humanos.cortes.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.collect_account.estate = 'Aprobado'
+                    self.collect_account.save()
+
+                    collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+                    models.Registration.objects.create(
+                        cut=collect_account.cut,
+                        user=self.request.user,
+                        collect_account=collect_account,
+                        delta="Aprobo la seguridad social"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.collect_account.estate = 'Aprobado'
+                        self.collect_account.save()
+
+                        collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+
+                        models.Registration.objects.create(
+                            cut=collect_account.cut,
+                            user=self.request.user,
+                            collect_account=collect_account,
+                            delta="Aprobo la seguridad social"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
 #----------------------------------------------------------------------------------
 
 #------------------------------- CONTACTS -----------------------------------------
@@ -5541,6 +5593,116 @@ class RutaHogaresActivitysMomentoInstrumentObjectDeleteView(View):
             else:
                 return HttpResponseRedirect('../../')
 
+class RutaHogaresActivitysMomentoInstrumentObjectAprobeView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+                "usuarios.iraca.individual.aprobar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.object.estate = 'Aprobado'
+                    self.object.save()
+
+                    object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+
+                    models.InstrumentTraceabilityRouteObject.objects.create(
+                        instrument=object,
+                        user=self.request.user,
+                        observation="Aprobado"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.object.estate = 'Aprobado'
+                        self.object.save()
+
+                        object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+
+                        models.InstrumentTraceabilityRouteObject.objects.create(
+                            instrument=object,
+                            user=self.request.user,
+                            observation="Aprobado"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class RutaHogaresActivitysMomentoInstrumentObjectRejectView(FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/individual/territorios/comunity/ruta/hogares/momento/reject.html'
+    form_class = forms.IndividualRejectForm
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+                "usuarios.iraca.individual.aprobar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+
+        instrument_object = models.ObjectRouteInstrument.objects.get(id=self.kwargs['pk_instrument_object'])
+
+        if instrument_object.estate != 'Rechazado':
+            instrument_object.estate = 'Rechazado'
+            instrument_object.observation = form.cleaned_data['observation']
+            instrument_object.save()
+
+        models.InstrumentTraceabilityRouteObject.objects.create(
+            instrument=instrument_object,
+            user=self.request.user,
+            observation="Rechazado por " + instrument_object.observation
+        )
+
+        return super(RutaHogaresActivitysMomentoInstrumentObjectRejectView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ruta = models.Routes.objects.get(id=self.kwargs['pk_ruta'])
+        momento = models.Moments.objects.get(id=self.kwargs['pk_momento'])
+        hogar = models.Households.objects.get(id=self.kwargs['pk_hogar'])
+        kwargs['title'] = "RECHAZAR"
+        kwargs['breadcrum_1'] = ruta.comunity.name
+        kwargs['breadcrum_3'] = momento.name
+        kwargs['breadcrum_2'] = hogar.document
+        kwargs['url'] = 'Formulacion'
+        return super(RutaHogaresActivitysMomentoInstrumentObjectRejectView, self).get_context_data(**kwargs)
 
 #----------------------------------------------------------------------------
 
@@ -5678,6 +5840,12 @@ class GrupalResguardCreateView(LoginRequiredMixin,
             foto_4 = foto_4,
         )
 
+        models.MiltonesTraceabilityObject.objects.create(
+            miltone = miltone,
+            user = self.request.user,
+            observation = "Acta creada"
+        )
+
 
         return HttpResponseRedirect(self.get_success_url())
 
@@ -5745,6 +5913,12 @@ class GrupalResguardUpdateView(LoginRequiredMixin,
 
         milestone.save()
 
+        models.MiltonesTraceabilityObject.objects.create(
+            miltone=milestone,
+            user=self.request.user,
+            observation="Acta creada"
+        )
+
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -5806,3 +5980,152 @@ class GrupalResguardDeleteView(LoginRequiredMixin,
 
         return HttpResponseRedirect('../../')
 
+class GrupalResguardAprobeView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.grupal.ver",
+                "usuarios.iraca.grupal.aprobar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.miltone.estate = 'Aprobado'
+                    self.miltone.save()
+
+                    miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+                    models.MiltonesTraceabilityObject.objects.create(
+                        miltone=miltone,
+                        user=self.request.user,
+                        observation="Aprobado"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.miltone.estate = 'Aprobado'
+                        self.miltone.save()
+
+                        miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+                        models.MiltonesTraceabilityObject.objects.create(
+                            miltone=miltone,
+                            user=self.request.user,
+                            observation="Aprobado"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class GrupalResguardrejectView(FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/grupal/resguardo/milestones/reject.html'
+    form_class = forms.GrupalRejectForm
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.grupal.ver",
+                "usuarios.iraca.grupal.aprobar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        if milestone.estate != 'Rechazado':
+            milestone.estate = 'Rechazado'
+            milestone.save()
+
+        miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        models.MiltonesTraceabilityObject.objects.create(
+            miltone=miltone,
+            user=self.request.user,
+            observation="Rechazado por" + milestone.observation
+        )
+
+        return super(GrupalResguardrejectView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "RECHAZAR"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['breadcrum_2'] = resguardo.name
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        return super(GrupalResguardrejectView, self).get_context_data(**kwargs)
+
+class GrupalResguardTraceabilityView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+    template_name = 'iraca/grupal/resguardo/milestones/traceability.html'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.grupal = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.individual.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "TRAZABILIDAD"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['breadcrum_2'] = resguardo.name
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/grupal/{0}/resguard/{1}/traceability/{2}/'.format(
+            certificate.id,
+            resguardo.id,
+            milestone.id,
+        )
+        return super(GrupalResguardTraceabilityView,self).get_context_data(**kwargs)
