@@ -415,7 +415,7 @@ class MilestonesUnitListApi(BaseDatatableView):
         if certificate.code == 4:
             transversal = self.model.objects.filter(transversal__type="cnt")
         elif certificate.code == 5:
-            transversal = self.model.objects.filter(transversal__type="css")
+            transversal = self.model.objects.filter(transversal__type="ctr")
         return transversal
 
     def filter_queryset(self, qs):

@@ -352,7 +352,7 @@ class MiltonesUnitForm(forms.Form):
                                                                                                     flat=True)
 
             self.fields['transversal'] = forms.ModelChoiceField(
-                queryset=models.Actas_Individual.objects.filter(type="css").exclude(id__in=transversal))
+                queryset=models.Actas_Individual.objects.filter(type="ctr").exclude(id__in=transversal))
 
             if 'pk_milestone' in kwargs['initial'].keys():
                 milestone = models.Milestones.objects.get(id=kwargs['initial']['pk_milestone'])
@@ -361,7 +361,7 @@ class MiltonesUnitForm(forms.Form):
                                                                                                         flat=True)
 
                 self.fields['transversal'] = forms.ModelChoiceField(
-                    queryset=models.Actas_Individual.objects.filter(type="css").exclude(id=milestone.id, id__in=transversal))
+                    queryset=models.Actas_Individual.objects.filter(type="ctr").exclude(id=milestone.id, id__in=transversal))
 
                 self.fields['transversal'].initial = milestone.transversal
                 self.fields['observation'].initial = milestone.observation
