@@ -560,7 +560,7 @@ class CerticateOptionsView(TemplateView):
     def get_items(self):
         items = []
 
-        for certificate in Certificates.objects.all().filter(code__in =[1,4]).order_by('name'):
+        for certificate in Certificates.objects.all().filter(code__in =[1,4,5]).order_by('name'):
             if self.request.user.has_perm('usuarios.certificate.ver'):
                 if certificate.code == 1:
                     items.append({
@@ -571,7 +571,7 @@ class CerticateOptionsView(TemplateView):
                         'sican_name': '{0}'.format(certificate.name),
                         'sican_description': 'Actas de {0}.'.format(certificate.name).lower()
                     })
-                elif certificate.code == 4:
+                elif certificate.code == 4 or certificate.code == 5:
                     items.append({
                         'sican_categoria': '{0}'.format(certificate.name),
                         'sican_color': certificate.color,

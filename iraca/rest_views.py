@@ -410,7 +410,12 @@ class MilestonesUnitListApi(BaseDatatableView):
 
 
     def get_initial_queryset(self):
-        transversal = self.model.objects.filter(transversal__type="cnt")
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+
+        if certificate.code == 4:
+            transversal = self.model.objects.filter(transversal__type="cnt")
+        elif certificate.code == 5:
+            transversal = self.model.objects.filter(transversal__type="css")
         return transversal
 
     def filter_queryset(self, qs):
