@@ -30,12 +30,19 @@ urlpatterns = [
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/edit/<uuid:pk_milestone>/', views.MilestonesUpdateView.as_view()),
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/view/<uuid:pk_milestone>/', views.MilestonesView.as_view()),
     path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/delete/<uuid:pk_milestone>/', views.MilestonesDeleteView.as_view()),
+    path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/aprobe/<uuid:pk_milestone>/', views.MilestonesAprobeView.as_view()),
+    path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/reject/<uuid:pk_milestone>/', views.MilestonesRejectView.as_view()),
+    path('certificate/<uuid:pk>/milestones/<uuid:pk_meeting>/traceability/<uuid:pk_milestone>/', views.MilestonesTraceabilityView.as_view()),
+
 
     path('certificate/<uuid:pk>/unit/', views.CertificateUnitMiltoneslistView.as_view()),
     path('certificate/<uuid:pk>/unit/create/', views.CertificateUnitMiltonesCreateView.as_view()),
     path('certificate/<uuid:pk>/unit/edit/<uuid:pk_milestone>/', views.CertificateUnitMiltonesUpdateView.as_view()),
     path('certificate/<uuid:pk>/unit/view/<uuid:pk_milestone>/', views.CertificateUnitMiltonesView.as_view()),
     path('certificate/<uuid:pk>/unit/delete/<uuid:pk_milestone>/', views.CertificateUnitMiltonesDeleteView.as_view()),
+    path('certificate/<uuid:pk>/unit/aprobe/<uuid:pk_milestone>/',views.CertificateUnitMiltonesAprobeView.as_view()),
+    path('certificate/<uuid:pk>/unit/reject/<uuid:pk_milestone>/',views.CertificateUnitMiltonesRejectView.as_view()),
+    path('certificate/<uuid:pk>/unit/traceability/<uuid:pk_milestone>/',views.CertificateUnitMiltonesTraceabilityView.as_view()),
 
     path('certificate/<uuid:pk>/resguard/', views.CertificateMunicipiOptionsView.as_view()),
     path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/', views.CertificateResguardOptionsView.as_view()),
@@ -44,6 +51,10 @@ urlpatterns = [
     path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/edit/<uuid:pk_milestone>/', views.CertificateComunityUpdateView.as_view()),
     path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/view/<uuid:pk_milestone>/', views.CertificateComunityView.as_view()),
     path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/delete/<uuid:pk_milestone>/', views.CertificateComunityDeleteView.as_view()),
+    path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/aprobe/<uuid:pk_milestone>/', views.CertificateComunityAprobeView.as_view()),
+    path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/reject/<uuid:pk_milestone>/', views.CertificateComunityRejectView.as_view()),
+    path('certificate/<uuid:pk>/resguard/<uuid:pk_municipity>/comunity/<uuid:pk_resguard>/traceability/<uuid:pk_milestone>/', views.CertificateComunityTraceabilityView.as_view()),
+
 
 
     path('certificate/<uuid:pk>/contacts/<uuid:pk_meeting>/', views.ContactslistView.as_view()),

@@ -309,8 +309,8 @@ class MeetingsListApi(BaseDatatableView):
 
 class MilestonesListApi(BaseDatatableView):
     model = Milestones
-    columns = ['id','meeting','type','file','observation','date']
-    order_columns = ['id','meeting','type','file','observation','date']
+    columns = ['id','meeting','type','file','observation','date','estate','resguard']
+    order_columns = ['id','meeting','type','file','observation','date','estate','resguard']
 
 
     def get_initial_queryset(self):
@@ -322,7 +322,6 @@ class MilestonesListApi(BaseDatatableView):
             q = Q(type__icontains=search)
             qs = qs.filter(q)
         return qs
-
 
     def render_column(self, row, column):
 
@@ -400,13 +399,82 @@ class MilestonesListApi(BaseDatatableView):
 
             return ret
 
+        elif column == 'estate':
+            if self.request.user.has_perm('usuarios.iraca.transversal.estado'):
+                ret = ''
+                if row.estate == 'Esperando aprobación':
+                    ret += '<a style="color:green;" href="aprobe/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+                    ret += '<a style="color:red;margin-left:10px;" href="reject/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+
+                if row.estate == 'Rechazado':
+                    ret += '<a style="color:green;" href="aprobe/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+                if row.estate == 'Aprobado':
+                    ret += '<a style="color:red;margin-left:10px;" href="reject/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+                return '<div class="center-align">' + ret + '</div>'
+            else:
+                return row.estate
+
+        elif column == 'resguard':
+            ret = '<div class="center-align">' \
+                  '<a href="traceability/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                  '<i class="material-icons">class</i>' \
+                  '</a>' \
+                  '</div>'.format(row.id, 'Ver la trazabilidad')
+            return ret
+
         else:
             return super(MilestonesListApi, self).render_column(row, column)
 
+class MilestonesTraceabilityApi(BaseDatatableView):
+    model = models.MiltonesTraceabilityObject
+    columns = ['creacion','user','observation']
+    order_columns = ['creacion','user','observation']
+
+    def get_initial_queryset(self):
+        self.milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver"
+            ]
+        }
+
+
+        return self.model.objects.filter(miltone=self.milestone)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(observacion__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'creacion':
+            return timezone.localtime(row.creacion).strftime('%d de %B del %Y a las %I:%M:%S %p')
+
+        elif column == 'user':
+            return row.user.get_full_name()
+
+        else:
+            return super(MilestonesTraceabilityApi, self).render_column(row, column)
+
 class MilestonesUnitListApi(BaseDatatableView):
     model = Milestones
-    columns = ['id','meeting','transversal','file','observation','date']
-    order_columns = ['id','meeting','transversal','file','observation','date']
+    columns = ['id','meeting','transversal','file','observation','date','estate','resguard']
+    order_columns = ['id','meeting','transversal','file','observation','date','estate','resguard']
 
 
     def get_initial_queryset(self):
@@ -481,7 +549,6 @@ class MilestonesUnitListApi(BaseDatatableView):
             else:
                 return ''
 
-
         elif column == 'transversal':
             return row.transversal.name
 
@@ -501,8 +568,77 @@ class MilestonesUnitListApi(BaseDatatableView):
 
             return ret
 
+        elif column == 'estate':
+            if self.request.user.has_perm('usuarios.iraca.transversal.estado'):
+                ret = ''
+                if row.estate == 'Esperando aprobación':
+                    ret += '<a style="color:green;" href="aprobe/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+                    ret += '<a style="color:red;margin-left:10px;" href="reject/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+
+                if row.estate == 'Rechazado':
+                    ret += '<a style="color:green;" href="aprobe/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+                if row.estate == 'Aprobado':
+                    ret += '<a style="color:red;margin-left:10px;" href="reject/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+                return '<div class="center-align">' + ret + '</div>'
+            else:
+                return row.estate
+
+        elif column == 'resguard':
+            ret = '<div class="center-align">' \
+                  '<a href="traceability/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                  '<i class="material-icons">class</i>' \
+                  '</a>' \
+                  '</div>'.format(row.id, 'Ver la trazabilidad')
+            return ret
+
         else:
             return super(MilestonesUnitListApi, self).render_column(row, column)
+
+class MilestonesUniTraceabilityApi(BaseDatatableView):
+    model = models.MiltonesTraceabilityObject
+    columns = ['creacion','user','observation']
+    order_columns = ['creacion','user','observation']
+
+    def get_initial_queryset(self):
+        self.milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver"
+            ]
+        }
+
+
+        return self.model.objects.filter(miltone=self.milestone)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(observacion__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'creacion':
+            return timezone.localtime(row.creacion).strftime('%d de %B del %Y a las %I:%M:%S %p')
+
+        elif column == 'user':
+            return row.user.get_full_name()
+
+        else:
+            return super(MilestonesUniTraceabilityApi, self).render_column(row, column)
 
 class CertificateMunicipialityListApi(BaseDatatableView):
     model = Resguards
@@ -552,8 +688,8 @@ class CertificateMunicipialityListApi(BaseDatatableView):
 
 class CertificateCertificate(BaseDatatableView):
     model = Milestones
-    columns = ['id','grupal','acta','file','observation','date']
-    order_columns = ['id','grupal','acta','file','observation','date']
+    columns = ['id','grupal','acta','file','observation','estate','meeting','date']
+    order_columns = ['id','grupal','acta','file','observation','estate','meeting','date']
 
     def get_initial_queryset(self):
         return self.model.objects.filter(resguard__id = self.kwargs['pk_resguard'], type_transversar=True)
@@ -638,11 +774,78 @@ class CertificateCertificate(BaseDatatableView):
                        '</div>'.format(row.id)
 
             return ret
+        elif column == 'estate':
+            if self.request.user.has_perm('usuarios.iraca.grupal.estado'):
+                ret = ''
+                if row.estate == 'Esperando aprobación':
+                    ret += '<a style="color:green;" href="aprobe/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Aprobar', 'check_box')
 
+                    ret += '<a style="color:red;margin-left:10px;" href="reject/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+
+                if row.estate == 'Rechazado':
+                    ret += '<a style="color:green;" href="aprobe/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Aprobar', 'check_box')
+
+                if row.estate == 'Aprobado':
+                    ret += '<a style="color:red;margin-left:10px;" href="reject/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                           '<i class="material-icons">{2}</i>' \
+                           '</a>'.format(row.id, 'Rechazar', 'highlight_off')
+                return '<div class="center-align">' + ret + '</div>'
+            else:
+                return row.estate
+
+        elif column == 'meeting':
+            ret = '<div class="center-align">' \
+                  '<a href="traceability/{0}" class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="{1}">' \
+                  '<i class="material-icons">class</i>' \
+                  '</a>' \
+                  '</div>'.format(row.id, 'Ver la trazabilidad')
+            return ret
 
 
         else:
             return super(CertificateCertificate, self).render_column(row, column)
+
+class CertificateMunicipialityMilestonesUniTraceabilityApi(BaseDatatableView):
+    model = models.MiltonesTraceabilityObject
+    columns = ['creacion','user','observation']
+    order_columns = ['creacion','user','observation']
+
+    def get_initial_queryset(self):
+        self.milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        self.permissions = {
+            "ver": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver"
+            ]
+        }
+
+
+        return self.model.objects.filter(miltone=self.milestone)
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get(u'search[value]', None)
+        if search:
+            q = Q(observacion__icontains=search)
+            qs = qs.filter(q)
+        return qs
+
+    def render_column(self, row, column):
+
+        if column == 'creacion':
+            return timezone.localtime(row.creacion).strftime('%d de %B del %Y a las %I:%M:%S %p')
+
+        elif column == 'user':
+            return row.user.get_full_name()
+
+        else:
+            return super(CertificateMunicipialityMilestonesUniTraceabilityApi, self).render_column(row, column)
 
 class ContactsListApi(BaseDatatableView):
     model = models.Contacts
@@ -2974,13 +3177,6 @@ class GrupaResguardlListApi(BaseDatatableView):
     order_columns = ['id','grupal','acta','file','observation','date','estate','meeting']
 
     def get_initial_queryset(self):
-        self.permissions = {
-            "estado": [
-                "usuarios.iraca.ver",
-                "usuarios.iraca.individual.ver",
-                "usuarios.iraca.individual.estado"
-            ]
-        }
         return self.model.objects.filter(resguard__id = self.kwargs['pk_resguard'], type_transversar=False)
 
     def filter_queryset(self, qs):
@@ -3065,7 +3261,7 @@ class GrupaResguardlListApi(BaseDatatableView):
             return ret
 
         elif column == 'estate':
-            if self.request.user.has_perms(self.permissions.get('estado')):
+            if self.request.user.has_perm('usuarios.iraca.grupal.estado'):
                 ret = ''
                 if row.estate == 'Esperando aprobación':
                     ret += '<a style="color:green;" href="aprobe/{0}" class="tooltipped" data-position="top" data-delay="50" data-tooltip="{1}">' \

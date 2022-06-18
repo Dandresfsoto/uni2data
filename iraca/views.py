@@ -757,6 +757,12 @@ class MiltonescreateView(LoginRequiredMixin,
             foto_4 = foto_4,
         )
 
+        models.MiltonesTraceabilityObject.objects.create(
+            miltone=miltone,
+            user=self.request.user,
+            observation="Acta creada"
+        )
+
 
         return HttpResponseRedirect(self.get_success_url())
 
@@ -825,6 +831,12 @@ class MilestonesUpdateView(LoginRequiredMixin,
 
         milestone.save()
 
+        models.MiltonesTraceabilityObject.objects.create(
+            miltone=milestone,
+            user=self.request.user,
+            observation="Acta editada"
+        )
+
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
@@ -889,7 +901,155 @@ class MilestonesDeleteView(LoginRequiredMixin,
 
         return HttpResponseRedirect('../../')
 
+class MilestonesAprobeView(View):
 
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver",
+                "usuarios.iraca.transversal.aprobar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.miltone.estate = 'Aprobado'
+                    self.miltone.save()
+
+                    miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+                    models.MiltonesTraceabilityObject.objects.create(
+                        miltone=miltone,
+                        user=self.request.user,
+                        observation="Aprobado"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.miltone.estate = 'Aprobado'
+                        self.miltone.save()
+
+                        miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+                        models.MiltonesTraceabilityObject.objects.create(
+                            miltone=miltone,
+                            user=self.request.user,
+                            observation="Aprobado"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class MilestonesRejectView(FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/miltones/reject.html'
+    form_class = forms.TransversalRejectForm
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver",
+                "usuarios.iraca.transversal.aprobar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        if milestone.estate != 'Rechazado':
+            milestone.estate = 'Rechazado'
+            milestone.save()
+
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        models.MiltonesTraceabilityObject.objects.create(
+            miltone=milestone,
+            user=self.request.user,
+            observation="Rechazado por " + form.cleaned_data['observation']
+        )
+
+        return super(MilestonesRejectView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        meeting = models.Meetings.objects.get(id=self.kwargs['pk_meeting'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "RECHAZAR"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['breadcrum_2'] = meeting.municipality.nombre
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        return super(MilestonesRejectView, self).get_context_data(**kwargs)
+
+class MilestonesTraceabilityView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+    template_name = 'iraca/certificate/miltones/traceability.html'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.grupal = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        meeting = models.Meetings.objects.get(id=self.kwargs['pk_meeting'])
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "TRAZABILIDAD"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['breadcrum_2'] = meeting.municipality.nombre
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/milestones/{1}/traceability/{2}/'.format(
+            certificate.id,
+            meeting.id,
+            milestone.id,
+        )
+        return super(MilestonesTraceabilityView,self).get_context_data(**kwargs)
 
 class CertificateUnitMiltoneslistView(LoginRequiredMixin,
                       MultiplePermissionsRequiredMixin,
@@ -1066,6 +1226,151 @@ class CertificateUnitMiltonesDeleteView(LoginRequiredMixin,
         milestone.delete()
 
         return HttpResponseRedirect('../../')
+
+class CertificateUnitMiltonesAprobeView(View):
+
+    login_url = settings.LOGIN_URL
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver",
+                "usuarios.iraca.transversal.aprobar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    self.miltone.estate = 'Aprobado'
+                    self.miltone.save()
+
+                    miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+                    models.MiltonesTraceabilityObject.objects.create(
+                        miltone=miltone,
+                        user=self.request.user,
+                        observation="Aprobado"
+                    )
+                    return HttpResponseRedirect('../../')
+                else:
+                    if request.user.has_perms(self.permissions.get('all')):
+                        self.miltone.estate = 'Aprobado'
+                        self.miltone.save()
+
+                        miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+                        models.MiltonesTraceabilityObject.objects.create(
+                            miltone=miltone,
+                            user=self.request.user,
+                            observation="Aprobado"
+                        )
+                        return HttpResponseRedirect('../../')
+                    else:
+                        return HttpResponseRedirect('../../')
+            else:
+                return HttpResponseRedirect('../../')
+
+class CertificateUnitMiltonesRejectView(FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/unit/reject.html'
+    form_class = forms.TransversalRejectForm
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver",
+                "usuarios.iraca.transversal.aprobar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        if milestone.estate != 'Rechazado':
+            milestone.estate = 'Rechazado'
+            milestone.save()
+
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        models.MiltonesTraceabilityObject.objects.create(
+            miltone=milestone,
+            user=self.request.user,
+            observation="Rechazado por " + form.cleaned_data['observation']
+        )
+
+        return super(CertificateUnitMiltonesRejectView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "RECHAZAR"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        return super(CertificateUnitMiltonesRejectView, self).get_context_data(**kwargs)
+
+class CertificateUnitMiltonesTraceabilityView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+    template_name = 'iraca/certificate/unit/traceability.html'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.grupal = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "TRAZABILIDAD"
+        kwargs['breadcrum_1'] = certificate.name
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/unit/traceability/{1}/'.format(
+            certificate.id,
+            milestone.id,
+        )
+        return super(CertificateUnitMiltonesTraceabilityView,self).get_context_data(**kwargs)
 
 class CertificateMunicipiOptionsView(TemplateView):
     """
@@ -1345,13 +1650,14 @@ class CertificateComunityAprobeView(View):
 
     def dispatch(self, request, *args, **kwargs):
 
-        self.object = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+        self.miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
 
 
         self.permissions = {
             "all": [
-                "usuarios.recursos_humanos.ver",
-                "usuarios.recursos_humanos.cortes.ver",
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver",
+                "usuarios.iraca.transversal.aprobar",
             ]
         }
 
@@ -1360,36 +1666,137 @@ class CertificateComunityAprobeView(View):
         else:
             if request.user.has_perms(self.permissions.get('all')):
                 if request.user.is_superuser:
-                    self.collect_account.estate = 'Aprobado'
-                    self.collect_account.save()
+                    self.miltone.estate = 'Aprobado'
+                    self.miltone.save()
 
-                    collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+                    miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
 
-                    models.Registration.objects.create(
-                        cut=collect_account.cut,
+                    models.MiltonesTraceabilityObject.objects.create(
+                        miltone=miltone,
                         user=self.request.user,
-                        collect_account=collect_account,
-                        delta="Aprobo la seguridad social"
+                        observation="Aprobado"
                     )
                     return HttpResponseRedirect('../../')
                 else:
                     if request.user.has_perms(self.permissions.get('all')):
-                        self.collect_account.estate = 'Aprobado'
-                        self.collect_account.save()
+                        self.miltone.estate = 'Aprobado'
+                        self.miltone.save()
 
-                        collect_account = models.Collects_Account.objects.get(id=self.kwargs['pk_collect_account'])
+                        miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
 
-                        models.Registration.objects.create(
-                            cut=collect_account.cut,
+                        models.MiltonesTraceabilityObject.objects.create(
+                            miltone=miltone,
                             user=self.request.user,
-                            collect_account=collect_account,
-                            delta="Aprobo la seguridad social"
+                            observation="Aprobado"
                         )
                         return HttpResponseRedirect('../../')
                     else:
                         return HttpResponseRedirect('../../')
             else:
                 return HttpResponseRedirect('../../')
+
+class CertificateComunityRejectView(FormView):
+
+    login_url = settings.LOGIN_URL
+    template_name = 'iraca/certificate/municipy/comunity/milestones/reject.html'
+    form_class = forms.TransversalRejectForm
+    success_url = "../../"
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        self.permissions = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver",
+                "usuarios.iraca.transversal.aprobar",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.user.has_perms(self.permissions.get('all')):
+                if request.user.is_superuser:
+                    if request.method.lower() in self.http_method_names:
+                        handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+                    else:
+                        handler = self.http_method_not_allowed
+                    return handler(request, *args, **kwargs)
+            else:
+                return HttpResponseRedirect('../../')
+
+    def form_valid(self, form):
+
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        if milestone.estate != 'Rechazado':
+            milestone.estate = 'Rechazado'
+            milestone.save()
+
+        miltone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+
+        models.MiltonesTraceabilityObject.objects.create(
+            miltone=miltone,
+            user=self.request.user,
+            observation="Rechazado por " + form.cleaned_data['observation']
+        )
+
+        return super(CertificateComunityRejectView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        certificate = models.Certificates.objects.get(id=self.kwargs['pk'])
+        municipio = Certificates.objects.get(id=self.kwargs['pk_municipity'])
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        kwargs['title'] = "VER ACTAS"
+        kwargs['breadcrum_3'] = certificate.name
+        kwargs['breadcrum_2'] = municipio.municipio.nombre
+        kwargs['breadcrum_1'] = resguardo.name
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        return super(CertificateComunityRejectView, self).get_context_data(**kwargs)
+
+class CertificateComunityTraceabilityView(TemplateView):
+
+    login_url = settings.LOGIN_URL
+    success_url = '../../'
+    template_name = 'iraca/certificate/municipy/comunity/milestones/traceability.html'
+
+    def dispatch(self, request, *args, **kwargs):
+
+        self.grupal = {
+            "all": [
+                "usuarios.iraca.ver",
+                "usuarios.iraca.transversal.ver",
+            ]
+        }
+
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(self.login_url)
+        else:
+            if request.method.lower() in self.http_method_names:
+                handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+            else:
+                handler = self.http_method_not_allowed
+            return handler(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        certificate = Certificates.objects.get(id=self.kwargs['pk'])
+        municipio = Certificates.objects.get(id=self.kwargs['pk_municipity'])
+        resguardo = models.Resguards.objects.get(id=self.kwargs['pk_resguard'])
+        milestone = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['title'] = "VER ACTAS"
+        kwargs['breadcrum_3'] = certificate.name
+        kwargs['breadcrum_2'] = municipio.municipio.nombre
+        kwargs['breadcrum_1'] = resguardo.name
+        kwargs['milestone'] = models.Milestones.objects.get(id=self.kwargs['pk_milestone'])
+        kwargs['url_datatable'] = '/rest/v1.0/iraca_new/certificate/{0}/resguard/{1}/comunity/{2}/traceability/{3}/'.format(
+            certificate.id,
+            municipio.id,
+            resguardo.id,
+            milestone.id,
+        )
+        return super(CertificateComunityTraceabilityView,self).get_context_data(**kwargs)
 
 #----------------------------------------------------------------------------------
 
@@ -5682,13 +6089,12 @@ class RutaHogaresActivitysMomentoInstrumentObjectRejectView(FormView):
 
         if instrument_object.estate != 'Rechazado':
             instrument_object.estate = 'Rechazado'
-            instrument_object.observation = form.cleaned_data['observation']
             instrument_object.save()
 
         models.InstrumentTraceabilityRouteObject.objects.create(
             instrument=instrument_object,
             user=self.request.user,
-            observation="Rechazado por " + instrument_object.observation
+            observation="Rechazado por " + form.cleaned_data['observation']
         )
 
         return super(RutaHogaresActivitysMomentoInstrumentObjectRejectView, self).form_valid(form)
@@ -5916,7 +6322,7 @@ class GrupalResguardUpdateView(LoginRequiredMixin,
         models.MiltonesTraceabilityObject.objects.create(
             miltone=milestone,
             user=self.request.user,
-            observation="Acta creada"
+            observation="Acta editada"
         )
 
         return HttpResponseRedirect(self.get_success_url())
@@ -6076,7 +6482,7 @@ class GrupalResguardrejectView(FormView):
         models.MiltonesTraceabilityObject.objects.create(
             miltone=miltone,
             user=self.request.user,
-            observation="Rechazado por" + milestone.observation
+            observation="Rechazado por " + form.cleaned_data['observation']
         )
 
         return super(GrupalResguardrejectView, self).form_valid(form)
@@ -6102,7 +6508,7 @@ class GrupalResguardTraceabilityView(TemplateView):
         self.grupal = {
             "all": [
                 "usuarios.iraca.ver",
-                "usuarios.iraca.individual.ver",
+                "usuarios.iraca.grupal.ver",
             ]
         }
 
