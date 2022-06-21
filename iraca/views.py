@@ -896,7 +896,8 @@ class MilestonesDeleteView(LoginRequiredMixin,
 
     def dispatch(self, request, *args, **kwargs):
         milestone = models.Milestones.objects.get(id = self.kwargs['pk_milestone'])
-
+        trazability = models.MiltonesTraceabilityObject.objects.filter(miltone=milestone)
+        trazability.delete()
         milestone.delete()
 
         return HttpResponseRedirect('../../')
@@ -1223,6 +1224,8 @@ class CertificateUnitMiltonesDeleteView(LoginRequiredMixin,
 
     def dispatch(self, request, *args, **kwargs):
         milestone = models.Milestones.objects.get(id = self.kwargs['pk_milestone'])
+        trazability = models.MiltonesTraceabilityObject.objects.filter(miltone=milestone)
+        trazability.delete()
         milestone.delete()
 
         return HttpResponseRedirect('../../')
@@ -1640,6 +1643,8 @@ class CertificateComunityDeleteView(LoginRequiredMixin,
 
     def dispatch(self, request, *args, **kwargs):
         milestone = models.Milestones.objects.get(id = self.kwargs['pk_milestone'])
+        trazability = models.MiltonesTraceabilityObject.objects.filter(miltone=milestone)
+        trazability.delete()
         milestone.delete()
 
         return HttpResponseRedirect('../../')
@@ -6382,6 +6387,8 @@ class GrupalResguardDeleteView(LoginRequiredMixin,
 
     def dispatch(self, request, *args, **kwargs):
         milestone = models.Milestones.objects.get(id = self.kwargs['pk_milestone'])
+        trazability = models.MiltonesTraceabilityObject.objects.filter(miltone=milestone)
+        trazability.delete()
         milestone.delete()
 
         return HttpResponseRedirect('../../')
