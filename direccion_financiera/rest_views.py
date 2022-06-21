@@ -2218,7 +2218,7 @@ class LiquidacionesListApi(BaseDatatableView):
 
             if estate == "Rechazado":
                 render += '<a class="tooltipped edit-table" data-position="top" data-delay="50" data-tooltip="Estado: {0}">' \
-                          '<i class="material-icons" style="font-size: 7{2rem;">block</i>' \
+                          '<i class="material-icons" style="font-size: 72rem;">block</i>' \
                           '</a>'.format(row.estado_informe)
 
             return '<div class="center-align">' + render + '</div>'
