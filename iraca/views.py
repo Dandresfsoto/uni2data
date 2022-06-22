@@ -1385,7 +1385,7 @@ class CertificateMunicipiOptionsView(TemplateView):
         items = []
 
         for certificate in Certificates.objects.all().filter(code=3).order_by('name'):
-            if self.request.user.has_perm('usuarios.iraca.transversal.ver'):
+            if self.request.user.has_perm('usuarios.iraca.actas.ver'):
                 items.append({
                     'sican_categoria': '{0}'.format(certificate.name),
                     'sican_color': certificate.color,
