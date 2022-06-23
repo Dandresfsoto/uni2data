@@ -36,7 +36,7 @@ block side_nav_container
                     div(class="divider divider-perfil")
 
                     li(class="bold waves-effect waves-light breadcrum-active")
-                        a(href="#") Crear liquidacion
+                        a(href="#") Crear liquidacions
                             i(class="material-icons icon-sican") check_circle
 
                     div(class="divider divider-perfil")
@@ -55,6 +55,15 @@ block body_script_auth
             $("label[for='id_mes']").addClass('active');
             $("label[for='id_año']").addClass('active');
             new AutoNumeric('#id_valor', {currencySymbol: '$ '});
+            new AutoNumeric('#id_valor_contrato', {currencySymbol: '$ '});
+
+            $('#id_visible_two').on('change', function () {
+                if (this.checked) {
+                    $("#valor_extra").show();
+                } else {
+                    $("#valor_extra").hide();
+                }
+            });
 
             $('#id_visible').on('change', function () {
                 if (this.checked) {
@@ -62,6 +71,8 @@ block body_script_auth
                 } else {
                     $("#valor_pagar").hide();
                 }
-            })
+            });
+
+
 
         });
