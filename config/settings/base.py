@@ -41,11 +41,11 @@ DEBUG = env.bool('DJANGO_DEBUG', True)
 
 # Celery settings
 
-# CELERY_BROKER_URL = env('CELERY_BROKER_URL')
-# CELERY_ACCEPT_CONTENT = ['json']
-# CELERY_RESULT_BACKEND = 'django-db'
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'America/Bogota'
+CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'America/Bogota'
 
 
 
@@ -58,16 +58,16 @@ CRISPY_TEMPLATE_PACK = 'materialize_css_forms'
 INTERNAL_IPS = ['localhost','127.0.0.1']
 
 
-EMAIL_HOST = "mail.iracaz1.com"
-EMAIL_PORT = 5787
-EMAIL_HOST_USER = "notificaciones@iracaz1.com"
-EMAIL_HOST_PASSWORD = "Iraca2019%"
-DEFAULT_FROM_EMAIL = "SION<notificaciones@iracaz1.com>"
-EMAIL_DIRECCION_FINANCIERA = "markosandres45@hotmail.com"
-EMAIL_GERENCIA = "markosandres45@hotmail.com"
-EMAIL_CONTABILIDAD = "markosandres45@hotmail.com"
-EMAIL_REPRESENTANTE_LEGAL = "markosandres45@hotmail.com"
-EMAIL_RECURSO_HUMANO2 = "markosandres45@hotmail.com"
+EMAIL_HOST = env('SICAN_EMAIL_HOST')
+EMAIL_PORT = env('SICAN_EMAIL_PORT')
+EMAIL_HOST_USER = env('SICAN_EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('SICAN_EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = env('SICAN_DEFAULT_FROM_EMAIL')
+EMAIL_DIRECCION_FINANCIERA = env('SICAN_EMAIL_DIRECCION_FINANCIERA')
+EMAIL_GERENCIA = env('SICAN_EMAIL_GERENCIA')
+EMAIL_CONTABILIDAD = env('SICAN_EMAIL_CONTABILIDAD')
+EMAIL_REPRESENTANTE_LEGAL = env('SICAN_EMAIL_REPRESENTANTE_LEGAL')
+EMAIL_RECURSO_HUMANO2 = env('EMAIL_RECURSO_HUMANO2')
 EMAIL_USE_TLS = True
 
 ADMINS = [('Diego Fonseca','dandresfsoto@gmail.com')]
@@ -76,7 +76,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": "redis://localhost:6379/0",
+            "hosts": [env('CHANNEL_LAYERS_URL')],
         },
     },
 }
@@ -99,7 +99,7 @@ REST_FRAMEWORK = {
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "f*h1-lgp!c#fl)$j^&_p_c"
+SECRET_KEY = env('SICAN_2018_SECRET_KEY')
 
 
 
@@ -301,8 +301,8 @@ STATICFILES_FINDERS = [
 
 
 
-SOCIAL_AUTH_FACEBOOK_KEY = 442709323031329
-SOCIAL_AUTH_FACEBOOK_SECRET = "a04bf201f0ede94bb54f6466abd04aab"
+SOCIAL_AUTH_FACEBOOK_KEY = env('SOCIAL_AUTH_FACEBOOK_KEY')
+SOCIAL_AUTH_FACEBOOK_SECRET = env('SOCIAL_AUTH_FACEBOOK_SECRET')
 SOCIAL_AUTH_FACEBOOK_API_VERSION = '2.12'
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
@@ -310,11 +310,11 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
   'fields': 'id, name, email, age_range'
 }
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = "374709912070-trnkc4sotolcpukv87599khviij1ucqg.apps.googleusercontent.com"
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = "bhCgjMy1Ft1AqiPPyI8Iz3Ia"
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
-SOCIAL_AUTH_TWITTER_KEY = "ZvPcBZzwrcJdnuVR34IJBq0Fj"
-SOCIAL_AUTH_TWITTER_SECRET = "Tmp0XeYI67aeWNpCf4fIWhwwvzhfVX3DZIiPAx9yoLLeQjpX2j"
+SOCIAL_AUTH_TWITTER_KEY = env('SOCIAL_AUTH_TWITTER_KEY')
+SOCIAL_AUTH_TWITTER_SECRET = env('SOCIAL_AUTH_TWITTER_SECRET')
 
 SOCIAL_AUTH_PIPELINE = (
     # Get the information we can about the user and return it in a simple
@@ -364,12 +364,12 @@ SOCIAL_AUTH_PIPELINE = (
     'config.pipeline.save_profile_picture',
 )
 
-FTP_STORAGE_LOCATION = "ftp://Sican:%4nd3s2018%@localhost:21"
+FTP_STORAGE_LOCATION = env('FTP_SICAN_2018')
 
 ATOMIC_REQUESTS = True
 
 sentry_sdk.init(
-    dsn="https://e697468f83434715ba88e74f3dcb3cdd@sentry.io/2611664",
+    dsn=env('SENTRY_URL'),
     integrations=[
         DjangoIntegration(),
         CeleryIntegration()
