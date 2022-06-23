@@ -2851,6 +2851,9 @@ class LiquidationsCreateView(LoginRequiredMixin,
             template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
             template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor())
 
+            template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_otros())
+
             template_header_tag = template_header.find(class_='contrato_valor_total_span_2')
             template_header_tag.insert(1, liquidacion.pretty_print_valor_ejecutado())
 
@@ -2933,6 +2936,9 @@ class LiquidationsCreateView(LoginRequiredMixin,
 
         elif float(contrato.valor) > float(total_valor):
             visible = form.cleaned_data['visible']
+            desctivar_valores = form.cleaned_data['visible_two']
+
+
 
             if visible==False:
                 liquidacion, created = models.Liquidations.objects.get_or_create(
@@ -2946,6 +2952,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
                     usuario_actualizacion=self.request.user,
                     mes=form.cleaned_data['mes'],
                     año=form.cleaned_data['año'],
+                    visible= True,
                 )
 
             else:
@@ -2968,6 +2975,20 @@ class LiquidationsCreateView(LoginRequiredMixin,
             contrato.liquidado = True
             contrato.save()
 
+            if desctivar_valores==True:
+                otros = models.Otros_si.objects.filter(contrato=contrato).count()
+                liquidacion.desctivar_valores = True
+
+                if otros > 0:
+                    otros_si = models.Otros_si.objects.filter(contrato=contrato)
+                    valor_otros_si = otros_si.aggregate(Sum('valor'))['valor__sum']
+                    liquidacion.valor_contrato = float(form.cleaned_data['valor_contrato'].replace('$ ', '').replace(',', ''))
+                    liquidacion.valor_otros = float(valor_otros_si)
+                else:
+                    liquidacion.valor_otros = 0
+                liquidacion.save()
+
+
             fecha_inicio = functions.contrato_inicio_español(contrato.id)
             fecha_fin = functions.contrato_fin_español(contrato.id)
 
@@ -2988,7 +3009,10 @@ class LiquidationsCreateView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor())
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_contrato())
+
+            template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_otros())
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_2')
             template_header_tag.insert(1, liquidacion.pretty_print_valor_ejecutado())
@@ -3333,6 +3357,7 @@ class LiquidationsEditView(LoginRequiredMixin,
                 liquidacion.mes=form.cleaned_data['mes']
                 liquidacion.año=form.cleaned_data['año']
                 liquidacion.visible=form.cleaned_data['visible']
+                liquidacion.desctivar_valores=form.cleaned_data['visible_two']
                 liquidacion.save()
             else:
                 valor_pagar = float(form.cleaned_data['valor'].replace('$ ', '').replace(',', ''))
@@ -3347,6 +3372,7 @@ class LiquidationsEditView(LoginRequiredMixin,
                 liquidacion.mes=form.cleaned_data['mes']
                 liquidacion.año=form.cleaned_data['año']
                 liquidacion.visible = form.cleaned_data['visible']
+                liquidacion.desctivar_valores = form.cleaned_data['visible_two']
                 liquidacion.save()
 
 
@@ -3354,6 +3380,19 @@ class LiquidationsEditView(LoginRequiredMixin,
 
             fecha_inicio = functions.contrato_inicio_español(contrato.id)
             fecha_fin = functions.contrato_fin_español(contrato.id)
+
+            if liquidacion.desctivar_valores==True:
+                otros = models.Otros_si.objects.filter(contrato=liquidacion.contrato).count()
+                liquidacion.desctivar_valores = True
+
+                if otros > 0:
+                    otros_si = models.Otros_si.objects.filter(contrato=liquidacion.contrato)
+                    valor_otros_si = otros_si.aggregate(Sum('valor'))['valor__sum']
+                    liquidacion.valor_contrato = float(form.cleaned_data['valor_contrato'].replace('$ ', '').replace(',', ''))
+                    liquidacion.valor_otros = float(valor_otros_si)
+                else:
+                    liquidacion.valor_otros = 0
+                liquidacion.save()
 
             template_header = BeautifulSoup(
                 open(settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/liquidacion.html', 'rb'),
@@ -3372,7 +3411,10 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor())
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_contrato())
+
+            template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_otros())
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_2')
             template_header_tag.insert(1, liquidacion.pretty_print_valor_ejecutado())

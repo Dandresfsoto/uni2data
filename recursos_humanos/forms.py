@@ -2074,6 +2074,7 @@ class CollectsAccountRejectForm(forms.Form):
 class CreateLiquidationForm(forms.Form):
 
     visible = forms.BooleanField(required=False, label="¿Desea cambiar el valor a favor del contratista?")
+    visible_two = forms.BooleanField(required=False, label="¿Desea cambiar los valores de contrato?")
     mes = forms.CharField(required=False,label='Mes', max_length=100, widget=forms.Select(choices=[
         ('', '----------'),
         ('Enero', 'Enero'),
@@ -2179,6 +2180,7 @@ class CreateLiquidationForm(forms.Form):
 
         if float(contrato.valor) > float(total_valor):
             self.fields['valor'] = forms.CharField(required=False,label="Valor a favor del contratista ($)")
+            self.fields['valor_contrato'] = forms.CharField(required=False,label="Valor del contratato($)")
 
             self.helper = FormHelper(self)
             self.helper.layout = Layout(
@@ -2237,7 +2239,7 @@ class CreateLiquidationForm(forms.Form):
                     Column(
                         Row(
                             Fieldset(
-                                'Cambiar valor:',
+                                'Cambiar valores:',
                             )
                         ),
                         Row(
@@ -2252,11 +2254,6 @@ class CreateLiquidationForm(forms.Form):
                 Row(
                     Column(
                         Row(
-                            Fieldset(
-                                'Nuevo valor:'
-                            )
-                        ),
-                        Row(
                             Column(
                                 'valor',
                                 css_class='s12'
@@ -2264,6 +2261,29 @@ class CreateLiquidationForm(forms.Form):
                         ),
                     ),
                     id='valor_pagar',
+                    style="display:none"
+                ),
+                Row(
+                    Column(
+                        Row(
+                            Column(
+                                'visible_two',
+                                css_class='s12 m6'
+                            )
+                        ),
+                        css_class="s12"
+                    ),
+                ),
+                Row(
+                    Column(
+                        Row(
+                            Column(
+                                'valor_contrato',
+                                css_class='s12'
+                            ),
+                        ),
+                    ),
+                    id='valor_extra',
                     style="display:none"
                 ),
                 Row(
@@ -2282,7 +2302,7 @@ class CreateLiquidationForm(forms.Form):
             )
 
 class EditLiquidationForm(forms.Form):
-
+    visible_two = forms.BooleanField(required=False, label="¿Desea cambiar los valores de contrato?")
     visible = forms.BooleanField(required=False, label="¿Desea cambiar el valor a favor del contratista?")
     mes = forms.CharField(required=False,label='Mes', max_length=100, widget=forms.Select(choices=[
         ('', '----------'),
@@ -2383,8 +2403,11 @@ class EditLiquidationForm(forms.Form):
             self.fields['mes'].initial = liquidacion.mes
             self.fields['año'].initial = liquidacion.año
             self.fields['valor'] = forms.CharField(required=False,label="Valor a favor del contratista ($)")
+            self.fields['valor_contrato'] = forms.CharField(required=False, label="Valor del contratato($)")
             self.fields['valor'].initial = str(liquidacion.valor.amount)
+            self.fields['valor_contrato'].initial = str(liquidacion.valor_contrato.amount)
             self.fields['visible'].initial = liquidacion.visible
+            self.fields['visible_two'].initial = liquidacion.desctivar_valores
             if liquidacion.visible == True:
                 self.helper = FormHelper(self)
                 self.helper.layout = Layout(
@@ -2470,6 +2493,29 @@ class EditLiquidationForm(forms.Form):
                             ),
                         ),
                         id='valor_pagar',
+                    ),
+                    Row(
+                        Column(
+                            Row(
+                                Column(
+                                    'visible_two',
+                                    css_class='s12 m6'
+                                )
+                            ),
+                            css_class="s12"
+                        ),
+                    ),
+                    Row(
+                        Column(
+                            Row(
+                                Column(
+                                    'valor_contrato',
+                                    css_class='s12'
+                                ),
+                            ),
+                        ),
+                        id='valor_extra',
+                        style="display:none"
                     ),
                     Row(
                         Column(

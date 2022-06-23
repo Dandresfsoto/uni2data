@@ -1073,6 +1073,8 @@ class Liquidations(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True, editable=False)
     contrato = models.ForeignKey(Contratos, on_delete=models.DO_NOTHING, blank=True, null=True)
     valor = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True)
+    valor_contrato = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True)
+    valor_otros = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True)
     valor_ejecutado = MoneyField(max_digits=10, decimal_places=2, default_currency='COP', default=0, blank=True, null=True)
     estado = models.CharField(max_length=100,blank=True,null = True)
     estado_informe = models.CharField(max_length=100,blank=True,null = True)
@@ -1124,6 +1126,7 @@ class Liquidations(models.Model):
     fecha_actualizacion = models.DateTimeField(blank=True, null=True)
     usuario_actualizacion = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True,related_name='usuario_actualizacion_liquidacion_ops')
     visible = models.BooleanField(default=False)
+    desctivar_valores = models.BooleanField(default=False)
 
     date_creation = models.DateTimeField(auto_now_add=True, verbose_name="Fecha creacion", blank=True, null=True)
 
@@ -1148,6 +1151,15 @@ class Liquidations(models.Model):
 
     def pretty_print_valor(self):
         return str(self.valor).replace('COL','')
+
+    def pretty_print_valor_contrato(self):
+        return str(self.valor_contrato).replace('COL','')
+
+    def pretty_print_valor_otros(self):
+        if self.valor_otros:
+            return str(self.valor_otros).replace('COL','')
+        else:
+            return "0"
 
     def url_file(self):
         url = None
