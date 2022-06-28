@@ -111,15 +111,29 @@ class MiltonesForm(forms.Form):
         meeting = models.Meetings.objects.get(id=kwargs['initial']['pk_meeting'])
         type = models.Milestones.objects.filter(meeting=meeting).values_list("type", flat=True)
 
-        self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.all().exclude(id__in=type))
-
+        if certificate.name == "ACTAS ARTICULACION":
+            self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.filter(name__contains="ARTICULACION").exclude(id__in=type))
+        elif certificate.name == "ACTAS REUNION ALCALDIAS":
+            self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.filter(name__contains="REUNION ALCALDIAS").exclude(id__in=type))
+        else:
+            self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.all().exclude(id__in=type))
 
         if 'pk_milestone' in kwargs['initial'].keys():
             milestone = models.Milestones.objects.get(id=kwargs['initial']['pk_milestone'])
 
-            type = models.Milestones.objects.filter(meeting=meeting).exclude(id=milestone.id).values_list("type",flat=True)
+            if certificate.name == "ACTAS ARTICULACION":
+                type = models.Milestones.objects.filter(meeting=meeting,name__contains="ARTICULACION").exclude(id=milestone.id).values_list("type",flat=True)
+            elif certificate.name == "ACTAS REUNION ALCALDIAS":
+                type = models.Milestones.objects.filter(meeting=meeting, name__contains="REUNION ALCALDIAS").exclude(id=milestone.id).values_list("type", flat=True)
+            else:
+                type = models.Milestones.objects.filter(meeting=meeting).exclude(id=milestone.id).values_list("type", flat=True)
 
-            self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.all().exclude(id__in=type))
+            if certificate.name == "ACTAS ARTICULACION":
+                self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.filter(name__contains="ARTICULACION").exclude(id__in=type))
+            elif certificate.name == "ACTAS REUNION ALCALDIAS":
+                self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.filter(name__contains="REUNION ALCALDIAS").exclude(id__in=type))
+            else:
+                self.fields['type'] = forms.ModelChoiceField(queryset=models.Types.objects.all().exclude(id__in=type))
 
             self.fields['type'].initial = milestone.type
             self.fields['observation'].initial = milestone.observation
@@ -460,16 +474,15 @@ class MiltonesUnitForm(forms.Form):
                 )
             )
         elif certificate.code == 6:
-            transversal = models.Milestones.objects.all().exclude(transversal__id=None,).values_list("transversal",
-                                                                                                    flat=True)
+            resguard = models.Resguards.objects.get(id=kwargs['initial']['pk_resguard'])
+            transversal = models.Milestones.objects.filter(resguard=resguard).exclude(transversal__id=None).values_list("transversal",flat=True)
 
-            self.fields['transversal'] = forms.ModelChoiceField(
-                queryset=models.Actas_Individual.objects.filter(type="css").exclude(id__in=transversal))
+            self.fields['transversal'] = forms.ModelChoiceField(queryset=models.Actas_Individual.objects.filter(type="css").exclude(id__in=transversal))
 
             if 'pk_milestone' in kwargs['initial'].keys():
                 milestone = models.Milestones.objects.get(id=kwargs['initial']['pk_milestone'])
 
-                transversal = models.Milestones.objects.all().exclude(transversal__id=None).values_list("transversal",
+                transversal = models.Milestones.objects.filter(resguard=resguard).exclude(transversal__id=None).values_list("transversal",
                                                                                                         flat=True)
 
                 self.fields['transversal'] = forms.ModelChoiceField(
