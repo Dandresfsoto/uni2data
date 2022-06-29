@@ -1309,14 +1309,14 @@ class ResguardMiltonesForm(forms.Form):
 
         certificate = models.Certificates.objects.get(id=kwargs['initial']['pk'])
         resguard= models.Resguards.objects.get(id=kwargs['initial']['pk_resguard'])
-        actas = models.Milestones.objects.filter(resguard=resguard).values_list("acta", flat=True)
+        actas = models.Milestones.objects.filter(resguard=resguard).exclude(acta=None).values_list("acta", flat=True)
 
         self.fields['acta'] = forms.ModelChoiceField(queryset=models.Actas.objects.all().exclude(id__in=actas))
 
         if 'pk_milestone' in kwargs['initial'].keys():
             milestone = models.Milestones.objects.get(id=kwargs['initial']['pk_milestone'])
 
-            actas = models.Milestones.objects.filter(resguard=resguard).exclude(id=milestone.id).values_list("acta", flat=True)
+            actas = models.Milestones.objects.filter(resguard=resguard).exclude(id=milestone.id, acta=None).values_list("acta", flat=True)
 
             self.fields['acta'] = forms.ModelChoiceField(queryset=models.Actas.objects.all().exclude(id__in=actas))
 
