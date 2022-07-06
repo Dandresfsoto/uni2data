@@ -2897,7 +2897,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
 
             if settings.DEBUG:
                 config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
-                pdfkit.from_file([liquidacion.html.path, liquidacion.file.path], {
+                pdfkit.from_file([liquidacion.html.path], liquidacion.file.path, {
                     '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
                     '--footer-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/footer/footer.html',
                     '--enable-local-file-access': None,
@@ -3580,10 +3580,12 @@ class LiquidationsDelete(LoginRequiredMixin,
     def dispatch(self, request, *args, **kwargs):
         liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
         contrato = liquidacion.contrato
-        cuenta = models.Collects_Account.objects.get(contract=contrato,liquidacion=True)
+
+        cuenta = models.Collects_Account.objects.filter(contract=contrato,liquidacion=True)
         registro=models.Registration.objects.filter(collect_account=cuenta)
-        registro.delete()
-        cuenta.delete()
+        if cuenta:
+            registro.delete()
+            cuenta.delete()
         contrato.liquidado = False
         contrato.save()
         liquidacion.delete()
