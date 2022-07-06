@@ -2895,7 +2895,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
             liquidacion.file.save('liquidacion.pdf',
                                   File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
 
-            if settings.DEBUG:
+            if settings.DEBUG == True:
                 config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                 pdfkit.from_file([liquidacion.html.path], liquidacion.file.path, {
                     '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
