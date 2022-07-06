@@ -3275,6 +3275,9 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_1')
             template_header_tag.insert(1, fecha_fin)
 
+            template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_otros())
+
             template_header_tag = template_header.find(class_='contratista_nombre_span_2')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
 
@@ -3285,7 +3288,7 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.nombre))
 
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_2')
-            template_header_tag.insert(1, liquidacion.contrato.fecha_fin)
+            template_header_tag.insert(1, fecha_fin)
 
             template_header_tag = template_header.find(class_='contratista_nombre_span_3')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
@@ -3581,11 +3584,20 @@ class LiquidationsDelete(LoginRequiredMixin,
         liquidacion = models.Liquidations.objects.get(id=self.kwargs['pk_liquidacion'])
         contrato = liquidacion.contrato
 
-        cuenta = models.Collects_Account.objects.filter(contract=contrato,liquidacion=True)
-        registro=models.Registration.objects.filter(collect_account=cuenta)
-        if cuenta:
+        cuentas = models.Collects_Account.objects.filter(contract=contrato,liquidacion=True)
+
+        if cuentas.count() <= 1:
+            cuenta = models.Collects_Account.objects.get(contract=contrato, liquidacion=True)
+            registro = models.Registration.objects.filter(collect_account=cuenta)
             registro.delete()
-            cuenta.delete()
+        else:
+            for cuenta in cuentas:
+                registro = models.Registration.objects.filter(collect_account=cuenta)
+                registro.delete()
+
+        if cuentas:
+            cuentas.delete()
+
         contrato.liquidado = False
         contrato.save()
         liquidacion.delete()

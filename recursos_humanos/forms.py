@@ -2353,9 +2353,9 @@ class EditLiquidationForm(forms.Form):
 
 
             self.helper = FormHelper(self)
+            self.fields['mes'].initial = liquidacion.mes
+            self.fields['año'].initial = liquidacion.año
             self.helper.layout = Layout(
-
-
                 Row(
                     Fieldset(
                         'Informacion del contrato',
@@ -2382,6 +2382,16 @@ class EditLiquidationForm(forms.Form):
                         """
                         <div class="col s12">{{ cuentas| safe }}</div>
                         """
+                    )
+                ),
+                Row(
+                    Column(
+                        'mes',
+                        css_class='s6'
+                    ),
+                    Column(
+                        'año',
+                        css_class='s6'
                     )
                 ),
                 Row(
