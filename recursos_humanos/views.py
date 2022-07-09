@@ -2849,7 +2849,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor())
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor_contrato_liquidacion())
 
             template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
             template_header_tag.insert(1, liquidacion.pretty_print_valor_otros())
@@ -2936,8 +2936,6 @@ class LiquidationsCreateView(LoginRequiredMixin,
 
         elif float(contrato.valor) > float(total_valor):
             visible = form.cleaned_data['visible']
-            desctivar_valores = form.cleaned_data['visible_two']
-
 
 
             if visible==False:
@@ -2975,20 +2973,6 @@ class LiquidationsCreateView(LoginRequiredMixin,
             contrato.liquidado = True
             contrato.save()
 
-            if desctivar_valores==True:
-                otros = models.Otros_si.objects.filter(contrato=contrato).count()
-                liquidacion.desctivar_valores = True
-
-                if otros > 0:
-                    otros_si = models.Otros_si.objects.filter(contrato=contrato)
-                    valor_otros_si = otros_si.aggregate(Sum('valor'))['valor__sum']
-                    liquidacion.valor_contrato = float(form.cleaned_data['valor_contrato'].replace('$ ', '').replace(',', ''))
-                    liquidacion.valor_otros = float(valor_otros_si)
-                else:
-                    liquidacion.valor_otros = 0
-                liquidacion.save()
-
-
             fecha_inicio = functions.contrato_inicio_español(contrato.id)
             fecha_fin = functions.contrato_fin_español(contrato.id)
 
@@ -3009,7 +2993,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
-            template_header_tag.insert(1, liquidacion.pretty_print_valor_contrato())
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_contrato_liquidacion())
 
             template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
             template_header_tag.insert(1, liquidacion.pretty_print_valor_otros())
@@ -3261,7 +3245,11 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor())
+            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor_contrato_liquidacion())
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_contrato_liquidacion())
+
+            template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_otros())
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_2')
             template_header_tag.insert(1, liquidacion.pretty_print_valor_ejecutado())
@@ -3274,9 +3262,6 @@ class LiquidationsEditView(LoginRequiredMixin,
 
             template_header_tag = template_header.find(class_='contrato_finalizacion_span_1')
             template_header_tag.insert(1, fecha_fin)
-
-            template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
-            template_header_tag.insert(1, liquidacion.pretty_print_valor_otros())
 
             template_header_tag = template_header.find(class_='contratista_nombre_span_2')
             template_header_tag.insert(1, liquidacion.contrato.contratista.get_full_name().upper())
@@ -3414,10 +3399,11 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
-            template_header_tag.insert(1, liquidacion.pretty_print_valor_contrato())
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_contrato_liquidacion())
 
             template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
             template_header_tag.insert(1, liquidacion.pretty_print_valor_otros())
+
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_2')
             template_header_tag.insert(1, liquidacion.pretty_print_valor_ejecutado())

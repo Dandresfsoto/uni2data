@@ -2145,8 +2145,8 @@ class LiquidacionesListApi(BaseDatatableView):
     def filter_queryset(self, qs):
         search = self.request.GET.get(u'search[value]', None)
         if search:
-            q = Q(nombre__icontains=search) | Q(contratista__nombres__icontains=search) | \
-                Q(contratista__apellidos__icontains=search) | Q(contratista__cedula__icontains=search)
+            q = Q(contrato__nombre__icontains=search) | Q(contrato__contratista__nombres__icontains=search) | \
+                Q(contrato__contratista__apellidos__icontains=search) | Q(contrato__contratista__cedula__icontains=search)
             qs = qs.filter(q)
         return qs
 
