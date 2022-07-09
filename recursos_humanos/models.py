@@ -1155,11 +1155,25 @@ class Liquidations(models.Model):
     def pretty_print_valor_contrato(self):
         return str(self.valor_contrato).replace('COL','')
 
-    def pretty_print_valor_otros(self):
-        if self.valor_otros:
-            return str(self.valor_otros).replace('COL','')
+    def pretty_print_valor_contrato_liquidacion(self):
+        contrato = self.contrato
+        valor_contrato_total = contrato.valor
+        otros = Otros_si.objects.filter(contrato = contrato)
+        if otros:
+            valor_otros =otros.aggregate(Sum('valor'))['valor__sum']
         else:
-            return "0"
+            valor_otros = 0
+        valor_final = float(valor_contrato_total) - float(valor_otros)
+        return "${:,.2f}".format(valor_final)
+
+    def pretty_print_valor_otros(self):
+        contrato = self.contrato
+        otros = Otros_si.objects.filter(contrato=contrato)
+        if otros:
+            valor_otros = otros.aggregate(Sum('valor'))['valor__sum']
+        else:
+            valor_otros = 0
+        return "${:,.2f}".format(valor_otros)
 
     def url_file(self):
         url = None

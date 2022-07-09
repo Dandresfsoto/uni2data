@@ -2263,29 +2263,7 @@ class CreateLiquidationForm(forms.Form):
                     id='valor_pagar',
                     style="display:none"
                 ),
-                Row(
-                    Column(
-                        Row(
-                            Column(
-                                'visible_two',
-                                css_class='s12 m6'
-                            )
-                        ),
-                        css_class="s12"
-                    ),
-                ),
-                Row(
-                    Column(
-                        Row(
-                            Column(
-                                'valor_contrato',
-                                css_class='s12'
-                            ),
-                        ),
-                    ),
-                    id='valor_extra',
-                    style="display:none"
-                ),
+
                 Row(
                     Column(
                         Div(

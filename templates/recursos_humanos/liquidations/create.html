@@ -60,15 +60,6 @@ var socket = new ReconnectingWebSocket(ws_scheme + '://' + window.location.host 
     $("label[for='id_mes']").addClass('active');
     $("label[for='id_año']").addClass('active');
     new AutoNumeric('#id_valor', {currencySymbol: '$ '});
-    new AutoNumeric('#id_valor_contrato', {currencySymbol: '$ '});
-
-    $('#id_visible_two').on('change', function () {
-        if (this.checked) {
-            $("#valor_extra").show();
-        } else {
-            $("#valor_extra").hide();
-        }
-    });
 
     $('#id_visible').on('change', function () {
         if (this.checked) {
