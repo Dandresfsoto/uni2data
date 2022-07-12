@@ -2849,7 +2849,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor_contrato_liquidacion())
+            template_header_tag.insert(1, liquidacion.pretty_print_valor_contrato_liquidacion())
 
             template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
             template_header_tag.insert(1, liquidacion.pretty_print_valor_otros())
@@ -3245,7 +3245,6 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag.insert(1, str(liquidacion.contrato.objeto_contrato))
 
             template_header_tag = template_header.find(class_='contrato_valor_total_span_1')
-            template_header_tag.insert(1, liquidacion.contrato.pretty_print_valor_contrato_liquidacion())
             template_header_tag.insert(1, liquidacion.pretty_print_valor_contrato_liquidacion())
 
             template_header_tag = template_header.find(class_='contrato_valor_otros_si_span_1')
