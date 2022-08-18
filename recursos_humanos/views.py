@@ -294,9 +294,9 @@ class CertificacionesCreateView(LoginRequiredMixin,
         certifiacion.html_template.save('certificacion.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
 
-        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
 
         if settings.DEBUG:
+            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
             pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/header/header.html',
@@ -1254,8 +1254,9 @@ class CertificacionesUpdateView(LoginRequiredMixin,
         certifiacion.html_template.save('certificacion.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
 
-        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
         if settings.DEBUG:
+            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
             pdfkit.from_file(certifiacion.html.path, certifiacion.pdf.path, {
                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/header/header.html',
@@ -1761,7 +1762,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
                         collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
-                        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
 
 
                         collect_account.file.save('cuenta_cobro.pdf',
@@ -1769,6 +1770,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
 
 
                         if settings.DEBUG:
+                            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
                             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                             pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
                                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
@@ -1787,7 +1789,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                                     '--page-size': 'Letter'
                                 }
                             )
-                            collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
+                            collect_account.file.save('cuenta_cobro.pdf', File(io.BytesIO(data)))
 
                             user = collect_account.contract.get_user_or_none()
 
@@ -1887,12 +1889,11 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         collect_account.html.save('cuenta_cobro.html',
                                                   File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
-                        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-
                         collect_account.file.save('cuenta_cobro.pdf',
                                                   File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
 
                         if settings.DEBUG:
+                            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
                             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                             pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
                                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
@@ -2059,13 +2060,14 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         collect_account.html.save('cuenta_cobro.html',
                                                   File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
-                        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
 
                         collect_account.file.save('cuenta_cobro.pdf',
                                                   File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf',
                                                             'rb')))
 
                         if settings.DEBUG:
+                            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
                             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                             pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
                                 '--header-html': settings.STATICFILES_DIRS[
@@ -2088,7 +2090,7 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                                     '--page-size': 'Letter'
                                 }
                             )
-                            collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
+                            collect_account.file.save('cuenta_cobro.pdf', File(io.BytesIO(data)))
 
                             user = collect_account.contract.get_user_or_none()
 
@@ -2185,13 +2187,14 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                         collect_account.html.save('cuenta_cobro.html',
                                                   File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
-                        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
 
                         collect_account.file.save('cuenta_cobro.pdf',
                                                   File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf',
                                                             'rb')))
 
                         if settings.DEBUG:
+                            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
                             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                             pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
                                 '--header-html': settings.STATICFILES_DIRS[
@@ -2388,12 +2391,13 @@ class CollectAccountUpdateView(FormView):
 
         collect_account.html.save('cuenta_cobro.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
-        path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
 
         collect_account.file.save('cuenta_cobro.pdf',
                               File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
 
         if settings.DEBUG:
+            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
             config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
             pdfkit.from_file([collect_account.html.path], collect_account.file.path, {
                 '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/cuentas_cobro/header/header.html',
@@ -2412,7 +2416,7 @@ class CollectAccountUpdateView(FormView):
                     '--page-size': 'Letter'
                 }
             )
-            collect_account.file.save('certificacion.pdf', File(io.BytesIO(data)))
+            collect_account.file.save('cuenta_cobro.pdf', File(io.BytesIO(data)))
 
         models.Registration.objects.create(
             cut=collect_account.cut,
@@ -2802,7 +2806,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
 
     def form_valid(self, form):
         contrato = models.Contratos.objects.get(id=self.kwargs['pk_contract'])
-        fecha = timezone.now()
+
 
         cuentas = models.Collects_Account.objects.filter(contract=contrato)
         total_valor = cuentas.aggregate(Sum('value_fees'))['value_fees__sum']
@@ -2889,13 +2893,13 @@ class LiquidationsCreateView(LoginRequiredMixin,
 
             liquidacion.html.save('liquidacion.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
-            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
+
 
             liquidacion.file.save('liquidacion.pdf',
                                   File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
 
             if settings.DEBUG:
+                path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
                 config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                 pdfkit.from_file([liquidacion.html.path], liquidacion.file.path, {
                     '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
@@ -2905,7 +2909,7 @@ class LiquidationsCreateView(LoginRequiredMixin,
                 }, configuration=config)
             else:
                 data = pdfkit.from_url(
-                    url=[liquidacion.html.url,liquidacion.html2.url],
+                    url=liquidacion.html.url,
                     output_path=False,
                     options={
                         '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
@@ -3086,10 +3090,11 @@ class LiquidationsCreateView(LoginRequiredMixin,
             template_header_tag_2.insert(1, str(liquidacion.año))
 
             liquidacion.html2.save('cuenta_cobro.html', File(io.BytesIO(template_header_2.prettify(encoding='utf-8'))))
-            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
 
 
             if settings.DEBUG:
+                path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
                 config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                 pdfkit.from_file([liquidacion.html.path,liquidacion.html2.path], liquidacion.file.path, {
                     '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
@@ -3285,13 +3290,11 @@ class LiquidationsEditView(LoginRequiredMixin,
 
             liquidacion.html.save('liquidacion.html', File(io.BytesIO(template_header.prettify(encoding='utf-8'))))
 
-            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
-            config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
-
             liquidacion.file.save('liquidacion.pdf',
                                   File(open(settings.STATICFILES_DIRS[0] + '/documentos/empty.pdf', 'rb')))
 
             if settings.DEBUG:
+                path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
                 config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                 pdfkit.from_file([liquidacion.html.path], liquidacion.file.path, {
                     '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
@@ -3492,10 +3495,11 @@ class LiquidationsEditView(LoginRequiredMixin,
             template_header_tag_2.insert(1, str(liquidacion.año))
 
             liquidacion.html2.save('cuenta_cobro.html', File(io.BytesIO(template_header_2.prettify(encoding='utf-8'))))
-            path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
 
 
             if settings.DEBUG:
+                path_wkthmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
                 config = pdfkit.configuration(wkhtmltopdf=path_wkthmltopdf)
                 pdfkit.from_file([liquidacion.html.path,liquidacion.html2.path], liquidacion.file.path, {
                     '--header-html': settings.STATICFILES_DIRS[0] + '/pdfkit/liquidaciones/header/header.html',
