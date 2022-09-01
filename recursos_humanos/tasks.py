@@ -293,7 +293,7 @@ def send_mail_templated_collect_account(template,dictionary,from_email,list_to_e
     return 'Email enviado'
 
 @app.task
-def build_list_collects_account(id):
+def build_list_collects_account_total(id):
     from recursos_humanos.models import Contratos, Cuts, Collects_Account
     reporte = models_reportes.Reportes.objects.get(id = id)
     proceso = "SICAN-LIST-CUENTAS DE COBRO"
