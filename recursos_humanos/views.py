@@ -1961,19 +1961,19 @@ class CutsCollectsAddAccountView(LoginRequiredMixin,
                             if days_monht == 31:
                                 date_rest = date(int(year_cut), int(month_cut), 1)
                                 days_rest = contract.fin - date_rest
-                                values_total = (valor_mensual / 30) * (days_rest.days)
+                                values_total = (valor_mensual / 30) * (days_rest.days+1)
                             elif days_monht == 30:
                                 date_rest = date(int(year_cut), int(month_cut), 1)
                                 days_rest = contract.fin - date_rest
-                                values_total = (valor_mensual / 30) * (days_rest.days+1)
+                                values_total = (valor_mensual / 30) * (days_rest.days+2)
                             elif days_monht == 29:
                                 date_rest = date(int(year_cut), int(month_cut), 1)
                                 days_rest = contract.fin - date_rest
-                                values_total = (valor_mensual / 30) * (days_rest.days + 2)
+                                values_total = (valor_mensual / 30) * (days_rest.days + 3)
                             elif days_monht == 28:
                                 date_rest = date(int(year_cut), int(month_cut), 1)
                                 days_rest = contract.fin - date_rest
-                                values_total = (valor_mensual / 30) * (days_rest.days + 3)
+                                values_total = (valor_mensual / 30) * (days_rest.days + 4)
                     else:
                         values_total=valor_mensual
 
